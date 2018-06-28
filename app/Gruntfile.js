@@ -8,8 +8,7 @@ module.exports = function(grunt) {
             components: {
                 files: [
                     'app/src/*.js',
-                    'app/src/**/*.js',
-                    'app/src/**/**/*.js'
+                    'app/src/**/*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {
@@ -33,13 +32,25 @@ module.exports = function(grunt) {
                     'src/**/*.js',
                     'src/**/**/*.js'
                 ],
-                dest:  'static/build/aligner.js'
+                dest:  '../build/js/main.js'
             },
         },
+        sass: {
+            dist: {
+                options: {
+                    sourceMap: false,
+                    includePaths: ['src','assets']
+                },
+                src: [
+                    'src/Main.scss'
+                ],
+                dest: '../build/css/style.css'
+            },
+        }
     });
 
     // Define your tasks here
-    grunt.registerTask('default', ['bundle:js']);
+    grunt.registerTask('default', ['bundle:js','sass']);
 
     grunt.registerTask('bundle:js', [
         'browserify:components'
@@ -47,5 +58,6 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-sass');
 
 }

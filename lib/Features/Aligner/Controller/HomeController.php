@@ -9,6 +9,7 @@
 namespace Features\Aligner\Controller;
 
 
+use Features\Aligner\Decorator\HomeDecorator;
 use PHPTALWithAppend;
 
 class HomeController extends \BaseKleinViewController {
@@ -28,7 +29,10 @@ class HomeController extends \BaseKleinViewController {
 
 
     public function composeView(){
-        //$this->setDefaultTemplateData() ;
+
+
+        /*$decorator = new HomeDecorator($this, $this->view);
+        $decorator->decorate();*/
 
         $this->response->body( $this->view->execute() );
         $this->response->send();
