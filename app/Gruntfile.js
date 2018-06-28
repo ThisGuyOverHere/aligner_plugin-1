@@ -7,8 +7,9 @@ module.exports = function(grunt) {
         watch: {
             components: {
                 files: [
-                    'static/src/es6/react/*.js',
-                    'static/src/js/*.js'
+                    'app/src/*.js',
+                    'app/src/**/*.js',
+                    'app/src/**/**/*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {
@@ -28,10 +29,11 @@ module.exports = function(grunt) {
                     }
                 },
                 src: [
-                    'static/src/es6/react/*.js',
-                    'static/src/js/index.js'
+                    'src/*.js',
+                    'src/**/*.js',
+                    'src/**/**/*.js'
                 ],
-                dest:  'static/build/ebay.js' 
+                dest:  'static/build/aligner.js'
             },
         },
     });
