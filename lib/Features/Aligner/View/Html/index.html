@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <title>Title</title>
-    <link rel="stylesheet" type="text/css" href="build/css/style.css" />
-    <script type="application/javascript" src="build/js/main.js"></script>
+
+    <tal:block  tal:repeat="css_url app_css">
+        <link rel="stylesheet" tal:attributes="href css_url"/>
+    </tal:block>
+
+    <tal:block  tal:repeat="js_url app_js">
+        <link rel="stylesheet" tal:attributes="href js_url"/>
+    </tal:block>
 
 </head>
 <body>

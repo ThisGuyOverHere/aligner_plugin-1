@@ -15,6 +15,11 @@ use PHPTALWithAppend;
 class HomeController extends \BaseKleinViewController {
 
     /**
+     * @var HomeDecorator
+     */
+    protected $decorator ;
+
+    /**
      * @var \PHPTAL ;
      */
     protected $view;
@@ -29,10 +34,8 @@ class HomeController extends \BaseKleinViewController {
 
 
     public function composeView(){
-
-
-        /*$decorator = new HomeDecorator($this, $this->view);
-        $decorator->decorate();*/
+        $decorator = new HomeDecorator($this, $this->view);
+        $decorator->decorate();
 
         $this->response->body( $this->view->execute() );
         $this->response->send();
