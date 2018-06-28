@@ -8,13 +8,12 @@
         <link rel="stylesheet" tal:attributes="href css_url"/>
     </tal:block>
 
-    <tal:block  tal:repeat="js_url app_js">
-        <link rel="stylesheet" tal:attributes="href js_url"/>
-    </tal:block>
-
 </head>
 <body>
-<h1>prova</h1>
 <div id="app-root"></div>
+
+<tal:block  tal:repeat="js_url app_js">
+    <script tal:attributes="src js_url"></script>
+</tal:block>
 </body>
 </html>

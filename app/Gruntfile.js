@@ -7,8 +7,8 @@ module.exports = function(grunt) {
         watch: {
             components: {
                 files: [
-                    'app/src/*.js',
-                    'app/src/**/*.js'
+                    'src/*.js',
+                    'src/**/*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {
@@ -32,7 +32,7 @@ module.exports = function(grunt) {
                     'src/**/*.js',
                     'src/**/**/*.js'
                 ],
-                dest:  '../build/js/main.js'
+                dest:  '../static/build/js/main.js'
             },
         },
         sass: {
@@ -44,7 +44,7 @@ module.exports = function(grunt) {
                 src: [
                     'src/Main.scss'
                 ],
-                dest: '../build/css/style.css'
+                dest: '../static/build/css/style.css'
             },
         }
     });

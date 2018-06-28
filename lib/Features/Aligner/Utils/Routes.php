@@ -15,7 +15,7 @@ class Routes {
     public static function staticBuild( $file, $options = [] ) {
         $host = \Routes::pluginsBase( $options );
 
-        return $host . "/aligner/build/$file";
+        return $host . "/aligner/static/build/$file";
     }
 
 }
