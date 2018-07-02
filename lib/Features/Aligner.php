@@ -24,7 +24,7 @@ class Aligner extends BaseFeature
 
     public static function loadRoutes( Klein $klein ) {
 
-        $klein->respond( 'GET', '/home', [ __CLASS__, 'homeRoute' ] );
+        $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }
 
     public static function homeRoute( $request, $response, $service, $app ) {
