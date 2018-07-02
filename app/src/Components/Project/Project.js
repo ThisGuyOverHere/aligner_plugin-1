@@ -15,7 +15,7 @@ class ProjectComponent extends Component {
     }
     static getDerivedStateFromProps(props, state){
         //console.log(props,state);
-        return this.state
+        return null
     }
     render() {
         return (

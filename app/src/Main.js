@@ -6,6 +6,8 @@ import HomeComponent from "./Components/Home/Home";
 import ProjectComponent from "./Components/Project/Project";
 import NotFoundComponent from "./Components/Shared/NotFound/NotFound"
 import {Switch} from "react-router";
+import HeaderComponent from "./Components/Shared/Header/Header";
+import FooterComponent from "./Components/Shared/Footer/Footer";
 
 const e = React.createElement;
 
@@ -15,18 +17,16 @@ class App extends Component {
             <HashRouter
                 basename="/">
                 <div className="App">
-                    <div>
-                        <Link to="/">Home</Link>
-                        <Link to="/project/123/123">Project</Link>
-                        <Link to="/not-found">Not Found</Link>
-                    </div>
+                    <HeaderComponent/>
                     <Switch>
                         <Route exact path="/" component={HomeComponent}/>
                         <Route path="/project/:projectID/:password" component={ProjectComponent}/>
                         <Route component={NotFoundComponent}/>
                     </Switch>
+                    <FooterComponent/>
                 </div>
             </HashRouter>
+
         );
     }
 }
