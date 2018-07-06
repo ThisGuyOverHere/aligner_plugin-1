@@ -19,17 +19,15 @@ class App extends Component {
                 <div className="App">
                     <HeaderComponent/>
                     <Switch>
-                        <Route exact path="/" component={HomeComponent}/>
+                        <Route exact path="/" component={() => <HomeComponent label="Questa è la home page" />} />
                         <Route path="/project/:projectID/:password" component={ProjectComponent}/>
                         <Route component={NotFoundComponent}/>
                     </Switch>
                     <FooterComponent/>
                 </div>
             </HashRouter>
-
         );
     }
 }
-
 const domContainer = document.querySelector('#app-root');
 ReactDOM.render(e(App), domContainer);
