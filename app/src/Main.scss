@@ -1,6 +1,10 @@
 @import "../assets/theme/theme";
 @import "Components/Home/Home.component";
+
 @import "Components/Project/Project.component";
+@import "Components/Project/Row/Row.component";
+@import "Components/Project/Row/Segment/Segment.component";
+
 @import "Components/Shared/NotFound/NotFound.component";
 @import "Components/Shared/Header/Header.component";
 @import "Components/Shared/Footer/Footer.component";
