@@ -17,9 +17,16 @@ module.exports = function(grunt) {
                 tasks: ['browserify:components'],
                 options: {
                     interrupt: true,
-                    livereload : false
+                    livereload : true
                 }
             },
+            css: {
+                files: 'src/**/*.scss',
+                tasks: ['sass'],
+                options: {
+                    livereload : true
+                }
+            }
         },
         browserify: {
             components: {
@@ -33,8 +40,7 @@ module.exports = function(grunt) {
                 },
                 src: [
                     'src/*.js',
-                    'src/**/*.js',
-                    'src/**/**/*.js'
+                    'src/**/*.js'
                 ],
                 dest:  '../static/build/js/main.js'
             },

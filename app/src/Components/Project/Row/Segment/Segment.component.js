@@ -61,7 +61,6 @@ class SegmentComponent extends Component {
     }
 
     componentDidMount() {
-
     }
 
     componentWillUnmount() {

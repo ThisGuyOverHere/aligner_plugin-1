@@ -50,16 +50,21 @@ class RowComponent extends Component {
     }
 
     render() {
-        const {connectDropTarget } = this.props;
+        let rowClass = ['row'];
+        const {connectDropTarget, isOver} = this.props;
+        if (isOver){
+            rowClass.push('dropHover');
+        }
         return connectDropTarget(
-            <div className='row'>
-                <div className="col-sm-6">
-                    {this.props.children[0]}
+            <div className="ui two column grid project-row">
+                <div className={rowClass.join(' ')}>
+                    <div className="column">
+                        {this.props.children[0]}
+                    </div>
+                    <div className="column">
+                        {this.props.children[1]}
+                    </div>
                 </div>
-                <div className="col-sm-6">
-                    {this.props.children[1]}
-                </div>
-
             </div>
         );
     }

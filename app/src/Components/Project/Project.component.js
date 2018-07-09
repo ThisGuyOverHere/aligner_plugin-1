@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import ProjectsStore from "../../Stores/Projects.store";
-import ProjectsConstants from "../../Constants/Projects.constants"
-import ProjectsActions from '../../Actions/Projects.actions';
+import ProjectStore from "../../Stores/Project.store";
+import ProjectConstants from "../../Constants/Project.constants"
+import ProjectActions from '../../Actions/Project.actions';
 import RowComponent from './Row/Row.component';
 import SegmentComponent from './Row/Segment/Segment.component';
 import {DragDropContext} from 'react-dnd';
@@ -17,14 +17,7 @@ class ProjectComponent extends Component {
                     password: this.props.match.params.password,
                     id: this.props.match.params.projectID
                 },
-                rows: [
-                    {source: 1, target: 1},
-                    {source: 2, target: 4},
-                    {source: 3, target: 3},
-                    {source: 4, target: 5},
-                    {source: 5, target: 2},
-                    {source: 6, target: null}
-                ]
+                rows: []
             }
         };
 
@@ -50,8 +43,12 @@ class ProjectComponent extends Component {
     }
 
 
-    _test = () => {
-        console.log('Arrow function and Flux init');
+    setRows = (rows) => {
+        this.setState({
+            project:{
+                rows: rows
+            }
+        })
     };
 
     renderItems(array) {
@@ -74,7 +71,7 @@ class ProjectComponent extends Component {
 
     render() {
         return (
-            <div>
+            <div className="ui container">
                 {this.renderItems(this.state.project.rows)}
             </div>
         );
@@ -85,12 +82,12 @@ class ProjectComponent extends Component {
     }
 
     componentDidMount() {
-        ProjectsStore.addListener(ProjectsConstants.GET_PROJECTS, this._test);
-        ProjectsActions.getProjects();
+        ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
+        ProjectActions.getRows();
     }
 
     componentWillUnmount() {
-        ProjectsStore.removeListener(ProjectsConstants.GET_PROJECTS, this._test);
+        ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
     }
 
 
