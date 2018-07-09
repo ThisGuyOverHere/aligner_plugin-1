@@ -1,4 +1,25 @@
-vendor
-composer.phar
+# IDE stuffs
+.settings
+.idea
+.project
+nbproject/
+
+
+# NodeJs stuff
+nodejs/*.log
 node_modules
 static/build
+
+# Development env config files
+.agignore
+.vagrant
+
+package-lock.json
+
+vendor
+composer.phar
+
+config/*.ini
+config/*.txt
+config/*.pem
+config.ini
