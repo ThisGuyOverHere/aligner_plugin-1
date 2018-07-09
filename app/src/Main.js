@@ -20,7 +20,7 @@ class App extends Component {
                     <HeaderComponent/>
                     <Switch>
                         <Route exact path="/" component={() => <HomeComponent label="Questa è la home page" />} />
-                        <Route path="/project/:projectID/:password" component={ProjectComponent}/>
+                        <Route path="/project/:jobID/:password" component={ProjectComponent}/>
                         <Route component={NotFoundComponent}/>
                     </Switch>
                     <FooterComponent/>

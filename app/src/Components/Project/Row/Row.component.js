@@ -1,17 +1,21 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../Constants/Draggable.constants';
 import {DropTarget} from 'react-dnd';
+import ProjectActions from "../../../Actions/Project.actions";
 
 const RowTarget = {
     drop(props, monitor) {
         const from = monitor.getItem();
-        const labels = {
-            0: "Source",
-            1: "Target"
+        const types = {
+            0: "source",
+            1: "target"
         };
-        const posFrom = +from.position + 1,
-            posTo = +props.children[from.type].props.position + 1;
-        console.log("Sposto il " + labels[from.type] + " dalla riga " + posFrom + " alla riga " + posTo)
+        const log = {
+            type: types[from.type],
+            from: from.order,
+            to: props.children[from.type].props.order
+        };
+        ProjectActions.changeSegmentPosition(log);
     }
 };
 

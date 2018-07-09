@@ -15,11 +15,13 @@ class ProjectComponent extends Component {
             project: {
                 config: {
                     password: this.props.match.params.password,
-                    id: this.props.match.params.projectID
+                    id: this.props.match.params.jobID
                 },
                 rows: []
             }
         };
+
+        ProjectActions.setJobID(this.props.match.params.jobID)
 
     }
 
@@ -45,7 +47,7 @@ class ProjectComponent extends Component {
 
     setRows = (rows) => {
         this.setState({
-            project:{
+            project: {
                 rows: rows
             }
         })
@@ -54,16 +56,16 @@ class ProjectComponent extends Component {
     renderItems(array) {
         let values = [];
         if (array.length > 0) {
-            array.map((item, pos) => {
-                values.push(<RowComponent key={pos}>
+            array.map((row,index) => {
+                values.push(<RowComponent key={index}>
                     <SegmentComponent type={0}
-                             value={item.source}
-                             position={pos}/>
+                                      value={row.source.content}
+                                      order={row.order}/>
                     <SegmentComponent type={1}
-                             position={pos}
-                             value={item.target}/>
+                                      value={row.target.content}
+                                      order={row.order}/>
                 </RowComponent>);
-                return item
+                return row;
             });
         }
         return values;
