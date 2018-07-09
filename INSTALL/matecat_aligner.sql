@@ -14,7 +14,7 @@ CREATE TABLE `projects` (
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
   KEY `remote_ip_address` (`remote_ip_address`),
-  KEY `name` (`name`),
+  KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `jobs`;
@@ -74,8 +74,8 @@ CREATE TABLE `segments` (
   UNIQUE KEY `primary_seq_job` (`seq`,`id_job`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `internal_id` (`internal_id`) USING BTREE,
-  KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
-  KEY `create_date_idx` (`create_date`),
+  KEY `content_hash` (`content_hash`) USING HASH COMMENT 'MD5 hash of segment content',
+  KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `segments_match`;
@@ -92,5 +92,5 @@ CREATE TABLE `segments_match` (
   KEY `order` (`order`),
   KEY `src_seq` (`src_seq`),
   KEY `trg_seq` (`trg_seq`),
-  KEY `create_date_idx` (`create_date`),
+  KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
