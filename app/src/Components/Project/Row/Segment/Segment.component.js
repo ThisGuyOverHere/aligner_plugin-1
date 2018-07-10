@@ -47,8 +47,7 @@ class SegmentComponent extends Component {
         return connectDragSource(
             <div style={{
                 opacity: isDragging ? 0.5 : 1,
-                fontSize: 25,
-                fontWeight: 'bold',
+                fontSize: 16,
                 cursor: 'move'
             }}>
                 <p>{this.props.value}</p>

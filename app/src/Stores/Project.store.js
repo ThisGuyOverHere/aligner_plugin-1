@@ -38,7 +38,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
     storeRowsMovement: function (rows) {
         rows.map(row => {
             const index = this.project.findIndex(i => i.get('order') === row.rif_order);
-            console.log(index);
             switch (row.action) {
                 case 'delete':
                     this.project = this.project.delete(index);
@@ -51,7 +50,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     break;
             }
         });
-        console.log('after storeRowsMovement: ',this.project.toJS());
     }
 
 });
