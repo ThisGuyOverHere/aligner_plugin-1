@@ -50,6 +50,10 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     break;
             }
         });
+    },
+    toggleCheckedRowStatus: function (indexRow) {
+        const status = this.project.get(indexRow).get('checked');
+        this.project = this.project.setIn([indexRow,'checked'],!status);
     }
 
 });
@@ -69,8 +73,10 @@ AppDispatcher.register(function (action) {
             ProjectStore.storeRowsMovement(action.rows);
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, ProjectStore.project.toJS());
             break;
-
-
+        case ProjectConstants.TOGGLE_CHECKED_ROW_STATUS:
+            ProjectStore.toggleCheckedRowStatus(action.indexRow);
+            ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, ProjectStore.project.toJS());
+            break;
     }
 });
 

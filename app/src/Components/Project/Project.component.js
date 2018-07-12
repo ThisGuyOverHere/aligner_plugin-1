@@ -56,12 +56,14 @@ class ProjectComponent extends Component {
     renderItems(array) {
         let values = [];
         if (array.length > 0) {
-            array.map((row,index) => {
-                values.push(<RowComponent key={index}>
+            array.map((row, index) => {
+                values.push(<RowComponent key={index} index={index} row={row}>
                     <SegmentComponent type={0}
+                                      rowChecked={row.checked}
                                       value={row.source.content}
                                       order={row.order}/>
                     <SegmentComponent type={1}
+                                      rowChecked={row.checked}
                                       value={row.target.content}
                                       order={row.order}/>
                 </RowComponent>);
@@ -73,8 +75,10 @@ class ProjectComponent extends Component {
 
     render() {
         return (
-            <div className="ui container">
-                {this.renderItems(this.state.project.rows)}
+            <div className="align-project">
+                <div className="ui container">
+                    {this.renderItems(this.state.project.rows)}
+                </div>
             </div>
         );
     }

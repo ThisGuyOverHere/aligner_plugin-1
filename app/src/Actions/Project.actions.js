@@ -64,6 +64,7 @@ let ProjectActions = {
             italian.map((e,i)=>{
                 rows.push({
                     order: i*1000000000,
+                    checked: false,
                     source: {
                         content: e
                     },
@@ -110,6 +111,7 @@ let ProjectActions = {
 
         let mock = {
             order: null,
+            checked: false,
             source: {
                 content: null
             },
@@ -172,12 +174,19 @@ let ProjectActions = {
             });
         }
 
-        console.log(mock.order);
-        console.log('Changes: ', changes);
-
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
             rows: changes
+        });
+    },
+    /**
+     *
+     * @param {Number} indexRow The index of row inside projectStore
+     */
+    toggleCheckedRowStatus: function (indexRow) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.TOGGLE_CHECKED_ROW_STATUS,
+            indexRow: indexRow
         });
     }
 };

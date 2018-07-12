@@ -1,18 +1,22 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../../Constants/Draggable.constants';
 import {DragSource} from 'react-dnd';
+import PropTypes from "prop-types";
 
 const ItemSource = {
     beginDrag(props) {
-        /*console.log(props);*/
         return props;
+    },
+    canDrag(props,monitor){
+        return (!props.rowChecked && props.value);
     }
 };
 
 function collect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
-        isDragging: monitor.isDragging()
+        isDragging: monitor.isDragging(),
+        canDrag: monitor.canDrag()
     }
 }
 
@@ -43,12 +47,18 @@ class SegmentComponent extends Component {
     }
 
     render() {
-        const {connectDragSource, isDragging} = this.props;
+        const {connectDragSource, isDragging, canDrag} = this.props;
+        let cursorDrag = 'not-allowed';
+        if(isDragging){
+            cursorDrag ='move';
+        }else if(canDrag && !isDragging){
+            cursorDrag = 'move'
+        }
         return connectDragSource(
             <div style={{
                 opacity: isDragging ? 0.5 : 1,
                 fontSize: 16,
-                cursor: 'move'
+                cursor: cursorDrag
             }}>
                 <p>{this.props.value}</p>
             </div>
@@ -65,5 +75,12 @@ class SegmentComponent extends Component {
     componentWillUnmount() {
     }
 }
+
+SegmentComponent.propTypes = {
+    type: PropTypes.number.isRequired,
+    rowChecked: PropTypes.bool.isRequired,
+    order: PropTypes.number.isRequired,
+    value: PropTypes.string
+};
 
 export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);

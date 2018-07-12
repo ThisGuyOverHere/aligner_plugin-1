@@ -2,8 +2,13 @@ import React, {Component} from 'react';
 import {ItemTypes} from '../../../Constants/Draggable.constants';
 import {DropTarget} from 'react-dnd';
 import ProjectActions from "../../../Actions/Project.actions";
+import PropTypes from "prop-types";
+import HomeComponent from "../../Home/Home.component";
 
 const RowTarget = {
+    canDrop(props, monitor) {
+        return !props.row.checked;
+    },
     drop(props, monitor) {
         const from = monitor.getItem();
         const types = {
@@ -22,7 +27,8 @@ const RowTarget = {
 function collect(connect, monitor) {
     return {
         connectDropTarget: connect.dropTarget(),
-        isOver: monitor.isOver()
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop()
     }
 }
 
@@ -53,19 +59,37 @@ class RowComponent extends Component {
 
     }
 
+    onCheckboxClick = () => {
+        ProjectActions.toggleCheckedRowStatus(this.props.index);
+    };
+
     render() {
-        let rowClass = ['row'];
-        const {connectDropTarget, isOver} = this.props;
-        if (isOver){
+        let rowClass = ['project-row'];
+
+        const {connectDropTarget, isOver, canDrop} = this.props;
+        if (isOver) {
             rowClass.push('dropHover');
         }
+        if(!canDrop){
+            rowClass.push('notDropStatus');
+        }
         return connectDropTarget(
-            <div className="ui two column grid project-row">
-                <div className={rowClass.join(' ')}>
-                    <div className="column">
+            <div className={rowClass.join(' ')}>
+                <div className="ui grid middle aligned">
+                    <div className="one wide column center aligned">
+                        {this.props.index}
+                    </div>
+                    <div className="seven wide column">
                         {this.props.children[0]}
                     </div>
-                    <div className="column">
+                    <div className="one wide column center aligned">
+                        {(this.props.row.source.content && this.props.row.target.content) ?
+                            <input type="checkbox"
+                                   defaultChecked={this.props.row.checked}
+                                   onChange={this.onCheckboxClick}/>
+                            : null}
+                    </div>
+                    <div className="seven wide column">
                         {this.props.children[1]}
                     </div>
                 </div>
@@ -84,5 +108,10 @@ class RowComponent extends Component {
     componentWillUnmount() {
     }
 }
+
+RowComponent.propTypes = {
+    index: PropTypes.number.isRequired,
+    row: PropTypes.object.isRequired
+};
 
 export default DropTarget(ItemTypes.ITEM, RowTarget, collect)(RowComponent);
