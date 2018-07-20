@@ -1,7 +1,11 @@
 import React, {Component} from 'react';
-import ProjectsStore from "../../Stores/Projects.store";
-import ProjectsConstants from "../../Constants/Projects.constants"
-import ProjectsActions from '../../Actions/Projects.actions';
+import ProjectStore from "../../Stores/Project.store";
+import ProjectConstants from "../../Constants/Project.constants"
+import ProjectActions from '../../Actions/Project.actions';
+import RowComponent from './Row/Row.component';
+import SegmentComponent from './Row/Segment/Segment.component';
+import {DragDropContext} from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 class ProjectComponent extends Component {
     constructor(props) {
@@ -11,39 +15,88 @@ class ProjectComponent extends Component {
             project: {
                 config: {
                     password: this.props.match.params.password,
-                    id: this.props.match.params.projectID
-                }
+                    id: this.props.match.params.jobID
+                },
+                rows: []
             }
         };
 
-        this._test = this._test.bind(this);
-    }
-    static getDerivedStateFromProps(props, state){
-        //console.log(props,state);
-        return null
-    }
-    _test(){
-        console.log('funziona');
+        ProjectActions.setJobID(this.props.match.params.jobID)
+
     }
 
-    componentDidMount() {
-        ProjectsStore.addListener(ProjectsConstants.GET_PROJECTS, this._test);
-        ProjectsActions.getProjects();
+    static getDerivedStateFromProps(props, state) {
+
+        return null;
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+
+        return true;
+    }
+
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+
+        return null;
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+
     }
 
 
-    componentWillUnmount() {
-        ProjectsStore.removeListener(ProjectsConstants.GET_PROJECTS, this._test);
-    }
+    setRows = (rows) => {
+        this.setState({
+            project: {
+                rows: rows
+            }
+        })
+    };
 
+    renderItems(array) {
+        let values = [];
+        if (array.length > 0) {
+            array.map((row, index) => {
+                values.push(<RowComponent key={index} index={index} row={row}>
+                    <SegmentComponent type={0}
+                                      rowChecked={row.checked}
+                                      value={row.source.content}
+                                      order={row.order}/>
+                    <SegmentComponent type={1}
+                                      rowChecked={row.checked}
+                                      value={row.target.content}
+                                      order={row.order}/>
+                </RowComponent>);
+                return row;
+            });
+        }
+        return values;
+    }
 
     render() {
         return (
-            <div>
-                <p>Project</p>
+            <div className="align-project">
+                <div className="ui container">
+                    {this.renderItems(this.state.project.rows)}
+                </div>
             </div>
         );
     }
+
+    componentDidCatch() {
+
+    }
+
+    componentDidMount() {
+        ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
+        ProjectActions.getRows();
+    }
+
+    componentWillUnmount() {
+        ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
+    }
+
+
 }
 
-export default ProjectComponent;
+export default DragDropContext(HTML5Backend)(ProjectComponent);

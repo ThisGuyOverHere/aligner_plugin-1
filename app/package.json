@@ -14,9 +14,12 @@
     "immutable": "^3.8.2",
     "keymirror": "^0.1.1",
     "react": "^16.0.0",
+    "react-dnd": "^5.0.0",
+    "react-dnd-html5-backend": "^5.0.1",
     "react-dom": "^16.0.0",
     "react-router": "^4.3.1",
-    "react-router-dom": "^4.3.1"
+    "react-router-dom": "^4.3.1",
+    "semantic-ui-react": "^0.82.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

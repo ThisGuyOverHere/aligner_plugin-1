@@ -1,0 +1,16 @@
+.project-row{
+  margin: 24px auto;
+  background-color: #fff;
+  &:hover{
+    background: #F9f9f9;
+  }
+  &.dropHover{
+    background: #F5F5F5;
+    &.notDropStatus{
+      background: #9e280e;
+      cursor: not-allowed;
+    }
+  }
+}
+
+
