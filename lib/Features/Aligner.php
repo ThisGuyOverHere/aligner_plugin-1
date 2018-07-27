@@ -11,6 +11,7 @@ namespace Features;
 use Klein\Klein;
 use BasicFeatureStruct;
 use Features\Aligner\Controller\HomeController;
+use NewDatabase;
 
 class Aligner extends BaseFeature
 {
@@ -19,12 +20,17 @@ class Aligner extends BaseFeature
     protected $autoActivateOnProject = false;
 
     public function __construct( BasicFeatureStruct $feature ) {
+        //$config = self::getConfig();
+        //$conn = \NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE']);
         parent::__construct( $feature );
     }
 
     public static function loadRoutes( Klein $klein ) {
-
+        route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
+        $config = self::getConfig();
+        //$conn = NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE']);
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
+
     }
 
     public static function homeRoute( $request, $response, $service, $app ) {
