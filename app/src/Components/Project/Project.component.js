@@ -6,6 +6,7 @@ import RowComponent from './Row/Row.component';
 import SegmentComponent from './Row/Segment/Segment.component';
 import {DragDropContext} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
 
 class ProjectComponent extends Component {
     constructor(props) {
@@ -78,6 +79,7 @@ class ProjectComponent extends Component {
             <div className="align-project">
                 <div className="ui container">
                     {this.renderItems(this.state.project.rows)}
+                    <AdvancedDragLayer />
                 </div>
             </div>
         );
