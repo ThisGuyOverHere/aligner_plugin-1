@@ -1,4 +1,5 @@
 CREATE DATABASE matecat_aligner;
+USE matecat_aligner;
 
 DROP TABLE IF EXISTS `projects`;
 CREATE TABLE `projects` (

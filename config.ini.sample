@@ -1,0 +1,4 @@
+DB_SERVER = "mysql"
+DB_DATABASE = "matecat_aligner"
+DB_USER = "admin"
+DB_PASS = "admin"
