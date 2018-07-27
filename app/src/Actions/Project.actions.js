@@ -21,7 +21,7 @@ let ProjectActions = {
             /*"Consulta il manuale utente prima di utilizzare iPhone. \n" +
             "Vai all’indirizzo help.apple.com/ iphone. \n" +
             "Puoi consultare il manuale utente su iPhone tramite il segnalibro corrispondente in Safari. \n" +*/
-            "In alternativa, puoi scaricare il manuale utente da iBooks Store (dove disponibile). \n" +
+            "In alternativa, puoi scaricare il manuale utente da iBooks Store (dove disponibile). Consulta il manuale utente prima di utilizzare iPhone. \nPuoi consultare il manuale utente su iPhone tramite il segnalibro corrispondente in Safari. \\n" +
             "Conserva la documentazione per consultazione futura.\n" +
             "Sicurezza e utilizzo\n" +
             "Consulta “Sicurezza, utilizzo e supporto” nel Manuale utente di iPhone.\n" +
