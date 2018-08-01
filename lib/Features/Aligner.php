@@ -27,8 +27,9 @@ class Aligner extends BaseFeature
 
     public static function loadRoutes( Klein $klein ) {
         $config = self::getConfig();
-        //NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE']);
+        NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE'])->getConnection();
         route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
+        route( '/create_project', 'POST', 'Features\Aligner\Controller\UploadController', 'createProject' );
 
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }

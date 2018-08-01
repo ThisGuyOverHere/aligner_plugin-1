@@ -10,6 +10,7 @@ CREATE TABLE `projects` (
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status_analysis` enum('not_ready_to_analisis', 'ready_to_analisis', 'in_analisis', 'empty', 'done') NOT NULL DEFAULT 'not_ready_to_analisis',
+  `due_date` DATE DEFAULT NULL,
   `remote_ip_address` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
@@ -83,15 +84,15 @@ DROP TABLE IF EXISTS `segments_match`;
 CREATE TABLE `segments_match` (
   `id_job` bigint(20) NOT NULL,
   `order` bigint(20) NOT NULL,
-  `src_seq` bigint(20) DEFAULT NULL,
-  `trg_seq` bigint(20) DEFAULT NULL,
+  `type` enum('target', 'source') NOT NULL,
+  `segment_seq` bigint(20) DEFAULT NULL,
   `next` bigint(20) DEFAULT NULL,
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY `primary_job_order` (`id_job`,`order`),
+  UNIQUE KEY `primary_job_order` (`id_job`,`order`,`type`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `order` (`order`),
-  KEY `src_seq` (`src_seq`),
-  KEY `trg_seq` (`trg_seq`),
+  KEY `type` (`type`),
+  KEY `segment_seq` (`segment_seq`),
   KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -17,6 +17,12 @@ class NewDatabase extends Database {
      */
     private static $instance;
 
+    /**
+     * Established connection
+     * @var PDO $connection
+     */
+    private $connection;
+
     // Connection variables
     private $server = ""; //database server
     private $user = ""; //database login name
@@ -53,6 +59,21 @@ class NewDatabase extends Database {
             static::$instance = new NewDatabase($server, $user, $password, $database);
         }
         return static::$instance;
+    }
+
+    public function getConnection() {
+        if ( empty( $this->connection ) || !$this->connection instanceof \PDO ) {
+            $this->connection = new \PDO(
+                    "mysql:host={$this->server};dbname={$this->database}",
+                    $this->user,
+                    $this->password,
+                    array(
+                            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
+                            \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                    ) );
+            $this->connection->exec( "SET names utf8" );
+        }
+        return $this->connection;
     }
 
 }
