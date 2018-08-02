@@ -18,25 +18,29 @@ class ParserController extends AlignerController {
     public function jobParser() {
         $id_job = $this->params['id_job'];
 
-        $fileStorage = new \FilesStorage;
-
         $source_file = Files_FileDao::getByJobId($id_job, "source")[0];
         $target_file = Files_FileDao::getByJobId($id_job, "target")[0];
 
-        list($date, $sha1_source) = explode("/", $source_file->sha1_original_file);
-        $xliff_source_file = $fileStorage->getXliffFromCache($sha1_source, $source_file->language_code);
-        $xliff_source_content = file_get_contents($xliff_source_file);
-        $source_parser = new \Xliff_Parser;
-        $source_array = $source_parser->Xliff2Array($xliff_source_content);
+        $source_segments = $this->_file2array($source_file);
+        $target_segments = $this->_file2array($target_file);
 
-        list($date, $sha1_target) = explode("/", $target_file->sha1_original_file);
-        $xliff_target_file = $fileStorage->getXliffFromCache($sha1_target, $target_file->language_code);
-        $xliff_target_content = file_get_contents($xliff_target_file);
-        $target_parser = new \Xliff_Parser;
-        $target_array = $target_parser->Xliff2Array($xliff_target_content);
+        $this->response->json( ['source' => $source_segments, 'target' => $target_segments] );
+    }
 
+    protected function _file2array($file) {
+        list($date, $sha1) = explode("/", $file->sha1_original_file);
 
-        sleep(1);
+        $fileStorage = new \FilesStorage;
+        $xliff_file = $fileStorage->getXliffFromCache($sha1, $file->language_code);
+        $xliff_content = file_get_contents($xliff_file);
 
+        $parser = new \Xliff_Parser;
+        $array = $parser->Xliff2Array($xliff_content);
+
+        $array = array_filter($array['files'], function($item) {
+            return array_key_exists('trans-units', $item);
+        });
+
+        return reset($array)['trans-units'];
     }
 }
