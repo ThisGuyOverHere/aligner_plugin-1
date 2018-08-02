@@ -45,6 +45,7 @@ DROP TABLE IF EXISTS `files`;
 CREATE TABLE `files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` int(11) NOT NULL,
+  `id_job` int(11) NOT NULL,
   `filename` varchar(255) DEFAULT NULL,
   `type` enum('source', 'target') NOT NULL,
   `language_code` varchar(45) NOT NULL,

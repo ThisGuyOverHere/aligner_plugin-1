@@ -8,8 +8,6 @@
 
 namespace Features\Aligner\Controller;
 use API\V2\KleinController;
-use Features\Aligner\Model\Projects_ProjectDao;
-use Features\Aligner\Model\Projects_ProjectStruct;
 
 class UploadController extends  KleinController {
 
@@ -71,35 +69,6 @@ class UploadController extends  KleinController {
 
         $result = $conversionHandler->getResult();
         $this->response->json( $result );
-    }
-
-    public function createProject(){
-
-        if ( empty( $_POST['project_name'] ) ) {
-            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file name." ];
-        }
-
-        $default_project_name = $_POST[ 'file_name' ];
-        $projectStruct = new Projects_ProjectStruct();
-
-        $user = $this->getUser();
-        if(!empty($user)){
-            $projectStruct->id_customer = $user->uid;
-        } else {
-            $projectStruct->id_customer = null;
-        }
-
-        if ( empty( $_POST['project_name'] ) ) {
-            $projectStruct->name = $default_project_name;
-        } else {
-            $projectStruct->name = $_POST['project_name'];
-        }
-        $projectStruct->password = \CatUtils::generate_password( 12 );
-
-        $projectStruct->create_date = date('Y-m-d H:i:s');
-        $projectStruct->remote_ip_address = \Utils::getRealIpAddr();
-        $project = Projects_ProjectDao::createFromStruct($projectStruct);
-        sleep(1);
     }
 
     private function setOrGetGuid() {

@@ -29,7 +29,7 @@ class Aligner extends BaseFeature
         $config = self::getConfig();
         NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE'])->getConnection();
         route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
-        route( '/create_project', 'POST', 'Features\Aligner\Controller\UploadController', 'createProject' );
+        route( '/create_project', 'POST', 'Features\Aligner\Controller\CreateProjectController', 'create' );
 
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }

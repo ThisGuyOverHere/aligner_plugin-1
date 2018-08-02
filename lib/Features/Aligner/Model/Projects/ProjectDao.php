@@ -80,7 +80,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function createFromStruct($project){
+    public static function createFromStruct(Projects_ProjectStruct $project){
         $conn = NewDatabase::obtain()->getConnection();
 
         $projStructToArray = $project->toArray();
