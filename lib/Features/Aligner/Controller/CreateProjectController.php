@@ -17,10 +17,15 @@ use Features\Aligner\Model\Jobs_JobStruct;
 
 class CreateProjectController extends AlignerController {
 
-    public $postInput;
+    protected $postInput;
 
-    public $project;
-    public $job;
+    protected $project;
+    protected $job;
+
+    protected $uploadDir;
+    protected $fileSourcePath;
+    protected $fileTargetPath;
+
 
 
     public function __construct( $request, $response, $service, $app ) {
@@ -65,13 +70,27 @@ class CreateProjectController extends AlignerController {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file name target." ];
         }
 
+        $this->uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+
+        $this->fileSourcePath = $this->uploadDir . "/" . $this->postInput[ 'file_name_source' ];
+        if ( !file_exists( $this->fileSourcePath ) ) {
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file source." ];
+        }
+
+        $this->fileTargetPath = $this->uploadDir . "/" . $this->postInput[ 'file_name_target' ];
+        if ( !file_exists( $this->fileTargetPath ) ) {
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file target." ];
+        }
+
+
+
         parent::__construct( $request, $response, $service, $app );
     }
 
     public function create() {
 
         if ( count( @$this->result[ 'errors' ] ) ) {
-            return false;
+            return $this->response->json($this->result);
         }
 
         $default_project_name = "ALIGNER-" . date( 'Y-m-d H:i:s' );
@@ -114,7 +133,7 @@ class CreateProjectController extends AlignerController {
         $sha1_target_file = sha1_file( $file_target_path );
         $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ], "target" );
 
-        sleep( 1 );
+        $this->response->json($this->project);
     }
 
     protected function _insertFile( $filename, $sha1, $language, $type ) {
