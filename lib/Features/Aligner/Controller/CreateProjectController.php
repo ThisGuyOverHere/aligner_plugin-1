@@ -8,7 +8,6 @@
 
 namespace Features\Aligner\Controller;
 
-use API\V2\KleinController;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Files_FileStruct;
 use Features\Aligner\Model\Projects_ProjectDao;
@@ -16,7 +15,7 @@ use Features\Aligner\Model\Projects_ProjectStruct;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Jobs_JobStruct;
 
-class CreateProjectController extends KleinController {
+class CreateProjectController extends AlignerController {
 
     public $postInput;
 
@@ -109,16 +108,16 @@ class CreateProjectController extends KleinController {
 
         $file_source_path = $uploadDir . "/" . $this->postInput[ 'file_name_source' ];
         $sha1_source_file = sha1_file( $file_source_path );
-        $this->_insertFile( $this->postInput[ 'file_name_source' ], $sha1_source_file, $this->postInput[ 'source_lang' ] );
+        $this->_insertFile( $this->postInput[ 'file_name_source' ], $sha1_source_file, $this->postInput[ 'source_lang' ], "source" );
 
         $file_target_path = $uploadDir . "/" . $this->postInput[ 'file_name_target' ];
         $sha1_target_file = sha1_file( $file_target_path );
-        $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ] );
+        $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ], "target" );
 
         sleep( 1 );
     }
 
-    protected function _insertFile( $filename, $sha1, $language ) {
+    protected function _insertFile( $filename, $sha1, $language, $type ) {
 
         $yearMonthPath    = date_create( $this->project->create_date )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1;
@@ -130,6 +129,7 @@ class CreateProjectController extends KleinController {
         $fileStruct->id_project         = $this->project->id;
         $fileStruct->id_job             = $this->job->id;
         $fileStruct->filename           = $filename;
+        $fileStruct->type = $type;
         $fileStruct->language_code      = $language;
         $fileStruct->mime_type          = $mimeType;
         $fileStruct->sha1_original_file = $fileDateSha1Path;

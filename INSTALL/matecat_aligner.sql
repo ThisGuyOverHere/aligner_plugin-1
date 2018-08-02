@@ -59,7 +59,7 @@ CREATE TABLE `files` (
 
 DROP TABLE IF EXISTS `segments`;
 CREATE TABLE `segments` (
-  `seq` bigint(20) NOT NULL AUTO_INCREMENT,
+  `seq` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
   `id_file` bigint(20) NOT NULL,
   `internal_id` varchar(100) DEFAULT NULL,

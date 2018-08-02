@@ -7,9 +7,8 @@
  */
 
 namespace Features\Aligner\Controller;
-use API\V2\KleinController;
 
-class UploadController extends  KleinController {
+class UploadController extends  AlignerController {
 
     private $guid = '';
 
