@@ -16,19 +16,21 @@ class Files_FileDao extends DataAccess_AbstractDao {
     /**
      * @param     $id_job
      *
+     * @param $type
+     *
      * @param int $ttl
      *
      * @return DataAccess_IDaoStruct[]|Files_FileStruct[]
      */
-    public static function getByJobId( $id_job, $ttl = 60 ) {
+    public static function getByJobId( $id_job, $type, $ttl = 60 ) {
 
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM files WHERE id_job = :id_job "
+                "SELECT * FROM files WHERE id_job = :id_job AND `type` = :type "
         );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job, 'type' => $type ] );
 
     }
 
