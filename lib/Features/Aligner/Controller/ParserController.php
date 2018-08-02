@@ -71,9 +71,11 @@ class ParserController extends AlignerController {
                 continue;
             }
 
-            $segments = array_merge($segments,  $xliff_file[ 'trans-units' ]);
+            foreach ($xliff_file[ 'trans-units' ] as $trans_unit) {
+                $segments = array_merge($segments,  $trans_unit[ 'seg-source' ]);
+            }
         }
 
-        return $segments;
+        return array_map(function ($item) { return $item['raw-content'];}, $segments);
     }
 }
