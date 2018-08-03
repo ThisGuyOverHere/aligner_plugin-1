@@ -32,7 +32,9 @@ class ParserController extends AlignerController {
         $source_segments = $this->_file2segments($source_file, $source_lang);
         $target_segments = $this->_file2segments($target_file, $target_lang);
 
-        $this->response->json( ['source' => $source_segments, 'target' => $target_segments] );
+        $alignment = $this->_alignSegments($source_segments, $target_segments);
+
+        $this->response->json( $alignment );
     }
 
 
@@ -147,4 +149,48 @@ class ParserController extends AlignerController {
         return $wordCount;
     }
 
+    /**
+     * @param $source
+     * @param $target
+     * @return array
+     */
+    protected function _alignSegments($source, $target) {
+
+        $alignment = array();
+
+        $source_length = count($source);
+        $target_length = count($target);
+
+        $index = 0;
+        while (true) {
+            if ($index < $source_length && $index < $target_length) {
+                $row = [
+                    'source' => $source[$index]['clean'],
+                    'target' => $target[$index]['clean']
+                ];
+
+                $alignment[] = $row;
+            } else if ($index < $source_length) {
+                $row = [
+                    'source' => $source[$index]['clean'],
+                    'target' => null
+                ];
+
+                $alignment[] = $row;
+            } else if ($index < $target_length) {
+                $row = [
+                    'source' => null,
+                    'target' => $target[$index]['clean']
+                ];
+
+                $alignment[] = $row;
+            } else {
+                break;
+            }
+
+            $index++;
+        }
+
+        return $alignment;
+    }
 }
