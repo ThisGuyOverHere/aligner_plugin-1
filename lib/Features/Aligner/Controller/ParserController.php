@@ -101,13 +101,50 @@ class ParserController extends AlignerController {
         return $segments;
     }
 
+    /**
+     *
+     * Code almost cloned from CatUtils::placehold_xliff_tags()
+     *
+     * @param $segment
+     * @param $lang
+     * @return null|string|string[]
+     */
     protected function _cleanSegment($segment, $lang) {
+
+        //remove not existent </x> tags
+        $segment = preg_replace('|(</x>)|si', "", $segment);
+
+        //$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+        $segment = preg_replace('|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', "", $segment);
+
+        $segment = preg_replace('|<(/g)>|si', "", $segment);
+
+        $segment = preg_replace('|<(x .*?/?)>|si', "", $segment);
+        $segment = preg_replace('#<(bx[ ]{0,}/?|bx .*?/?)>#si', "", $segment);
+        $segment = preg_replace('#<(ex[ ]{0,}/?|ex .*?/?)>#si', "", $segment);
+        $segment = preg_replace('|<(bpt\s*.*?)>|si', "", $segment);
+        $segment = preg_replace('|<(/bpt)>|si', "", $segment);
+        $segment = preg_replace('|<(ept\s*.*?)>|si', "", $segment);
+        $segment = preg_replace('|<(/ept)>|si', "", $segment);
+        $segment = preg_replace('|<(ph .*?)>|si', "", $segment);
+        $segment = preg_replace('|<(/ph)>|si', "", $segment);
+        $segment = preg_replace('|<(it .*?)>|si', "", $segment);
+        $segment = preg_replace('|<(/it)>|si', "", $segment);
+        $segment = preg_replace('|<(mrk\s*.*?)>|si', "", $segment);
+        $segment = preg_replace('|<(/mrk)>|si', "", $segment);
+
         return $segment;
     }
 
+    /**
+     * @param $segment
+     * @param $lang
+     * @return float|int
+     */
     protected function _countWordsInSegment($segment, $lang) {
         $wordCount = CatUtils::segment_raw_wordcount( $segment, $lang );
 
         return $wordCount;
     }
+
 }
