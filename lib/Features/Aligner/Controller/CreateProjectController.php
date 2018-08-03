@@ -82,8 +82,6 @@ class CreateProjectController extends AlignerController {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file target." ];
         }
 
-
-
         parent::__construct( $request, $response, $service, $app );
     }
 
@@ -123,14 +121,10 @@ class CreateProjectController extends AlignerController {
 
         $this->job = Jobs_JobDao::createFromStruct( $jobStruct );
 
-        $uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
-
-        $file_source_path = $uploadDir . "/" . $this->postInput[ 'file_name_source' ];
-        $sha1_source_file = sha1_file( $file_source_path );
+        $sha1_source_file = sha1_file( $this->fileSourcePath );
         $this->_insertFile( $this->postInput[ 'file_name_source' ], $sha1_source_file, $this->postInput[ 'source_lang' ], "source" );
 
-        $file_target_path = $uploadDir . "/" . $this->postInput[ 'file_name_target' ];
-        $sha1_target_file = sha1_file( $file_target_path );
+        $sha1_target_file = sha1_file( $this->fileTargetPath );
         $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ], "target" );
 
         $this->response->json($this->project);
@@ -154,14 +148,6 @@ class CreateProjectController extends AlignerController {
         $fileStruct->sha1_original_file = $fileDateSha1Path;
 
         $file = Files_FileDao::createFromStruct( $fileStruct );
-
-
-        /*$this->fileStorage->moveFromCacheToFileDir(
-                $fileDateSha1Path,
-                $this->projectStructure[ 'source_language' ],
-                $fid,
-                $originalFileName
-        );*/
 
         return $file;
 

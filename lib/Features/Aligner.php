@@ -23,6 +23,7 @@ class Aligner extends BaseFeature
     }
 
     public static function loadRoutes( Klein $klein ) {
+        route( '/upload', 'POST', 'Features\Aligner\Controller\UploadController', 'upload' );
         route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
         route( '/create_project', 'POST', 'Features\Aligner\Controller\CreateProjectController', 'create' );
         route( '/parse/[:id_job]', 'GET', 'Features\Aligner\Controller\ParserController', 'jobParser' );
