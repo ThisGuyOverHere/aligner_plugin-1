@@ -70,6 +70,25 @@ class UploadController extends  AlignerController {
         $this->response->json( $result );
     }
 
+    public function upload(){
+        $uploadFile = new \Upload($this->setOrGetGuid());
+
+        try {
+            $result = $uploadFile->uploadFiles( $_FILES );
+            
+            foreach($result as $key => $value){
+                unset($result->$key->file_path);
+            }
+        } catch ( \Exception $e ) {
+            $result                  = [
+                    'errors' => [
+                            [ "code" => -1, "message" => $e->getMessage() ]
+                    ]
+            ];
+        }
+        $this->response->json($result);
+    }
+
     private function setOrGetGuid() {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
