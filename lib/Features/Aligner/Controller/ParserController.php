@@ -43,6 +43,18 @@ class ParserController extends AlignerController {
                 break;
         }
 
+        // Format alignment for frontend test purpose
+        $alignment = array_map(function ($index, $item) {
+            return [
+                'source' => ['content' => $item['source']['clean']],
+                'target' => ['content' => $item['target']['clean']],
+                'order' => ($index + 1)* 1000000000,
+                'next' => ($index + 2) * 1000000000
+                ];
+        }, array_keys($alignment), $alignment);
+
+        $alignment[count($alignment)-1]['next'] = null;
+
         $this->response->json( $alignment );
     }
 
@@ -333,7 +345,7 @@ class ParserController extends AlignerController {
         $indexes = array_reverse($indexes);
 
         $alignment = [];
-        foreach ($indexes as $index) {
+        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length]] of the source/target slice
             $si = $index[0][0];
             $ti = $index[1][0];
 
