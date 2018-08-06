@@ -248,6 +248,7 @@ class ParserController extends AlignerController {
                     return -INF;
                 }
             }
+
             function lengthCost($sourceLengths, $targetLengths, $mean, $variance) {
                 $sl = array_sum($sourceLengths);
                 $tl = array_sum($targetLengths);
@@ -266,7 +267,7 @@ class ParserController extends AlignerController {
 
             $m = [];
             foreach (range(0, count($sourceLengths)) as $si) {
-                foreach (range(0, count($sourceLengths)) as $ti) {
+                foreach (range(0, count($targetLengths)) as $ti) {
                     if ($si == 0 && $ti == 0) {
                         $m['0-0'] = [0, 0, 0];
                     } else {
