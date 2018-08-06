@@ -214,18 +214,44 @@ class ParserController extends AlignerController {
      */
     protected function _alignSegmentsV1($source, $target) {
 
-        // Basic C&G algorithm, with mean=1.0 and variance=6.8  <-- They should be calculated on documents
-        $mean = 1.0;
-        $variance = 6.8;
-        $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];
-
-        $sourceLengths = array_map(function ($item) { return sentenceLength($item); }, $source);
-        $targetLengths = array_map(function ($item) { return sentenceLength($item); }, $target);
-
-        _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts);
-
         // Utility functions for algorithm
+        function sentenceLength($sentence) {
+            return strlen(str_replace(' ', '', $sentence));
+        }
+
         function _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts) {
+            // Math utils functions
+            function normCDF($value) {
+                $t = 1 / (1 + 0.2316419 * $value);
+
+                $probdist = 1 - 0.3989423 * exp(-$value * $value / 2) * (0.319381530 * $t - 0.356563782 * pow($t, 2) + 1.781477937 * pow($t, 3) - 1.821255978 * pow($t, 4) + 1.330274429 * pow($t, 5));
+
+                return $probdist;
+            }
+
+            function normLogs($value) {
+                try {
+                    return log(1 - normCDF($value));
+                } catch (\Exception $e) {
+                    return -INF;
+                }
+            }
+            function lengthCost($sourceLengths, $targetLengths, $mean, $variance) {
+                $sl = array_sum($sourceLengths);
+                $tl = array_sum($targetLengths);
+
+                $m = ($sl + $tl * $mean) / 2;
+
+                if (sqrt($m * $variance) == 0) {
+                    return -INF;
+                } else {
+                    $delta = ($sl - $tl * $mean) / sqrt($m * $variance);
+
+                    return -100 * (log(2) + normLogs(abs($delta)));
+                }
+            }
+
+
             $m = [];
             foreach (range(0, count($sourceLengths)) as $si) {
                 foreach (range(0, count($sourceLengths)) as $ti) {
@@ -233,9 +259,27 @@ class ParserController extends AlignerController {
                         $m['0-0'] = [0, 0, 0];
                     } else {
 
-                        // m[i, j] = min((m[i-di, j-dj][0] + length_cost(x[i-di:i], y[j-dj:j], mean_xy, variance_xy) + bead_cost, di, dj) for (di, dj), bead_cost in BEAD_COSTS.iteritems() if i-di>=0 and j-dj>=0)
+                        $value = null;
 
-                        $m[$si.'-'.$ti] = [0, 0, 0];
+                        foreach ($beadCosts as $pair => $beadCost) {
+                            $sd = intval(substr($pair, 0, 1));
+                            $td = intval(substr($pair, -1, 1));
+
+                            if ($si - $sd >= 0 && $ti - $td >= 0) {
+                                $tuple = [
+                                    $m[($si-$sd).'-'.($ti-$td)][0] + lengthCost(array_slice($sourceLengths, $si-$sd, $sd), array_slice($targetLengths, $ti-$td, $td), $mean, $variance) + $beadCost,
+                                    $sd,
+                                    $td
+                                ];
+
+                                // Emulate min function on tuple
+                                if ($value == null || $tuple[0] < $value[0]) {
+                                    $value = $tuple;
+                                }
+                            }
+                        }
+
+                        $m[$si.'-'.$ti] = $value;
                     }
                 }
             }
@@ -252,39 +296,58 @@ class ParserController extends AlignerController {
                     break;
                 }
 
-                $res[] = [[$si - $sd, $si], [$ti - $td, $ti]];
+                $res[] = [[$si - $sd, $sd], [$ti - $td, $td]];
 
                 $si -= $sd;
                 $ti -= $td;
             }
+
+            return $res;
         }
 
-        function sentenceLength($sentence) {
-            return strlen(str_replace(' ', '', $sentence));
-        }
+        // Simple merge, for 2-1 or 1-2 matches
+        function mergeSegments($segments) {
+            if (count($segments) == 1) {
+                return $segments[0];
+            } else {
+                return array_reduce($segments, function ($carry, $item) {
+                    $carry['raw'] .= $item['raw'];
+                    $carry['clean'] .= $item['clean'];
+                    $carry['words'] += $item['words'];
 
-        function lengthCost($sourceLengths, $targetLengths, $mean, $variance) {
-            $sl = array_sum($sourceLengths);
-            $tl = array_sum($targetLengths);
-
-            $m = ($sl + $tl + $mean) / 2;
-
-            $delta = ($sl - $tl * $mean) / sqrt(m * $variance);  //TODO: Division by 0
-
-            return -100 * (log(2) + $delta);
-
-            // Math utils functions
-            function normLogs($value) {
-                return log(1 - normCDF($value));  //TODO: Value Error
-            }
-
-            function normCDF($value) {
-                $t = 1 / (1 + 0.2316419 * $value);
-
-                $probdist = 1 - 0.3989423 * exp(-$value * $value / 2) * (0.319381530 * $t - 0.356563782 * pow($t, 2) + 1.781477937 * pow($t, 3) - 1.821255978 * pow($t, 4) + 1.330274429 * pow($t, 5));
-
-                return $probdist;
+                    return $carry;
+                }, ['raw' => '', 'clean' => '', 'words' => 0]);
             }
         }
+
+
+        // Basic C&G algorithm, with mean=1.0 and variance=6.8  <-- They should be calculated on documents
+        $mean = 1.0;
+        $variance = 6.8;
+        $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];
+
+        $sourceLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $source);
+        $targetLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $target);
+
+        $indexes = _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts);
+        $indexes = array_reverse($indexes);
+
+        $alignment = [];
+        foreach ($indexes as $index) {
+            $si = $index[0][0];
+            $ti = $index[1][0];
+
+            $sd = $index[0][1];
+            $td = $index[1][1];
+
+            $row = [
+                'source' => mergeSegments(array_slice($source, $si, $sd)),
+                'target' => mergeSegments(array_slice($target, $ti, $td))
+            ];
+
+            $alignment[] = $row;
+        }
+
+        return $alignment;
     }
 }
