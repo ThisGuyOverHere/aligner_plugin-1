@@ -26,6 +26,7 @@ class CreateProjectController extends AlignerController {
     protected $fileSourcePath;
     protected $fileTargetPath;
 
+    public $result;
 
 
     public function __construct( $request, $response, $service, $app ) {
@@ -70,6 +71,10 @@ class CreateProjectController extends AlignerController {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file name target." ];
         }
 
+        if ( !isset( $_COOKIE[ 'upload_session' ] ) && empty( $_COOKIE[ 'upload_session' ] ) ) {
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Cookie session is not set" ];
+        }
+
         $this->uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
 
         $this->fileSourcePath = $this->uploadDir . "/" . $this->postInput[ 'file_name_source' ];
@@ -88,7 +93,7 @@ class CreateProjectController extends AlignerController {
     public function create() {
 
         if ( count( @$this->result[ 'errors' ] ) ) {
-            return $this->response->json($this->result);
+            return $this->response->json( $this->result );
         }
 
         $default_project_name = "ALIGNER-" . date( 'Y-m-d H:i:s' );
@@ -127,7 +132,12 @@ class CreateProjectController extends AlignerController {
         $sha1_target_file = sha1_file( $this->fileTargetPath );
         $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ], "target" );
 
-        $this->response->json($this->project);
+        $this->result = [
+                'project' => $this->project,
+                'job'     => $this->job
+        ];
+
+        $this->response->json( $this->result );
     }
 
     protected function _insertFile( $filename, $sha1, $language, $type ) {
@@ -142,7 +152,7 @@ class CreateProjectController extends AlignerController {
         $fileStruct->id_project         = $this->project->id;
         $fileStruct->id_job             = $this->job->id;
         $fileStruct->filename           = $filename;
-        $fileStruct->type = $type;
+        $fileStruct->type               = $type;
         $fileStruct->language_code      = $language;
         $fileStruct->mime_type          = $mimeType;
         $fileStruct->sha1_original_file = $fileDateSha1Path;

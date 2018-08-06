@@ -8,34 +8,47 @@
 
 namespace Features\Aligner\Controller;
 
-class UploadController extends  AlignerController {
-
-    private $guid = '';
+class UploadController extends AlignerController {
 
     protected $file_name;
     protected $source_lang;
     protected $target_lang;
     protected $segmentation_rule;
 
-    public function convert(){
-        $filterArgs = array(
-                'file_name'         => array(
+    public $result;
+
+    public function __construct( $request, $response, $service, $app ) {
+        if ( !isset( $_COOKIE[ 'upload_session' ] ) && empty( $_COOKIE[ 'upload_session' ] ) ) {
+            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Cookie session is not set" ];
+        }
+        parent::__construct( $request, $response, $service, $app );
+    }
+
+    public function convert() {
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            $this->response->json( $this->result );
+
+            return;
+        }
+
+        $filterArgs = [
+                'file_name'         => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW
-                ),
-                'source_lang'       => array(
+                ],
+                'source_lang'       => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'target_lang'       => array(
+                ],
+                'target_lang'       => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'segmentation_rule' => array(
+                ],
+                'segmentation_rule' => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
-        );
+                ]
+        ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -48,7 +61,6 @@ class UploadController extends  AlignerController {
             $this->segmentation_rule = null;
         }
 
-        $this->setOrGetGuid();
         $cookieDir = $_COOKIE[ 'upload_session' ];
         $intDir    = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
         $errDir    = \INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
@@ -62,42 +74,43 @@ class UploadController extends  AlignerController {
         $conversionHandler->setIntDir( $intDir );
         $conversionHandler->setErrDir( $errDir );
         $conversionHandler->setFeatures( $this->featureSet );
-        $conversionHandler->setUserIsLogged( $this->userIsLogged );
+        $user = $this->getUser();
+        if ( $user ) {
+            $userIsLogged = true;
+        } else {
+            $userIsLogged = false;
+        }
+        $conversionHandler->setUserIsLogged( $userIsLogged );
 
         $conversionHandler->doAction();
 
-        $result = $conversionHandler->getResult();
-        $this->response->json( $result );
+        $this->result = $conversionHandler->getResult();
+        $this->response->json( $this->result );
     }
 
-    public function upload(){
-        $uploadFile = new \Upload($this->setOrGetGuid());
+    public function upload() {
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            $this->response->json( $this->result );
+
+            return;
+        }
+
+        $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
 
         try {
-            $result = $uploadFile->uploadFiles( $_FILES );
-            
-            foreach($result as $key => $value){
-                unset($result->$key->file_path);
+            $this->result = $uploadFile->uploadFiles( $_FILES );
+
+            foreach ( $this->result as $key => $value ) {
+                unset( $this->result->$key->file_path );
             }
         } catch ( \Exception $e ) {
-            $result                  = [
+            $this->result = [
                     'errors' => [
                             [ "code" => -1, "message" => $e->getMessage() ]
                     ]
             ];
         }
-        $this->response->json($result);
-    }
-
-    private function setOrGetGuid() {
-        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-        if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            $this->guid = \Utils::create_guid();
-            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
-        } else {
-            $this->guid = $_COOKIE[ 'upload_session' ];
-        }
-
+        $this->response->json( $this->result );
     }
 
 }

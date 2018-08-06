@@ -76,8 +76,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     /**
      * For now this is used by tests
      *
-     * TODO Upgrade Project manager class with this method
-     *
      * @param Jobs_JobStruct $jobStruct
      *
      * @return Jobs_JobStruct
@@ -137,8 +135,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $jStruct->password = $new_password;
 
         return $jStruct;
-
-
 
     }
 
