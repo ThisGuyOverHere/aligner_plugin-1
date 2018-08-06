@@ -7,7 +7,7 @@ import HomeComponent from "../../Home/Home.component";
 
 const RowTarget = {
     canDrop(props, monitor) {
-        return !props.row.checked;
+        return true
     },
     drop(props, monitor) {
         const from = monitor.getItem();
@@ -59,10 +59,6 @@ class RowComponent extends Component {
 
     }
 
-    onCheckboxClick = () => {
-        ProjectActions.toggleCheckedRowStatus(this.props.index);
-    };
-
     render() {
         let rowClass = ['project-row'];
 
@@ -82,13 +78,7 @@ class RowComponent extends Component {
                     <div className="seven wide column">
                         {this.props.children[0]}
                     </div>
-                    <div className="one wide column center aligned">
-                        {(this.props.row.source.content && this.props.row.target.content) ?
-                            <input type="checkbox"
-                                   defaultChecked={this.props.row.checked}
-                                   onChange={this.onCheckboxClick}/>
-                            : null}
-                    </div>
+                    <div className="one wide column center aligned"> </div>
                     <div className="seven wide column">
                         {this.props.children[1]}
                     </div>

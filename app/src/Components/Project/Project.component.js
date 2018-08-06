@@ -60,11 +60,9 @@ class ProjectComponent extends Component {
             array.map((row, index) => {
                 values.push(<RowComponent key={index} index={index} row={row}>
                     <SegmentComponent type={0}
-                                      rowChecked={row.checked}
                                       value={row.source.content}
                                       order={row.order}/>
                     <SegmentComponent type={1}
-                                      rowChecked={row.checked}
                                       value={row.target.content}
                                       order={row.order}/>
                 </RowComponent>);
@@ -91,7 +89,7 @@ class ProjectComponent extends Component {
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
-        ProjectActions.getRows();
+        ProjectActions.getRows(this.props.match.params.jobID,this.props.match.params.jobPassword);
     }
 
     componentWillUnmount() {
