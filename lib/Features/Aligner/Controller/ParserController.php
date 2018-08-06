@@ -32,7 +32,16 @@ class ParserController extends AlignerController {
         $source_segments = $this->_file2segments($source_file, $source_lang);
         $target_segments = $this->_file2segments($target_file, $target_lang);
 
-        $alignment = $this->_alignSegmentsV1($source_segments, $target_segments);
+        $version = $this->params['version'];
+
+        switch ($version) {
+            case 'v0':
+                $alignment = $this->_alignSegmentsV0($source_segments, $target_segments);
+                break;
+            case 'v1':
+                $alignment = $this->_alignSegmentsV1($source_segments, $target_segments);
+                break;
+        }
 
         $this->response->json( $alignment );
     }
