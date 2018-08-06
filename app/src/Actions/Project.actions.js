@@ -2,6 +2,7 @@ import ProjectStore from "../Stores/Project.store";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
+import {httpAlignJob} from "../HttpRequests/Alignment.http";
 
 
 let ProjectActions = {
@@ -15,12 +16,27 @@ let ProjectActions = {
             jobID: jobID
         });
     },
-    getRows: function () {
+    getRows: function (jobID,jobPassword) {
+
+         httpAlignJob(jobID).then(response =>{
+            console.log(response.data);
+             AppDispatcher.dispatch({
+                 actionType: ProjectConstants.GET_ROWS,
+                 rows: response.data
+             });
+         });
+
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.GET_ROWS,
+            rows: rows
+        });
+    },
+    /*getRows: function () {
 
         let italian = "Manuale utente di iPhone\n" +
-            /*"Consulta il manuale utente prima di utilizzare iPhone. \n" +
+            /!*"Consulta il manuale utente prima di utilizzare iPhone. \n" +
             "Vai all’indirizzo help.apple.com/ iphone. \n" +
-            "Puoi consultare il manuale utente su iPhone tramite il segnalibro corrispondente in Safari. \n" +*/
+            "Puoi consultare il manuale utente su iPhone tramite il segnalibro corrispondente in Safari. \n" +*!/
             "In alternativa, puoi scaricare il manuale utente da iBooks Store (dove disponibile). Consulta il manuale utente prima di utilizzare iPhone. \nPuoi consultare il manuale utente su iPhone tramite il segnalibro corrispondente in Safari. \\n" +
             "Conserva la documentazione per consultazione futura.\n" +
             "Sicurezza e utilizzo\n" +
@@ -64,7 +80,6 @@ let ProjectActions = {
             italian.map((e,i)=>{
                 rows.push({
                     order: i*1000000000,
-                    checked: false,
                     source: {
                         content: e
                     },
@@ -93,7 +108,7 @@ let ProjectActions = {
             actionType: ProjectConstants.GET_ROWS,
             rows: rows
         });
-    },
+    },*/
     /**
      *
      * @param {Object} log A log of move action from frontend
@@ -111,7 +126,6 @@ let ProjectActions = {
 
         let mock = {
             order: null,
-            checked: false,
             source: {
                 content: null
             },
@@ -179,16 +193,6 @@ let ProjectActions = {
             rows: changes
         });
     },
-    /**
-     *
-     * @param {Number} indexRow The index of row inside projectStore
-     */
-    toggleCheckedRowStatus: function (indexRow) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.TOGGLE_CHECKED_ROW_STATUS,
-            indexRow: indexRow
-        });
-    }
 };
 
 

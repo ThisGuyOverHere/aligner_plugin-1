@@ -9,7 +9,7 @@ const ItemSource = {
         return props;
     },
     canDrag(props,monitor){
-        return (!props.rowChecked && props.value);
+        return props.value;
     }
 };
 
@@ -108,7 +108,6 @@ class SegmentComponent extends Component {
 
 SegmentComponent.propTypes = {
     type: PropTypes.number.isRequired,
-    rowChecked: PropTypes.bool.isRequired,
     order: PropTypes.number.isRequired,
     value: PropTypes.string
 };
