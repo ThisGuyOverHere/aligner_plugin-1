@@ -341,8 +341,8 @@ class ParserController extends AlignerController {
             $td = $index[1][1];
 
             $row = [
-                'source' => mergeSegments(array_splice($source, $si, $sd)),
-                'target' => mergeSegments(array_splice($target, $ti, $td))
+                'source' => mergeSegments(array_slice($source, $si, $sd)),
+                'target' => mergeSegments(array_slice($target, $ti, $td))
             ];
 
             $alignment[] = $row;
