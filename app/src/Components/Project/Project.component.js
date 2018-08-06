@@ -7,12 +7,14 @@ import SegmentComponent from './Row/Segment/Segment.component';
 import {DragDropContext} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
+import env from "../../Constants/Env.constants";
 
 class ProjectComponent extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            algorithm: env.alignAlgorithmDefaultVersion,
             project: {
                 config: {
                     password: this.props.match.params.password,
@@ -54,6 +56,14 @@ class ProjectComponent extends Component {
         })
     };
 
+    changeAlgorithmVersion = (e) => {
+        ProjectActions.getRows(this.props.match.params.jobID, this.props.match.params.jobPassword, e.target.value);
+
+        this.setState({
+            algorithm: e.target.value
+        });
+    };
+
     renderItems(array) {
         let values = [];
         if (array.length > 0) {
@@ -73,11 +83,22 @@ class ProjectComponent extends Component {
     }
 
     render() {
+        let algorithmElements = [];
+        env.alignAlgorithmAllVersions.map(e => {
+            const checked = (this.state.algorithm == e) ? true : false;
+            algorithmElements.push(<option value={e} selected={checked} >Algorithm V{e}</option>);
+        });
         return (
             <div className="align-project">
                 <div className="ui container">
+                    <select name="algorithm" id="algorithm" onChange={this.changeAlgorithmVersion}>
+                        {algorithmElements}
+                    </select>
+                </div>
+
+                <div className="ui container">
                     {this.renderItems(this.state.project.rows)}
-                    <AdvancedDragLayer />
+                    <AdvancedDragLayer/>
                 </div>
             </div>
         );
@@ -89,7 +110,7 @@ class ProjectComponent extends Component {
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
-        ProjectActions.getRows(this.props.match.params.jobID,this.props.match.params.jobPassword);
+        ProjectActions.getRows(this.props.match.params.jobID, this.props.match.params.jobPassword);
     }
 
     componentWillUnmount() {

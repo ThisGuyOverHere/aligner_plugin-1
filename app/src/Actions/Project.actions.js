@@ -16,20 +16,15 @@ let ProjectActions = {
             jobID: jobID
         });
     },
-    getRows: function (jobID,jobPassword) {
+    getRows: function (jobID,jobPassword, algorithm) {
 
-         httpAlignJob(jobID).then(response =>{
+         httpAlignJob(jobID,algorithm).then(response =>{
             console.log(response.data);
              AppDispatcher.dispatch({
                  actionType: ProjectConstants.GET_ROWS,
                  rows: response.data
              });
          });
-
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.GET_ROWS,
-            rows: rows
-        });
     },
     /*getRows: function () {
 
