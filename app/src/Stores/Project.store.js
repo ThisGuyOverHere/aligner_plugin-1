@@ -23,6 +23,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 
     storeRows: function (rows) {
         const list = fromJS(rows);
+        this.project = List();//for change algorithm
         this.project = this.project.push(...list);
     },
     /**
