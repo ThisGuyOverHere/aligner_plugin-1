@@ -46,17 +46,17 @@ class ParserController extends AlignerController {
                 break;
         }
 
-        // Format alignment for frontend test purpose
-        $alignment = array_map(function ($index, $item) {
-            return [
-                'source' => ['content' => $item['source']['clean']],
-                'target' => ['content' => $item['target']['clean']],
-                'order' => ($index + 1)* 1000000000,
-                'next' => ($index + 2) * 1000000000
-                ];
-        }, array_keys($alignment), $alignment);
-
-        $alignment[count($alignment)-1]['next'] = null;
+//        // Format alignment for frontend test purpose
+//        $alignment = array_map(function ($index, $item) {
+//            return [
+//                'source' => ['content' => $item['source']['clean']],
+//                'target' => ['content' => $item['target']['clean']],
+//                'order' => ($index + 1)* 1000000000,
+//                'next' => ($index + 2) * 1000000000
+//                ];
+//        }, array_keys($alignment), $alignment);
+//
+//        $alignment[count($alignment)-1]['next'] = null;
 
         $this->response->json( $alignment );
     }
@@ -137,27 +137,28 @@ class ParserController extends AlignerController {
      */
     protected function _cleanSegment($segment, $lang) {
 
-        //remove not existent </x> tags
-        $segment = preg_replace('|(</x>)|si', "", $segment);
+        $tagsRegex = [
+            '|(</x>)|si',
+            '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si',
+            '|<(/g)>|si',
+            '|<(x .*?/?)>|si',
+            '#<(bx[ ]{0,}/?|bx .*?/?)>#si',
+            '#<(ex[ ]{0,}/?|ex .*?/?)>#si',
+            '|<(bpt\s*.*?)>|si',
+            '|<(/bpt)>|si',
+            '|<(ept\s*.*?)>|si',
+            '|<(/ept)>|si',
+            '|<(ph .*?)>|si',
+            '|<(/ph)>|si',
+            '|<(it .*?)>|si',
+            '|<(/it)>|si',
+            '|<(mrk\s*.*?)>|si',
+            '|<(/mrk)>|si'
+        ];
 
-        //$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
-        $segment = preg_replace('|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', "", $segment);
-
-        $segment = preg_replace('|<(/g)>|si', "", $segment);
-
-        $segment = preg_replace('|<(x .*?/?)>|si', "", $segment);
-        $segment = preg_replace('#<(bx[ ]{0,}/?|bx .*?/?)>#si', "", $segment);
-        $segment = preg_replace('#<(ex[ ]{0,}/?|ex .*?/?)>#si', "", $segment);
-        $segment = preg_replace('|<(bpt\s*.*?)>|si', "", $segment);
-        $segment = preg_replace('|<(/bpt)>|si', "", $segment);
-        $segment = preg_replace('|<(ept\s*.*?)>|si', "", $segment);
-        $segment = preg_replace('|<(/ept)>|si', "", $segment);
-        $segment = preg_replace('|<(ph .*?)>|si', "", $segment);
-        $segment = preg_replace('|<(/ph)>|si', "", $segment);
-        $segment = preg_replace('|<(it .*?)>|si', "", $segment);
-        $segment = preg_replace('|<(/it)>|si', "", $segment);
-        $segment = preg_replace('|<(mrk\s*.*?)>|si', "", $segment);
-        $segment = preg_replace('|<(/mrk)>|si', "", $segment);
+        foreach ($tagsRegex as $regex) {
+            $segment = preg_replace($regex, '', $segment);
+        }
 
         return $segment;
     }
@@ -393,152 +394,79 @@ class ParserController extends AlignerController {
     protected function _alignSegmentsV2($source, $target) {
 
         // Utility functions for algorithm
-        function sentenceLength($sentence) {
-            return strlen(str_replace(' ', '', $sentence));
-        }
+        function tagsInSegment($segment) {
+            $allMatches = [];
 
-        function calculateMean($source, $target) {
-            $sourceLength = array_reduce($source, function ($carry, $item) {
-                $carry += sentenceLength($item['clean']);
-                return $carry;
-            }, 0);
-
-            $targetLength = array_reduce($target, function ($carry, $item) {
-                $carry += sentenceLength($item['clean']);
-                return $carry;
-            }, 0);
-
-            return $targetLength / $sourceLength;
-        }
-
-        function _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts) {
-            // Math utils functions
-            function normCDF($value) {
-                $t = 1 / (1 + 0.2316419 * $value);
-
-                $probdist = 1 - 0.3989423 * exp(-$value * $value / 2) * (0.319381530 * $t - 0.356563782 * pow($t, 2) + 1.781477937 * pow($t, 3) - 1.821255978 * pow($t, 4) + 1.330274429 * pow($t, 5));
-
-                return $probdist;
-            }
-
-            function normLogs($value) {
-                try {
-                    return log(1 - normCDF($value));
-                } catch (\Exception $e) {
-                    return -INF;
-                }
-            }
-
-            function lengthCost($sourceLengths, $targetLengths, $mean, $variance) {
-                $sl = array_sum($sourceLengths);
-                $tl = array_sum($targetLengths);
-
-                $m = ($sl + $tl * $mean) / 2;
-
-                if (sqrt($m * $variance) == 0) {
-                    return -INF;
-                } else {
-                    $delta = ($sl - $tl * $mean) / sqrt($m * $variance);
-
-                    return -100 * (log(2) + normLogs(abs($delta)));
-                }
-            }
-
-
-            $m = [];
-            foreach (range(0, count($sourceLengths)) as $si) {
-                foreach (range(0, count($targetLengths)) as $ti) {
-                    if ($si == 0 && $ti == 0) {
-                        $m['0-0'] = [0, 0, 0];
-                    } else {
-
-                        $value = null;
-
-                        foreach ($beadCosts as $pair => $beadCost) {
-                            $sd = intval(substr($pair, 0, 1));
-                            $td = intval(substr($pair, -1, 1));
-
-                            if ($si - $sd >= 0 && $ti - $td >= 0) {
-                                $tuple = [
-                                    $m[($si-$sd).'-'.($ti-$td)][0] + lengthCost(array_slice($sourceLengths, $si-$sd, $sd), array_slice($targetLengths, $ti-$td, $td), $mean, $variance) + $beadCost,
-                                    $sd,
-                                    $td
-                                ];
-
-                                // Emulate min function on tuple
-                                if ($value == null || $tuple[0] < $value[0]) {
-                                    $value = $tuple;
-                                }
-                            }
-                        }
-
-                        $m[$si.'-'.$ti] = $value;
-                    }
-                }
-            }
-
-            $res = [];
-
-            $si = count($sourceLengths);
-            $ti = count($targetLengths);
-
-            while (true) {
-                list($c, $sd, $td) = $m[$si.'-'.$ti];
-
-                if ($sd == 0 && $td == 0) {
-                    break;
-                }
-
-                $res[] = [[$si - $sd, $sd], [$ti - $td, $td]];
-
-                $si -= $sd;
-                $ti -= $td;
-            }
-
-            return $res;
-        }
-
-        // Simple merge, for 2-1 or 1-2 matches
-        function mergeSegments($segments) {
-            if (count($segments) == 1) {
-                return $segments[0];
-            } else {
-                return array_reduce($segments, function ($carry, $item) {
-                    $carry['raw'] .= $item['raw'];
-                    $carry['clean'] .= $item['clean'];
-                    $carry['words'] += $item['words'];
-
-                    return $carry;
-                }, ['raw' => '', 'clean' => '', 'words' => 0]);
-            }
-        }
-
-
-        // Basic C&G algorithm, with mean=1.0 and variance=6.8  <-- They should be calculated on documents
-        $mean = calculateMean($source, $target);
-        $variance = 6.8;
-        $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];
-
-        $sourceLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $source);
-        $targetLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $target);
-
-        $indexes = _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts);
-        $indexes = array_reverse($indexes);
-
-        $alignment = [];
-        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length]] of the source/target slice
-            $si = $index[0][0];
-            $ti = $index[1][0];
-
-            $sd = $index[0][1];
-            $td = $index[1][1];
-
-            $row = [
-                'source' => mergeSegments(array_slice($source, $si, $sd)),
-                'target' => mergeSegments(array_slice($target, $ti, $td))
+            $tagsRegex = [
+                '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si',
+                '|<(x .*?/?)>|si',
+                '#<(bx[ ]{0,}/?|bx .*?/?)>#si',
+                '#<(ex[ ]{0,}/?|ex .*?/?)>#si',
+                '|<(bpt\s*.*?)>|si',
+                '|<(ept\s*.*?)>|si',
+                '|<(ph .*?)>|si',
+                '|<(it .*?)>|si',
+                '|<(mrk\s*.*?)>|si'
             ];
 
-            $alignment[] = $row;
+            foreach ($tagsRegex as $regex) {
+                preg_match_all($regex, $segment['raw'], $matches);
+
+                if (!empty($matches)) {
+                    $allMatches = array_merge($allMatches, $matches[0]); // $matches[0] contains all raw matches
+                }
+            }
+
+            return $allMatches;
+        }
+
+
+        // Extract tags from source and target segments
+        $source = array_map(function ($item) {
+            $item['tags'] = tagsInSegment($item);
+            return $item;
+        }, $source);
+
+        $target = array_map(function ($item) {
+            $item['tags'] = tagsInSegment($item);
+            return $item;
+        }, $target);
+
+
+
+        $alignment = array();
+
+        $source_length = count($source);
+        $target_length = count($target);
+
+        $index = 0;
+        while (true) {
+            if ($index < $source_length && $index < $target_length) {
+                $row = [
+                    'source' => $source[$index],
+                    'target' => $target[$index]
+                ];
+
+                $alignment[] = $row;
+            } else if ($index < $source_length) {
+                $row = [
+                    'source' => $source[$index],
+                    'target' => null
+                ];
+
+                $alignment[] = $row;
+            } else if ($index < $target_length) {
+                $row = [
+                    'source' => null,
+                    'target' => $target[$index]
+                ];
+
+                $alignment[] = $row;
+            } else {
+                break;
+            }
+
+            $index++;
         }
 
         return $alignment;
