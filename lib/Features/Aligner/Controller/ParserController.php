@@ -57,17 +57,17 @@
                     $source = $row['source'];
                 }else{
                     $source['clean'] = null;
-                    $source['row'] = null;
+                    $source['raw'] = null;
                 }
 
                 $source['order'] = ($index + 1) * 1000000000;
                 $source['next'] = ($index + 2) * 1000000000;
 
-                if($row['source']){
+                if($row['target']){
                     $target = $row['target'];
                 }else{
                     $target['clean'] = null;
-                    $target['row'] = null;
+                    $target['raw'] = null;
                 }
 
                 $target['order'] = ($index + 1) * 1000000000;
