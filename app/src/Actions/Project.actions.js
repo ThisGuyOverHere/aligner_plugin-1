@@ -16,13 +16,17 @@ let ProjectActions = {
             jobID: jobID
         });
     },
-    getRows: function (jobID,jobPassword, algorithm) {
-
+    /**
+     *
+     * @param {Number} jobID The Job ID of current project
+     * @param {String} jobPassword The password of current Job ID
+     * @param {Number} algorithm The version of algorithm for alignment
+     */
+    getSegments: function (jobID,jobPassword, algorithm=null) {
          httpAlignJob(jobID,algorithm).then(response =>{
-            console.log(response.data);
              AppDispatcher.dispatch({
-                 actionType: ProjectConstants.GET_ROWS,
-                 rows: response.data
+                 actionType: ProjectConstants.STORE_SEGMENTS,
+                 segments: response.data
              });
          });
     },
