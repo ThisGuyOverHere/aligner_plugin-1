@@ -231,6 +231,22 @@ class ParserController extends AlignerController {
             return strlen(str_replace(' ', '', $sentence));
         }
 
+        function calculateMean($source, $target) {
+            // Caluclate mean length: mean = len(trgfile) / len(srcfile)
+
+            $sourceLength = array_reduce($source, function ($carry, $item) {
+                $carry += sentenceLength($item['clean']);
+                return $carry;
+            }, 0);
+
+            $targetLength = array_reduce($target, function ($carry, $item) {
+                $carry += sentenceLength($item['clean']);
+                return $carry;
+            }, 0);
+
+            return $targetLength / $sourceLength;
+        }
+
         function _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts) {
             // Math utils functions
             function normCDF($value) {
@@ -335,7 +351,7 @@ class ParserController extends AlignerController {
 
 
         // Basic C&G algorithm, with mean=1.0 and variance=6.8  <-- They should be calculated on documents
-        $mean = 1.0;
+        $mean = calculateMean($source, $target);
         $variance = 6.8;
         $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];
 
