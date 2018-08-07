@@ -420,20 +420,26 @@ class ParserController extends AlignerController {
             return $allMatches;
         }
 
+        function charactersInSegment($segment) {
+            return strlen(str_replace(' ', '', $segment['clean']));
+        }
 
-        // Extract tags from source and target segments
+
+        // Expand meta-info for source and target segments
         $source = array_map(function ($item) {
             $item['tags'] = tagsInSegment($item);
+            $item['chars'] = charactersInSegment($item);
             return $item;
         }, $source);
 
         $target = array_map(function ($item) {
             $item['tags'] = tagsInSegment($item);
+            $item['chars'] = charactersInSegment($item);
             return $item;
         }, $target);
 
 
-
+        // Alignment
         $alignment = array();
 
         $source_length = count($source);
