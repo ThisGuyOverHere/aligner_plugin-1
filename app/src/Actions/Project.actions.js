@@ -106,8 +106,6 @@ let ProjectActions = {
              *  2 *
              ******/
             // creo un buco in corrispondenza dell'elemento spostato
-            console.log(tmpJob[inverse[log.type]].get(toIndex).toJS());
-            console.log(tmpJob[inverse[log.type]].get(toIndex+1).toJS());
             mockFrom.order = tmpJob[inverse[log.type]].getIn([toIndex, 'order']) + (tmpJob[inverse[log.type]].getIn([toIndex + 1, 'order']) - tmpJob[inverse[log.type]].getIn([toIndex, 'order'])) / 2;
             mockFrom.next = tmpJob[inverse[log.type]].getIn([+toIndex + 1, 'order']);
             changes.push({
@@ -152,7 +150,6 @@ let ProjectActions = {
             data: changeData
         });
 
-
         /******
          *  5 *
          ******/
@@ -181,9 +178,6 @@ let ProjectActions = {
             });
         }
 
-
-
-        console.log(changes);
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
             changes: changes
