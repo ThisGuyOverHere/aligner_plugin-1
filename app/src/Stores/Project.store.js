@@ -52,7 +52,10 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
      */
     storeMovements: function (changes) {
         changes.map(change => {
-            const index = this.job[change.type].findIndex(i => i.get('order') === change.rif_order);
+            let index;
+            if(change.rif_order){
+                index = this.job[change.type].findIndex(i => i.get('order') === change.rif_order);
+            }
             switch (change.action) {
                 case 'delete':
                     this.job[change.type] = this.job[change.type].delete(index);
@@ -60,11 +63,26 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                 case 'create':
                     this.job[change.type] = this.job[change.type].insert(index, fromJS(change.data));
                     break;
+                case 'push':
+                    this.job[change.type] = this.job[change.type].push(fromJS(change.data));
+                    break;
                 case 'update':
                     this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
                     break;
             }
         });
+
+        //Todo: remove this test
+        const arrayS = this.job.source.toJS();
+        console.log('#### SOURCE #####');
+        for(let x= arrayS.length -5; x<= arrayS.length; x++){
+            console.log(arrayS[x].order+'       '+arrayS[x].next);
+        }
+        const arrayt = this.job.target.toJS();
+        console.log('#### TARGET #####');
+        for(let x= arrayT.length -5; x<= arrayT.length; x++){
+            console.log(arrayt[x].order+'       '+arrayt[x].next);
+        }
     },
 
 });

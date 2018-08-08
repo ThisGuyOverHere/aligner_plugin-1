@@ -1,6 +1,6 @@
 const env = {
-    alignAlgorithmDefaultVersion: 0,
-    alignAlgorithmAllVersions: [0,1],
+    alignAlgorithmDefaultVersion: 2,
+    alignAlgorithmAllVersions: [0,1,2],
     languages: [
         {code:"af-ZA", value:"Afrikaans"},
         {code:"sq-AL", value:"Albanian"},
@@ -158,7 +158,14 @@ const env = {
         {code:"yi-YD", value:"Yiddish"},
         {code:"yo-NG", value:"Yoruba"},
         {code:"zu-ZA", value:"Zulu"}
-    ]
+    ],
+    segmentModel: {
+        clean: null,
+        raw: null,
+        order: null,
+        next: null
+    },
+    orderElevation: 1000000000
 };
 
 export default env;

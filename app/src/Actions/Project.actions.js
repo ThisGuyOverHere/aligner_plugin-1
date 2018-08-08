@@ -3,6 +3,8 @@ import ProjectStore from "../Stores/Project.store";
 let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
 import {httpAlignJob} from "../HttpRequests/Alignment.http";
+import env from "../Constants/Env.constants";
+import {avgOrder} from "../Helpers/SegmentUtils.helper";
 
 
 let ProjectActions = {
@@ -35,7 +37,7 @@ let ProjectActions = {
     /**
      *
      * @param {Object} log A log of move action from frontend
-     * @param {String} log.type The type of segment: Source or Target
+     * @param {String} log.type The type of segment: source or target
      * @param {Number} log.from The row's order of Drag action
      * @param {Number} log.to The row's order of Drop action
      */
@@ -44,34 +46,24 @@ let ProjectActions = {
 
         let tmpJob = ProjectStore.job,
             changeData,
-            changes = [];
-
-        let fromIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.from);
-        let toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to);
-
-
-        let mockFrom = {
-            clean: null,
-            raw: null,
-            words: null,
-            order: null,
-            next: null
-
-        };
-
-        let mockToInverse = {
-            clean: null,
-            raw: null,
-            words: null,
-            order: null,
-            next: null
-
-        };
+            changes = [],
+            fromIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.from),
+            toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to),
+            mockFrom = Object.assign({}, env.segmentModel),
+            mockToInverse = Object.assign({}, env.segmentModel);
 
         const inverse = {
-            source: 'target',
-            target: 'source'
-        };
+                source: 'target',
+                target: 'source'
+            },
+            toOrder = tmpJob[log.type].getIn([toIndex, 'order']),
+            toNextOrder = tmpJob[log.type].getIn([+toIndex + 1, 'order']),
+            toInverseOrder = tmpJob[inverse[log.type]].getIn([toIndex, 'order']),
+            toNextInverseOrder = tmpJob[inverse[log.type]].getIn([+toIndex + 1, 'order']),
+            fromOrder = tmpJob[log.type].getIn([fromIndex, 'order']),
+            fromNextOrder = tmpJob[log.type].getIn([+fromIndex + 1, 'order']),
+            fromInverseOrder = tmpJob[inverse[log.type]].getIn([fromIndex, 'order']),
+            fromNextInverseOrder = tmpJob[inverse[log.type]].getIn([+fromIndex + 1, 'order']);
 
 
         /*
@@ -90,15 +82,16 @@ let ProjectActions = {
 
         changeData = tmpJob[log.type].get(toIndex).toJS();
 
-        //controllo se l'elemento in toIndex non sia vuoto, nel caso sia vuoto salto il punto 1 e 2
+        //controllo se l'elemento in toIndex non sia vuoto, nel caso sia vuoto salto il punto 1 e 2 e 3
         //lo salto perchè quando si rimpiazza un buco non bisogna spostare l'elemento in posizione toIndex (i buchi si rimpiazzano e basta)
         if (changeData.clean !== null) {
-            changeData.order = tmpJob[log.type].getIn([toIndex, 'order']) + (tmpJob[log.type].getIn([toIndex + 1, 'order']) - tmpJob[log.type].getIn([toIndex, 'order'])) / 2;
-            changeData.next = tmpJob[log.type].getIn([+toIndex + 1, 'order']);
+
+            changeData.order = avgOrder(toOrder, toNextOrder);
+            changeData.next = toNextOrder;
             changes.push({
                 type: log.type,
                 action: 'create',
-                rif_order: tmpJob[log.type].getIn([toIndex + 1, 'order']),
+                rif_order: toNextOrder,
                 data: changeData
             });
 
@@ -106,12 +99,12 @@ let ProjectActions = {
              *  2 *
              ******/
             // creo un buco in corrispondenza dell'elemento spostato
-            mockFrom.order = tmpJob[inverse[log.type]].getIn([toIndex, 'order']) + (tmpJob[inverse[log.type]].getIn([toIndex + 1, 'order']) - tmpJob[inverse[log.type]].getIn([toIndex, 'order'])) / 2;
-            mockFrom.next = tmpJob[inverse[log.type]].getIn([+toIndex + 1, 'order']);
+            mockFrom.order = avgOrder(toInverseOrder, toNextInverseOrder);
+            mockFrom.next = toNextInverseOrder;
             changes.push({
                 type: inverse[log.type],
                 action: 'create',
-                rif_order: tmpJob[inverse[log.type]].getIn([toIndex + 1, 'order']),
+                rif_order: toNextInverseOrder,
                 data: mockFrom
             });
 
@@ -121,11 +114,10 @@ let ProjectActions = {
             //cambio il next dell'elemento precedente al buco creato al punto 2
             changeData = tmpJob[inverse[log.type]].get(toIndex).toJS();
             changeData.next = mockFrom.order;
-
             changes.push({
                 type: inverse[log.type],
                 action: 'update',
-                rif_order: tmpJob[inverse[log.type]].getIn([toIndex, 'order']),
+                rif_order: toInverseOrder,
                 data: changeData
             });
         }
@@ -136,7 +128,8 @@ let ProjectActions = {
          ******/
         // sostituisco l'elemento draggato (fromIndex) con quello nella posizione toIndex
         changeData = tmpJob[log.type].get(fromIndex).toJS();
-        changeData.order = tmpJob[log.type].getIn([toIndex, 'order']);
+        changeData.order = toOrder;
+        changeData.next = tmpJob[log.type].getIn([toIndex, 'next']);
 
         //se l'elemento del punto 1 è stato creato, il punto due avrà un next diverso
         //se invece c'era un buco nel punto 1 non cambia nulla, poichè non abbiamo creato nuovi elementi successivi
@@ -146,7 +139,7 @@ let ProjectActions = {
         changes.push({
             type: log.type,
             action: 'update',
-            rif_order: tmpJob[log.type].getIn([toIndex, 'order']),
+            rif_order: toOrder,
             data: changeData
         });
 
@@ -155,26 +148,45 @@ let ProjectActions = {
          ******/
         //se l'elemento opposto al fromIndex non è vuoto creo il buco altrimenti cancello entrambi gli elementi
         // buco / buco si annulla
-        if(tmpJob[inverse[log.type]].getIn([fromIndex, 'clean'])){
-            mockToInverse.order = tmpJob[log.type].getIn([fromIndex, 'order']);
+        if (tmpJob[inverse[log.type]].getIn([fromIndex, 'clean'])) {
+            mockToInverse.order = fromOrder;
             mockToInverse.next = tmpJob[log.type].getIn([fromIndex, 'next']);
 
             changes.push({
                 type: log.type,
                 action: 'update',
-                rif_order: tmpJob[log.type].getIn([fromIndex, 'order']),
+                rif_order: fromOrder,
                 data: mockToInverse
             });
-        }else{
+        } else {
             changes.push({
                 type: log.type,
                 action: 'delete',
-                rif_order: tmpJob[log.type].getIn([fromIndex, 'order'])
+                rif_order: fromOrder
             });
             changes.push({
                 type: inverse[log.type],
                 action: 'delete',
-                rif_order: tmpJob[inverse[log.type]].getIn([fromIndex, 'order'])
+                rif_order: fromInverseOrder
+            });
+            //aggiorno il next dei precedenti
+            let prevChangeData = tmpJob[log.type].get(fromIndex - 1).toJS(),
+                inversePrevChangeData = tmpJob[inverse[log.type]].get(fromIndex - 1).toJS();
+
+            prevChangeData.next = tmpJob[log.type].getIn([fromIndex + 1, 'order']);
+            inversePrevChangeData.next = tmpJob[inverse[log.type]].getIn([fromIndex + 1, 'order']);
+            changes.push({
+                type: log.type,
+                action: 'update',
+                rif_order: tmpJob[log.type].getIn([+fromIndex - 1, 'order']),
+                data: prevChangeData
+            });
+            changes.push({
+                type: inverse[log.type],
+                action: 'update',
+                rif_order: tmpJob[inverse[log.type]].getIn([+fromIndex - 1, 'order']),
+                data: inversePrevChangeData
+
             });
         }
 
@@ -183,6 +195,70 @@ let ProjectActions = {
             changes: changes
         });
     },
+
+    /**
+     *
+     * @param {Object} log A log of position and type of action
+     * @param {Number} log.order The position where create a space
+     * @param {String} log.type The type of segment: source or target
+     */
+    createSpaceSegment: function (log) {
+        const tmpJob = ProjectStore.job,
+            index = tmpJob[log.type].findIndex(i => i.get('order') === log.order),
+            prevOrder = tmpJob[log.type].getIn([+index - 1, 'order']),
+            inverse = {
+                source: 'target',
+                target: 'source'
+            };
+        let changes = [],
+            mock = Object.assign({}, env.segmentModel);
+
+        //aggiungo il buco
+        mock.order = avgOrder(prevOrder, log.order);
+        mock.next = log.order;
+        changes.push({
+            type: log.type,
+            action: 'create',
+            rif_order: log.order,
+            data: mock
+        });
+
+        //cambio il next dell'elemento precedente al buco
+        let changeData = tmpJob[log.type].get(+index - 1).toJS();
+        changeData.next = mock.order;
+        changes.push({
+            type: log.type,
+            action: 'update',
+            rif_order: changeData.order,
+            data: changeData
+        });
+
+        //aggiungo un buco a fine lista inversa
+        let lastMock = Object.assign({}, env.segmentModel),
+            lastSegment = tmpJob[inverse[log.type]].get(-1).toJS();
+
+        lastMock.order = +lastSegment.order+env.orderElevation;
+        lastSegment.next = lastMock.order;
+        changes.push({
+            type: log.type,
+            action: 'update',
+            rif_order: lastSegment.order,
+            data: lastSegment
+        });
+        changes.push({
+            type: log.type,
+            action: 'push',
+            data: lastMock
+        });
+
+
+
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: changes
+        });
+
+    }
 };
 
 

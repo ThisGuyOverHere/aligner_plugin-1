@@ -3,6 +3,7 @@ import {ItemTypes} from '../../../../Constants/Draggable.constants';
 import {DragSource, ConnectDragPreview} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
+import ProjectActions from "../../../../Actions/Project.actions";
 
 const ItemSource = {
     beginDrag(props) {
@@ -69,6 +70,13 @@ class SegmentComponent extends Component {
 
     }
 
+    createSpaceSegment = () => {
+        ProjectActions.createSpaceSegment({
+            order: this.props.segment.order,
+            type: this.props.type
+        });
+    };
+
 
     render() {
         const {connectDragSource, isDragging, canDrag, segment} = this.props;
@@ -79,7 +87,7 @@ class SegmentComponent extends Component {
             cursorDrag = 'move'
         }
         return connectDragSource(
-            <div style={getStyles(this.props)}>
+            <div style={getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
                 <p>{segment.clean}</p>
             </div>
         );
@@ -107,11 +115,15 @@ class SegmentComponent extends Component {
 }
 
 SegmentComponent.propTypes = {
-    type: PropTypes.number.isRequired,
+    type: PropTypes.string.isRequired,
     segment: PropTypes.shape({
         order: PropTypes.number.isRequired,
-        clean: PropTypes.oneOfType([() => {return null}, PropTypes.number]).isDefined,
-        next: PropTypes.oneOfType([() => {return null}, PropTypes.number]).isDefined
+        clean: PropTypes.oneOfType([() => {
+            return null
+        }, PropTypes.number]).isDefined,
+        next: PropTypes.oneOfType([() => {
+            return null
+        }, PropTypes.number]).isDefined
     }).isRequired
 
 };

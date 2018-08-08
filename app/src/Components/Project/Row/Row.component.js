@@ -3,23 +3,22 @@ import {ItemTypes} from '../../../Constants/Draggable.constants';
 import {DropTarget} from 'react-dnd';
 import ProjectActions from "../../../Actions/Project.actions";
 import PropTypes from "prop-types";
-import HomeComponent from "../../Home/Home.component";
 
 const RowTarget = {
     canDrop(props, monitor) {
         return true
     },
     drop(props, monitor) {
-        const from = monitor.getItem();
-        const types = {
-            0: "source",
-            1: "target"
-        };
-        const log = {
-            type: types[from.type],
-            from: from.segment.order,
-            to: props.children[from.type].props.segment.order
-        };
+        const from = monitor.getItem(),
+            types = {
+                'source': 0,
+                'target': 1
+            },
+            log = {
+                type: from.type,
+                from: from.segment.order,
+                to: props.children[types[from.type]].props.segment.order
+            };
         ProjectActions.changeSegmentPosition(log);
     }
 };
@@ -66,7 +65,7 @@ class RowComponent extends Component {
         if (isOver) {
             rowClass.push('dropHover');
         }
-        if(!canDrop){
+        if (!canDrop) {
             rowClass.push('notDropStatus');
         }
         return connectDropTarget(
@@ -78,7 +77,7 @@ class RowComponent extends Component {
                     <div className="seven wide column">
                         {this.props.children[0]}
                     </div>
-                    <div className="one wide column center aligned"> </div>
+                    <div className="one wide column center aligned"></div>
                     <div className="seven wide column">
                         {this.props.children[1]}
                     </div>

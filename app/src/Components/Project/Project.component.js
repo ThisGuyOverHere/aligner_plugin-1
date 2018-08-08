@@ -78,9 +78,9 @@ class ProjectComponent extends Component {
         if (array.length > 0) {
             array.map((row, index) => {
                 values.push(<RowComponent key={index} index={index} row={row}>
-                    <SegmentComponent type={0}
+                    <SegmentComponent type="source"
                                       segment={row.source} />
-                    <SegmentComponent type={1}
+                    <SegmentComponent type="target"
                                       segment={row.target} />
                 </RowComponent>);
                 return row;
