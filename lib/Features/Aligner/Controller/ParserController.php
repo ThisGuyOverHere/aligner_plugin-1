@@ -46,19 +46,29 @@ class ParserController extends AlignerController {
                 break;
         }
 
-//        // Format alignment for frontend test purpose
-//        $alignment = array_map(function ($index, $item) {
-//            return [
-//                'source' => ['content' => $item['source']['clean']],
-//                'target' => ['content' => $item['target']['clean']],
-//                'order' => ($index + 1)* 1000000000,
-//                'next' => ($index + 2) * 1000000000
-//                ];
-//        }, array_keys($alignment), $alignment);
-//
-//        $alignment[count($alignment)-1]['next'] = null;
+        // Format alignment for frontend test purpose
+        $source = array_map(function ($index, $item) {
+            return [
+                'clean' => $item['source']['clean'],
+                'raw' => $item['source']['raw'],
+                'order' => ($index + 1)* 1000000000,
+                'next' => ($index + 2) * 1000000000
+                ];
+        }, array_keys($alignment), $alignment);
 
-        $this->response->json( $alignment );
+        $target = array_map(function ($index, $item) {
+            return [
+                'clean' => $item['target']['clean'],
+                'raw' => $item['target']['raw'],
+                'order' => ($index + 1)* 1000000000,
+                'next' => ($index + 2) * 1000000000
+            ];
+        }, array_keys($alignment), $alignment);
+
+        $source[count($source)-1]['next'] = null;
+        $target[count($target)-1]['next'] = null;
+
+        $this->response->json( ['source' => $source, 'target' => $target] );
     }
 
 
