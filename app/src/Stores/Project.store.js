@@ -33,32 +33,35 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
     storeSegments: function (segments) {
         const source = fromJS(segments.source);
         const target = fromJS(segments.target);
+        /*TODO: remove this when we remove select algorithm*/
+        this.job.source = List();
+        this.job.target = List();
         this.job.source = this.job.source.push(...source);
         this.job.target = this.job.target.push(...target);
     },
     /**
      *
-     * @param {Object[]} movements A List of rows to apply actions
-     * @param {String} movements[].action The action to application on local row
-     * @param {String} movements[].rif_order Depending on the received action takes different meanings.
-     * if rows[].action = 'create' we refer to next order row.
-     * if rows[].action = 'delete' we refer to row to delete.
-     * if rows[].action = 'update' we refer to row to update.
-     * @param {String} movements[].data The new row
-     * @param {String} type The type of segments (target or source)
+     * @param {Object[]} changes A List of rows to apply actions
+     * @param {String} changes[].action The action to application on local row
+     * @param {String} changes[].rif_order Depending on the received action takes different meanings.
+     * if changes[].action = 'create' we refer to next order row.
+     * if changes[].action = 'delete' we refer to row to delete.
+     * if changes[].action = 'update' we refer to row to update.
+     * @param {String} changes[].data The new row
+     * @param {String} changes[].type The type of segments (target or source)
      */
-    storeMovements: function (movements, type) {
-        rows.map(row => {
-            const index = this.job[type].findIndex(i => i.get('order') === row.rif_order);
-            switch (row.action) {
+    storeMovements: function (changes) {
+        changes.map(change => {
+            const index = this.job[change.type].findIndex(i => i.get('order') === change.rif_order);
+            switch (change.action) {
                 case 'delete':
-                    this.job[type] = this.job[type].delete(index);
+                    this.job[change.type] = this.job[change.type].delete(index);
                     break;
                 case 'create':
-                    this.job[type] = this.job[type].insert(index, fromJS(row.data));
+                    this.job[change.type] = this.job[change.type].insert(index, fromJS(change.data));
                     break;
                 case 'update':
-                    this.job[type] = this.job[type].set(index, fromJS(row.data));
+                    this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
                     break;
             }
         });
@@ -81,7 +84,7 @@ AppDispatcher.register(function (action) {
             });
             break;
         case ProjectConstants.CHANGE_SEGMENT_POSITION:
-            ProjectStore.storeMovements(action.movements,action.type);
+            ProjectStore.storeMovements(action.changes,action.type);
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
