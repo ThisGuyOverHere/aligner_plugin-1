@@ -17,8 +17,8 @@ const RowTarget = {
         };
         const log = {
             type: types[from.type],
-            from: from.order,
-            to: props.children[from.type].props.order
+            from: from.segment.order,
+            to: props.children[from.type].props.segment.order
         };
         ProjectActions.changeSegmentPosition(log);
     }

@@ -20,13 +20,12 @@ export default class SegmentDragLayer extends React.PureComponent {
     }
 
     render() {
-        const {type,order,value} = this.props.item;
+        const {type,segment} = this.props.item;
 
         return (
             <div style={styles}>
                 <SegmentComponent type={type}
-                                  value={value}
-                                  order={order}/>
+                                  segment={segment}/>
             </div>
         )
     }

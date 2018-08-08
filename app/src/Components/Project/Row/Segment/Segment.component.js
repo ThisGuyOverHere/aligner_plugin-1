@@ -1,15 +1,15 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../../Constants/Draggable.constants';
 import {DragSource, ConnectDragPreview} from 'react-dnd';
-import { getEmptyImage } from 'react-dnd-html5-backend';
+import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 
 const ItemSource = {
     beginDrag(props) {
         return props;
     },
-    canDrag(props,monitor){
-        return props.value;
+    canDrag(props, monitor) {
+        return props.segment.clean;
     }
 };
 
@@ -23,11 +23,11 @@ function collect(connect, monitor) {
 }
 
 function getStyles(props) {
-    const { left, top, isDragging } = props;
+    const {left, top, isDragging} = props;
     const transform = `translate3d(${left}px, ${top}px, 0)`;
 
     return {
-        position: isDragging?'absolute':'relative',
+        position: isDragging ? 'absolute' : 'relative',
         zIndex: 9999,
         transform,
         WebkitTransform: transform,
@@ -71,16 +71,16 @@ class SegmentComponent extends Component {
 
 
     render() {
-        const {connectDragSource, isDragging, canDrag, value} = this.props;
+        const {connectDragSource, isDragging, canDrag, segment} = this.props;
         let cursorDrag = 'not-allowed';
-        if(isDragging){
-            cursorDrag ='move';
-        }else if(canDrag && !isDragging){
+        if (isDragging) {
+            cursorDrag = 'move';
+        } else if (canDrag && !isDragging) {
             cursorDrag = 'move'
         }
         return connectDragSource(
             <div style={getStyles(this.props)}>
-                <p>{value}</p>
+                <p>{segment.clean}</p>
             </div>
         );
     }
@@ -90,7 +90,7 @@ class SegmentComponent extends Component {
     }
 
     componentDidMount() {
-        const { connectDragPreview } = this.props
+        const {connectDragPreview} = this.props
         if (connectDragPreview) {
             // Use empty image as a drag preview so browsers don't draw it
             // and we can draw whatever we want on the custom drag layer instead.
@@ -108,8 +108,12 @@ class SegmentComponent extends Component {
 
 SegmentComponent.propTypes = {
     type: PropTypes.number.isRequired,
-    order: PropTypes.number.isRequired,
-    value: PropTypes.string
+    segment: PropTypes.shape({
+        order: PropTypes.number.isRequired,
+        clean: PropTypes.oneOfType([() => {return null}, PropTypes.number]).isDefined,
+        next: PropTypes.oneOfType([() => {return null}, PropTypes.number]).isDefined
+    }).isRequired
+
 };
 
 export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);

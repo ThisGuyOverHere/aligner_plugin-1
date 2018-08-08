@@ -48,7 +48,16 @@ class ProjectComponent extends Component {
     }
 
 
-    setRows = (rows) => {
+    setRows = (job) => {
+        let row;
+        let rows = [];
+        job.source.map((e, index) => {
+            row = {
+                source: e,
+                target: job.target[index]
+            };
+            rows.push(row);
+        });
         this.setState({
             project: {
                 rows: rows
@@ -57,7 +66,7 @@ class ProjectComponent extends Component {
     };
 
     changeAlgorithmVersion = (e) => {
-        ProjectActions.getRows(this.props.match.params.jobID, this.props.match.params.jobPassword, e.target.value);
+        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword, e.target.value);
 
         this.setState({
             algorithm: e.target.value
@@ -70,11 +79,9 @@ class ProjectComponent extends Component {
             array.map((row, index) => {
                 values.push(<RowComponent key={index} index={index} row={row}>
                     <SegmentComponent type={0}
-                                      value={row.source.content}
-                                      order={row.order}/>
+                                      segment={row.source} />
                     <SegmentComponent type={1}
-                                      value={row.target.content}
-                                      order={row.order}/>
+                                      segment={row.target} />
                 </RowComponent>);
                 return row;
             });
@@ -85,13 +92,12 @@ class ProjectComponent extends Component {
     render() {
         let algorithmElements = [];
         env.alignAlgorithmAllVersions.map(e => {
-            const checked = (this.state.algorithm == e) ? true : false;
-            algorithmElements.push(<option value={e} selected={checked} >Algorithm V{e}</option>);
+            algorithmElements.push(<option key={e} value={e}>Algorithm V{e}</option>);
         });
         return (
             <div className="align-project">
                 <div className="ui container">
-                    <select name="algorithm" id="algorithm" onChange={this.changeAlgorithmVersion}>
+                    <select name="algorithm" id="algorithm" defaultValue={this.state.algorithm} onChange={this.changeAlgorithmVersion}>
                         {algorithmElements}
                     </select>
                 </div>
@@ -110,7 +116,7 @@ class ProjectComponent extends Component {
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
-        ProjectActions.getRows(this.props.match.params.jobID, this.props.match.params.jobPassword);
+        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
     }
 
     componentWillUnmount() {
