@@ -74,9 +74,6 @@ class RowComponent extends Component {
         if (isOver) {
             rowClass.push('dropHover');
         }
-        if (!canDrop) {
-            rowClass.push('notDropStatus');
-        }
         return connectDropTarget(
             <div className={rowClass.join(' ')}>
                 <div className="ui grid middle aligned">

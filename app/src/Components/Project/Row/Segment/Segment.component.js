@@ -23,40 +23,6 @@ function collect(connect, monitor) {
     }
 }
 
-function getStyles(props) {
-    const {left, top, isDragging, segment} = props;
-    const transform = `translate3d(${left}px, ${top}px, 0)`;
-    let background;
-    console.log(segment);
-    if(segment.clean){
-        background = {
-            background: '#ffffff',
-            boxShadow: '0px 1px 1px #CCCCCC',
-        }
-    }else{
-        background = {
-            border: '1px dashed #CBCBCB',
-        }
-    }
-    return {
-        position: isDragging ? 'absolute' : 'relative',
-        zIndex: 9999,
-        width: '100%',
-        transform,
-        WebkitTransform: transform,
-        // IE fallback: hide the real node using CSS when dragging
-        // because IE will ignore our custom "empty image" drag preview.
-        cursor: 'pointer',
-        ...background,
-        padding: '20px 10px',
-        textAlign: 'left',
-        opacity: isDragging ? 0 : 1,
-        height: isDragging ? 0 : '',
-        fontSize: 16,
-    }
-}
-
-
 class SegmentComponent extends Component {
     constructor(props) {
         super(props);
@@ -83,6 +49,38 @@ class SegmentComponent extends Component {
 
     }
 
+    getStyles = (props) => {
+        const {left, top, isDragging, segment} = props;
+        const transform = `translate3d(${left}px, ${top}px, 0)`;
+        let background;
+        if (segment.clean) {
+            background = {
+                background: '#ffffff',
+                boxShadow: '0px 1px 1px #CCCCCC',
+            }
+        } else {
+            background = {
+                border: '1px dashed #CBCBCB',
+            }
+        }
+        return {
+            position: isDragging ? 'absolute' : 'relative',
+            zIndex: 9999,
+            width: '100%',
+            transform,
+            WebkitTransform: transform,
+            // IE fallback: hide the real node using CSS when dragging
+            // because IE will ignore our custom "empty image" drag preview.
+            cursor: 'pointer',
+            ...background,
+            padding: '20px 10px',
+            textAlign: 'left',
+            opacity: isDragging ? 0 : 1,
+            height: isDragging ? 0 : '',
+            fontSize: 16,
+        }
+    };
+
     createSpaceSegment = () => {
         ProjectActions.createSpaceSegment({
             order: this.props.segment.order,
@@ -100,7 +98,7 @@ class SegmentComponent extends Component {
             cursorDrag = 'move'
         }
         return connectDragSource(
-            <div style={getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
+            <div style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
                 <p>{segment.clean}</p>
             </div>
         );
@@ -111,7 +109,7 @@ class SegmentComponent extends Component {
     }
 
     componentDidMount() {
-        const {connectDragPreview} = this.props
+        const {connectDragPreview} = this.props;
         if (connectDragPreview) {
             // Use empty image as a drag preview so browsers don't draw it
             // and we can draw whatever we want on the custom drag layer instead.
