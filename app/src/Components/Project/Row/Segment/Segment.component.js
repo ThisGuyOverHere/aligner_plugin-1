@@ -24,19 +24,32 @@ function collect(connect, monitor) {
 }
 
 function getStyles(props) {
-    const {left, top, isDragging} = props;
+    const {left, top, isDragging, segment} = props;
     const transform = `translate3d(${left}px, ${top}px, 0)`;
-
+    let background;
+    console.log(segment);
+    if(segment.clean){
+        background = {
+            background: '#ffffff',
+            boxShadow: '0px 1px 1px #CCCCCC',
+        }
+    }else{
+        background = {
+            border: '1px dashed #CBCBCB',
+        }
+    }
     return {
         position: isDragging ? 'absolute' : 'relative',
         zIndex: 9999,
+        width: '100%',
         transform,
         WebkitTransform: transform,
         // IE fallback: hide the real node using CSS when dragging
         // because IE will ignore our custom "empty image" drag preview.
         cursor: 'pointer',
-        background: '#f5f5f5',
+        ...background,
         padding: '20px 10px',
+        textAlign: 'left',
         opacity: isDragging ? 0 : 1,
         height: isDragging ? 0 : '',
         fontSize: 16,

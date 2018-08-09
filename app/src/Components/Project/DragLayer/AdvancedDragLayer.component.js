@@ -12,6 +12,10 @@ const layerStyles = {
     width: '100%',
     height: '100%',
 };
+const containerStyle = {
+    marginLeft: {value:'0px',important:true},
+    marginRight: {value:'0px',important:true}
+};
 
 function getItemStyles(props) {
     const {initialOffset, currentOffset} = props
@@ -46,12 +50,21 @@ const AdvancedDragLayer = props => {
     if (!isDragging) {
         return null
     }
+
     return (
         <div style={layerStyles}>
-            <div className="ui container">
+            <div className="ui container" ref={(el) => {
+                if (el) {
+                    el.style.setProperty('margin', '0px', 'important');
+                }
+            }}>
                 <div className="ui grid middle aligned">
-                    <div className="seven wide column">
-                        <div style={getItemStyles(props)}>{renderItem()}</div>
+                    <div className="fifteen wide column">
+                        <div className="ui grid top aligned">
+                            <div className="eight wide column">
+                                <div style={getItemStyles(props)}>{renderItem()}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

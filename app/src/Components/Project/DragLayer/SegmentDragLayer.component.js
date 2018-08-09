@@ -3,6 +3,7 @@ import SegmentComponent from '../Row/Segment/Segment.component'
 
 const styles = {
     display: 'inline-block',
+    width: '100%',
     transform: 'rotate(-7deg)',
     WebkitTransform: 'rotate(-7deg)',
 };

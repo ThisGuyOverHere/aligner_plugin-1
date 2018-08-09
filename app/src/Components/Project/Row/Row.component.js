@@ -6,7 +6,16 @@ import PropTypes from "prop-types";
 
 const RowTarget = {
     canDrop(props, monitor) {
-        return true
+        const from = monitor.getItem(),
+        types = {
+            'source': 0,
+            'target': 1
+        };
+
+        if(from.segment.order !== props.children[types[from.type]].props.segment.order){
+            return true
+        }
+        return false
     },
     drop(props, monitor) {
         const from = monitor.getItem(),
@@ -74,13 +83,17 @@ class RowComponent extends Component {
                     <div className="one wide column center aligned">
                         {this.props.index}
                     </div>
-                    <div className="seven wide column">
-                        {this.props.children[0]}
+                    <div className="fifteen wide column center aligned">
+                        <div className="ui grid top aligned">
+                            <div className="eight wide column">
+                                {this.props.children[0]}
+                            </div>
+                            <div className="eight wide column">
+                                {this.props.children[1]}
+                            </div>
+                        </div>
                     </div>
-                    <div className="one wide column center aligned"></div>
-                    <div className="seven wide column">
-                        {this.props.children[1]}
-                    </div>
+
                 </div>
             </div>
         );
