@@ -14,6 +14,7 @@ use CatUtils;
 use Exception;
 use Features\Aligner\Model\Files_FileDao;
 
+
 class ParserController extends AlignerController {
 
 
@@ -21,6 +22,24 @@ class ParserController extends AlignerController {
      * @throws Exception
      */
     public function jobParser() {
+
+        $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+        $engineRecord->extra_parameters['client_secret'] = '';
+        $engineRecord->type = 'MT';
+
+        $engine = new \Engines_GoogleTranslate($engineRecord);
+
+        $res = $engine->get([
+            'source' => 'it',
+            'target' => 'en',
+            'segment' => 'Questo è una prova di traduzione con Google Translate'
+        ]);
+
+        $this->response->json( ['res' => $res] );
+        return;
+
+
+
         $id_job = $this->params['id_job'];
 
         $source_file = Files_FileDao::getByJobId($id_job, "source")[0];
