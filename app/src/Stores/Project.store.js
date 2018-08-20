@@ -72,7 +72,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             }
         });
 
-        //Todo: remove this test
+       /* //Todo: remove this test
         const arrayS = this.job.source.toJS();
         console.log('#### SOURCE #####');
         for(let x= arrayS.length -5; x<= arrayS.length; x++){
@@ -82,7 +82,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         console.log('#### TARGET #####');
         for(let x= arrayT.length -5; x<= arrayT.length; x++){
             console.log(arrayt[x].order+'       '+arrayt[x].next);
-        }
+        }*/
     },
 
 });

@@ -3,14 +3,6 @@ import {DragLayer, XYCoord} from 'react-dnd'
 import {ItemTypes} from '../../../Constants/Draggable.constants';
 import SegmentDragLayer from './SegmentDragLayer.component';
 
-
-const layerStylesContainer = {
-    position: 'relative',
-    padding: '1rem',
-    width: '15.75%',
-    display: 'inline-block'
-};
-
 const layerStyles = {
     position: 'fixed',
     pointerEvents: 'none',
@@ -19,6 +11,10 @@ const layerStyles = {
     top: 0,
     width: '100%',
     height: '100%',
+};
+const containerStyle = {
+    marginLeft: {value:'0px',important:true},
+    marginRight: {value:'0px',important:true}
 };
 
 function getItemStyles(props) {
@@ -54,10 +50,23 @@ const AdvancedDragLayer = props => {
     if (!isDragging) {
         return null
     }
+
     return (
-        <div style={layerStylesContainer}>
-            <div style={layerStyles}>
-                <div style={getItemStyles(props)}>{renderItem()}</div>
+        <div style={layerStyles}>
+            <div className="ui container" ref={(el) => {
+                if (el) {
+                    el.style.setProperty('margin', '0px', 'important');
+                }
+            }}>
+                <div className="ui grid middle aligned">
+                    <div className="fifteen wide column">
+                        <div className="ui grid top aligned">
+                            <div className="eight wide column">
+                                <div style={getItemStyles(props)}>{renderItem()}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )
