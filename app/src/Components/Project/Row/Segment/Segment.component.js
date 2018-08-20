@@ -65,19 +65,12 @@ class SegmentComponent extends Component {
         }
         return {
             position: isDragging ? 'absolute' : 'relative',
-            zIndex: 9999,
-            width: '100%',
             transform,
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
             // because IE will ignore our custom "empty image" drag preview.
-            cursor: 'pointer',
+            cursor: isDragging ? 'grabbing' : 'grab',
             ...background,
-            padding: '20px 10px',
-            textAlign: 'left',
-            opacity: isDragging ? 0 : 1,
-            height: isDragging ? 0 : '',
-            fontSize: 16,
         }
     };
 
@@ -98,7 +91,7 @@ class SegmentComponent extends Component {
             cursorDrag = 'move'
         }
         return connectDragSource(
-            <div style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
+            <div className="segmentBox" style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
                 <p>{segment.clean}</p>
             </div>
         );

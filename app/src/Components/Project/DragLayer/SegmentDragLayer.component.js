@@ -21,12 +21,12 @@ export default class SegmentDragLayer extends React.PureComponent {
         return {
             display: 'inline-block',
             transition: 'transform .5s',
+            cursor: 'grabbing',
             width: '100%',
             ...transform
         }
     };
     animate = () => {
-        console.log('animo');
         this.setState({
             animate: true
         })
@@ -44,7 +44,6 @@ export default class SegmentDragLayer extends React.PureComponent {
     }
 
     componentDidMount() {
-        console.log('monto');
         setTimeout(this.animate,10);
     }
 }
