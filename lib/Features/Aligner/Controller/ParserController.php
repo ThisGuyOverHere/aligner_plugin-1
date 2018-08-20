@@ -12,7 +12,9 @@ include_once \INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use CatUtils;
 use Exception;
+use Features\Aligner;
 use Features\Aligner\Model\Files_FileDao;
+
 
 class ParserController extends AlignerController {
 
@@ -21,6 +23,26 @@ class ParserController extends AlignerController {
      * @throws Exception
      */
     public function jobParser() {
+
+        $config = Aligner::getConfig();
+
+        $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+        $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
+        $engineRecord->type = 'MT';
+
+        $engine = new \Engines_GoogleTranslate($engineRecord);
+
+        $res = $engine->get([
+            'source' => 'it',
+            'target' => 'en',
+            'segment' => 'Questo è una prova di traduzione con Google Translate'
+        ]);
+
+        $this->response->json( ['res' => $res] );
+        return;
+
+
+
         $id_job = $this->params['id_job'];
 
         $source_file = Files_FileDao::getByJobId($id_job, "source")[0];
