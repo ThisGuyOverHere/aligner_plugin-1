@@ -36,7 +36,7 @@ export default class SegmentDragLayer extends React.PureComponent {
         const {type,segment} = this.props.item;
 
         return (
-            <div style={this.getStyles()}>
+            <div className="dragSegmentContainer" style={this.getStyles()}>
                 <SegmentComponent type={type}
                                   segment={segment}/>
             </div>

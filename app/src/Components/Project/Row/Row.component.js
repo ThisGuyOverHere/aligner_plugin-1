@@ -7,12 +7,12 @@ import PropTypes from "prop-types";
 const RowTarget = {
     canDrop(props, monitor) {
         const from = monitor.getItem(),
-        types = {
-            'source': 0,
-            'target': 1
-        };
+            types = {
+                'source': 0,
+                'target': 1
+            };
 
-        if(from.segment.order !== props.children[types[from.type]].props.segment.order){
+        if (from.segment.order !== props.children[types[from.type]].props.segment.order) {
             return true
         }
         return false
@@ -36,10 +36,10 @@ function collect(connect, monitor) {
     return {
         connectDropTarget: connect.dropTarget(),
         isOver: monitor.isOver(),
-        canDrop: monitor.canDrop()
+        canDrop: monitor.canDrop(),
+        dragEl: monitor.getItem()
     }
 }
-
 
 class RowComponent extends Component {
     constructor(props) {
@@ -69,10 +69,14 @@ class RowComponent extends Component {
 
     render() {
         let rowClass = ['project-row'];
-
-        const {connectDropTarget, isOver, canDrop} = this.props;
-        if (isOver) {
-            rowClass.push('dropHover');
+        let columnsClass = {
+            source: ['eight','wide','column'],
+            target: ['eight','wide','column'],
+        };
+        const {connectDropTarget, isOver, canDrop, dragEl} = this.props;
+        const dragElType  = dragEl ? dragEl.type : undefined;
+        if(isOver && dragElType){
+            columnsClass[dragElType].push('dropColumn');
         }
         return connectDropTarget(
             <div className={rowClass.join(' ')}>
@@ -82,10 +86,10 @@ class RowComponent extends Component {
                     </div>
                     <div className="fifteen wide column center aligned">
                         <div className="ui grid top aligned">
-                            <div className="eight wide column">
+                            <div className={columnsClass.source.join(' ')}>
                                 {this.props.children[0]}
                             </div>
-                            <div className="eight wide column">
+                            <div className={columnsClass.target.join(' ')}>
                                 {this.props.children[1]}
                             </div>
                         </div>

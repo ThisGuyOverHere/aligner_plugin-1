@@ -1,7 +1,21 @@
-.segmentBox{
+.segmentBox {
   padding: 20px 10px;
   font-size: 16px;
   text-align: left;
   z-index: 9999;
   width: 100%;
+}
+
+/*.dragSegmentContainer {
+  .segmentBox {
+    !*box-shadow: 0 1px 1px #09beec3b !important;*!
+    box-shadow: 0 0 3px 1px #09beec3b !important;
+  }
+}*/
+
+.dropColumn {
+  .segmentBox {
+    /*box-shadow: 0 1px 1px #09beec3b !important;*/
+    box-shadow: 0 0 3px 1px #09beec3b !important;
+  }
 }

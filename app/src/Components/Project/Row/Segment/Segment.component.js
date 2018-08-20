@@ -7,6 +7,7 @@ import ProjectActions from "../../../../Actions/Project.actions";
 
 const ItemSource = {
     beginDrag(props) {
+
         return props;
     },
     canDrag(props, monitor) {
@@ -53,18 +54,18 @@ class SegmentComponent extends Component {
         const {left, top, isDragging, segment} = props;
         const transform = `translate3d(${left}px, ${top}px, 0)`;
         let background;
-        if (segment.clean) {
+        if (!segment.clean || isDragging) {
+            background = {
+                border: '1px dashed #CBCBCB',
+            }
+        } else {
             background = {
                 background: '#ffffff',
                 boxShadow: '0px 1px 1px #CCCCCC',
             }
-        } else {
-            background = {
-                border: '1px dashed #CBCBCB',
-            }
         }
+
         return {
-            position: isDragging ? 'absolute' : 'relative',
             transform,
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
@@ -92,7 +93,7 @@ class SegmentComponent extends Component {
         }
         return connectDragSource(
             <div className="segmentBox" style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
-                <p>{segment.clean}</p>
+                <p>{isDragging ? '' : segment.clean}</p>
             </div>
         );
     }

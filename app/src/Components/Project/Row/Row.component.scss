@@ -1,10 +1,8 @@
 .project-row{
   margin: 24px auto;
   &:hover{
-    background: #F9f9f9;
   }
   &.dropHover{
-    
     &.notDropStatus{
       background: #9e280e;
       cursor: not-allowed;
