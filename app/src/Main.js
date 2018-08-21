@@ -17,7 +17,7 @@ class App extends Component {
             <HashRouter
                 basename="/">
                 <div className="App">
-                    {/*<HeaderComponent/>*/}
+                    <HeaderComponent/>
                     <Switch>
                         <Route exact path="/" component={() => <HomeComponent/>} />
                         <Route path="/project/:jobID/:password" component={ProjectComponent}/>

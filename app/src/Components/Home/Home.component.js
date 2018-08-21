@@ -114,51 +114,58 @@ class HomeComponent extends Component {
         }
 
         return (
-            <div className="ui container">
-                <div id="uploader" className="ui grid">
-                    <div className="row">
-                        <div className="column">
-                            <input type="text" value={this.state.pName} onChange={this.ProjectNameChange}/>
-                        </div>
+            <div className="homeComponent">
+                <div className="visor">
+                    <div className="visor-content">
+
                     </div>
-                    <div className="row">
-                        <div className="four wide column">
-                            <Dropdown fluid search selection
-                                      options={this.state.languages}
-                                      defaultValue={this.state.sourceLang}
-                                      onChange={this.onSourceLanguageChange}
-                            />
-                        </div>
-                        <div className="eight wide column">
-                            <div className="dropzone">
-                                <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
-                                    <p>Add source file (or drop it here).</p>
-                                </Dropzone>
+                </div>
+                <div className="ui container">
+                    <div id="uploader" className="ui grid">
+                        <div className="row">
+                            <div className="column">
+                                <input className="form-control" type="text" value={this.state.pName} onChange={this.ProjectNameChange}/>
                             </div>
                         </div>
-                    </div>
-                    <div className="row">
-                        <div className="four wide column">
-                            <Dropdown fluid search selection
-                                      options={this.state.languages}
-                                      defaultValue={this.state.targetLang}
-                                      onChange={this.onTargetLanguageChange}
-                            />
-                        </div>
-                        <div className="eight wide column">
-                            <div className="dropzone">
-                                <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
-                                    <p>Add target file (or drop it here).</p>
-                                </Dropzone>
+                        <div className="row">
+                            <div className="four wide column">
+                                <Dropdown fluid search selection
+                                          options={this.state.languages}
+                                          defaultValue={this.state.sourceLang}
+                                          onChange={this.onSourceLanguageChange}
+                                />
+                            </div>
+                            <div className="eight wide column">
+                                <div className="dropzone">
+                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
+                                        <p>Add source file (or drop it here).</p>
+                                    </Dropzone>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="row">
-                        <div className="sixteen wide column">
-                            <button className="ui button" onClick={this.startAlignment}
-                                    disabled={!this.state.fileNameSource || !this.state.fileNameTarget}
-                            >Start alignment
-                            </button>
+                        <div className="row">
+                            <div className="four wide column">
+                                <Dropdown fluid search selection
+                                          options={this.state.languages}
+                                          defaultValue={this.state.targetLang}
+                                          onChange={this.onTargetLanguageChange}
+                                />
+                            </div>
+                            <div className="eight wide column">
+                                <div className="dropzone">
+                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
+                                        <p>Add target file (or drop it here).</p>
+                                    </Dropzone>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="sixteen wide column">
+                                <button className="ui button" onClick={this.startAlignment}
+                                        disabled={!this.state.fileNameSource || !this.state.fileNameTarget}
+                                >Start alignment
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
