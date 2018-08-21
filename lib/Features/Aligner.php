@@ -32,28 +32,10 @@ class Aligner extends BaseFeature
     }
 
     public static function homeRoute( $request, $response, $service, $app ) {
-        self::setOrGetGuid(); //setcookie for upload
         $controller    = new HomeController( $request, $response, $service, $app );
         $template_path = dirname( __FILE__ ) . '/Aligner/View/Html/index.html';
         $controller->setView( $template_path );
         $controller->respond( 'composeView' );
-    }
-
-    public static function setOrGetGuid() {
-        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-        if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            $guid = \Utils::create_guid();
-            setcookie( "upload_session", $guid, time() + 86400, '/' );
-        } else {
-            $guid = $_COOKIE[ 'upload_session' ];
-        }
-
-        $intDir = \INIT::$UPLOAD_REPOSITORY . '/' . $guid . '/';
-        if ( !is_dir( $intDir ) ) {
-            mkdir( $intDir, 0775, true );
-        }
-        return $guid;
-
     }
 
 
