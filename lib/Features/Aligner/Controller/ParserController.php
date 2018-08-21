@@ -47,7 +47,13 @@ class ParserController extends AlignerController {
             case 'v2':
                 $alignment = $this->_alignSegmentsV2($source_segments, $target_segments, $source_lang, $target_lang);
                 break;
+            case 'v3':
+                $alignment = $this->_alignSegmentsV3($source_segments, $target_segments, $source_lang, $target_lang);
+                break;
         }
+
+        $this->response->json( ['res' => $alignment] );
+        return;
 
         // Format alignment for frontend test purpose
         $source = array_map(function ($index, $item) {
@@ -574,6 +580,276 @@ class ParserController extends AlignerController {
 
         return $alignment;
     }
+
+    /**
+     *  Alignment based on editing distance
+     *
+     * @param $source
+     * @param $target
+     * @return array
+     */
+    protected function _alignSegmentsV3($source, $target, $source_lang, $target_lang) {
+
+        function long_levenshtein($str1, $str2, $costIns = 1.0, $costRep = 1.0, $costDel = 1.0) {
+
+            $str1Array = str_split($str1, 1);
+            $str2Array = str_split($str2, 1);
+
+            $matrix = [];
+
+            $str1Length = count($str1Array);
+            $str2Length = count($str2Array);
+
+            $row = [];
+            $row[0] = 0.0;
+            for ($j = 1; $j < $str2Length + 1; $j++) {
+                $row[$j] = $j * $costIns;
+            }
+
+            $matrix[0] = $row;
+
+            for ($i = 0; $i < $str1Length; $i++) {
+                $row = [];
+                $row[0] = ($i + 1) * $costDel;
+
+                for ($j = 0; $j < $str2Length; $j++) {
+                    $row[$j + 1] = min(
+                        $matrix[$i][$j + 1] + $costDel,
+                        $row[$j] + $costIns,
+                        $matrix[$i][$j] + ($str1Array[$i] === $str2Array[$j] ? 0.0 : $costRep)
+                    );
+                }
+
+                $matrix[$i + 1] = $row;
+            }
+
+            return $matrix[$str1Length][$str2Length];
+        }
+
+        function eval_sents($source, $target, $nbest) {
+            $scoredict = [];
+
+            foreach ($source as $si => $ss) {
+                $scores = [];
+
+                foreach ($target as $ti => $ts) {
+
+                    // Calculate score here, using Levenshtein distance
+                    // We need a value higher for better alignment
+                    $score = 1000 - long_levenshtein($ss['clean'], $ts['clean']);
+                    $scores[] = [$ti, $score];
+                }
+
+                // Sort scores ascending based on value
+                usort($scores, function ($a, $b) {
+                    return $a[1] < $b[1];
+                });
+
+                $scores = array_slice($scores, 0, $nbest);  // Keep only top alternatives
+
+                $scoredict[$si] = $scores;
+            }
+
+            return $scoredict;
+        }
+
+        // apply heuristics to align all sentences that remain unaligned after finding best path of 1-to-1 alignments
+        // heuristics include bleu-based 1-to-n alignment and length-based alignment
+        function gapfiller($source, $target, $sourcegap, $targetgap, $pregap, $postgap) {
+            return 0;
+        }
+
+        // find unaligned sentences and create work packets for gapfiller()
+        // gapfiller() takes two sentence pairs and all unaligned sentences in between as arguments; gapfinder() extracts these.
+        function gapfinder($source, $target, $paths) {
+
+            $alignment = [];
+
+            // find gaps: lastpair is considered pre-gap, pair is post-gap
+            $lastpair = [[], []];
+
+            // if alignment is empty, gap will start at 0
+            $src = -1;
+            $trg = -1;
+
+            foreach ($paths as $pair) {
+                $src = $pair[0];
+                $trg = $pair[1];
+
+                $old_src = $lastpair[0];
+                $old_trg = $lastpair[1];
+
+                #in first iteration, gap will start at 0
+                if (empty($old_src)) {
+                    $old_src = [-1];
+                }
+                if (empty($old_trg)) {
+                    $old_trg = [-1];
+                }
+
+                // identify gap sizes
+                $source_gap = [];
+                $target_gap = [];
+
+                if ($old_src[count($old_src) - 1] + 1 < $src - 1) {
+                    $source_gap = range($old_src[count($old_src) - 1] + 1, $src - 1);
+                }
+
+                if ($old_trg[count($old_trg) - 1] + 1 < $trg - 1) {
+                    $target_gap = range($old_trg[count($old_trg) - 1] + 1, $trg - 1);
+                }
+
+                if (!empty($source_gap) || !empty($target_gap)) {
+                    $lastpair = gapfiller($source, $target, $source_gap, $target_gap, $lastpair, [[$src], [$trg]]);
+                } else {
+                    $alignment[] = $lastpair;
+                    $lastpair = [[$src], [$trg]];
+                }
+            }
+
+            // search for gap after last alignment pair
+            $source_gap = [];
+            $target_gap = [];
+
+            if ($src + 1 < count($source) - 1) {
+                $source_gap = range($src + 1, count($source) - 1);
+            }
+
+            if ($trg + 1 < count($target) - 1) {
+                $target_gap = range($trg + 1, count($target) - 1);
+            }
+
+
+            if (!empty($source_gap) || !empty($target_gap)) {
+                $lastpair = gapfiller($source, $target, $source_gap, $target_gap, $lastpair, [[], []]);
+            }
+
+            $alignment[] = $lastpair;
+
+            return $alignment;
+        }
+
+        // follow the backpointers in score matrix to extract best path of 1-to-1 alignments
+        function extract_best_path($pointers) {
+
+            $i = count($pointers) - 1;
+            $j = count($pointers[0]) - 1;
+
+            $best_path = [];
+
+            while ($i >= 0 && $j >= 0) {
+                $pointer = $pointers[$i][$j];
+
+                if ($pointer == '^') {
+                    $i -= 1;
+                } else if ($pointer == '<') {
+                    $j -= 1;
+                } else if ($pointer == 'match') {
+                    $best_path[] = [$i, $j];
+                    $i -= 1;
+                    $j -= 1;
+                }
+            }
+
+            return array_reverse($best_path);
+        }
+
+        // dynamic programming search for best path of alignments (maximal score)
+        function pathfinder($source, $target, $scoredict) {
+
+             // add an extra row/column to the matrix and start filling it from 1,1 (to avoid exceptions for first row/column)
+             $matrix = [];
+             for ($row = 0; $row <= count($source); $row++) {
+                 for ($column = 0; $column <= count($target); $column++) {
+                     $matrix[$row][$column] = 0;
+                 }
+             }
+
+            $pointers = [];
+            for ($row = 0; $row < count($source); $row++) {
+                for ($column = 0; $column < count($target); $column++) {
+                    $pointers[$row][$column] = '';
+                }
+            }
+
+            for ($i = 0; $i < count($source); $i++) {
+                $alignments = $scoredict[$i];
+
+                for ($j = 0; $j < count($target); $j++) {
+                    $best_score = $matrix[$i][$j+1];
+                    $best_pointer = '^';
+
+                    $score = $matrix[$i+1][$j];
+
+                    if ($score > $best_score) {
+                        $best_score = $score;
+                        $best_pointer = '<';
+                    }
+
+                    $alignment = array_filter($alignments, function ($item) use ($j) {
+                       return $item[0] == $j;
+                    });
+
+                    if ($alignment) {
+                        $score = $alignment[0][1] + $matrix[$i][$j];
+
+                        if ($score > $best_score) {
+                            $best_score = $score;
+                            $best_pointer = 'match';
+                        }
+                    }
+
+                    $matrix[$i+1][$j+1] = $best_score;
+                    $pointers[$i][$j] = $best_pointer;
+                }
+            }
+
+            return extract_best_path($pointers);
+        }
+
+        function translateSegment($segment, $source_lang, $target_lang) {
+            $config = Aligner::getConfig();
+
+            $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+            $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
+            $engineRecord->type = 'MT';
+
+            $engine = new \Engines_GoogleTranslate($engineRecord);
+
+            $res = $engine->get([
+                'source' => $source_lang,
+                'target' => $target_lang,
+                'segment' => $segment
+            ]);
+
+            return $res['translation'];
+        }
+
+        // Pre-translate segments from source_lang to target_lang
+        function translateSegments($segments, $source_lang, $target_lang) {
+            $result = [];
+
+            foreach ($segments as $segment) {
+                $segment['clean'] = translateSegment($segment['clean'], $source_lang, $target_lang);
+                $result[] = $segment;
+            }
+
+            return $result;
+        }
+
+
+        // Variant on Bleu Align algorithm with Levenshtein distance
+        $source_translated = translateSegments($source, $source_lang, $target_lang);
+
+        $nbest = 5;
+
+        $scoredict = eval_sents($source_translated, $target, $nbest);
+        $paths = pathfinder($source_translated, $target, $scoredict);
+
+        $alignment = gapfinder($source_translated, $target, $paths);
+
+        return $alignment;
+   }
 
     /**
      * Temp version, remove if unused. It takes care of Tags
