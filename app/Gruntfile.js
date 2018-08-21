@@ -21,8 +21,11 @@ module.exports = function(grunt) {
                 }
             },
             css: {
-                files: 'src/**/*.scss',
-                tasks: ['sass'],
+                files: [
+                    'src/**/*.scss',
+                    'assets/**/*.scss'
+                ],
+                tasks: ['sass','autoprefixer'],
                 options: {
                     livereload : true
                 }
@@ -45,6 +48,16 @@ module.exports = function(grunt) {
                 dest:  '../static/build/js/main.js'
             },
         },
+        autoprefixer:{
+            options: {
+                browsers: ['last 2 versions']
+            },
+            dist:{
+                files:{
+                    '../static/build/css/style.css':'../static/build/css/style.css'
+                }
+            }
+        },
         sass: {
             options: {
                 sourceMap: false,
@@ -61,7 +74,7 @@ module.exports = function(grunt) {
     });
 
     // Define your tasks here
-    grunt.registerTask('default', ['bundle:js','sass']);
+    grunt.registerTask('default', ['bundle:js','sass','autoprefixer']);
 
     grunt.registerTask('bundle:js', [
         'browserify:components'
@@ -69,6 +82,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-autoprefixer');
     grunt.loadNpmTasks('grunt-sass');
 
 };
