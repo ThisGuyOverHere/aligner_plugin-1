@@ -124,7 +124,10 @@ class HomeComponent extends Component {
                     <div id="uploader" className="ui grid">
                         <div className="row">
                             <div className="column">
-                                <input className="form-control" type="text" value={this.state.pName} onChange={this.ProjectNameChange}/>
+                                <label className="ui header" htmlFor="pname">Alignment project name (optional)</label>
+                                <div className="ui input">
+                                    <input className="form-control" name="pname" type="text" value={this.state.pName} onChange={this.ProjectNameChange}/>
+                                </div>
                             </div>
                         </div>
                         <div className="row">
