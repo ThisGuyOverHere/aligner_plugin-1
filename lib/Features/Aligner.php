@@ -47,6 +47,11 @@ class Aligner extends BaseFeature
         } else {
             $guid = $_COOKIE[ 'upload_session' ];
         }
+
+        $intDir = \INIT::$UPLOAD_REPOSITORY . '/' . $guid . '/';
+        if ( !is_dir( $intDir ) ) {
+            mkdir( $intDir, 0775, true );
+        }
         return $guid;
 
     }
