@@ -25,6 +25,20 @@ function collect(connect, monitor) {
 }
 
 class SegmentComponent extends Component {
+    static propTypes = {
+        type: PropTypes.string.isRequired,
+        segment: PropTypes.shape({
+            order: PropTypes.number.isRequired,
+            clean: PropTypes.oneOfType([() => {
+                return null
+            }, PropTypes.number]).isDefined,
+            next: PropTypes.oneOfType([() => {
+                return null
+            }, PropTypes.number]).isDefined
+        }).isRequired
+
+    }
+
     constructor(props) {
         super(props);
 
@@ -83,7 +97,7 @@ class SegmentComponent extends Component {
     };
 
 
-    render() {
+    render = () => {
         const {connectDragSource, isDragging, canDrag, segment} = this.props;
         let cursorDrag = 'not-allowed';
         if (isDragging) {
@@ -98,8 +112,8 @@ class SegmentComponent extends Component {
         );
     }
 
-    componentDidCatch() {
-
+    componentDidCatch = (error) => {
+        console.error(error)
     }
 
     componentDidMount() {
@@ -118,19 +132,5 @@ class SegmentComponent extends Component {
     componentWillUnmount() {
     }
 }
-
-SegmentComponent.propTypes = {
-    type: PropTypes.string.isRequired,
-    segment: PropTypes.shape({
-        order: PropTypes.number.isRequired,
-        clean: PropTypes.oneOfType([() => {
-            return null
-        }, PropTypes.number]).isDefined,
-        next: PropTypes.oneOfType([() => {
-            return null
-        }, PropTypes.number]).isDefined
-    }).isRequired
-
-};
 
 export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);
