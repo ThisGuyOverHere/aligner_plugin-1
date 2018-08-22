@@ -59,6 +59,12 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             switch (change.action) {
                 case 'delete':
                     this.job[change.type] = this.job[change.type].delete(index);
+
+                    //todo: fix for change prev, delete this when algorithm are in backend
+                    let prev = this.job[change.type].get(index-1);
+                    prev = prev.setIn(['next'],this.job[change.type].getIn([index,'order']));
+                    this.job[change.type] = this.job[change.type].set(index-1, prev);
+
                     break;
                 case 'create':
                     this.job[change.type] = this.job[change.type].insert(index, fromJS(change.data));
@@ -72,16 +78,16 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             }
         });
 
-       /* //Todo: remove this test
+        /*//Todo: remove this test
         const arrayS = this.job.source.toJS();
         console.log('#### SOURCE #####');
-        for(let x= arrayS.length -5; x<= arrayS.length; x++){
+        for(let x= arrayS.length -5; x< arrayS.length; x++){
             console.log(arrayS[x].order+'       '+arrayS[x].next);
         }
-        const arrayt = this.job.target.toJS();
+        const arrayT = this.job.target.toJS();
         console.log('#### TARGET #####');
-        for(let x= arrayT.length -5; x<= arrayT.length; x++){
-            console.log(arrayt[x].order+'       '+arrayt[x].next);
+        for(let x= arrayT.length -5; x < arrayT.length; x++){
+            console.log(arrayT[x].order+'       '+arrayT[x].next);
         }*/
     },
 
