@@ -1,8 +1,13 @@
+@import "variables";
+
 .visor{
   width: 100%;
-  height: 200px;
-  background: #2185d0;
-  .visor-content{
-
-  }
+  height: 240px;
+  background: $mainBlue;
+  position: relative;
+  top: -40px;
+    .visor-content{
+      position: relative;
+      top: 88px;
+    }
 }
