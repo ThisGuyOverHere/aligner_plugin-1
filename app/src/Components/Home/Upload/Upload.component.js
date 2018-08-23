@@ -27,15 +27,15 @@ class UploadComponent extends Component {
             pName: '',
             fileNameSource: null,
             uploadSource: {
-                status: 0,
+                progress: 0,
                 start: false,
-                error: false,
+                status: 'start'
             },
             fileNameTarget: null,
             uploadTarget: {
-                status: 0,
+                progress: 0,
                 start: false,
-                error: false,
+                status: 'start'
             },
             sourceLang: 'en-US',
             targetLang: 'it-IT',
@@ -82,7 +82,8 @@ class UploadComponent extends Component {
         }, (error) => {
             this.setState({
                 uploadSource: {
-                    error: true
+                    progress: 0,
+                    status: 'error'
                 }
             });
         });
@@ -113,8 +114,8 @@ class UploadComponent extends Component {
         }, (error) => {
             this.setState({
                 uploadTarget: {
-                    //error: true
-                    status: 100
+                    progress: 0,
+                    status: 'error'
                 }
             });
         });
@@ -152,28 +153,89 @@ class UploadComponent extends Component {
             source: ['dropzone'],
             target: ['dropzone']
         };
-        const sourceError = this.state.uploadSource.error;
-        const targetError = this.state.uploadTarget.error;
 
         if (this.state.job) {
             return <Redirect push to={'/project/' + this.state.job.id + '/' + this.state.job.password}/>;
         }
 
         //check if error props for source is true, and set error class.
-        if (this.state.uploadSource.error) {
+        if (this.state.uploadSource.status === 'error') {
             classes.source.push('error');
         }
         //check if error props for target is true, and set error class.
-        if (this.state.uploadTarget.error) {
+        if (this.state.uploadTarget.status === 'error') {
             classes.target.push('error');
         }
 
-        //check if source upload is completed
-        if (this.state.uploadTarget.status === 100) {
-            classes.target.push('completed');
+        // check for source upload completed
+        if(this.state.uploadSource.status === 'finish'){
+            classes.source.push('finish');
         }
-        if (this.state.uploadSource.status === 100) {
-            classes.source.push('completed');
+        // check for target upload completed
+        if(this.state.uploadTarget.status === 'finish'){
+            classes.target.push('finish');
+        }
+
+        // upload source status
+        let htmlUploadSource;
+        switch (this.state.uploadSource.status) {
+            case 'start':
+                htmlUploadSource =  <p><span>+ Add Source file</span> (or drop it here).</p>;
+                break;
+
+            case 'progress':
+                htmlUploadSource = <div></div>;
+                break;
+
+            case 'finish':
+                htmlUploadSource =
+                    <p>
+                        <i id="error-icon" aria-hidden='true' className='window close outline icon'/> NomeFileSource.txt
+                        <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
+                    </p>;
+                break;
+
+            case 'error':
+                htmlUploadSource =
+                    <p>
+                        <i id="error-icon" aria-hidden='true'
+                           className='window close outline icon'/>Error during file upload : <span> Server problem occurred. </span>
+                        <i id="delete-icon" aria-hidden='true'
+                           className='trash alternate outline icon'/>
+                        <i id="triangle" aria-hidden='true' className='triangle right icon'/>
+                    </p>;
+                break;
+        }
+
+        // upload target status
+        let htmlUploadTarget;
+        switch (this.state.uploadTarget.status) {
+            case 'start':
+                htmlUploadTarget =  <p><span>+ Add Target file</span> (or drop it here).</p>;
+                break;
+
+            case 'progress':
+                htmlUploadTarget = <div></div>;
+                break;
+
+            case 'finish':
+                htmlUploadTarget =
+                    <p>
+                        <i id="error-icon" aria-hidden='true' className='window close outline icon'/> NomeFileTarget.txt
+                        <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
+                    </p>;
+                break;
+
+            case 'error':
+                htmlUploadTarget =
+                    <p>
+                        <i id="error-icon" aria-hidden='true'
+                           className='window close outline icon'/>Error during file upload : <span> Server problem occurred. </span>
+                        <i id="delete-icon" aria-hidden='true'
+                           className='trash alternate outline icon'/>
+                        <i id="triangle" aria-hidden='true' className='triangle right icon'/>
+                    </p>;
+                break;
         }
 
         return (
@@ -210,21 +272,12 @@ class UploadComponent extends Component {
                         <div className="ten wide column">
                             <div className={classes.source.join(' ')}>
                                 <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
-                                    {sourceError ? (
-                                        <p>
-                                            <i id="error-icon" aria-hidden='true'
-                                               className='window close outline icon'/>Error during file upload : <span> Server problem occurred. </span>
-                                            <i id="delete-icon" aria-hidden='true'
-                                               className='trash alternate outline icon'/>
-                                            <i id="triangle" aria-hidden='true' className='triangle right icon'/>
-                                        </p>
-                                    ) : (
-                                        <p><span>+ Add Source file</span> (or drop it here).</p>
-                                    )}
+                                    { htmlUploadSource }
                                 </Dropzone>
                             </div>
                         </div>
                     </div>
+
                     <div className="row">
                         <div className="six wide column">
                             <Dropdown fluid search selection
@@ -236,26 +289,7 @@ class UploadComponent extends Component {
                         <div className="ten wide column">
                             <div className={classes.target.join(' ')}>
                                 <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
-                                    {(targetError) ? (
-                                        <p>
-                                            <i id="error-icon" aria-hidden='true'
-                                               className='window close outline icon'/>Error during file upload : <span> Server problem occurred. </span>
-                                            <i id="delete-icon" aria-hidden='true'
-                                               className='trash alternate outline icon'/>
-                                            <i id="triangle" aria-hidden='true' className='triangle right icon'/>
-                                        </p>
-                                    ) : (
-                                        <p><span>+ Add Target file</span> (or drop it here).</p>
-                                    )}
-
-                                    {this.state.uploadTarget.status === 100 ? <p>
-                                        <i id="error-icon" aria-hidden='true'
-                                           className='window close outline icon'/> NomeFileTarget.txt
-                                        <i id="delete-icon" aria-hidden='true'
-                                           className='trash alternate outline icon'/>
-                                    </p> : null}
-
-
+                                    { htmlUploadTarget }
                                 </Dropzone>
                             </div>
                         </div>
