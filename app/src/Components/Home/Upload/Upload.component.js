@@ -26,13 +26,19 @@ class UploadComponent extends Component {
             job: undefined,
             pName: '',
             fileNameSource: null,
+            uploadSource: {
+                status: 0,
+                start: false,
+                error: false,
+            },
             fileNameTarget: null,
             uploadTarget: {
                 status: 0,
-                start: false
+                start: false,
+                error: false,
             },
             sourceLang: 'en-US',
-            targetLang: 'it-IT'
+            targetLang: 'it-IT',
         }
     }
 
@@ -54,7 +60,14 @@ class UploadComponent extends Component {
     };
 
     onDropSource = (files) => {
-        const onProgress = progressEvent => null;
+        const onProgress = progressEvent => {
+            this.setState({
+                uploadSource: {
+                    status: 0,
+                    start: true
+                }
+            })
+        };
         httpUpload(files[0], onProgress).then(response => {
             if (!response.errors) {
                 httpConversion({
@@ -66,6 +79,12 @@ class UploadComponent extends Component {
                     fileNameSource: response.data.file.name
                 });
             }
+        },(error) =>{
+            this.setState({
+                uploadSource: {
+                    error : true
+                }
+            });
         });
     };
 
@@ -91,6 +110,12 @@ class UploadComponent extends Component {
                     fileNameTarget: response.data.file.name
                 });
             }
+        },(error) => {
+            this.setState({
+                uploadTarget: {
+                    error: true
+                }
+            });
         });
     };
 
@@ -122,9 +147,22 @@ class UploadComponent extends Component {
     render() {
 
         const uploadAreaStyle = {};
+        let statusSourceClass = [];
+        let statusTargetClass = [];
+        let sourceError = this.state.uploadSource.error;
+        let targetError = this.state.uploadTarget.error;
 
         if (this.state.job) {
             return <Redirect push to={'/project/' + this.state.job.id + '/' + this.state.job.password}/>;
+        }
+
+        //check if error props for source is true, and set error class.
+        if(this.state.uploadSource.error){
+            statusSourceClass.push(' error ');
+        }
+        //check if error props for target is true, and set error class.
+        if(this.state.uploadTarget.error){
+            statusTargetClass.push(' error ');
         }
 
         return (
@@ -159,9 +197,17 @@ class UploadComponent extends Component {
                             />
                         </div>
                         <div className="ten wide column">
-                            <div className="dropzone">
+                            <div className={'dropzone' + statusSourceClass.toString() }>
                                 <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
-                                    <p><span>+ Add source file</span> (or drop it here).</p>
+                                    { sourceError ? (
+                                        <p>
+                                            <i id="error-icon" aria-hidden='true' className='window close outline icon'/>Error during file upload : <span> Server problem occurred. </span>
+                                            <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
+                                            <i id="triangle" aria-hidden='true' className='triangle right icon'/>
+                                        </p>
+                                    ) : (
+                                        <p><span>+ Add Source file</span> (or drop it here).</p>
+                                    )}
                                 </Dropzone>
                             </div>
                         </div>
@@ -175,9 +221,17 @@ class UploadComponent extends Component {
                             />
                         </div>
                         <div className="ten wide column">
-                            <div className="dropzone">
+                            <div className={'dropzone' + statusTargetClass.toString()}>
                                 <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
-                                    <p><span>+ Add source file</span> (or drop it here).</p>
+                                    { targetError ? (
+                                        <p>
+                                            <i id="error-icon" aria-hidden='true' className='window close outline icon'/>Error during file upload : <span> Server problem occurred. </span>
+                                            <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
+                                            <i id="triangle" aria-hidden='true' className='triangle right icon'/>
+                                        </p>
+                                    ) : (
+                                        <p><span>+ Add Target file</span> (or drop it here).</p>
+                                    )}
                                 </Dropzone>
                             </div>
                         </div>

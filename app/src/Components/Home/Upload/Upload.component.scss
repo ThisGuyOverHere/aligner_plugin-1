@@ -67,4 +67,32 @@
       }
     }
   }
+
+  .error{
+    border: 2px solid $white;
+    border-radius: 2px;
+    padding: 8px;
+    background: $lightRose;
+    p {
+      text-align: left;
+      color: $red;
+      span {
+        color: $red;
+      }
+    }
+    #error-icon{
+      margin-right: 8px;
+    }
+    #delete-icon{
+      float: right;
+    }
+    #triangle{
+      color: $rose;
+      font-size: 2rem;
+      transform: rotate(-45deg);
+      position: absolute;
+      top: -16px;
+      right: -28px;
+    }
+  }
 }
