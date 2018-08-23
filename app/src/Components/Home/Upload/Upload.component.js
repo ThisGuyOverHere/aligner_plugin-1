@@ -93,6 +93,7 @@ class UploadComponent extends Component {
             }
         });
     };
+
     startAlignment = () => {
         httpCreateProject({
             project_name: this.state.pName,
@@ -127,54 +128,72 @@ class UploadComponent extends Component {
         }
 
         return (
-            <div className="uploadComponent ui grid">
-                <div className="row">
-                    <div className="column">
-                        <h3 className="ui header">Alignment project name (optional)</h3>
-                        <div className="ui input">
-                            <input className="form-control" name="pname" type="text" value={this.state.pName}
-                                   onChange={this.ProjectNameChange}/>
+            <div className="uploadComponent">
+                <div className="uploadCard ui grid">
+                    <div className="row" id="projectNameHeader">
+                        <h3 className="ui header">Alignment project name <span>(optional)</span></h3>
+                    </div>
+
+                    <div className="row" id="projectNameInput">
+                        <div className="fourteen wide column">
+                            <div className="ui input">
+                                <input className="form-control" name="pname" type="text" value={this.state.pName}
+                                       onChange={this.ProjectNameChange}/>
+                            </div>
+                        </div>
+
+                        <div className="two wide column">
+                            <p>
+                                <i aria-hidden='true' className='setting icon'/>
+                                <span>Settings</span>
+                            </p>
                         </div>
                     </div>
-                </div>
-                <div className="row">
-                    <div className="six wide column">
-                        <Dropdown fluid search selection
-                                  options={this.state.languages}
-                                  defaultValue={this.state.sourceLang}
-                                  onChange={this.onSourceLanguageChange}
-                        />
-                    </div>
-                    <div className="ten wide column">
-                        <div className="dropzone">
-                            <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
-                                <p>Add source file (or drop it here).</p>
-                            </Dropzone>
+
+                    <div className="row">
+                        <div className="six wide column">
+                            <Dropdown fluid search selection
+                                      options={this.state.languages}
+                                      defaultValue={this.state.sourceLang}
+                                      onChange={this.onSourceLanguageChange}
+                            />
+                        </div>
+                        <div className="ten wide column">
+                            <div className="dropzone">
+                                <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
+                                    <p><span>+ Add source file</span> (or drop it here).</p>
+                                </Dropzone>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="row">
-                    <div className="six wide column">
-                        <Dropdown fluid search selection
-                                  options={this.state.languages}
-                                  defaultValue={this.state.targetLang}
-                                  onChange={this.onTargetLanguageChange}
-                        />
-                    </div>
-                    <div className="ten wide column">
-                        <div className="dropzone">
-                            <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
-                                <p>Add target file (or drop it here).</p>
-                            </Dropzone>
+                    <div className="row">
+                        <div className="six wide column">
+                            <Dropdown fluid search selection
+                                      options={this.state.languages}
+                                      defaultValue={this.state.targetLang}
+                                      onChange={this.onTargetLanguageChange}
+                            />
+                        </div>
+                        <div className="ten wide column">
+                            <div className="dropzone">
+                                <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
+                                    <p><span>+ Add source file</span> (or drop it here).</p>
+                                </Dropzone>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="row">
-                    <div className="sixteen wide column">
-                        <button className="ui button" onClick={this.startAlignment}
-                                disabled={!this.state.fileNameSource || !this.state.fileNameTarget}
-                        >Start alignment
-                        </button>
+                    <div className="row" id="buttonRow">
+
+                        <div className="twelve wide column">
+                            <h4>MateCat supports <span> 71 file formats </span></h4>
+                        </div>
+
+                        <div className="four wide column">
+                            <button className="ui primary button" onClick={this.startAlignment}
+                                    disabled={!this.state.fileNameSource || !this.state.fileNameTarget}
+                            >Start alignment
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
