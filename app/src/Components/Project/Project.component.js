@@ -23,6 +23,10 @@ class ProjectComponent extends Component {
                     id: this.props.match.params.jobID
                 },
                 rows: []
+            },
+            animateRowToOrder: {
+                type: null,
+                order: null
             }
         };
 
@@ -67,6 +71,21 @@ class ProjectComponent extends Component {
         })
     };
 
+    /**
+     *
+     * @param {String} type type of segment to check
+     * @param {Number} order order of segment to check
+     */
+    setAnimatedRow = (type,order) =>{
+        this.setState({
+            animateRowToOrder: {
+                type: type,
+                order: order
+            }
+        })
+    };
+
+
     changeAlgorithmVersion = (e) => {
         ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword, e.target.value);
 
@@ -79,7 +98,11 @@ class ProjectComponent extends Component {
         let values = [];
         if (array.length > 0) {
             array.map((row, index) => {
-                values.push(<RowComponent key={index} index={index} row={row}>
+                values.push(<RowComponent key={index}
+                                          index={index}
+                                          row={row}
+                                          animate={this.state.animateRowToOrder.type && this.state.animateRowToOrder.order === row[this.state.animateRowToOrder.type].order}
+                                          setAnimatedRow={this.setAnimatedRow}>
                     <SegmentComponent type="source"
                                       segment={row.source} />
                     <SegmentComponent type="target"
