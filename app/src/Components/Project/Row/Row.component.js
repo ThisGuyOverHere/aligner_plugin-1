@@ -94,7 +94,7 @@ class RowComponent extends Component {
 
         //todo: migliorare l'hover, attualmente abbiamo adattato il vecchio comportamento a 2 righe invece che 1
         const dragElType  = dragEl ? dragEl.type : undefined;
-        if(isOver && dragElType || animate){
+        if(isOver && dragElType && canDrop || animate){
             columnsClass.source.push('dropColumn');
             columnsClass.target.push('dropColumn');
         }
