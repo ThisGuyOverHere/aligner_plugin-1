@@ -626,7 +626,53 @@ class ParserController extends AlignerController {
             return $matrix[$str1Length][$str2Length];
         }
 
-        function eval_sents($source, $target, $nbest) {
+        function addToAlignment(&$alignment, $pair) {
+            if (!empty($pair[0]) && !empty($pair[1])) {
+                $alignment[] = $pair;
+            }
+        }
+
+        // Simple merge, for 1-N matches
+        function mergeSegments($segments) {
+            if (count($segments) == 1) {
+                return $segments[0];
+            } else {
+                return array_reduce($segments, function ($carry, $item) {
+                    $carry['raw'] .= $item['raw'];
+                    $carry['clean'] .= $item['clean'];
+                    $carry['words'] += $item['words'];
+
+                    return $carry;
+                }, ['raw' => '', 'clean' => '', 'words' => 0]);
+            }
+        }
+
+        // get a list of (ID,Sentence) tuples and generate bi- or tri-sentence tuples
+        function createSegmentTuples($segments, $size) {
+            $res = [];
+
+            for ($i = 0; $i <= count($segments) - $size; $i++) {
+                $ids = [];
+                $segs = [];
+
+                foreach (array_slice($segments, $i, $i + $size) as $sublist) {
+                    foreach ($sublist[0] as $k) {
+                        $ids[] = $k;
+                    }
+
+                    $segs[] = $sublist[1];
+                }
+
+                $res[] = [$ids, mergeSegments($segs)];
+            }
+
+            return $res;
+        }
+
+        function eval_sents($source, $target) {
+
+            $nbest = 5;
+
             $scoredict = [];
 
             foreach ($source as $si => $ss) {
@@ -655,8 +701,232 @@ class ParserController extends AlignerController {
 
         // apply heuristics to align all sentences that remain unaligned after finding best path of 1-to-1 alignments
         // heuristics include bleu-based 1-to-n alignment and length-based alignment
-        function gapfiller($source, $target, $sourcegap, $targetgap, $pregap, $postgap) {
-            return 0;
+        function gapfiller(&$alignment, $source, $target, $sourcegap, $targetgap, $pregap, $postgap) {
+            $evalsrc = [];
+            $evaltrg = [];
+
+            // compile list of sentences in gap that will be considered for BLEU comparison
+
+            // concatenate all sentences in pregap alignment pair
+            $tmpsegs = array_reduce($pregap[0], function ($carry, $item) use ($source) {
+                $carry[] = $source[$item];
+                return $carry;
+            }, []);
+            $evalsrc[] = [$pregap[0], mergeSegments($tmpsegs)];
+
+            #concatenate all sentences in pregap alignment pair
+            $tmpsegs = array_reduce($pregap[1], function ($carry, $item) use ($target) {
+                $carry[] = $target[$item];
+                return $carry;
+            }, []);
+            $evaltrg[] = [$pregap[1], mergeSegments($tmpsegs)];
+
+            // search will be pruned to this window
+            $nto1 = 2;
+            $window = 10 + $nto1;
+
+            foreach ($sourcegap as $index => $value) {
+                if ($index < $window || count($sourcegap) - $index <= $window) {
+                    $sent = $source[$value];
+                    $evalsrc[] = [[$value], $sent];
+                }
+            }
+
+            foreach ($targetgap as $index => $value) {
+                if ($index < $window || count($targetgap) - $index <= $window) {
+                    $sent = $target[$value];
+                    $evaltrg[] = [[$value], $sent];
+                }
+            }
+
+            // concatenate all sentences in postgap alignment pair
+            $tmpsegs = array_reduce($postgap[0], function ($carry, $item) use ($source) {
+                $carry[] = $source[$item];
+                return $carry;
+            }, []);
+            $evalsrc[] = [$postgap[0], mergeSegments($tmpsegs)];
+
+            // concatenate all sentences in postgap alignment pair
+            $tmpsegs = array_reduce($postgap[1], function ($carry, $item) use ($target) {
+                $carry[] = $target[$item];
+                return $carry;
+            }, []);
+            $evaltrg[] = [$postgap[1], mergeSegments($tmpsegs)];
+
+
+
+            $nsrc = [];
+            foreach (range(2, $nto1) as $n) {
+                $nsrc[$n] = createSegmentTuples($evalsrc, $n);
+                $evalsrc = array_merge($evalsrc, $nsrc[$n]);
+            }
+
+            $ntrg = [];
+            foreach (range(2, $nto1) as $n) {
+                $ntrg[$n] = createSegmentTuples($evaltrg, $n);
+                $evaltrg = array_merge($evaltrg, $ntrg[$n]);
+            }
+
+            $evalsrc_raw = array_map(function ($item) { return $item[1]; }, $evalsrc);
+            $evaltrg_raw = array_map(function ($item) { return $item[1]; }, $evaltrg);
+
+            $scoredict_raw = eval_sents($evalsrc_raw, $evaltrg_raw);
+
+            $scoredict = [];
+            foreach ($scoredict_raw as $src => $value) {
+                $srcs = $evalsrc[$src][0];
+
+                if (!empty($value)) {
+                    foreach ($value as $item) {
+                        $trg = $item[0];
+                        $score = $item[1];
+
+                        $trgs = $evaltrg[$trg][0];
+
+                        $scoredict[] = [$srcs, $trgs, $score];
+                    }
+                }
+            }
+
+
+
+            while (!empty($sourcegap) or !empty($targetgap)) {
+                $pregapsrc = $pregap[0];
+                $pregaptarget = $pregap[1];
+
+                $postgapsrc = $postgap[0];
+                $postgaptarget = $postgap[1];
+
+                if (!empty($sourcegap)) {
+
+                    // try if concatenating source sentences together improves score (beginning of gap)
+                    if (!empty($pregapsrc)) {
+                        $olditem = reset(array_filter($scoredict, function ($item) use ($pregapsrc) {
+                            return $item[0] === $pregapsrc;
+                        }));
+
+                        $oldtarget = $olditem[1];
+                        $oldscore = $olditem[2];
+
+                        $srcs = array_merge($pregapsrc, [$sourcegap[0]]);
+
+                        $newitem = reset(array_filter($scoredict, function ($item) use ($srcs) {
+                            return $item[0] === $srcs;
+                        }));
+
+                        if ($newitem) {
+                            $newtarget = $newitem[1];
+                            $newscore = $newitem[2];
+
+                            if ($newscore > $oldscore && $newtarget == $pregaptarget) {
+                                $pregap = [$srcs, $pregaptarget];
+                                array_shift($sourcegap);
+                                continue;
+                            }
+                        }
+                    }
+
+                    // try if concatenating source sentences together improves score (end of gap)
+                    if (!empty($postgapsrc)) {
+                        $olditem = reset(array_filter($scoredict, function ($item) use ($postgapsrc) {
+                            return $item[0] === $postgapsrc;
+                        }));
+
+                        $oldtarget = $olditem[1];
+                        $oldscore = $olditem[2];
+
+                        $srcs = array_merge([$sourcegap[count($sourcegap) - 1]], $postgapsrc);
+
+                        $newitem = reset(array_filter($scoredict, function ($item) use ($srcs) {
+                            return $item[0] === $srcs;
+                        }));
+
+                        if ($newitem) {
+                            $newtarget = $newitem[1];
+                            $newscore = $newitem[2];
+
+                            if ($newscore > $oldscore && $newtarget == $postgaptarget) {
+                                $postgap = [$srcs, $postgaptarget];
+                                array_shift($sourcegap);
+                                continue;
+                            }
+                        }
+                    }
+
+                }
+
+                if (!empty($targetgap)) {
+
+                    // try if concatenating target sentences together improves score (beginning of gap)
+                    if (!empty($pregapsrc)) {
+                        $newitem = reset(array_filter($scoredict, function ($item) use ($pregapsrc) {
+                            return $item[0] === $pregapsrc;
+                        }));
+
+                        $newtarget = $newitem[1];
+                        $newscore = $newitem[2];
+
+                        if ($newtarget !== $pregaptarget && $newtarget !== $postgaptarget) {
+                            $pregap = [$pregapsrc, $newtarget];
+
+                            $targetgap = array_filter($targetgap, function ($item) use ($newtarget) {
+                                return !in_array($item, $newtarget);
+                            });
+
+                            continue;
+                        }
+                    }
+
+                    // try if concatenating target sentences together improves score (end of gap)
+                    if (!empty($postgapsrc)) {
+                        $newitem = reset(array_filter($scoredict, function ($item) use ($postgapsrc) {
+                            return $item[0] === $postgapsrc;
+                        }));
+
+                        $newtarget = $newitem[1];
+                        $newscore = $newitem[2];
+
+                        if ($newtarget !== $postgaptarget && $newtarget !== $pregaptarget) {
+                            $postgap = [$postgapsrc, $newtarget];
+
+                            $targetgap = array_filter($targetgap, function ($item) use ($newtarget) {
+                                return !in_array($item, $newtarget);
+                            });
+
+                            continue;
+                        }
+                    }
+                }
+
+                // concatenation didn't help, and we still have possible one-to-one alignments
+                if (!empty($sourcegap) && !empty($targetgap)) {
+
+                    // align first two sentences if score exists
+                    $bestmatch = reset(array_filter($scoredict, function ($item) use ($sourcegap, $targetgap) {
+                        return $item[0] === [$sourcegap[0]] && $item[1] == [$targetgap[0]];
+                    }))[1];
+
+                    if ($bestmatch) {
+                        addToAlignment($alignment, $pregap);
+                        $pregap = [$bestmatch[0], $bestmatch[1]];
+                        array_shift($sourcegap);
+                        array_shift($targetgap);
+                        continue;
+                    }
+                }
+
+                break;
+            }
+
+            $exists = array_filter($alignment, function ($item) use ($pregap) {
+                return $item[0] === $pregap;
+            })[0];
+
+            if (!$exists) {
+                addToAlignment($alignment, $pregap);
+            }
+
+            return $postgap;
         }
 
         // find unaligned sentences and create work packets for gapfiller()
@@ -691,18 +961,18 @@ class ParserController extends AlignerController {
                 $source_gap = [];
                 $target_gap = [];
 
-                if ($old_src[count($old_src) - 1] + 1 < $src - 1) {
+                if ($old_src[count($old_src) - 1] + 1 < $src) {
                     $source_gap = range($old_src[count($old_src) - 1] + 1, $src - 1);
                 }
 
-                if ($old_trg[count($old_trg) - 1] + 1 < $trg - 1) {
+                if ($old_trg[count($old_trg) - 1] + 1 < $trg) {
                     $target_gap = range($old_trg[count($old_trg) - 1] + 1, $trg - 1);
                 }
 
                 if (!empty($source_gap) || !empty($target_gap)) {
-                    $lastpair = gapfiller($source, $target, $source_gap, $target_gap, $lastpair, [[$src], [$trg]]);
+                    $lastpair = gapfiller($alignment, $source, $target, $source_gap, $target_gap, $lastpair, [[$src], [$trg]]);
                 } else {
-                    $alignment[] = $lastpair;
+                    addToAlignment($alignment, $lastpair);
                     $lastpair = [[$src], [$trg]];
                 }
             }
@@ -711,20 +981,20 @@ class ParserController extends AlignerController {
             $source_gap = [];
             $target_gap = [];
 
-            if ($src + 1 < count($source) - 1) {
+            if ($src + 1 < count($source)) {
                 $source_gap = range($src + 1, count($source) - 1);
             }
 
-            if ($trg + 1 < count($target) - 1) {
+            if ($trg + 1 < count($target)) {
                 $target_gap = range($trg + 1, count($target) - 1);
             }
 
 
             if (!empty($source_gap) || !empty($target_gap)) {
-                $lastpair = gapfiller($source, $target, $source_gap, $target_gap, $lastpair, [[], []]);
+                $lastpair = gapfiller($alignment, $source, $target, $source_gap, $target_gap, $lastpair, [[], []]);
             }
 
-            $alignment[] = $lastpair;
+            addToAlignment($alignment, $lastpair);
 
             return $alignment;
         }
@@ -841,9 +1111,7 @@ class ParserController extends AlignerController {
         // Variant on Bleu Align algorithm with Levenshtein distance
         $source_translated = translateSegments($source, $source_lang, $target_lang);
 
-        $nbest = 5;
-
-        $scoredict = eval_sents($source_translated, $target, $nbest);
+        $scoredict = eval_sents($source_translated, $target);
         $paths = pathfinder($source_translated, $target, $scoredict);
 
         $alignment = gapfinder($source_translated, $target, $paths);
