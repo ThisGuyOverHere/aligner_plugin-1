@@ -1,10 +1,53 @@
+@import "../../../../assets/theme/variables";
+
 .uploadComponent {
+  .uploadCard{
+    margin: 0 auto;
+    width: 90%;
+    z-index: 11;
+    padding-bottom: 24px;
+    position: relative;
+    top: -144px;
+    background: $white;
+    box-shadow: $cardShadow;
+    #projectName{
+      padding: 24px 0px 14px;
+      background: $lightGrey;
+      h3{
+        padding-left: 16px;
+        span{
+          color: $secondaryText;
+          font-size: 12px;
+        }
+      }
+    }
+    #buttonRow{
+      padding-bottom: 0px;
+      h4{
+        padding: 8px 24px 8px 16px;
+        font-weight: 300;
+        span{
+          color: $darkBlue;
+          text-decoration: underline;
+          font-weight: 600;
+        }
+      }
+    }
+  }
   .dropzone{
-    border: 2px dashed #D2D2D2;
+    border: 2px dashed $dropzoneBorder;
     border-radius: 2px;
     padding: 8px;
+    background: $lightGrey;
     p{
       margin: 0;
+      font-size: 14px;
+      text-align: center;
+      color: $secondaryText;
+      span{
+        color: $lightBlue;
+        font-weight: bold;
+      }
     }
   }
 }

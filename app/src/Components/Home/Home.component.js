@@ -12,6 +12,13 @@ class HomeComponent extends Component {
                     <div className="visor-content">
                     </div>
                 </div>
+                <div className="subHeader">
+                    <div className="ui container">
+                        <div className="ui grid">
+                            <h2 className="ui header">Upload your files to align them with MateCat</h2>
+                        </div>
+                    </div>
+                </div>
                 <div className="ui container">
                     <UploadComponent/>
                 </div>

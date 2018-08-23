@@ -3,4 +3,17 @@
     position: relative;
     top: -40px;
   }
+
+  .subHeader{
+    z-index: 10;
+    position: relative;
+    background: #E5E9F1;
+    height: 176px;
+    top: -40px;
+    h2{
+      width: 88%;
+      margin: 0 auto;
+      padding: 24px 24px 24px 32px;
+    }
+  }
 }

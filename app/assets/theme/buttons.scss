@@ -1,3 +1,15 @@
+@import "variables";
+
 .button{
-  color: #000;
+  &.primary{
+    width: 100%;
+    background: $primaryBtnBg;
+    border: 1px solid $primaryBtnborder;
+    box-sizing: border-box;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+  &.secondary{
+
+  }
 }
