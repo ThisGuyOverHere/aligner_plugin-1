@@ -1,13 +1,27 @@
+@import "../../../assets/theme/variables";
+
 .homeComponent{
   .visor{
-    position: relative;
-    top: -40px;
+    .visor-content{
+      h1{
+        width: 100%;
+        text-align: center;
+        font-size: 48px;
+        color: $white;
+      }
+      h2{
+        width: 100%;
+        text-align: center;
+        color: $white;
+        font-weight: 500;
+      }
+    }
   }
 
   .subHeader{
     z-index: 10;
     position: relative;
-    background: #E5E9F1;
+    background: $sectionGrey;
     height: 176px;
     top: -40px;
     h2{

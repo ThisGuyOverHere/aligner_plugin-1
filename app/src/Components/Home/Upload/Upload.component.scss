@@ -10,14 +10,28 @@
     top: -144px;
     background: $white;
     box-shadow: $cardShadow;
-    #projectName{
-      padding: 24px 0px 14px;
+    #projectNameHeader{
       background: $lightGrey;
+      padding: 24px 0px 8px 16px;
       h3{
         padding-left: 16px;
         span{
           color: $secondaryText;
           font-size: 12px;
+          font-weight: 300;
+        }
+      }
+    }
+    #projectNameInput{
+      padding: 0px 0px 12px;
+      background: $lightGrey;
+      p{
+        color: $darkBlue;
+        padding: .67857143em 0 .67857143em 1em;
+        text-align: right;
+        cursor: pointer;
+        span{
+          text-decoration: underline;
         }
       }
     }
@@ -30,6 +44,7 @@
           color: $darkBlue;
           text-decoration: underline;
           font-weight: 600;
+          cursor: pointer;
         }
       }
     }
@@ -39,11 +54,13 @@
     border-radius: 2px;
     padding: 8px;
     background: $lightGrey;
+    cursor: pointer;
     p{
       margin: 0;
       font-size: 14px;
       text-align: center;
       color: $secondaryText;
+      font-weight: 300;
       span{
         color: $lightBlue;
         font-weight: bold;
