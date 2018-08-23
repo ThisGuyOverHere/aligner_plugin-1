@@ -10,9 +10,9 @@
     top: -144px;
     background: $white;
     box-shadow: $cardShadow;
-    #projectName{
-      padding: 24px 0px 12px;
+    #projectNameHeader{
       background: $lightGrey;
+      padding: 24px 0px 8px 16px;
       h3{
         padding-left: 16px;
         span{
@@ -21,6 +21,10 @@
           font-weight: 300;
         }
       }
+    }
+    #projectNameInput{
+      padding: 0px 0px 12px;
+      background: $lightGrey;
       p{
         color: $darkBlue;
         padding: .67857143em 0 .67857143em 1em;

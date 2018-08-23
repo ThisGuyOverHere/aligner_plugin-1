@@ -93,6 +93,7 @@ class UploadComponent extends Component {
             }
         });
     };
+
     startAlignment = () => {
         httpCreateProject({
             project_name: this.state.pName,
@@ -129,10 +130,12 @@ class UploadComponent extends Component {
         return (
             <div className="uploadComponent">
                 <div className="uploadCard ui grid">
-                    <div className="row" id="projectName">
+                    <div className="row" id="projectNameHeader">
+                        <h3 className="ui header">Alignment project name <span>(optional)</span></h3>
+                    </div>
 
+                    <div className="row" id="projectNameInput">
                         <div className="fourteen wide column">
-                            <h3 className="ui header">Alignment project name <span>(optional)</span></h3>
                             <div className="ui input">
                                 <input className="form-control" name="pname" type="text" value={this.state.pName}
                                        onChange={this.ProjectNameChange}/>
@@ -140,13 +143,13 @@ class UploadComponent extends Component {
                         </div>
 
                         <div className="two wide column">
-                            <h1></h1>
                             <p>
                                 <i aria-hidden='true' className='setting icon'/>
                                 <span>Settings</span>
                             </p>
                         </div>
                     </div>
+
                     <div className="row">
                         <div className="six wide column">
                             <Dropdown fluid search selection
