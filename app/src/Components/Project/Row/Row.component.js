@@ -76,7 +76,8 @@ class RowComponent extends Component {
         const {connectDropTarget, isOver, canDrop, dragEl} = this.props;
         const dragElType  = dragEl ? dragEl.type : undefined;
         if(isOver && dragElType){
-            columnsClass[dragElType].push('dropColumn');
+            columnsClass.source.push('dropColumn');
+            columnsClass.target.push('dropColumn');
         }
         return connectDropTarget(
             <div className={rowClass.join(' ')}>
