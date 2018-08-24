@@ -135,8 +135,7 @@ class ProjectComponent extends Component {
                 <div className="ui container">
                     <Transition
                         native
-                        items={this.state.project.rows}
-                        keys={this.state.project.rows.map(item => item.source.clean)}
+                        keys={this.state.project.rows.map(item => item.source.order)}
                         from={{opacity: 0, maxHeight: 0, overflow: 'hidden'}}
                         enter={{opacity: 1, maxHeight: 600, overflow: 'hidden'}}
                         leave={{opacity: 0, maxHeight: 0, overflow: 'hidden'}}>
