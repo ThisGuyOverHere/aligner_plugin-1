@@ -104,8 +104,8 @@ class RowComponent extends Component {
         }
         return connectDropTarget(
             <div className={rowClass.join(' ')}>
-                <div className="ui grid middle aligned">
-                    <div className="one wide column center aligned">
+                <div className="ui grid top aligned">
+                    <div className="one wide column middle aligned">
                         {this.props.index}
                     </div>
                     <div className="fifteen wide column center aligned">

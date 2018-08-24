@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {Transition, animated} from 'react-spring'
 import ProjectStore from "../../Stores/Project.store";
 import ProjectConstants from "../../Constants/Project.constants"
 import ProjectActions from '../../Actions/Project.actions';
@@ -10,7 +11,6 @@ import MouseBackEnd from 'react-dnd-mouse-backend'
 
 import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
 import env from "../../Constants/Env.constants";
-
 class ProjectComponent extends Component {
     constructor(props) {
         super(props);
@@ -76,7 +76,7 @@ class ProjectComponent extends Component {
      * @param {String} type type of segment to check
      * @param {Number} order order of segment to check
      */
-    setAnimatedRow = (type,order) =>{
+    setAnimatedRow = (type, order) => {
         this.setState({
             animateRowToOrder: {
                 type: type,
@@ -94,41 +94,54 @@ class ProjectComponent extends Component {
         });
     };
 
-    renderItems(array) {
+    renderItems = (array) => {
         let values = [];
         if (array.length > 0) {
             array.map((row, index) => {
-                values.push(<RowComponent key={index}
-                                          index={index}
-                                          row={row}
-                                          animate={this.state.animateRowToOrder.type && this.state.animateRowToOrder.order === row[this.state.animateRowToOrder.type].order}
-                                          setAnimatedRow={this.setAnimatedRow}>
-                    <SegmentComponent type="source"
-                                      segment={row.source} />
-                    <SegmentComponent type="target"
-                                      segment={row.target} />
-                </RowComponent>);
+                values.push(
+                    <RowComponent key={index}
+                                  index={index}
+                                  row={row}
+                                  animate={this.state.animateRowToOrder.type && this.state.animateRowToOrder.order === row[this.state.animateRowToOrder.type].order}
+                                  setAnimatedRow={this.setAnimatedRow}>
+                        <SegmentComponent type="source"
+                                          segment={row.source}/>
+                        <SegmentComponent type="target"
+                                          segment={row.target}/>
+                    </RowComponent>
+                );
                 return row;
             });
         }
         return values;
-    }
+    };
 
     render() {
         let algorithmElements = [];
         env.alignAlgorithmAllVersions.map(e => {
             algorithmElements.push(<option key={e} value={e}>Algorithm V{e}</option>);
         });
+        let rows = this.renderItems(this.state.project.rows);
+
         return (
             <div className="align-project">
                 <div className="ui container">
-                    <select name="algorithm" id="algorithm" defaultValue={this.state.algorithm} onChange={this.changeAlgorithmVersion}>
+                    <select name="algorithm" id="algorithm" defaultValue={this.state.algorithm}
+                            onChange={this.changeAlgorithmVersion}>
                         {algorithmElements}
                     </select>
                 </div>
 
                 <div className="ui container">
-                    {this.renderItems(this.state.project.rows)}
+                    <Transition
+                        native
+                        keys={this.state.project.rows.map(item => item.source.order)}
+                        from={{opacity: 0, maxHeight: 0, overflow: 'hidden'}}
+                        enter={{opacity: 1, maxHeight: 600, overflow: 'hidden'}}
+                        leave={{opacity: 0, maxHeight: 0, overflow: 'hidden'}}>
+                        {this.renderItems(this.state.project.rows).map(item => styles => <animated.div style={styles}>{item}</animated.div>)}
+                    </Transition>
+
                     <AdvancedDragLayer/>
                 </div>
             </div>
