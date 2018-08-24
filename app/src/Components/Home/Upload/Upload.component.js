@@ -68,15 +68,15 @@ class UploadComponent extends Component {
                 }
             })
         };
-        httpUpload(files, onProgress).then(response => {
+        httpUpload(files[0], onProgress).then(response => {
             if (!response.errors) {
                 httpConversion({
-                    file_name: response.data.file.name,
+                    file_name: response.data.files[0].name,
                     source_lang: this.state.sourceLang,
                     target_lang: this.state.targetLang
                 });
                 this.setState({
-                    fileNameSource: response.data.file.name
+                    fileNameSource: response.data.files[0].name
                 });
             }
         }, (error) => {
@@ -99,16 +99,16 @@ class UploadComponent extends Component {
                 }
             })
         };
-        httpUpload(files, onProgress).then(response => {
+        httpUpload(files[0], onProgress).then(response => {
 
             if (!response.errors) {
                 httpConversion({
-                    file_name: response.data.file.name,
+                    file_name: response.data.files[0].name,
                     source_lang: this.state.targetLang,
                     target_lang: this.state.sourceLang
                 });
                 this.setState({
-                    fileNameTarget: response.data.file.name
+                    fileNameTarget: response.data.files[0].name
                 });
             }
         }, (error) => {
