@@ -52,8 +52,10 @@ class ParserController extends AlignerController {
                 break;
         }
 
+        // DEBUG START //
         $this->response->json( ['res' => $alignment] );
         return;
+        // DEBUG END//
 
         // Format alignment for frontend test purpose
         $source = array_map(function ($index, $item) {
@@ -635,11 +637,11 @@ class ParserController extends AlignerController {
         // Simple merge, for 1-N matches
         function mergeSegments($segments) {
             if (count($segments) == 1) {
-                return $segments[0];
+                return reset($segments);  // Here I'm not sure if array starts with index 0
             } else {
                 return array_reduce($segments, function ($carry, $item) {
-                    $carry['raw'] .= $item['raw'];
-                    $carry['clean'] .= $item['clean'];
+                    $carry['raw'] = trim($carry['raw'] . ' ' . $item['raw']);
+                    $carry['clean'] = trim($carry['clean'] . ' ' . $item['clean']);
                     $carry['words'] += $item['words'];
 
                     return $carry;
@@ -904,7 +906,7 @@ class ParserController extends AlignerController {
                     // align first two sentences if score exists
                     $bestmatch = reset(array_filter($scoredict, function ($item) use ($sourcegap, $targetgap) {
                         return $item[0] === [$sourcegap[0]] && $item[1] == [$targetgap[0]];
-                    }))[1];
+                    }));
 
                     if ($bestmatch) {
                         addToAlignment($alignment, $pregap);
@@ -918,9 +920,9 @@ class ParserController extends AlignerController {
                 break;
             }
 
-            $exists = array_filter($alignment, function ($item) use ($pregap) {
+            $exists = reset(array_filter($alignment, function ($item) use ($pregap) {
                 return $item[0] === $pregap;
-            })[0];
+            }));
 
             if (!$exists) {
                 addToAlignment($alignment, $pregap);
@@ -1056,12 +1058,12 @@ class ParserController extends AlignerController {
                         $best_pointer = '<';
                     }
 
-                    $alignment = array_filter($alignments, function ($item) use ($j) {
+                    $alignment = reset(array_filter($alignments, function ($item) use ($j) {
                        return $item[0] == $j;
-                    });
+                    }));
 
                     if ($alignment) {
-                        $score = $alignment[0][1] + $matrix[$i][$j];
+                        $score = $alignment[1] + $matrix[$i][$j];
 
                         if ($score > $best_score) {
                             $best_score = $score;
@@ -1107,14 +1109,41 @@ class ParserController extends AlignerController {
             return $result;
         }
 
-
         // Variant on Bleu Align algorithm with Levenshtein distance
         $source_translated = translateSegments($source, $source_lang, $target_lang);
 
         $scoredict = eval_sents($source_translated, $target);
         $paths = pathfinder($source_translated, $target, $scoredict);
+        $indexes = gapfinder($source_translated, $target, $paths);
 
-        $alignment = gapfinder($source_translated, $target, $paths);
+        $alignment = [];
+        foreach ($indexes as $index) {  // Every index contains [[sources...], [targets...]]
+            $si = $index[0];
+            $ti = $index[1];
+
+            $ss = [];
+            $ts = [];
+
+            // We cannot use array_filter with flag here, it's available only on PHP 5.6+
+            foreach ($source as $key => $value) {
+                if (in_array($key, $si)) {
+                    $ss[] = $value;
+                }
+            }
+
+            foreach ($target as $key => $value) {
+                if (in_array($key, $ti)) {
+                    $ts[] = $value;
+                }
+            }
+
+            $row = [
+                'source' => mergeSegments($ss),
+                'target' => mergeSegments($ts)
+            ];
+
+            $alignment[] = $row;
+        }
 
         return $alignment;
    }
