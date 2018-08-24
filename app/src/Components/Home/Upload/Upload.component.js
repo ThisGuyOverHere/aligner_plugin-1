@@ -190,8 +190,8 @@ class UploadComponent extends Component {
             case 'finish':
                 return <p>
                     <i id="file-icon" aria-hidden='true' className='file icon'/>
-                    <p className="fileInfo">{data.filename}</p>
-                    <p id="fileSize"> {data.filesize} kb </p>
+                    <span className="fileInfo">{data.filename}</span>
+                    <span id="fileSize"> {data.filesize} kb </span>
                     <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
                 </p>;
 
