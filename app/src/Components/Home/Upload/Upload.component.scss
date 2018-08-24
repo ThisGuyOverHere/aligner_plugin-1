@@ -98,6 +98,47 @@
 
   .finish{
     background: $white;
-    border: 2px solid $white;
+    border: 2px dashed $dropzoneBorder;
+    p{
+      text-align: left;
+      color: $black;
+      #file-icon{
+        color: $lightBlue;
+      }
+      #delete-icon{
+        display: none;
+        float: right;
+        color: $secondaryText;
+      }
+      #fileSize{
+        font-size: 10px;
+        margin: 2px;
+        float: right;
+        color: $secondaryText;
+      }
+      &:hover #delete-icon{
+        display: inline-block;
+      }
+      &:hover #fileSize{
+        display: none;
+      }
+    }
+  }
+
+  .progress{
+    #fileSize{
+      font-size: 10px;
+      margin: 2px 2px 2px 8px;
+      float: right;
+    }
+    #actionInfo{
+      float: right;
+      font-size: 10px;
+      margin: 2px 2px 2px 8px;
+    }
+  }
+
+  .fileInfo{
+    display: inline-block;
   }
 }
