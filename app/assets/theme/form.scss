@@ -1,3 +1,5 @@
+@import "variables";
+
 //override semantic ui
 .ui{
   &.header{
@@ -16,6 +18,20 @@
     &.dropdown{
       padding: 18px;
       line-height: 0;
+    }
+  }
+  &.progress{
+    display: inline-block;
+    width: 25%;
+    margin: 2px !important;
+    float: right;
+    height: 16px;
+    border-radius: 50px;
+    .bar{
+      border-radius: 50px;
+      width: 2px;
+      height: 16px;
+      background-color: $lightBlue;
     }
   }
 }

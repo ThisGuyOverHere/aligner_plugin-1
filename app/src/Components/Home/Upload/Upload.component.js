@@ -26,12 +26,14 @@ class UploadComponent extends Component {
             job: undefined,
             pName: '',
             fileNameSource: null,
+            fileSizeSource: 0,
             uploadSource: {
                 progress: 0,
                 start: false,
                 status: 'start'
             },
             fileNameTarget: null,
+            fileSizeTarget: 0,
             uploadTarget: {
                 progress: 0,
                 start: false,
@@ -62,11 +64,14 @@ class UploadComponent extends Component {
     onDropSource = (files) => {
         const onProgress = progressEvent => {
             this.setState({
+                fileSizeSource: Math.floor((progressEvent.total) / 1000),
+                fileNameSource: files[0].name,
                 uploadSource: {
-                    status: 0,
-                    start: true
+                    progress: ((progressEvent.loaded * 100) / progressEvent.total),
+                    start: true,
+                    status: 'progress',
                 }
-            })
+            });
         };
         httpUpload(files[0], onProgress).then(response => {
             if (!response.errors) {
@@ -76,7 +81,12 @@ class UploadComponent extends Component {
                     target_lang: this.state.targetLang
                 });
                 this.setState({
-                    fileNameSource: response.data[0].name
+                    fileNameSource: response.data[0].name,
+                    uploadSource: {
+                        status: 'finish',
+                        progress: 0
+                    }
+
                 });
             }
         }, (error) => {
@@ -87,15 +97,21 @@ class UploadComponent extends Component {
                 }
             });
         });
+
+
+
     };
 
 
     onDropTarget = (files) => {
         const onProgress = progressEvent => {
             this.setState({
+                fileSizeTarget: Math.floor((progressEvent.total) / 1000),
+                fileNameTarget: files[0].name,
                 uploadTarget: {
-                    status: 0,
-                    start: true
+                    progress: ((progressEvent.loaded * 100) / progressEvent.total),
+                    start: true,
+                    status: 'progress',
                 }
             })
         };
@@ -108,7 +124,13 @@ class UploadComponent extends Component {
                     target_lang: this.state.sourceLang
                 });
                 this.setState({
-                    fileNameTarget: response.data[0].name
+                    fileNameTarget: response.data[0].name,
+                    start: false,
+                    uploadTarget: {
+                        status: 'finish',
+                        progress: 0
+                    },
+
                 });
             }
         }, (error) => {
@@ -152,11 +174,24 @@ class UploadComponent extends Component {
                 return <p><span>+ Add Target file</span> (or drop it here).</p>;
 
             case 'progress':
-                return <div></div>;
+                return <div>
+                    <div className="fileInfo">
+                        <p>
+                            <i id="error-icon" aria-hidden='true' className='file icon'/> {data.filename}
+                        </p>
+                    </div>
+                    <p id="fileSize"> {data.filesize} kb </p>
+                    <div className='ui progress' data-percent={data.progress}>
+                        <div className='bar' style={{width: data.progress + '%'}}/>
+                    </div>
+                    <p id="actionInfo">Uploading</p>
+                </div>;
 
             case 'finish':
                 return <p>
-                    <i id="error-icon" aria-hidden='true' className='window close outline icon'/> {data.filename}
+                    <i id="file-icon" aria-hidden='true' className='file icon'/>
+                    <p className="fileInfo">{data.filename}</p>
+                    <p id="fileSize"> {data.filesize} kb </p>
                     <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
                 </p>;
 
@@ -179,11 +214,12 @@ class UploadComponent extends Component {
             target: ['dropzone']
         };
 
+        classes.source.push(this.state.uploadSource.status);
+        classes.target.push(this.state.uploadTarget.status);
+
         if (this.state.job) {
             return <Redirect push to={'/project/' + this.state.job.id + '/' + this.state.job.password}/>;
         }
-        classes.source.push(this.state.uploadSource.status);
-        classes.target.push(this.state.uploadTarget.status);
 
         return (
             <div className="uploadComponent">
@@ -193,14 +229,14 @@ class UploadComponent extends Component {
                     </div>
 
                     <div className="row" id="projectNameInput">
-                        <div className="fourteen wide column">
+                        <div className="thirteen wide column">
                             <div className="ui input">
                                 <input className="form-control" name="pname" type="text" value={this.state.pName}
                                        onChange={this.ProjectNameChange}/>
                             </div>
                         </div>
 
-                        <div className="two wide column">
+                        <div className="three wide column">
                             <p>
                                 <i aria-hidden='true' className='setting icon'/>
                                 <span>Settings</span>
@@ -219,7 +255,15 @@ class UploadComponent extends Component {
                         <div className="ten wide column">
                             <div className={classes.source.join(' ')}>
                                 <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
-                                    { this.renderHtmlUpload(this.state.uploadSource.status,{filename: 'test.png'}) }
+                                    {
+                                        this.renderHtmlUpload(
+                                            this.state.uploadSource.status,
+                                            {
+                                                filename: this.state.fileNameSource,
+                                                progress: this.state.uploadSource.progress,
+                                                filesize: this.state.fileSizeSource
+                                            })
+                                    }
                                 </Dropzone>
                             </div>
                         </div>
@@ -236,7 +280,15 @@ class UploadComponent extends Component {
                         <div className="ten wide column">
                             <div className={classes.target.join(' ')}>
                                 <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
-                                    { this.renderHtmlUpload(this.state.uploadTarget.status,{filename: 'test.png'}) }
+                                    {
+                                        this.renderHtmlUpload(
+                                            this.state.uploadTarget.status,
+                                            {
+                                                filename: this.state.fileNameTarget ,
+                                                progress: this.state.uploadTarget.progress,
+                                                filesize: this.state.fileSizeTarget,
+                                            })
+                                    }
                                 </Dropzone>
                             </div>
                         </div>
