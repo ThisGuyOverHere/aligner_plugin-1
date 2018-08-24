@@ -121,8 +121,6 @@ class ProjectComponent extends Component {
         env.alignAlgorithmAllVersions.map(e => {
             algorithmElements.push(<option key={e} value={e}>Algorithm V{e}</option>);
         });
-        let rows = this.renderItems(this.state.project.rows);
-
         return (
             <div className="align-project">
                 <div className="ui container">
