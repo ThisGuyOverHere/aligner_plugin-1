@@ -68,7 +68,7 @@ class UploadComponent extends Component {
                 }
             })
         };
-        httpUpload(files[0], onProgress).then(response => {
+        httpUpload(files, onProgress).then(response => {
             if (!response.errors) {
                 httpConversion({
                     file_name: response.data.file.name,
@@ -99,7 +99,7 @@ class UploadComponent extends Component {
                 }
             })
         };
-        httpUpload(files[0], onProgress).then(response => {
+        httpUpload(files, onProgress).then(response => {
 
             if (!response.errors) {
                 httpConversion({

@@ -9,7 +9,7 @@ import axios, {post} from 'axios';
 export const httpUpload = (file, onProgress) => {
     const url = '/plugins/aligner/upload';
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('files', file);
     let config = {
         headers: {
             'content-type': 'multipart/form-data'
