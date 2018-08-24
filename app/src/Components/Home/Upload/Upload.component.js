@@ -71,12 +71,12 @@ class UploadComponent extends Component {
         httpUpload(files[0], onProgress).then(response => {
             if (!response.errors) {
                 httpConversion({
-                    file_name: response.data.files[0].name,
+                    file_name: response.data[0].name,
                     source_lang: this.state.sourceLang,
                     target_lang: this.state.targetLang
                 });
                 this.setState({
-                    fileNameSource: response.data.files[0].name
+                    fileNameSource: response.data[0].name
                 });
             }
         }, (error) => {
@@ -103,12 +103,12 @@ class UploadComponent extends Component {
 
             if (!response.errors) {
                 httpConversion({
-                    file_name: response.data.files[0].name,
+                    file_name: response.data[0].name,
                     source_lang: this.state.targetLang,
                     target_lang: this.state.sourceLang
                 });
                 this.setState({
-                    fileNameTarget: response.data.files[0].name
+                    fileNameTarget: response.data[0].name
                 });
             }
         }, (error) => {
