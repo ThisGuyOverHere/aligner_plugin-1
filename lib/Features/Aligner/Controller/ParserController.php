@@ -50,6 +50,9 @@ class ParserController extends AlignerController {
             case 'v3':
                 $alignment = $this->_alignSegmentsV3($source_segments, $target_segments, $source_lang, $target_lang);
                 break;
+            case 'v3b':
+                $alignment = $this->_alignSegmentsV3B($source_segments, $target_segments, $source_lang, $target_lang);
+                break;
         }
 
         // DEBUG START //
@@ -1147,6 +1150,193 @@ class ParserController extends AlignerController {
 
         return $alignment;
    }
+
+    /**
+     *  Alignment based on Church and Gale with editing distance scoring
+     *
+     * @param $source
+     * @param $target
+     * @return array
+     */
+    protected function _alignSegmentsV3B($source, $target, $source_lang, $target_lang) {
+
+        function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
+
+            $str1Array = str_split($str1, 1);
+            $str2Array = str_split($str2, 1);
+
+            $matrix = [];
+
+            $str1Length = count($str1Array);
+            $str2Length = count($str2Array);
+
+            $row = [];
+            $row[0] = 0.0;
+            for ($j = 1; $j < $str2Length + 1; $j++) {
+                $row[$j] = $j * $costIns;
+            }
+
+            $matrix[0] = $row;
+
+            for ($i = 0; $i < $str1Length; $i++) {
+                $row = [];
+                $row[0] = ($i + 1) * $costDel;
+
+                for ($j = 0; $j < $str2Length; $j++) {
+                    $row[$j + 1] = min(
+                        $matrix[$i][$j + 1] + $costDel,
+                        $row[$j] + $costIns,
+                        $matrix[$i][$j] + ($str1Array[$i] === $str2Array[$j] ? 0.0 : $costRep)
+                    );
+                }
+
+                $matrix[$i + 1] = $row;
+            }
+
+            return $matrix[$str1Length][$str2Length];
+        }
+
+        // Simple merge, for 1-N matches
+        function mergeSegments($segments) {
+            if (count($segments) == 1) {
+                return reset($segments);  // Here I'm not sure if array starts with index 0
+            } else {
+                return array_reduce($segments, function ($carry, $item) {
+                    $carry['raw'] = trim($carry['raw'] . ' ' . $item['raw']);
+                    $carry['clean'] = trim($carry['clean'] . ' ' . $item['clean']);
+                    $carry['words'] += $item['words'];
+
+                    return $carry;
+                }, ['raw' => '', 'clean' => '', 'words' => 0]);
+            }
+        }
+
+        function eval_sents($sources, $targets) {
+            $costIns = 1; $costRep = 1; $costDel = 1;
+
+            $ss = mergeSegments($sources)['clean'];
+            $ts = mergeSegments($targets)['clean'];
+
+            if (strlen($ss) < 255 && strlen($ts) < 255) {
+                return levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+            } else {
+                return long_levenshtein($ss['clean'], $ts['clean'], $costIns, $costRep, $costDel);
+            }
+        }
+
+        function align($source, $target) {
+
+            $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
+
+            $m = [];
+            foreach (range(0, count($source)) as $si) {
+                foreach (range(0, count($target)) as $ti) {
+                    if ($si == 0 && $ti == 0) {
+                        $m[0][0] = [0, 0, 0];
+                    } else {
+
+                        $value = null;
+
+                        foreach ($beadCosts as $pair => $beadCost) {
+                            $sd = intval(substr($pair, 0, 1));
+                            $td = intval(substr($pair, -1, 1));
+
+                            if ($si - $sd >= 0 && $ti - $td >= 0) {
+
+                                $sources = array_slice($source, $si-$sd, $sd);
+                                $targets = array_slice($target, $ti-$td, $td);
+
+                                $score = $m[$si-$sd][$ti-$td][0] + eval_sents($sources, $targets) + $beadCost;
+
+                                $tuple = [$score, $sd, $td];
+
+                                // Emulate min function on tuple
+                                if ($value == null || $tuple[0] < $value[0]) {
+                                    $value = $tuple;
+                                }
+                            }
+                        }
+
+                        $m[$si][$ti] = $value;
+                    }
+                }
+            }
+
+            $res = [];
+
+            $si = count($source);
+            $ti = count($target);
+
+            while (true) {
+                list($c, $sd, $td) = $m[$si][$ti];
+
+                if ($sd == 0 && $td == 0) {
+                    break;
+                }
+
+                $res[] = [[$si - $sd, $sd], [$ti - $td, $td]];
+
+                $si -= $sd;
+                $ti -= $td;
+            }
+
+            return array_reverse($res);
+        }
+
+        function translateSegment($segment, $source_lang, $target_lang) {
+            $config = Aligner::getConfig();
+
+            $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+            $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
+            $engineRecord->type = 'MT';
+
+            $engine = new \Engines_GoogleTranslate($engineRecord);
+
+            $res = $engine->get([
+                'source' => $source_lang,
+                'target' => $target_lang,
+                'segment' => $segment
+            ]);
+
+            return $res['translation'];
+        }
+
+        // Pre-translate segments from source_lang to target_lang
+        function translateSegments($segments, $source_lang, $target_lang) {
+            $result = [];
+
+            foreach ($segments as $segment) {
+                $segment['clean'] = translateSegment($segment['clean'], $source_lang, $target_lang);
+                $result[] = $segment;
+            }
+
+            return $result;
+        }
+
+
+        // Variant on Church and Gale algorithm with Levenshtein distance
+        $source_translated = translateSegments($source, $source_lang, $target_lang);
+
+        $indexes = align($source_translated, $target);
+
+        $alignment = [];
+        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length]] of the source/target slice
+            $si = $index[0][0];
+            $ti = $index[1][0];
+
+            $sd = $index[0][1];
+            $td = $index[1][1];
+
+            $row = [
+                'source' => mergeSegments(array_slice($source, $si, $sd)),
+                'target' => mergeSegments(array_slice($target, $ti, $td))
+            ];
+
+            $alignment[] = $row;
+        }
+
+        return $alignment;
+    }
 
     /**
      * Temp version, remove if unused. It takes care of Tags
