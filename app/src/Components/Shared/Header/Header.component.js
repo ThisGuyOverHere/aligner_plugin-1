@@ -8,16 +8,7 @@ class HeaderComponent extends Component {
 
     constructor() {
         super();
-        let languages = [];
-        env.languages.map(e => {
-            languages.push({
-                key: e.code,
-                text: e.value,
-                value: e.code
-            })
-        });
         this.state = {
-            languages: languages,
             job: undefined,
             pName: '',
             projectTitle: 'Sample title for test header ellipsis at center',
@@ -47,9 +38,9 @@ class HeaderComponent extends Component {
                 </li>
                 <li>
                     <div id="source_to_target">
-                        <span id="source">{this.state.sourceLang}</span>
+                        <span id="source"> en-US </span>
                         >
-                        <span id="source">{this.state.targetLang}</span>
+                        <span id="source"> it-IT </span>
                     </div>
                 </li>
                 <li>
