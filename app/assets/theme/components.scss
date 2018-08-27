@@ -1,0 +1,27 @@
+ul.inline-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+
+  @media screen and (min-width: 30em) {
+    flex-direction: row;
+  }
+
+  > li {
+    display: inline-block;
+    margin: 0 16px;
+  }
+
+  &.align-middle {
+    li{
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+    align-items: center;
+  }
+}

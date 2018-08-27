@@ -23,7 +23,7 @@ class App extends Component {
                         <Route path="/project/:jobID/:password" component={ProjectComponent}/>
                         <Route component={NotFoundComponent}/>
                     </Switch>
-                    {/*<FooterComponent/>*/}
+                    <FooterComponent/>
                 </div>
             </HashRouter>
         );
