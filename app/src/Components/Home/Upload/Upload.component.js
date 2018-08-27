@@ -25,19 +25,19 @@ class UploadComponent extends Component {
             languages: languages,
             job: undefined,
             pName: '',
-            fileNameSource: null,
-            fileSizeSource: 0,
             uploadSource: {
                 progress: 0,
                 start: false,
-                status: 'start'
+                status: 'start',
+                name: null,
+                size: 0
             },
-            fileNameTarget: null,
-            fileSizeTarget: 0,
             uploadTarget: {
                 progress: 0,
                 start: false,
-                status: 'start'
+                status: 'start',
+                name: null,
+                size: 0
             },
             sourceLang: 'en-US',
             targetLang: 'it-IT',
@@ -64,12 +64,12 @@ class UploadComponent extends Component {
     onDropSource = (files) => {
         const onProgress = progressEvent => {
             this.setState({
-                fileSizeSource: Math.floor((progressEvent.total) / 1000),
-                fileNameSource: files[0].name,
                 uploadSource: {
                     progress: ((progressEvent.loaded * 100) / progressEvent.total),
                     start: true,
                     status: 'progress',
+                    size: Math.floor((progressEvent.total) / 1000),
+                    name: files[0].name
                 }
             });
         };
@@ -81,10 +81,11 @@ class UploadComponent extends Component {
                     target_lang: this.state.targetLang
                 });
                 this.setState({
-                    fileNameSource: response.data[0].name,
                     uploadSource: {
                         status: 'finish',
-                        progress: 0
+                        progress: 0,
+                        name: response.data[0].name,
+                        size: Math.floor((files[0].size) / 1000)
                     }
 
                 });
@@ -106,12 +107,12 @@ class UploadComponent extends Component {
     onDropTarget = (files) => {
         const onProgress = progressEvent => {
             this.setState({
-                fileSizeTarget: Math.floor((progressEvent.total) / 1000),
-                fileNameTarget: files[0].name,
                 uploadTarget: {
                     progress: ((progressEvent.loaded * 100) / progressEvent.total),
                     start: true,
                     status: 'progress',
+                    size: Math.floor((progressEvent.total) / 1000),
+                    name: files[0].name
                 }
             })
         };
@@ -124,11 +125,12 @@ class UploadComponent extends Component {
                     target_lang: this.state.sourceLang
                 });
                 this.setState({
-                    fileNameTarget: response.data[0].name,
-                    start: false,
                     uploadTarget: {
+                        start: false,
                         status: 'finish',
-                        progress: 0
+                        progress: 0,
+                        name: response.data[0].name,
+                        size: Math.floor((files[0].size) / 1000),
                     },
 
                 });
@@ -146,8 +148,8 @@ class UploadComponent extends Component {
     startAlignment = () => {
         httpCreateProject({
             project_name: this.state.pName,
-            file_name_source: this.state.fileNameSource,
-            file_name_target: this.state.fileNameTarget,
+            file_name_source: this.state.uploadSource.name,
+            file_name_target: this.state.uploadTarget.name,
             source_lang: this.state.sourceLang,
             target_lang: this.state.targetLang
         }).then(response => {
@@ -259,9 +261,9 @@ class UploadComponent extends Component {
                                         this.renderHtmlUpload(
                                             this.state.uploadSource.status,
                                             {
-                                                filename: this.state.fileNameSource,
+                                                filename: this.state.uploadSource.name,
                                                 progress: this.state.uploadSource.progress,
-                                                filesize: this.state.fileSizeSource
+                                                filesize: this.state.uploadSource.size
                                             })
                                     }
                                 </Dropzone>
@@ -284,9 +286,9 @@ class UploadComponent extends Component {
                                         this.renderHtmlUpload(
                                             this.state.uploadTarget.status,
                                             {
-                                                filename: this.state.fileNameTarget ,
+                                                filename: this.state.uploadTarget.name ,
                                                 progress: this.state.uploadTarget.progress,
-                                                filesize: this.state.fileSizeTarget,
+                                                filesize: this.state.uploadTarget.size,
                                             })
                                     }
                                 </Dropzone>
@@ -301,7 +303,7 @@ class UploadComponent extends Component {
 
                         <div className="four wide column">
                             <button className="ui primary button" onClick={this.startAlignment}
-                                    disabled={!this.state.fileNameSource || !this.state.fileNameTarget}
+                                    disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name}
                             >Start alignment
                             </button>
                         </div>

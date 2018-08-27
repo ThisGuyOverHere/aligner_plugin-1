@@ -109,6 +109,11 @@
       #file-icon{
         color: $lightBlue;
       }
+      .fileInfo{
+        display: inline-block;
+        text-align: left;
+        color: $black;
+      }
       #delete-icon{
         display: none;
         float: right;

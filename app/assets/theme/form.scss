@@ -29,7 +29,8 @@
     border-radius: 50px;
     .bar{
       border-radius: 50px;
-      width: 2px;
+      width: 2%;
+      min-width: 8%;
       height: 16px;
       background-color: $lightBlue;
     }
