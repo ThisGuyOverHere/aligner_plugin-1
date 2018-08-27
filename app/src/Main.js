@@ -1,13 +1,11 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import {HashRouter, Route, Link} from 'react-router-dom'
+import {HashRouter} from 'react-router-dom'
 
 import HomeComponent from "./Components/Home/Home.component";
 import ProjectComponent from "./Components/Project/Project.component";
 import NotFoundComponent from "./Components/Shared/NotFound/NotFound.component"
 import {Switch} from "react-router";
-import HeaderComponent from "./Components/Shared/Header/Header.component";
-import FooterComponent from "./Components/Shared/Footer/Footer.component";
 import Layout from "./Components/Shared/Layout/Layout.component";
 
 const e = React.createElement;
