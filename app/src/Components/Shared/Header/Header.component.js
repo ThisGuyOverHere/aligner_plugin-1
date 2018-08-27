@@ -38,9 +38,9 @@ class HeaderComponent extends Component {
                 </li>
                 <li>
                     <div id="source_to_target">
-                        <span id="source"> en-US </span>
+                        <span id="source">{this.state.sourceLang}</span>
                         >
-                        <span id="source"> it-IT </span>
+                        <span id="source">{this.state.targetLang}</span>
                     </div>
                 </li>
                 <li>
@@ -73,7 +73,7 @@ class HeaderComponent extends Component {
                 <li id="logo"></li>
                 <li id="user">
                     <div className="ui user-nolog label" title="Login">
-                        <i className="icon-user22"></i>
+                        <i className="icon user"></i>
                     </div>
                 </li>
             </ul>
