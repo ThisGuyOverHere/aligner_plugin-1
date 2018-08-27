@@ -7,9 +7,9 @@ const Layout = ({component: Component, ...rest}) => {
     return (
         <Route {...rest} render={matchProps => (
             <div className="DefaultLayout">
-                <HeaderComponent/>
+                <HeaderComponent {...matchProps}/>
                 <Component {...matchProps} />
-                <FooterComponent/>
+                <FooterComponent {...matchProps}/>
             </div>
         )} />
     )

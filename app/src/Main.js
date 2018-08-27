@@ -17,9 +17,9 @@ class App extends Component {
                 basename="/">
                 <div className="App">
                     <Switch>
-                        <Layout exact path="/" component={() => <HomeComponent/>}/>
-                        <Layout path="/project/:jobID/:password" component={() => ProjectComponent}/>
-                        <Layout component={() => NotFoundComponent}/>
+                        <Layout exact path="/" component={HomeComponent}/>
+                        <Layout path="/project/:jobID/:password" component={ProjectComponent}/>
+                        <Layout component={NotFoundComponent}/>
                     </Switch>
                 </div>
             </HashRouter>
