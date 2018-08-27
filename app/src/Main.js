@@ -8,6 +8,7 @@ import NotFoundComponent from "./Components/Shared/NotFound/NotFound.component"
 import {Switch} from "react-router";
 import HeaderComponent from "./Components/Shared/Header/Header.component";
 import FooterComponent from "./Components/Shared/Footer/Footer.component";
+import Layout from "./Components/Shared/Layout/Layout.component";
 
 const e = React.createElement;
 
@@ -17,17 +18,16 @@ class App extends Component {
             <HashRouter
                 basename="/">
                 <div className="App">
-                    <HeaderComponent/>
                     <Switch>
-                        <Route exact path="/" component={() => <HomeComponent/>} />
-                        <Route path="/project/:jobID/:password" component={ProjectComponent}/>
-                        <Route component={NotFoundComponent}/>
+                        <Layout exact path="/" component={() => <HomeComponent/>}/>
+                        <Layout path="/project/:jobID/:password" component={() => ProjectComponent}/>
+                        <Layout component={() => NotFoundComponent}/>
                     </Switch>
-                    <FooterComponent/>
                 </div>
             </HashRouter>
         );
     }
 }
+
 const domContainer = document.querySelector('#app-root');
 ReactDOM.render(e(App), domContainer);
