@@ -10,7 +10,7 @@ namespace Features\Aligner\Model;
 
 abstract class DataAccess_AbstractDao extends \DataAccess_AbstractDao {
 
-    public function updateField( $project, $field, $value ) {
+    /*public function updateField( $project, $field, $value ) {
 
         $sql = "UPDATE ".self::TABLE." SET {$field} = :value WHERE id = :id ";
 
@@ -28,6 +28,6 @@ abstract class DataAccess_AbstractDao extends \DataAccess_AbstractDao {
 
         return $project;
 
-    }
+    }*/
 
 }
