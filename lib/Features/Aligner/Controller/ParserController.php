@@ -59,31 +59,31 @@ class ParserController extends AlignerController {
         }
 
         // DEBUG //
-        $this->response->json( ['res' => $alignment] );
+//        $this->response->json( ['res' => $alignment] );
 
         // Format alignment for frontend test purpose
-//        $source = array_map(function ($index, $item) {
-//            return [
-//                'clean' => $item['source']['clean'],
-//                'raw' => $item['source']['raw'],
-//                'order' => ($index + 1)* 1000000000,
-//                'next' => ($index + 2) * 1000000000
-//                ];
-//        }, array_keys($alignment), $alignment);
-//
-//        $target = array_map(function ($index, $item) {
-//            return [
-//                'clean' => $item['target']['clean'],
-//                'raw' => $item['target']['raw'],
-//                'order' => ($index + 1)* 1000000000,
-//                'next' => ($index + 2) * 1000000000
-//            ];
-//        }, array_keys($alignment), $alignment);
-//
-//        $source[count($source)-1]['next'] = null;
-//        $target[count($target)-1]['next'] = null;
-//
-//        $this->response->json( ['source' => $source, 'target' => $target] );
+        $source = array_map(function ($index, $item) {
+            return [
+                'clean' => $item['source']['clean'],
+                'raw' => $item['source']['raw'],
+                'order' => ($index + 1)* 1000000000,
+                'next' => ($index + 2) * 1000000000
+                ];
+        }, array_keys($alignment), $alignment);
+
+        $target = array_map(function ($index, $item) {
+            return [
+                'clean' => $item['target']['clean'],
+                'raw' => $item['target']['raw'],
+                'order' => ($index + 1)* 1000000000,
+                'next' => ($index + 2) * 1000000000
+            ];
+        }, array_keys($alignment), $alignment);
+
+        $source[count($source)-1]['next'] = null;
+        $target[count($target)-1]['next'] = null;
+
+        $this->response->json( ['source' => $source, 'target' => $target] );
     }
 
 
