@@ -7,7 +7,6 @@ class HeaderComponent extends Component {
         const jobID = (this.props.match
             && this.props.match.params
             && this.props.match.params.jobID) ? this.props.match.params.jobID : null;
-        console.log('constructor', this.props.match.params);
         this.state = {
             pName: '',
             projectTitle: 'Sample title for test header ellipsis at center',
@@ -29,26 +28,16 @@ class HeaderComponent extends Component {
         return str;
     };
 
-    /*
-    setJobID = (jobID) =>{
+    static getDerivedStateFromProps(nextProps, prevState) {
 
-      this.setState({
-          job:{
-              id: jobID
-          }
-      })
-    };
-    */
-
-     static getDerivedStateFromProps(nextProps, prevState) {
-        if(Object.keys(nextProps.match.params).length == 0){
-            prevState.job.id = null;
-        }else{
+        if(nextProps.match.params && nextProps.match.params.jobID){
             prevState.job.id = nextProps.match.params.jobID;
+        }else{
+            prevState.job.id = null;
         }
+
         return prevState;
     }
-
 
     renderHtmlNavigation = () => {
         if(this.state.job.id){
