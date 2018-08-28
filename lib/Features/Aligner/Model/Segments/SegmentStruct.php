@@ -14,7 +14,10 @@ class Segments_SegmentStruct extends \DataAccess_AbstractDaoSilentStruct impleme
     public $id_job ;
     public $id_file ;
     public $type ;
-    public $content ;
+    public $order ;
+    public $next ;
+    public $content_clean ;
+    public $content_raw ;
     public $content_hash ;
     public $language_code ;
     public $raw_word_count;

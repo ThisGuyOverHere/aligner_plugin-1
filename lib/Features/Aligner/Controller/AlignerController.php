@@ -13,9 +13,11 @@ use Features\Aligner;
 use Features\Aligner\Model\NewDatabase;
 
 class AlignerController extends KleinController {
+    public $dbHandler;
+
     public function __construct( $request, $response, $service, $app ) {
         $config = Aligner::getConfig();
-        NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE'])->getConnection();
+        $this->dbHandler = NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE'])->getConnection();
         parent::__construct( $request, $response, $service, $app );
     }
 }

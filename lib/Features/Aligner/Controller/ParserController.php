@@ -668,4 +668,10 @@ class ParserController extends AlignerController {
 
         return $alignment;
     }
+
+    private function __storeSegments($segments){
+
+        $sequenceIds = $this->dbHandler->nextSequence( NewDatabase::ID_SEGMENT, count( $segments ) );
+
+    }
 }
