@@ -1,0 +1,143 @@
+@import "../../../../assets/theme/variables";
+
+.loginContainer{
+  margin: auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  -webkit-animation-name: animatetop;
+  -webkit-animation-duration: 0.4s;
+  animation-name: animatetop;
+  animation-duration: 0.4s;
+  text-align: center;
+  -webkit-box-shadow: 0 1px 20px #000;
+  box-shadow: 0 1px 20px #6f6e6e;
+  width: 80%;
+  max-width: 800px;
+  min-width: 600px;
+  .header{
+    background-color: $headerBlack;
+    height: 48px;
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 7px 10px 23px;
+    .dx-header{
+
+    }
+    .sx-header{
+      img{
+        height: 22px;
+      }
+    }
+  }
+  .content{
+    background-color: $white;
+    .dx-content{
+      padding: 24px;
+      text-align: left;
+      h2{
+        font-size: 22px;
+        color: $black;
+      }
+      ul{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: $black;
+        li{
+          margin-bottom: 15px;
+          i{
+            margin-right: 11px!important;
+            color: $checkBlue;
+          }
+        }
+      }
+      button{
+        padding: 8px 18px;
+        margin: 16px 0 16px 0px;
+        border-radius: 2px;
+        font-size: 18px;
+        width: 160px;
+        text-transform: none;
+      }
+    }
+    .sx-content{
+      height: 100%;
+      padding: 24px;
+      background-color: $googleLogin;
+      border-left: 1px solid $googleLoginBorder;
+      .google-login{
+        background-color: #3e82f7;
+        color: #fff;
+        padding: 8px;
+      }
+      .login-form-container{
+        .divider-line{
+          height: 2px;
+          width: 40%;
+          background-color: #c5c5c5;
+          margin-top: 10px;
+          display: block;
+          float: left;
+        }
+        .form-divider{
+          width: 100%;
+          text-align: center;
+          position: relative;
+          height: 20px;
+          margin: 15px 0px;
+          .divider-line{
+            height: 2px;
+            width: 40%;
+            background-color: #c5c5c5;
+            margin-top: 10px;
+            display: block;
+            float: left;
+          }
+          span{
+            float: left;
+            width: 20%;
+            color: #656565;
+            display: inline-block;
+          }
+        }
+        input{
+          width: 100%;
+          padding: 10px;
+          display: inline-block;
+          border: 1px solid $googleLoginBorder;
+          box-shadow: $loginInputShadow;
+          border-radius: 4px;
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+          font-size: 15px;
+          color: #333;
+          margin-bottom: 17px;
+          margin-top: 5px;
+        }
+      }
+      .login-btn{
+        width: 120px;
+        margin: 15px auto;
+        display: block;
+        text-transform: none;
+      }
+      .forgot-password{
+        cursor: pointer;
+        text-decoration: underline;
+        color: $darkBlue;
+      }
+    }
+  }
+}
+
+.my-row{
+  padding: 0px!important;
+}
+
+.my-grid{
+  margin-top: 0px!important;
+}

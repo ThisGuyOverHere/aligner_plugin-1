@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import { Link } from "react-router-dom";
+import LoginComponent from "../Login/Login.component";
+
 class HeaderComponent extends Component {
 
     constructor(props) {
@@ -7,7 +9,6 @@ class HeaderComponent extends Component {
         const jobID = (this.props.match
             && this.props.match.params
             && this.props.match.params.jobID) ? this.props.match.params.jobID : null;
-        console.log('constructor', this.props.match.params);
         this.state = {
             pName: '',
             projectTitle: 'Sample title for test header ellipsis at center',
@@ -17,7 +18,9 @@ class HeaderComponent extends Component {
                 name: null,
                 id: jobID,
                 segments: null
-            }
+            },
+            loginOpen: false,
+            loggedIn: false
         }
     }
 
@@ -29,23 +32,14 @@ class HeaderComponent extends Component {
         return str;
     };
 
-    /*
-    setJobID = (jobID) =>{
-
-      this.setState({
-          job:{
-              id: jobID
-          }
-      })
-    };
-    */
-
      static getDerivedStateFromProps(nextProps, prevState) {
-        if(Object.keys(nextProps.match.params).length == 0){
-            prevState.job.id = null;
-        }else{
-            prevState.job.id = nextProps.match.params.jobID;
-        }
+
+         if(nextProps.match.params && nextProps.match.params.jobID){
+             prevState.job.id = nextProps.match.params.jobID;
+         }else{
+             prevState.job.id = null;
+         }
+
         return prevState;
     }
 
@@ -90,6 +84,13 @@ class HeaderComponent extends Component {
                         <div className="ui user-nolog label" title="Login">
                             <i className="icon user"></i>
                         </div>
+                        {this.state.loginOpen ? (
+                            <div className="overlay" onClick={() => this.loginClicked()}>
+                                <LoginComponent/>
+                            </div>
+                        ) : (
+                            null
+                        )}
                     </div>
                 </li>
             </ul>;
@@ -99,9 +100,16 @@ class HeaderComponent extends Component {
                     <div id="logo"></div>
                 </Link>
                 <li id="user">
-                    <div className="ui user-nolog label" title="Login">
+                    <div className="ui user-nolog label" title="Login" onClick={() => this.loginClicked()}>
                         <i className="icon user"></i>
                     </div>
+                    {this.state.loginOpen ? (
+                        <div className="overlay" onClick={() => this.loginClicked()}>
+                            <LoginComponent/>
+                        </div>
+                    ) : (
+                        null
+                    )}
                 </li>
             </ul>
         }
@@ -114,5 +122,10 @@ class HeaderComponent extends Component {
             </div>
         );
     }
+
+    loginClicked () {
+        console.log('here');
+        this.setState(prevState => ({ loginOpen: !prevState.loginOpen }) );
+    };
 }
 export default HeaderComponent;

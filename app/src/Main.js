@@ -4,7 +4,7 @@ import {HashRouter} from 'react-router-dom'
 
 import HomeComponent from "./Components/Home/Home.component";
 import ProjectComponent from "./Components/Project/Project.component";
-import NotFoundComponent from "./Components/Shared/NotFound/NotFound.component"
+import NotFoundComponent from "./Components/Shared/NotFound/NotFound.component";
 import {Switch} from "react-router";
 import Layout from "./Components/Shared/Layout/Layout.component";
 
