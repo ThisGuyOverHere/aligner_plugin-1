@@ -53,14 +53,12 @@ class ProjectComponent extends Component {
 
 
     setRows = (job) => {
-        let row;
         let rows = [];
         job.source.map((e, index) => {
-            row = {
+            rows.push({
                 source: e,
                 target: job.target[index]
-            };
-            rows.push(row);
+            });
         });
         this.setState({
             project: {
