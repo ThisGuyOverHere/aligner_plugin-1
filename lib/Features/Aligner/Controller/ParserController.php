@@ -1439,7 +1439,7 @@ class ParserController extends AlignerController {
             }
         }
 
-        function align($source, $target) {
+        function buildScores($source, $target) {
 
             $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
 
@@ -1477,13 +1477,17 @@ class ParserController extends AlignerController {
                 }
             }
 
+            return $m;
+        }
+
+        function extractPath($source, $target, $scores) {
             $res = [];
 
             $si = count($source);
             $ti = count($target);
 
             while (true) {
-                list($c, $sd, $td) = $m[$si][$ti];
+                list($c, $sd, $td) = $scores[$si][$ti];
 
                 if ($sd == 0 && $td == 0) {
                     break;
@@ -1496,6 +1500,14 @@ class ParserController extends AlignerController {
             }
 
             return array_reverse($res);
+        }
+
+        function align($source, $target) {
+
+            $scores = buildScores($source, $target);
+            $alignment = extractPath($source, $target, $scores);
+
+            return $alignment;
         }
 
         function translateSegment($segment, $source_lang, $target_lang) {
