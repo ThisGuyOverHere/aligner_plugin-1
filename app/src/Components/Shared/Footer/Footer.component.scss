@@ -9,6 +9,7 @@
   bottom: 0;
   left: 0;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   /*display: flex;*/
   .ui.progress{
@@ -18,5 +19,8 @@
   }
   p{
     line-height: 1em;
+  }
+  a{
+    color: $white;
   }
 }

@@ -221,17 +221,16 @@ let ProjectActions = {
         lastMock.order = +lastSegment.order + env.orderElevation;
         lastSegment.next = lastMock.order;
         changes.push({
-            type: log.type,
+            type: inverse[log.type],
             action: 'update',
             rif_order: lastSegment.order,
             data: lastSegment
         });
         changes.push({
-            type: log.type,
+            type: inverse[log.type],
             action: 'push',
             data: lastMock
         });
-
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,

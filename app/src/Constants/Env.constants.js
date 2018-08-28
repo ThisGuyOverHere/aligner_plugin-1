@@ -1,6 +1,6 @@
 const env = {
     alignAlgorithmDefaultVersion: 1,
-    alignAlgorithmAllVersions: [0,1,2],
+    alignAlgorithmAllVersions: ["0","1","2","3","3b","3c"],
     languages: [
         {code:"af-ZA", value:"Afrikaans"},
         {code:"sq-AL", value:"Albanian"},

@@ -53,14 +53,12 @@ class ProjectComponent extends Component {
 
 
     setRows = (job) => {
-        let row;
         let rows = [];
         job.source.map((e, index) => {
-            row = {
+            rows.push({
                 source: e,
                 target: job.target[index]
-            };
-            rows.push(row);
+            });
         });
         this.setState({
             project: {
@@ -115,7 +113,7 @@ class ProjectComponent extends Component {
     render() {
         let algorithmElements = [];
         env.alignAlgorithmAllVersions.map(e => {
-            algorithmElements.push(<option key={e} value={e}>Algorithm V{e}</option>);
+            algorithmElements.push(<option key={e} value={e}>Algorithm v{e}</option>);
         });
         return (
             <div className="align-project">
