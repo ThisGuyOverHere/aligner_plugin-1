@@ -28,7 +28,28 @@ class HeaderComponent extends Component {
         }
         return str;
     };
-    
+
+    /*
+    setJobID = (jobID) =>{
+
+      this.setState({
+          job:{
+              id: jobID
+          }
+      })
+    };
+    */
+
+     static getDerivedStateFromProps(nextProps, prevState) {
+        if(Object.keys(nextProps.match.params).length == 0){
+            prevState.job.id = null;
+        }else{
+            prevState.job.id = nextProps.match.params.jobID;
+        }
+        return prevState;
+    }
+
+
     renderHtmlNavigation = () => {
         if(this.state.job.id){
             return <ul className="aligner-nav-log" role="navigation">
