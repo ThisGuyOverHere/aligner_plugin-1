@@ -1,20 +1,23 @@
 import React, {Component} from 'react';
-import {Link} from "react-router-dom";
-import env from "../../../Constants/Env.constants";
-
+import { Link } from "react-router-dom";
 class HeaderComponent extends Component {
 
-    static propTypes = {};
-
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
+        const jobID = (this.props.match
+            && this.props.match.params
+            && this.props.match.params.jobID) ? this.props.match.params.jobID : null;
+        console.log('constructor', this.props.match.params);
         this.state = {
-            job: undefined,
             pName: '',
             projectTitle: 'Sample title for test header ellipsis at center',
             sourceLang: 'en-US',
             targetLang: 'it-IT',
-            alignmentStarted: true
+            job: {
+                name: null,
+                id: jobID,
+                segments: null
+            }
         }
     }
 
@@ -25,13 +28,14 @@ class HeaderComponent extends Component {
         }
         return str;
     };
-
-
+    
     renderHtmlNavigation = () => {
-        if(this.state.alignmentStarted){
+        if(this.state.job.id){
             return <ul className="aligner-nav-log" role="navigation">
                 <li>
-                    <div id="logo"></div>
+                    <Link to="/">
+                        <div id="logo"></div>
+                    </Link>
                     <div id="final_title">
                         {this.titleEllipsisCenter()}
                     </div>
@@ -45,7 +49,7 @@ class HeaderComponent extends Component {
                 </li>
                 <li>
                     <div id="mini_align_nav">
-                        <p id="aligned"> Mismatch 1 </p> /  5
+                        <p id="aligned"> Mismatch 1 </p> / 5
                         <span>
                             <i className="icon angle up"></i>
                         </span>
@@ -67,10 +71,12 @@ class HeaderComponent extends Component {
                         </div>
                     </div>
                 </li>
-            </ul>
+            </ul>;
         } else {
             return <ul className="aligner-nav-nolog" role="navigation">
-                <li id="logo"></li>
+                <Link to="/">
+                    <div id="logo"></div>
+                </Link>
                 <li id="user">
                     <div className="ui user-nolog label" title="Login">
                         <i className="icon user"></i>
