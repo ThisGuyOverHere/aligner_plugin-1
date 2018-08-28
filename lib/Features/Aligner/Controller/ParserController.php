@@ -1441,7 +1441,8 @@ class ParserController extends AlignerController {
 
         function buildScores($source, $target) {
 
-            $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
+            // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
+            $beadCosts = ['1-1' => 0, '2-1' => 0, '1-2' => 0, '0-1' => 0, '1-0' => 0, '2-2' => 0];  // Penality for merge and holes
 
             $m = [];
             foreach (range(0, count($source)) as $si) {
@@ -1502,12 +1503,97 @@ class ParserController extends AlignerController {
             return array_reverse($res);
         }
 
+        function findAbsoluteMatches($source, $target) {
+            // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
+            $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
+
+            $source = array_map(function ($item) use ($delimiters) {
+                $text = strtolower($item['clean']);
+                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
+                $text = implode('', $elements);
+                return $text;
+            }, $source);
+
+            $target = array_map(function ($item) use ($delimiters) {
+                $text = strtolower($item['clean']);
+                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
+                $text = implode('', $elements);
+                return $text;
+            }, $target);
+
+            // We need to perform it twice to have both indexes
+            $commonST = array_intersect($source, $target);
+            $commonTS = array_intersect($target, $source);
+
+            $sourceIndexes = array_keys($commonST);
+            $targetIndexes = array_keys($commonTS);
+
+            // Indexes array are same size
+            $commonSegments = [];
+
+            foreach ($sourceIndexes as $key => $value) {
+                $commonSegments[] = [$value, $targetIndexes[$key]];  // Build pairs with source,target index of exact matches
+            }
+
+            return $commonSegments;
+        }
+
         function align($source, $target) {
 
-            $scores = buildScores($source, $target);
-            $alignment = extractPath($source, $target, $scores);
+            $matches = findAbsoluteMatches($source, $target);
 
-            return $alignment;
+            // No exact match has been found, we need to align entire document
+            if (empty($matches)) {
+                $scores = buildScores($source, $target);
+                $alignment = extractPath($source, $target, $scores);
+
+                return $alignment;
+            } else {
+                // Perform alignment on all sub-array, then merge them
+                $alignment = [];
+                $lastMatch = [0, 0];
+
+                foreach ($matches as $match) {
+
+                    $subSource = array_slice($source, $lastMatch[0], $match[0] - $lastMatch[0]);
+                    $subTarget = array_slice($target, $lastMatch[1], $match[1] - $lastMatch[1]);
+
+                    $scores = buildScores($subSource, $subTarget);
+                    $subAlignment = extractPath($subSource, $subTarget, $scores);
+
+                    // Adjust offset
+                    $subAlignment = array_map(function ($item) use ($lastMatch) {
+                        $item[0][0] += $lastMatch[0];
+                        $item[1][0] += $lastMatch[1];
+                        return $item;
+                    }, $subAlignment);
+
+                    $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
+                    $alignment[] = [[$match[0], 1], [$match[1], 1]];  // Add alignment for exact match
+
+                    // Update lastMatch to skip current match
+                    $lastMatch[0] = $match[0] + 1;
+                    $lastMatch[1] = $match[1] + 1;
+                }
+
+                // Align last part of documents, after last exact match
+                $subSource = array_slice($source, $lastMatch[0]);
+                $subTarget = array_slice($target, $lastMatch[1]);
+
+                $scores = buildScores($subSource, $subTarget);
+                $subAlignment = extractPath($subSource, $subTarget, $scores);
+
+                // Adjust offset
+                $subAlignment = array_map(function ($item) use ($lastMatch) {
+                    $item[0][0] += $lastMatch[0];
+                    $item[1][0] += $lastMatch[1];
+                    return $item;
+                }, $subAlignment);
+
+                $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
+
+                return $alignment;
+            }
         }
 
         function translateSegment($segment, $source_lang, $target_lang) {
