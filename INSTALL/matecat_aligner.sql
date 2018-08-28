@@ -57,9 +57,14 @@ CREATE TABLE `files` (
   KEY `filename` (`filename`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `sequences`;
+CREATE TABLE `sequences` (
+  `id_segment` bigint(20) unsigned NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `segments`;
 CREATE TABLE `segments` (
-  `seq` bigint(20) NOT NULL,
+  `id` bigint(20) unsigned NOT NULL,
   `id_job` bigint(20) NOT NULL,
   `id_file` bigint(20) NOT NULL,
   `internal_id` varchar(100) DEFAULT NULL,
@@ -74,7 +79,7 @@ CREATE TABLE `segments` (
   `raw_word_count` double(20,2) DEFAULT NULL,
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY `primary_seq_job` (`seq`,`id_job`),
+  UNIQUE KEY `primary_seq_job` (`id`,`id_job`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `internal_id` (`internal_id`) USING BTREE,
   KEY `content_hash` (`content_hash`) USING HASH COMMENT 'MD5 hash of segment content',
@@ -86,7 +91,7 @@ CREATE TABLE `segments_match` (
   `id_job` bigint(20) NOT NULL,
   `order` bigint(20) NOT NULL,
   `type` enum('target', 'source') NOT NULL,
-  `segment_seq` bigint(20) DEFAULT NULL,
+  `segment_id` bigint(20) DEFAULT NULL,
   `next` bigint(20) DEFAULT NULL,
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -94,6 +99,8 @@ CREATE TABLE `segments_match` (
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `order` (`order`),
   KEY `type` (`type`),
-  KEY `segment_seq` (`segment_seq`),
+  KEY `segment_id` (`segment_id`),
   KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+

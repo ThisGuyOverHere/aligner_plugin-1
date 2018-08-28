@@ -9,34 +9,26 @@ module.exports = function(grunt) {
 
     grunt.initConfig( {
         watch: {
-            components: {
-                files: [
-                    'src/*.js',
-                    'src/**/*.js'
-                ],
-                tasks: ['browserify:components'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },
             css: {
-                files: 'src/**/*.scss',
-                tasks: ['sass'],
-                options: {
-                    livereload : true
-                }
+                files: [
+                    'src/**/*.scss',
+                    'assets/**/*.scss'
+                ],
+                tasks: ['sass','autoprefixer'],
             }
         },
         browserify: {
-            components: {
+
+            dev: {
                 options: {
                     transform: [
                         [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
-                        paths: [ __dirname + '/node_modules' ]
-                    }
+                        debug : true // source mapping
+                    },
+                    watch : true, // use watchify for incremental builds!
+                    //keepAlive : true, // watchify will exit unless task is kept alive
                 },
                 src: [
                     'src/*.js',
@@ -44,6 +36,29 @@ module.exports = function(grunt) {
                 ],
                 dest:  '../static/build/js/main.js'
             },
+
+            dist: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
+                    ],
+                },
+                src: [
+                    'src/*.js',
+                    'src/**/*.js'
+                ],
+                dest:  '../static/build/js/main.js'
+            },
+        },
+        autoprefixer:{
+            options: {
+                browsers: ['last 2 versions']
+            },
+            dist:{
+                files:{
+                    '../static/build/css/style.css':'../static/build/css/style.css'
+                }
+            }
         },
         sass: {
             options: {
@@ -61,14 +76,13 @@ module.exports = function(grunt) {
     });
 
     // Define your tasks here
-    grunt.registerTask('default', ['bundle:js','sass']);
+    grunt.registerTask('default', ['browserify:dist','sass','autoprefixer']);
+    grunt.registerTask('dev', ['browserify:dev','sass','autoprefixer','watch']);
 
-    grunt.registerTask('bundle:js', [
-        'browserify:components'
-    ]);
 
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-autoprefixer');
     grunt.loadNpmTasks('grunt-sass');
 
 };

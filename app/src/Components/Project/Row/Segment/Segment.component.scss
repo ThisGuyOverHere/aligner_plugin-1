@@ -1,0 +1,32 @@
+.segmentBox {
+  padding: 20px 10px;
+  font-size: 16px;
+  text-align: left;
+  z-index: 9999;
+  width: 100%;
+  transition: box-shadow 600ms ease-in;
+}
+
+.columnSegment{
+  transition: transform 300ms ease-in;
+  &.dropColumn {
+    .segmentBox {
+      box-shadow: 0 0 3px 1px #09beec3b !important;
+      transition: box-shadow 200ms ease-in;
+    }
+    &.dropped{
+      transform: perspective(1px) scale(1.02) translateZ(0px);
+      -webkit-transform: perspective(1px) scale(1.02) translateZ(0px);
+      *{
+        transform: perspective(1px) translateZ(0px);
+        -webkit-transform: perspective(1px) translateZ(0px);
+      }
+    }
+  }
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  body {
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+}

@@ -1,0 +1,139 @@
+@import "../../../../assets/theme/variables";
+
+#header{
+  height: 48px;
+  z-index: 999;
+  background: $headerBlack;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  li{
+    color: $headerText;
+    font-size: 16px;
+    line-height: 32px;
+    font-weight: 300;
+    &:last-child{
+      margin-right: 0px;
+    }
+  }
+  .aligner-nav-log , .aligner-nav-nolog{
+    padding: 6px 11px 0 13px;
+    display: -ms-flexbox;
+    display: flex;
+    list-style: none;
+    margin: 0px;
+    justify-content: space-between;
+    #logo{
+      top: 4px;
+      border: 0;
+      background: url("/public/img/logo.png") 0px 2px no-repeat;
+      width: 145px;
+      height: 31px;
+      background-size: 130px 26px;
+      position: relative;
+    }
+  }
+  .aligner-nav-nolog{
+    justify-content: space-between;
+    #user{
+      i{
+        margin: 0 auto;
+      }
+    }
+  }
+
+  .aligner-nav-log{
+    li{
+      flex: 1;
+      height: 38px;
+      &:nth-child(2){
+        text-align: center;
+      }
+      &:nth-child(3){
+        text-align: right;
+      }
+    }
+    #logo,
+    #source_to_target,
+    #user,
+    #final_title,
+    #mini_align_nav,
+    #export{
+      display: inline-block;
+    }
+    #final_title{
+      position: relative;
+      bottom: 8px;
+      left: 24px;
+    }
+    #source_to_target{
+     span{
+       color: $white;
+       margin: 0px 16px;
+     }
+    }
+    #mini_align_nav{
+      margin-right: 24px;
+      #aligned{
+        color: $white;
+        display: inline-block;
+      }
+      span{
+        &:nth-child(2){
+          margin-left: 8px;
+        }
+        border: 1px solid $secondaryText;
+        border-radius: 2px;
+        font-size: 1.5rem;
+        position: relative;
+        top: 4px;
+        margin: 0px 2px;
+        cursor: pointer;
+        i{
+          margin: 0px;
+        }
+      }
+    }
+    #export{
+      button{
+        width: 88px;
+        margin: 0px;
+        padding: 8px;
+        text-transform: none;
+        span{
+          i{
+            margin: 0 auto;
+            padding-left: 8px;
+          }
+
+        }
+      }
+    }
+    #user{
+      i{
+        margin: 0 auto;
+      }
+    }
+  }
+
+  .user-nolog{
+    align-items: center;
+    background: center/cover transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: #fff;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: relative;
+    font-size: 14px;
+    height: 36px;
+    width: 36px;
+    margin-left: 24px;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px dashed;
+  }
+}

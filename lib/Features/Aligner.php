@@ -27,6 +27,7 @@ class Aligner extends BaseFeature
         route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
         route( '/create_project', 'POST', 'Features\Aligner\Controller\CreateProjectController', 'create' );
         route( '/parse/[:version]/[:id_job]', 'GET', 'Features\Aligner\Controller\ParserController', 'jobParser' );
+        route( '/segments/[:id_job]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
 
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }

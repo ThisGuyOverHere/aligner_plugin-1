@@ -1,5 +1,5 @@
 const env = {
-    alignAlgorithmDefaultVersion: 2,
+    alignAlgorithmDefaultVersion: 1,
     alignAlgorithmAllVersions: [0,1,2],
     languages: [
         {code:"af-ZA", value:"Afrikaans"},

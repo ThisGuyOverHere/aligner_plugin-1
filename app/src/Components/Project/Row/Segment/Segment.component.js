@@ -7,6 +7,7 @@ import ProjectActions from "../../../../Actions/Project.actions";
 
 const ItemSource = {
     beginDrag(props) {
+
         return props;
     },
     canDrag(props, monitor) {
@@ -24,6 +25,20 @@ function collect(connect, monitor) {
 }
 
 class SegmentComponent extends Component {
+    static propTypes = {
+        type: PropTypes.string.isRequired,
+        segment: PropTypes.shape({
+            order: PropTypes.number.isRequired,
+            clean: PropTypes.oneOfType([() => {
+                return null
+            }, PropTypes.number]).isDefined,
+            next: PropTypes.oneOfType([() => {
+                return null
+            }, PropTypes.number]).isDefined
+        }).isRequired
+
+    };
+
     constructor(props) {
         super(props);
 
@@ -53,31 +68,24 @@ class SegmentComponent extends Component {
         const {left, top, isDragging, segment} = props;
         const transform = `translate3d(${left}px, ${top}px, 0)`;
         let background;
-        if (segment.clean) {
+        if (!segment.clean || isDragging) {
+            background = {
+                border: '1px dashed #CBCBCB',
+            }
+        } else {
             background = {
                 background: '#ffffff',
                 boxShadow: '0px 1px 1px #CCCCCC',
             }
-        } else {
-            background = {
-                border: '1px dashed #CBCBCB',
-            }
         }
+
         return {
-            position: isDragging ? 'absolute' : 'relative',
-            zIndex: 9999,
-            width: '100%',
             transform,
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
             // because IE will ignore our custom "empty image" drag preview.
-            cursor: 'pointer',
+            cursor: isDragging ? 'grabbing' : 'grab',
             ...background,
-            padding: '20px 10px',
-            textAlign: 'left',
-            opacity: isDragging ? 0 : 1,
-            height: isDragging ? 0 : '',
-            fontSize: 16,
         }
     };
 
@@ -89,7 +97,7 @@ class SegmentComponent extends Component {
     };
 
 
-    render() {
+    render = () => {
         const {connectDragSource, isDragging, canDrag, segment} = this.props;
         let cursorDrag = 'not-allowed';
         if (isDragging) {
@@ -98,14 +106,14 @@ class SegmentComponent extends Component {
             cursorDrag = 'move'
         }
         return connectDragSource(
-            <div style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
-                <p>{segment.clean}</p>
+            <div className="segmentBox" style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
+                <p>{isDragging ? '' : segment.clean}</p>
             </div>
         );
     }
 
-    componentDidCatch() {
-
+    componentDidCatch = (error) => {
+        console.error(error)
     }
 
     componentDidMount() {
@@ -124,19 +132,5 @@ class SegmentComponent extends Component {
     componentWillUnmount() {
     }
 }
-
-SegmentComponent.propTypes = {
-    type: PropTypes.string.isRequired,
-    segment: PropTypes.shape({
-        order: PropTypes.number.isRequired,
-        clean: PropTypes.oneOfType([() => {
-            return null
-        }, PropTypes.number]).isDefined,
-        next: PropTypes.oneOfType([() => {
-            return null
-        }, PropTypes.number]).isDefined
-    }).isRequired
-
-};
 
 export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);

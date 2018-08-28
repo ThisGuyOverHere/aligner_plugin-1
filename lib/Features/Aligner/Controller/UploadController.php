@@ -8,12 +8,17 @@
 
 namespace Features\Aligner\Controller;
 
+include_once \INIT::$UTILS_ROOT . "/fileupload/upload.class.php";
+
+
 class UploadController extends AlignerController {
 
     protected $file_name;
     protected $source_lang;
     protected $target_lang;
     protected $segmentation_rule;
+
+    protected $guid;
 
     public $result;
 
@@ -88,7 +93,7 @@ class UploadController extends AlignerController {
         $this->response->json( $this->result );
     }
 
-    public function upload() {
+    public function upload_old() {
         if ( @count( $this->result[ 'errors' ] ) ) {
             $this->response->json( $this->result );
 
@@ -111,6 +116,43 @@ class UploadController extends AlignerController {
             ];
         }
         $this->response->json( $this->result );
+    }
+
+
+    public function upload(){
+
+        $this->setOrGetGuid();
+        $this->initUploadDir();
+        header('Pragma: no-cache');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('Content-Disposition: inline; filename="files.json"');
+        header('X-Content-Type-Options: nosniff');
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE');
+        header('Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size');
+
+        $upload_handler = new \UploadHandler();
+        $upload_handler->post();
+    }
+
+    private function setOrGetGuid() {
+        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
+        if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
+            $guid = \Utils::create_guid();
+            setcookie( "upload_session", $guid, time() + 86400, '/' );
+        } else {
+            $guid = $_COOKIE[ 'upload_session' ];
+        }
+        $this->guid = $guid;
+        return $guid;
+
+    }
+
+    private function initUploadDir(){
+        $intDir = \INIT::$UPLOAD_REPOSITORY . '/' . $this->guid . '/';
+        if ( !is_dir( $intDir ) ) {
+            mkdir( $intDir, 0775, true );
+        }
     }
 
 }

@@ -169,25 +169,6 @@ let ProjectActions = {
                 action: 'delete',
                 rif_order: fromInverseOrder
             });
-            //aggiorno il next dei precedenti
-            let prevChangeData = tmpJob[log.type].get(fromIndex - 1).toJS(),
-                inversePrevChangeData = tmpJob[inverse[log.type]].get(fromIndex - 1).toJS();
-
-            prevChangeData.next = tmpJob[log.type].getIn([fromIndex + 1, 'order']);
-            inversePrevChangeData.next = tmpJob[inverse[log.type]].getIn([fromIndex + 1, 'order']);
-            changes.push({
-                type: log.type,
-                action: 'update',
-                rif_order: tmpJob[log.type].getIn([+fromIndex - 1, 'order']),
-                data: prevChangeData
-            });
-            changes.push({
-                type: inverse[log.type],
-                action: 'update',
-                rif_order: tmpJob[inverse[log.type]].getIn([+fromIndex - 1, 'order']),
-                data: inversePrevChangeData
-
-            });
         }
 
         AppDispatcher.dispatch({
@@ -237,7 +218,7 @@ let ProjectActions = {
         let lastMock = Object.assign({}, env.segmentModel),
             lastSegment = tmpJob[inverse[log.type]].get(-1).toJS();
 
-        lastMock.order = +lastSegment.order+env.orderElevation;
+        lastMock.order = +lastSegment.order + env.orderElevation;
         lastSegment.next = lastMock.order;
         changes.push({
             type: log.type,
@@ -250,7 +231,6 @@ let ProjectActions = {
             action: 'push',
             data: lastMock
         });
-
 
 
         AppDispatcher.dispatch({
