@@ -37,7 +37,7 @@ class SegmentComponent extends Component {
             }, PropTypes.number]).isDefined
         }).isRequired
 
-    }
+    };
 
     constructor(props) {
         super(props);

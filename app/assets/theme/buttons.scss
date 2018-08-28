@@ -1,3 +1,18 @@
-.button{
-  color: #000;
+@import "variables";
+
+//override semantic ui
+.ui {
+  &.button {
+    &.primary {
+      width: 100%;
+      background-color: $primaryBtnBg;
+      border: 1px solid $primaryBtnborder;
+      box-sizing: border-box;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+    &.secondary {
+
+    }
+  }
 }

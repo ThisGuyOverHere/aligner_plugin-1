@@ -9,37 +9,39 @@ module.exports = function(grunt) {
 
     grunt.initConfig( {
         watch: {
-            components: {
-                files: [
-                    'src/*.js',
-                    'src/**/*.js'
-                ],
-                tasks: ['browserify:components'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },
             css: {
                 files: [
                     'src/**/*.scss',
                     'assets/**/*.scss'
                 ],
                 tasks: ['sass','autoprefixer'],
-                options: {
-                    livereload : true
-                }
             }
         },
         browserify: {
-            components: {
+
+            dev: {
                 options: {
                     transform: [
                         [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
-                        paths: [ __dirname + '/node_modules' ]
-                    }
+                        debug : true // source mapping
+                    },
+                    watch : true, // use watchify for incremental builds!
+                    //keepAlive : true, // watchify will exit unless task is kept alive
+                },
+                src: [
+                    'src/*.js',
+                    'src/**/*.js'
+                ],
+                dest:  '../static/build/js/main.js'
+            },
+
+            dist: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
+                    ],
                 },
                 src: [
                     'src/*.js',
@@ -74,11 +76,9 @@ module.exports = function(grunt) {
     });
 
     // Define your tasks here
-    grunt.registerTask('default', ['bundle:js','sass','autoprefixer']);
+    grunt.registerTask('default', ['browserify:dist','sass','autoprefixer']);
+    grunt.registerTask('dev', ['browserify:dev','sass','autoprefixer','watch']);
 
-    grunt.registerTask('bundle:js', [
-        'browserify:components'
-    ]);
 
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-watch');

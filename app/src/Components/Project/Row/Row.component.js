@@ -23,12 +23,19 @@ const RowTarget = {
                 'source': 0,
                 'target': 1
             },
+            inverse = {
+                'source': 1,
+                'target': 0
+            },
             log = {
                 type: from.type,
                 from: from.segment.order,
                 to: props.children[types[from.type]].props.segment.order
             };
         ProjectActions.changeSegmentPosition(log);
+
+        //send type and order of inverse segment in drop position.
+        props.setAnimatedRow(props.children[inverse[from.type]].props.type,props.children[inverse[from.type]].props.segment.order);
     }
 };
 
@@ -42,6 +49,14 @@ function collect(connect, monitor) {
 }
 
 class RowComponent extends Component {
+
+    static propTypes = {
+        index: PropTypes.number.isRequired,
+        animate: PropTypes.bool,
+        setAnimatedRow: PropTypes.func,
+        row: PropTypes.object.isRequired
+    };
+
     constructor(props) {
         super(props);
 
@@ -64,19 +79,28 @@ class RowComponent extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-
+        if(this.props.animate){
+            setTimeout(()=>{this.props.setAnimatedRow(null,null)},500)
+        }
     }
 
     render() {
         let rowClass = ['project-row'];
         let columnsClass = {
-            source: ['eight','wide','column'],
-            target: ['eight','wide','column'],
+            source: ['eight','wide','column','columnSegment'],
+            target: ['eight','wide','column','columnSegment'],
         };
-        const {connectDropTarget, isOver, canDrop, dragEl} = this.props;
+        const {connectDropTarget, isOver, canDrop, dragEl, animate} = this.props;
+
+        //todo: migliorare l'hover, attualmente abbiamo adattato il vecchio comportamento a 2 righe invece che 1
         const dragElType  = dragEl ? dragEl.type : undefined;
-        if(isOver && dragElType){
-            columnsClass[dragElType].push('dropColumn');
+        if(isOver && dragElType && canDrop || animate){
+            columnsClass.source.push('dropColumn');
+            columnsClass.target.push('dropColumn');
+        }
+        if(animate){
+            columnsClass.source.push('dropped');
+            columnsClass.target.push('dropped');
         }
         return connectDropTarget(
             <div className={rowClass.join(' ')}>
@@ -111,10 +135,5 @@ class RowComponent extends Component {
     componentWillUnmount() {
     }
 }
-
-RowComponent.propTypes = {
-    index: PropTypes.number.isRequired,
-    row: PropTypes.object.isRequired
-};
 
 export default DropTarget(ItemTypes.ITEM, RowTarget, collect)(RowComponent);
