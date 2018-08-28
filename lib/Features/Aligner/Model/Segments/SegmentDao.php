@@ -57,6 +57,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getByJobId( $id_job, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * FROM segments WHERE id_job = ? ORDER BY id ASC" );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $id_job ] );
+
+    }
+
     public function createList( Array $obj_arr ) {
 
         $obj_arr = array_chunk( $obj_arr, 100 );
