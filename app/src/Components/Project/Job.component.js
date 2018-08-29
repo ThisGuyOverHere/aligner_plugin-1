@@ -10,12 +10,12 @@ import MouseBackEnd from 'react-dnd-mouse-backend'
 import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
 import env from "../../Constants/Env.constants";
 
-class ProjectComponent extends Component {
+class JobComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
             algorithm: env.alignAlgorithmDefaultVersion,
-            project: {
+            job: {
                 config: {
                     password: this.props.match.params.password,
                     id: this.props.match.params.jobID
@@ -61,7 +61,7 @@ class ProjectComponent extends Component {
             });
         });
         this.setState({
-            project: {
+            job: {
                 rows: rows
             }
         })
@@ -124,7 +124,7 @@ class ProjectComponent extends Component {
                 </div>
 
                 <div className="ui container">
-                    {this.renderItems(this.state.project.rows)}
+                    {this.renderItems(this.state.job.rows)}
                     <AdvancedDragLayer/>
                 </div>
             </div>
@@ -147,4 +147,4 @@ class ProjectComponent extends Component {
 
 }
 
-export default DragDropContext(MouseBackEnd)(ProjectComponent);
+export default DragDropContext(MouseBackEnd)(JobComponent);
