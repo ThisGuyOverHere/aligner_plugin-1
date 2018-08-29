@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { Link } from "react-router-dom";
 import LoginComponent from "../Login/Login.component";
+import SystemActions from "../../../Actions/System.actions";
 
 class HeaderComponent extends Component {
 
@@ -20,10 +21,8 @@ class HeaderComponent extends Component {
                 id: jobID,
                 segments: null
             },
-            loginOpen: false,
             loggedIn: false,
         };
-        this.closeLogin = this.loginClicked.bind(this);
     }
 
     titleEllipsisCenter = () => {
@@ -82,17 +81,9 @@ class HeaderComponent extends Component {
                         </button>
                     </div>
                     <div id="user">
-                        <div className="ui user-nolog label" title="Login" onClick={() => this.loginClicked()}>
+                        <div className="ui user-nolog label" title="Login" onClick={this.openLogin}>
                             <i className="icon user"></i>
                         </div>
-                        {this.state.loginOpen ? (
-                            <div>
-                                <div className="overlay" onClick={() => this.loginClicked()}></div>
-                                <LoginComponent onLoginClose={this.closeLogin} />
-                            </div>
-                        ) : (
-                            null
-                        )}
                     </div>
                 </li>
             </ul>;
@@ -102,24 +93,12 @@ class HeaderComponent extends Component {
                     <div id="logo"></div>
                 </Link>
                 <li id="user">
-                    <div className="ui user-nolog label" title="Login" onClick={() => this.loginClicked()}>
+                    <div className="ui user-nolog label" title="Login" onClick={this.openLogin}>
                         <i className="icon user"></i>
                     </div>
-                    {this.state.loginOpen ? (
-                        <div>
-                            <div className="overlay" onClick={() => this.loginClicked()}></div>
-                            <LoginComponent onLoginClose={this.closeLogin} />
-                        </div>
-                    ) : (
-                        null
-                    )}
                 </li>
             </ul>
         }
-    };
-
-    loginClicked () {
-        this.setState(prevState => ({ loginOpen: !prevState.loginOpen }) );
     };
 
     render() {
@@ -128,6 +107,12 @@ class HeaderComponent extends Component {
                 { this.renderHtmlNavigation() }
             </div>
         );
+    }
+
+
+    openLogin = () =>{
+        console.log('apro');
+        SystemActions.setLoginStatus(true)
     }
 
 }

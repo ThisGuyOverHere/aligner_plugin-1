@@ -1,19 +1,28 @@
 import React, {Component} from 'react';
+import SystemActions from "../../../Actions/System.actions";
 
-class LoginComponent extends Component{
-    constructor() {
-        super();
+class LoginComponent extends Component {
+    constructor(props) {
+        super(props);
     }
 
-    render() {
+    onCloseLogin = () => {
+        console.log('chiamo chiusura')
+        SystemActions.setLoginStatus(false);
+    };
+
+    render = () => {
         return (
+            <div>
+                <div className="overlay" onClick={this.onCloseLogin}>
+                </div>
                 <div className="loginContainer">
                     <div className="header">
                         <div className="sx-header">
                             <img src="/public/img/logo-ico.png"></img>
                         </div>
                         <div className="dx-header">
-                            <span onClick={ this.props.onLoginClose }>
+                            <span onClick={this.onCloseLogin}>
                                 <i className="icon window close"></i>
                             </span>
                         </div>
@@ -21,7 +30,8 @@ class LoginComponent extends Component{
                     <div className="content">
                         <div className="sx-content"><h2>Sign up now to:</h2>
                             <ul className="">
-                                <li><i className="icon check"></i>Manage your TMs, glossaries and MT<br></br> engines</li>
+                                <li><i className="icon check"></i>Manage your TMs, glossaries and MT<br></br> engines
+                                </li>
                                 <li><i className="icon check"></i>Access the management panel</li>
                                 <li><i className="icon check"></i>Translate Google Drive files</li>
                             </ul>
@@ -54,6 +64,9 @@ class LoginComponent extends Component{
                         </div>
                     </div>
                 </div>
+
+            </div>
+
         );
     }
 }
