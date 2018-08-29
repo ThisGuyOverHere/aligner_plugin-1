@@ -21,7 +21,8 @@ class HeaderComponent extends Component {
             },
             loginOpen: false,
             loggedIn: false
-        }
+        };
+        this.closeLogin = this.loginClicked.bind(this);
     }
 
     titleEllipsisCenter = () => {
@@ -42,7 +43,6 @@ class HeaderComponent extends Component {
 
         return prevState;
     }
-
 
     renderHtmlNavigation = () => {
         if(this.state.job.id){
@@ -81,12 +81,13 @@ class HeaderComponent extends Component {
                         </button>
                     </div>
                     <div id="user">
-                        <div className="ui user-nolog label" title="Login">
+                        <div className="ui user-nolog label" title="Login" onClick={() => this.loginClicked()}>
                             <i className="icon user"></i>
                         </div>
                         {this.state.loginOpen ? (
-                            <div className="overlay" onClick={() => this.loginClicked()}>
-                                <LoginComponent/>
+                            <div>
+                                <div className="overlay" onClick={() => this.loginClicked()}></div>
+                                <LoginComponent onLoginClose={this.closeLogin} />
                             </div>
                         ) : (
                             null
@@ -104,8 +105,9 @@ class HeaderComponent extends Component {
                         <i className="icon user"></i>
                     </div>
                     {this.state.loginOpen ? (
-                        <div className="overlay" onClick={() => this.loginClicked()}>
-                            <LoginComponent/>
+                        <div>
+                            <div className="overlay" onClick={() => this.loginClicked()}></div>
+                            <LoginComponent onLoginClose={this.closeLogin} />
                         </div>
                     ) : (
                         null
@@ -113,6 +115,11 @@ class HeaderComponent extends Component {
                 </li>
             </ul>
         }
+    };
+
+    loginClicked () {
+        console.log('hey');
+        this.setState(prevState => ({ loginOpen: !prevState.loginOpen }) );
     };
 
     render() {
@@ -123,9 +130,5 @@ class HeaderComponent extends Component {
         );
     }
 
-    loginClicked () {
-        console.log('here');
-        this.setState(prevState => ({ loginOpen: !prevState.loginOpen }) );
-    };
 }
 export default HeaderComponent;

@@ -1,8 +1,9 @@
 @import "../../../../assets/theme/variables";
 
 .loginContainer{
+  z-index: 99;
+  position: fixed;
   margin: auto;
-  position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -22,9 +23,17 @@
     height: 48px;
     display: flex;
     justify-content: space-between;
-    padding: 11px 7px 10px 23px;
+    padding: 11px 10px 7px 23px;
+    border-radius: 4px 4px 0 0;
     .dx-header{
-
+      span{
+        position: relative;
+        bottom: 6px;
+        cursor: pointer;
+        &:hover{
+          color: $red;
+        }
+      }
     }
     .sx-header{
       img{
@@ -33,24 +42,40 @@
     }
   }
   .content{
-    background-color: $white;
-    .dx-content{
+    border-radius: 0px 0px 4px 4px;
+    background-color: #ffffff;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    overflow: hidden;
+    .sx-content{
+      width: 61%;
+      height: 303px;
       padding: 24px;
       text-align: left;
+      background: url(https://www.matecat.com/wp-content/themes/stanleywp/images/bgfeat5.png) no-repeat;
+      background-size: 84%;
+      background-position: 370% center;
       h2{
         font-size: 22px;
         color: $black;
       }
       ul{
-        margin: 0;
+        margin-top: 25px;
         padding: 0;
         list-style: none;
         color: $black;
         li{
           margin-bottom: 15px;
+          color: $black!important;
+          display: inline-flex;
+          line-height: 19px!important;
           i{
             margin-right: 11px!important;
             color: $checkBlue;
+            position: relative;
+            bottom: 0px;
           }
         }
       }
@@ -63,17 +88,40 @@
         text-transform: none;
       }
     }
-    .sx-content{
+    .dx-content{
       height: 100%;
+      width: 39%;
       padding: 24px;
       background-color: $googleLogin;
       border-left: 1px solid $googleLoginBorder;
       .google-login{
+        cursor: pointer;
+        border-radius: 4px;
         background-color: #3e82f7;
-        color: #fff;
+        color: #ffffff;
         padding: 8px;
+        position: relative;
+        height: 44px;
+        width: 196px;
+        i{
+          color: #3e82f7;
+          font-size: 24px;
+          padding: 8px;
+          background: #ffffff;
+          width: 40px;
+          height: 40px;
+          position: absolute;
+          top: 1px;
+          left: 1px;
+        }
+        span{
+          font-size: 15px;
+          float: right;
+        }
       }
       .login-form-container{
+        width: 225px;
+        margin: 0 auto;
         .divider-line{
           height: 2px;
           width: 40%;
@@ -101,6 +149,8 @@
             width: 20%;
             color: #656565;
             display: inline-block;
+            position: relative;
+            bottom: 6px;
           }
         }
         input{
@@ -120,10 +170,12 @@
         }
       }
       .login-btn{
-        width: 120px;
+        width: 160px;
         margin: 15px auto;
         display: block;
         text-transform: none;
+        font-size: 18px;
+        padding: 8px 18px;
       }
       .forgot-password{
         cursor: pointer;
