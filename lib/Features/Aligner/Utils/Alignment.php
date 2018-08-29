@@ -1320,7 +1320,7 @@ class Alignment
 
         function findAbsoluteMatches($source, $target) {
             // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
-            $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
+            $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
 
             $source = array_map(function ($item) use ($delimiters) {
                 $text = strtolower($item['content_clean']);
@@ -1353,14 +1353,27 @@ class Alignment
             return $commonSegments;
         }
 
+        function alignPart($source, $target, $offset) {
+            $scores = buildScores($source, $target);
+            $alignment = extractPath($source, $target, $scores);
+
+            // Adjust offset
+            $alignment = array_map(function ($item) use ($offset) {
+                $item[0][0] += $offset[0];
+                $item[1][0] += $offset[1];
+                return $item;
+            }, $alignment);
+
+            return $alignment;
+        }
+
         function align($source, $target) {
 
             $matches = findAbsoluteMatches($source, $target);
 
             // No exact match has been found, we need to align entire document
             if (empty($matches)) {
-                $scores = buildScores($source, $target);
-                $alignment = extractPath($source, $target, $scores);
+                $alignment = alignPart($source, $target, [0, 0]);
 
                 return $alignment;
             } else {
@@ -1373,15 +1386,7 @@ class Alignment
                     $subSource = array_slice($source, $lastMatch[0], $match[0] - $lastMatch[0]);
                     $subTarget = array_slice($target, $lastMatch[1], $match[1] - $lastMatch[1]);
 
-                    $scores = buildScores($subSource, $subTarget);
-                    $subAlignment = extractPath($subSource, $subTarget, $scores);
-
-                    // Adjust offset
-                    $subAlignment = array_map(function ($item) use ($lastMatch) {
-                        $item[0][0] += $lastMatch[0];
-                        $item[1][0] += $lastMatch[1];
-                        return $item;
-                    }, $subAlignment);
+                    $subAlignment = alignPart($subSource, $subTarget, $lastMatch);
 
                     $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
                     $alignment[] = [[$match[0], 1], [$match[1], 1]];  // Add alignment for exact match
@@ -1395,15 +1400,7 @@ class Alignment
                 $subSource = array_slice($source, $lastMatch[0]);
                 $subTarget = array_slice($target, $lastMatch[1]);
 
-                $scores = buildScores($subSource, $subTarget);
-                $subAlignment = extractPath($subSource, $subTarget, $scores);
-
-                // Adjust offset
-                $subAlignment = array_map(function ($item) use ($lastMatch) {
-                    $item[0][0] += $lastMatch[0];
-                    $item[1][0] += $lastMatch[1];
-                    return $item;
-                }, $subAlignment);
+                $subAlignment = alignPart($subSource, $subTarget, $lastMatch);
 
                 $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
 
