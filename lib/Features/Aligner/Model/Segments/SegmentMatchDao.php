@@ -26,5 +26,4 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     }
 
-
 }

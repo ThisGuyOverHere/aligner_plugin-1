@@ -67,6 +67,26 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getTargetOrdered($id_job){
+        return self::getTypeOrderedByJobId($id_job, "target");
+    }
+
+    public static function getSourceOrdered($id_job){
+        return self::getTypeOrderedByJobId($id_job, "source");
+    }
+
+    public static function getTypeOrderedByJobId($id_job, $type, $ttl = 0){
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+        $query = "SELECT * FROM segments as s
+        JOIN segments_match as sm ON s.id = sm.segment_id AND s.type = sm.type
+        WHERE s.id_job = ? AND s.type = ?
+        ORDER by sm.order";
+        $stmt = $conn->prepare( $query );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $id_job, $type ] );
+    }
+
     public function createList( Array $obj_arr ) {
 
         $obj_arr = array_chunk( $obj_arr, 100 );

@@ -14,8 +14,8 @@ class SegmentsController extends AlignerController {
 
     public function get(){
         $id_job = $this->params['id_job'];
-        $matches = Segments_SegmentDao::getByJobId($id_job);
-        $this->response->json($matches);
+        $target = Segments_SegmentDao::getTargetOrdered($id_job);
+        $source = Segments_SegmentDao::getSourceOrdered($id_job);
+        $this->response->json(['target' => $target, 'source' => $source]);
     }
-
 }

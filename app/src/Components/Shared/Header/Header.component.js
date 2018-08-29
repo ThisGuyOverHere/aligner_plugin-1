@@ -9,6 +9,7 @@ class HeaderComponent extends Component {
         const jobID = (this.props.match
             && this.props.match.params
             && this.props.match.params.jobID) ? this.props.match.params.jobID : null;
+        console.log('constructor', this.props.match.params);
         this.state = {
             pName: '',
             projectTitle: 'Sample title for test header ellipsis at center',
@@ -20,7 +21,7 @@ class HeaderComponent extends Component {
                 segments: null
             },
             loginOpen: false,
-            loggedIn: false
+            loggedIn: false,
         };
         this.closeLogin = this.loginClicked.bind(this);
     }
@@ -118,7 +119,6 @@ class HeaderComponent extends Component {
     };
 
     loginClicked () {
-        console.log('hey');
         this.setState(prevState => ({ loginOpen: !prevState.loginOpen }) );
     };
 
