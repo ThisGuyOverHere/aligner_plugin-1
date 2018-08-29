@@ -121,8 +121,7 @@ class UploadController extends AlignerController {
 
     public function upload(){
 
-        $this->setOrGetGuid();
-        $this->initUploadDir();
+
         header('Pragma: no-cache');
         header('Cache-Control: no-store, no-cache, must-revalidate');
         header('Content-Disposition: inline; filename="files.json"');
@@ -130,6 +129,9 @@ class UploadController extends AlignerController {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE');
         header('Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size');
+        $this->setOrGetGuid();
+        $this->initUploadDir();
+
 
         $upload_handler = new \UploadHandler();
         $upload_handler->post();
@@ -140,6 +142,7 @@ class UploadController extends AlignerController {
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
             $guid = \Utils::create_guid();
             setcookie( "upload_session", $guid, time() + 86400, '/' );
+            $_COOKIE['upload_session'] = $guid;
         } else {
             $guid = $_COOKIE[ 'upload_session' ];
         }

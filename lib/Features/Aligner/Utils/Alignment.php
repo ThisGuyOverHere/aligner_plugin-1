@@ -8,55 +8,10 @@
 
 namespace Features\Aligner\Utils;
 
+use Features\Aligner;
+
 class Alignment
 {
-    /**
-     *
-     * Code almost cloned from CatUtils::placehold_xliff_tags()
-     *
-     * @param $segment
-     * @param $lang
-     * @return null|string|string[]
-     */
-    protected function _cleanSegment($segment, $lang) {
-
-        $tagsRegex = [
-                '|(</x>)|si',
-                '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si',
-                '|<(/g)>|si',
-                '|<(x .*?/?)>|si',
-                '#<(bx[ ]{0,}/?|bx .*?/?)>#si',
-                '#<(ex[ ]{0,}/?|ex .*?/?)>#si',
-                '|<(bpt\s*.*?)>|si',
-                '|<(/bpt)>|si',
-                '|<(ept\s*.*?)>|si',
-                '|<(/ept)>|si',
-                '|<(ph .*?)>|si',
-                '|<(/ph)>|si',
-                '|<(it .*?)>|si',
-                '|<(/it)>|si',
-                '|<(mrk\s*.*?)>|si',
-                '|<(/mrk)>|si'
-        ];
-
-        foreach ($tagsRegex as $regex) {
-            $segment = preg_replace($regex, '', $segment);
-        }
-
-        return $segment;
-    }
-
-    /**
-     * @param $segment
-     * @param $lang
-     * @return float|int
-     */
-    protected function _countWordsInSegment($segment, $lang) {
-        $wordCount = CatUtils::segment_raw_wordcount( $segment, $lang );
-
-        return $wordCount;
-    }
-
     /**
      * Naive algorithm, it only puts side by side source and target
      *

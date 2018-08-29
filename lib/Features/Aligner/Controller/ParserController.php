@@ -15,6 +15,7 @@ use Exception;
 use Features\Aligner;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Utils\Alignment;
+use Features\Aligner\Model\NewDatabase;
 
 
 class ParserController extends AlignerController {
@@ -155,9 +156,61 @@ class ParserController extends AlignerController {
         return $segments;
     }
 
+    /**
+     *
+     * Code almost cloned from CatUtils::placehold_xliff_tags()
+     *
+     * @param $segment
+     * @param $lang
+     * @return null|string|string[]
+     */
+    protected function _cleanSegment($segment, $lang) {
+
+        $tagsRegex = [
+                '|(</x>)|si',
+                '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si',
+                '|<(/g)>|si',
+                '|<(x .*?/?)>|si',
+                '#<(bx[ ]{0,}/?|bx .*?/?)>#si',
+                '#<(ex[ ]{0,}/?|ex .*?/?)>#si',
+                '|<(bpt\s*.*?)>|si',
+                '|<(/bpt)>|si',
+                '|<(ept\s*.*?)>|si',
+                '|<(/ept)>|si',
+                '|<(ph .*?)>|si',
+                '|<(/ph)>|si',
+                '|<(it .*?)>|si',
+                '|<(/it)>|si',
+                '|<(mrk\s*.*?)>|si',
+                '|<(/mrk)>|si'
+        ];
+
+        foreach ($tagsRegex as $regex) {
+            $segment = preg_replace($regex, '', $segment);
+        }
+
+        return $segment;
+    }
+
+    /**
+     * @param $segment
+     * @param $lang
+     * @return float|int
+     */
+    protected function _countWordsInSegment($segment, $lang) {
+        $wordCount = CatUtils::segment_raw_wordcount( $segment, $lang );
+
+        return $wordCount;
+    }
+
     private function __storeSegments($segments){
 
-        $sequenceIds = $this->dbHandler->nextSequence( NewDatabase::ID_SEGMENT, count( $segments ) );
+        $sequenceIds = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $segments ) );
+        foreach($sequenceIds as $key => $sequenceId){
+            $segments[$key]['id'] = $sequenceId;
+
+        }
+
 
     }
 }
