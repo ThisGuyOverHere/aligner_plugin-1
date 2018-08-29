@@ -57,13 +57,23 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function getByJobId( $id_job, $ttl = 0 ) {
+    public static function getByJobIdAndType( $id_job, $type, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM segments WHERE id_job = ? ORDER BY id ASC" );
+        $stmt = $conn->prepare( "SELECT * FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $id_job ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $id_job , $type] );
+
+    }
+
+
+    public static function getDataForAlignment( $id_job, $type, $ttl = 0 ) {
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT id, content_clean FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
+        $stmt->execute( [$id_job, $type] );
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
     }
 
@@ -94,9 +104,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $baseQuery = "INSERT INTO segments ( 
                             id, 
                             id_job, 
-                            id_file,
                             type,
-                            content, 
+                            content_clean, 
+                            content_raw,
                             content_hash, 
                             raw_word_count, 
                             language_code
@@ -112,14 +122,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $values = [];
             foreach( $chunk as $segStruct ){
 
-                $values[] = $segStruct->id;
-                $values[] = $segStruct->id_job;
-                $values[] = $segStruct->id_file;
-                $values[] = $segStruct->type;
-                $values[] = $segStruct->content;
-                $values[] = $segStruct->content_hash;
-                $values[] = $segStruct->raw_word_count;
-                $values[] = $segStruct->language_code;
+                $values[] = $segStruct['id'];
+                $values[] = $segStruct['id_job'];
+                $values[] = $segStruct['type'];
+                $values[] = $segStruct['content_clean'];
+                $values[] = $segStruct['content_raw'];
+                $values[] = $segStruct['content_hash'];
+                $values[] = $segStruct['raw_word_count'];
+                $values[] = $segStruct['language_code'];
 
             }
 

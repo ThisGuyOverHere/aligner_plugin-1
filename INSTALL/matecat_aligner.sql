@@ -66,7 +66,6 @@ DROP TABLE IF EXISTS `segments`;
 CREATE TABLE `segments` (
   `id` bigint(20) unsigned NOT NULL,
   `id_job` bigint(20) NOT NULL,
-  `id_file` bigint(20) NOT NULL,
   `type` enum('target', 'source') NOT NULL,
   `content_clean` text,
   `content_raw` text,

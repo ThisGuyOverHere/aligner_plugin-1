@@ -17,7 +17,8 @@ class AlignerController extends KleinController {
 
     public function __construct( $request, $response, $service, $app ) {
         $config = Aligner::getConfig();
-        $this->dbHandler = NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE'])->getConnection();
+        $this->dbHandler = NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE']);
+        $this->dbHandler->getConnection();
         parent::__construct( $request, $response, $service, $app );
     }
 }
