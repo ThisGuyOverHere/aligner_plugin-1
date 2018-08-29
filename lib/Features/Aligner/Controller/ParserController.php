@@ -68,8 +68,8 @@ class ParserController extends AlignerController {
         // Format alignment for frontend test purpose
         $source = array_map(function ($index, $item) {
             return [
-                'clean' => $item['source']['clean'],
-                'raw' => $item['source']['raw'],
+                'clean' => $item['source']['content_clean'],
+                'raw' => $item['source']['content_raw'],
                 'order' => ($index + 1)* 1000000000,
                 'next' => ($index + 2) * 1000000000
                 ];
@@ -77,8 +77,8 @@ class ParserController extends AlignerController {
 
         $target = array_map(function ($index, $item) {
             return [
-                'clean' => $item['target']['clean'],
-                'raw' => $item['target']['raw'],
+                'clean' => $item['target']['content_clean'],
+                'raw' => $item['target']['content_raw'],
                 'order' => ($index + 1)* 1000000000,
                 'next' => ($index + 2) * 1000000000
             ];
@@ -142,9 +142,9 @@ class ParserController extends AlignerController {
                 // Build an object with raw-content and clean-content
                 $unit_segments = array_map(function ($item) use ($lang) {
                     return [
-                        'raw' => $item,
-                        'clean' => $this->_cleanSegment($item, $lang),
-                        'words' => $this->_countWordsInSegment($item, $lang)
+                        'content_raw' => $item,
+                        'content_clean' => $this->_cleanSegment($item, $lang),
+                        'raw_word_count' => $this->_countWordsInSegment($item, $lang)
                     ];
                 }, $unit_segments);
 
