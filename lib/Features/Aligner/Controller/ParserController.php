@@ -1432,7 +1432,9 @@ class ParserController extends AlignerController {
             $ss = implode('', $ss);
             $ts = implode('', $ts);
 
-            if (strlen($ss) < 255 && strlen($ts) < 255) {
+            if (strlen($ss) == 0 || strlen($ts) == 0) {  // Check if we can return immediately the upper bound
+                return max(strlen($ss), strlen($ts));
+            } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
                 return levenshtein($ss, $ts, $costIns, $costRep, $costDel);
             } else {
                 return long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
@@ -1442,7 +1444,7 @@ class ParserController extends AlignerController {
         function buildScores($source, $target) {
 
             // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
-            $beadCosts = ['1-1' => 0, '2-1' => 0, '1-2' => 0, '0-1' => 0, '1-0' => 0, '2-2' => 0];  // Penality for merge and holes
+            $beadCosts = ['1-1' => 0, '2-1' => 100, '1-2' => 100, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
 
             $m = [];
             foreach (range(0, count($source)) as $si) {
