@@ -14,5 +14,9 @@
     &.secondary {
 
     }
+    &.disabled{
+      background: #d6d6d6;
+      box-shadow: none !important;
+    }
   }
 }
