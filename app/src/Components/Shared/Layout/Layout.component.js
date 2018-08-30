@@ -36,7 +36,6 @@ class Layout extends Component {
     };
 
     setStatusLogin = (status) => {
-        console.log('ricevo');
         this.setState({
             statusLogin: status
         })

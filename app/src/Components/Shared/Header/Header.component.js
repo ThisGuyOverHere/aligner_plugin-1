@@ -1,16 +1,23 @@
 import React, {Component} from 'react';
 import { Link } from "react-router-dom";
-import LoginComponent from "../Login/Login.component";
 import SystemActions from "../../../Actions/System.actions";
+import PropTypes from "prop-types";
 
 class HeaderComponent extends Component {
+
+    static propTypes = {
+        match: PropTypes.shape({
+            params: PropTypes.shape({
+                jobID: PropTypes.number
+            })
+        }).isRequired,
+    };
 
     constructor(props) {
         super(props);
         const jobID = (this.props.match
             && this.props.match.params
             && this.props.match.params.jobID) ? this.props.match.params.jobID : null;
-        console.log('constructor', this.props.match.params);
         this.state = {
             pName: '',
             projectTitle: 'Sample title for test header ellipsis at center',
@@ -111,7 +118,6 @@ class HeaderComponent extends Component {
 
 
     openLogin = () =>{
-        console.log('apro');
         SystemActions.setLoginStatus(true)
     }
 
