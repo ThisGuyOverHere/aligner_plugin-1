@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { Link } from "react-router-dom";
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
-import {titleEllipsisCenter} from "../../../Helpers/SegmentUtils.helper";
+import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
 
 class HeaderComponent extends Component {
 
@@ -50,7 +50,7 @@ class HeaderComponent extends Component {
                         <div id="logo"></div>
                     </Link>
                     <div id="final_title">
-                        {titleEllipsisCenter(this.state.projectTitle)}
+                        {textEllipsisCenter(this.state.projectTitle)}
                     </div>
                 </li>
                 <li>
