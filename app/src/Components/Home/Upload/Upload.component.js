@@ -231,18 +231,11 @@ class UploadComponent extends Component {
                     </div>
 
                     <div className="row" id="projectNameInput">
-                        <div className="thirteen wide column">
+                        <div className="sixteen wide column">
                             <div className="ui input">
                                 <input className="form-control" name="pname" type="text" value={this.state.pName}
                                        onChange={this.ProjectNameChange}/>
                             </div>
-                        </div>
-
-                        <div className="three wide column">
-                            <p>
-                                <i aria-hidden='true' className='setting icon'/>
-                                <span>Settings</span>
-                            </p>
                         </div>
                     </div>
 
