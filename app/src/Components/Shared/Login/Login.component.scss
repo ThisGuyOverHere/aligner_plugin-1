@@ -28,8 +28,10 @@
     .dx-header{
       span{
         position: relative;
-        bottom: 6px;
+        bottom: 2px;
         cursor: pointer;
+        color: $headerText;
+        font-size: 1.2rem;
         &:hover{
           color: $red;
         }
@@ -63,9 +65,10 @@
       }
       ul{
         margin-top: 25px;
-        padding: 0;
+        padding: 0px 20% 0px 0px;
         list-style: none;
-        color: $black;
+        color: #000000;
+        font-size: 16px;
         li{
           margin-bottom: 15px;
           color: $black!important;
