@@ -1,6 +1,18 @@
 import React, {Component} from 'react';
 import { Link } from "react-router-dom";
+import SystemActions from "../../../Actions/System.actions";
+import PropTypes from "prop-types";
+import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
+
 class HeaderComponent extends Component {
+
+    static propTypes = {
+        match: PropTypes.shape({
+            params: PropTypes.shape({
+                jobID: PropTypes.string
+            })
+        }).isRequired,
+    };
 
     constructor(props) {
         super(props);
@@ -16,26 +28,17 @@ class HeaderComponent extends Component {
                 name: null,
                 id: jobID,
                 segments: null
-            }
-        }
+            },
+            loggedIn: false,
+        };
     }
 
-    titleEllipsisCenter = () => {
-        let str = this.state.projectTitle;
-        if(str.length > 30){
-            return str.substr(0, 12) + '[...]' + str.substr(str.length-12, str.length);
-        }
-        return str;
-    };
-
-    static getDerivedStateFromProps(nextProps, prevState) {
-
-        if(nextProps.match.params && nextProps.match.params.jobID){
-            prevState.job.id = nextProps.match.params.jobID;
-        }else{
-            prevState.job.id = null;
-        }
-
+     static getDerivedStateFromProps(nextProps, prevState) {
+         if(nextProps.match.params && nextProps.match.params.jobID){
+             prevState.job.id = nextProps.match.params.jobID;
+         }else{
+             prevState.job.id = null;
+         }
         return prevState;
     }
 
@@ -47,7 +50,7 @@ class HeaderComponent extends Component {
                         <div id="logo"></div>
                     </Link>
                     <div id="final_title">
-                        {this.titleEllipsisCenter()}
+                        {textEllipsisCenter(this.state.projectTitle)}
                     </div>
                 </li>
                 <li>
@@ -76,7 +79,7 @@ class HeaderComponent extends Component {
                         </button>
                     </div>
                     <div id="user">
-                        <div className="ui user-nolog label" title="Login">
+                        <div className="ui user-nolog label" title="Login" onClick={this.openLogin}>
                             <i className="icon user"></i>
                         </div>
                     </div>
@@ -88,7 +91,7 @@ class HeaderComponent extends Component {
                     <div id="logo"></div>
                 </Link>
                 <li id="user">
-                    <div className="ui user-nolog label" title="Login">
+                    <div className="ui user-nolog label" title="Login" onClick={this.openLogin}>
                         <i className="icon user"></i>
                     </div>
                 </li>
@@ -103,5 +106,11 @@ class HeaderComponent extends Component {
             </div>
         );
     }
+
+
+    openLogin = () =>{
+        SystemActions.setLoginStatus(true)
+    }
+
 }
 export default HeaderComponent;
