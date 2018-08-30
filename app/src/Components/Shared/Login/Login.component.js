@@ -7,7 +7,6 @@ class LoginComponent extends Component {
     }
 
     onCloseLogin = () => {
-        console.log('chiamo chiusura')
         SystemActions.setLoginStatus(false);
     };
 
