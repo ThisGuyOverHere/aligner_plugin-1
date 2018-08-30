@@ -2,13 +2,14 @@ import React, {Component} from 'react';
 import { Link } from "react-router-dom";
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
+import {titleEllipsisCenter} from "../../../Helpers/SegmentUtils.helper";
 
 class HeaderComponent extends Component {
 
     static propTypes = {
         match: PropTypes.shape({
             params: PropTypes.shape({
-                jobID: PropTypes.number
+                jobID: PropTypes.string
             })
         }).isRequired,
     };
@@ -32,22 +33,12 @@ class HeaderComponent extends Component {
         };
     }
 
-    titleEllipsisCenter = () => {
-        let str = this.state.projectTitle;
-        if(str.length > 30){
-            return str.substr(0, 12) + '[...]' + str.substr(str.length-12, str.length);
-        }
-        return str;
-    };
-
      static getDerivedStateFromProps(nextProps, prevState) {
-
          if(nextProps.match.params && nextProps.match.params.jobID){
              prevState.job.id = nextProps.match.params.jobID;
          }else{
              prevState.job.id = null;
          }
-
         return prevState;
     }
 
@@ -59,7 +50,7 @@ class HeaderComponent extends Component {
                         <div id="logo"></div>
                     </Link>
                     <div id="final_title">
-                        {this.titleEllipsisCenter()}
+                        {titleEllipsisCenter(this.state.projectTitle)}
                     </div>
                 </li>
                 <li>
