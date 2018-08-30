@@ -14,6 +14,7 @@ use CatUtils;
 use Exception;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
+use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\Alignment;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
@@ -28,8 +29,12 @@ class ParserController extends AlignerController {
      * @throws Exception
      */
     public function jobParser() {
+        ini_set('max_execution_time', 200);
         $this->id_job = $this->params['id_job'];
         $job = Jobs_JobDao::getById($this->id_job)[0];
+
+        $segmentsMatchDao = new Segments_SegmentMatchDao;
+        $segmentsMatchDao->deleteByJobId($this->id_job);
 
         $source_lang = $job->source;
         $target_lang = $job->target;
@@ -65,29 +70,39 @@ class ParserController extends AlignerController {
         // DEBUG //
 //        $this->response->json( ['res' => $alignment] );
 
-        // Format alignment for frontend test purpose
-        $source = array_map(function ($index, $item) {
-            return [
-                'clean' => $item['source']['content_clean'],
-                'raw' => $item['source']['content_raw'],
-                'order' => ($index + 1)* 1000000000,
-                'next' => ($index + 2) * 1000000000
-                ];
-        }, array_keys($alignment), $alignment);
+        $source_array = [];
+        $target_array = [];
+        foreach($alignment as $key => $value){
+            $source_element = [];
+            $source_element['segment_id'] = $value['source']['id'];
+            $source_element['order'] = ($key+1)*1000000000;
+            $source_element['next'] = ($key+2)*1000000000;
+            $source_element['id_job'] = $this->id_job;
+            $source_element['score'] = 0;
+            $source_element['type'] = "source";
 
-        $target = array_map(function ($index, $item) {
-            return [
-                'clean' => $item['target']['content_clean'],
-                'raw' => $item['target']['content_raw'],
-                'order' => ($index + 1)* 1000000000,
-                'next' => ($index + 2) * 1000000000
-            ];
-        }, array_keys($alignment), $alignment);
+            $target_element = []; ;
+            $target_element['segment_id'] = $value['target']['id'];
+            $target_element['order'] = ($key+1)*1000000000;
+            $target_element['next'] = ($key+2)*1000000000;
+            $target_element['score'] = 0;
+            $target_element['id_job'] = $this->id_job;
+            $target_element['type'] = "target";
 
-        $source[count($source)-1]['next'] = null;
-        $target[count($target)-1]['next'] = null;
+            $source_array[] = $source_element;
+            $target_array[] = $target_element;
+        }
 
-        $this->response->json( ['source' => $source, 'target' => $target] );
+        $source_array[count($source_array)-1]['next'] = null;
+        $target_array[count($target_array)-1]['next'] = null;
+
+
+        $segmentsMatchDao->createList($source_array);
+        $segmentsMatchDao->createList($target_array);
+
+
+
+        $this->response->json( ['source' => $source_array, 'target' => $target_array] );
     }
 
 }

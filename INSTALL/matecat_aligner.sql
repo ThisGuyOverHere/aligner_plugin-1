@@ -87,6 +87,7 @@ CREATE TABLE `segments_match` (
   `type` enum('target', 'source') NOT NULL,
   `segment_id` bigint(20) DEFAULT NULL,
   `next` bigint(20) DEFAULT NULL,
+  `score` integer(11) NOT NULL default '0',
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `primary_job_order` (`id_job`,`order`,`type`),
