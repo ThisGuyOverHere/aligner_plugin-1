@@ -16,6 +16,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         source: List(),
         target: List()
     },
+    mergeStatus: false,
 
     updateAll: function (volumeAnalysis, project) {
 
@@ -114,6 +115,12 @@ AppDispatcher.register(function (action) {
                 target: ProjectStore.job.target.toJS()
             });
             break;
+        case ProjectConstants.MERGE_STATUS:
+            ProjectStore.mergeStatus = action.status;
+            ProjectStore.emitChange(ProjectConstants.MERGE_STATUS, action.status);
+            break;
+        default:
+            ProjectStore.emitChange(action.actionType, action.data);
     }
 });
 

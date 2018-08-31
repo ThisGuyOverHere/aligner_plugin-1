@@ -25,7 +25,8 @@ class JobComponent extends Component {
             animateRowToOrder: {
                 type: null,
                 order: null
-            }
+            },
+            mergeStatus: false,
         };
 
         ProjectActions.setJobID(this.props.match.params.jobID)
@@ -51,6 +52,42 @@ class JobComponent extends Component {
 
     }
 
+
+    componentDidCatch() {
+
+    }
+
+    componentDidMount() {
+        ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
+        ProjectStore.addListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
+        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
+    }
+
+    componentWillUnmount() {
+        ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
+        ProjectStore.removeListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
+    }
+
+    render() {
+        let algorithmElements = [];
+        env.alignAlgorithmAllVersions.map(e => {
+            algorithmElements.push(<option key={e} value={e}>Algorithm v{e}</option>);
+        });
+        return (
+            <div className="align-project">
+                <div className="ui container">
+                    <select name="algorithm" id="algorithm" defaultValue={this.state.algorithm} onChange={this.changeAlgorithmVersion}>
+                        {algorithmElements}
+                    </select>
+                </div>
+
+                <div className="ui container">
+                    {this.renderItems(this.state.job.rows)}
+                    <AdvancedDragLayer/>
+                </div>
+            </div>
+        );
+    }
 
     setRows = (job) => {
         let rows = [];
@@ -96,55 +133,21 @@ class JobComponent extends Component {
             array.map((row, index) => {
                 values.push(<RowComponent key={index}
                                           index={index}
+                                          mergeStatus={this.state.mergeStatus}
                                           row={row}
                                           animate={this.state.animateRowToOrder.type && this.state.animateRowToOrder.order === row[this.state.animateRowToOrder.type].order}
-                                          setAnimatedRow={this.setAnimatedRow}>
-                    <SegmentComponent type="source"
-                                      segment={row.source} />
-                    <SegmentComponent type="target"
-                                      segment={row.target} />
-                </RowComponent>);
+                                          setAnimatedRow={this.setAnimatedRow} />);
                 return row;
             });
         }
         return values;
     }
 
-    render() {
-        let algorithmElements = [];
-        env.alignAlgorithmAllVersions.map(e => {
-            algorithmElements.push(<option key={e} value={e}>Algorithm v{e}</option>);
-        });
-        return (
-            <div className="align-project">
-                <div className="ui container">
-                    <select name="algorithm" id="algorithm" defaultValue={this.state.algorithm} onChange={this.changeAlgorithmVersion}>
-                        {algorithmElements}
-                    </select>
-                </div>
-
-                <div className="ui container">
-                    {this.renderItems(this.state.job.rows)}
-                    <AdvancedDragLayer/>
-                </div>
-            </div>
-        );
+    setMergeStatus = (status) =>{
+        this.setState({
+            mergeStatus: status
+        })
     }
-
-    componentDidCatch() {
-
-    }
-
-    componentDidMount() {
-        ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
-        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
-    }
-
-    componentWillUnmount() {
-        ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
-    }
-
-
 }
 
 export default DragDropContext(MouseBackEnd)(JobComponent);

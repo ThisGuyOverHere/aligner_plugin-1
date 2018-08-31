@@ -27,6 +27,7 @@ function collect(connect, monitor) {
 class SegmentComponent extends Component {
     static propTypes = {
         type: PropTypes.string.isRequired,
+        mergeStatus: PropTypes.bool,
         segment: PropTypes.shape({
             order: PropTypes.number.isRequired,
             clean: PropTypes.oneOfType([() => {
@@ -108,12 +109,11 @@ class SegmentComponent extends Component {
         return connectDragSource(
             <div className="segmentBox" style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
                 <p>{isDragging ? '' : segment.clean}</p>
+                {this.props.mergeStatus && <span className="merge">
+                    MERGE
+                </span>}
             </div>
         );
-    }
-
-    componentDidCatch = (error) => {
-        console.error(error)
     }
 
     componentDidMount() {

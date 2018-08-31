@@ -39,3 +39,10 @@ export const httpAlignJob = (jobID, algorithmVersion=null) => {
     const url = '/plugins/aligner/parse/v'+algorithm+'/'+jobID;
     return get(url);
 };
+
+
+export const httpGetSegments = (jobID, algorithmVersion=null) => {
+    const algorithm = algorithmVersion ? algorithmVersion : env.alignAlgorithmDefaultVersion;
+    const url = '/plugins/aligner/segments/'+jobID;
+    return get(url);
+};

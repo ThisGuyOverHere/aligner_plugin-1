@@ -237,6 +237,14 @@ let ProjectActions = {
             changes: changes
         });
 
+    },
+
+
+    setMergeStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.MERGE_STATUS,
+            status: status
+        });
     }
 };
 
