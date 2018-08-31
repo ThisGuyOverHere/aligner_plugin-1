@@ -1,6 +1,7 @@
 @import "../assets/theme/theme";
 @import "Components/Home/Home.component";
 @import "Components/Home/Upload/Upload.component";
+@import "Components/Home/Upload/FileFormatsModal/FileFormatsModal.component";
 
 @import "Components/Project/Job.component";
 @import "Components/Project/Row/Row.component";
@@ -9,3 +10,6 @@
 @import "Components/Shared/NotFound/NotFound.component";
 @import "Components/Shared/Header/Header.component";
 @import "Components/Shared/Footer/Footer.component";
+@import "Components/Shared/Login/Login.component";
+
+@import "Components/Analyse/Analyse.component";
