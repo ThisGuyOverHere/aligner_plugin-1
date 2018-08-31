@@ -7,22 +7,19 @@
  */
 namespace Features\Aligner\Model;
 
+use DataAccess\ShapelessConcreteStruct;
+
 class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
     const TABLE = "segments_match";
 
 
-    /**
-     * @param     $id
-     * @param int $ttl
-     *
-     * @return Projects_ProjectStruct
-     */
-    public static function findById( $id, $ttl = 0 ) {
+    public function missAlignments($id_job, $ttl = 0){
 
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM segments WHERE id = :id " );
-        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
+        $stmt = $conn->prepare( " SELECT `type`, `order` FROM segments_match WHERE segment_id IS NULL AND id_job =  :id_job" );
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id_job ] );
+
 
     }
 

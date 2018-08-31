@@ -32,7 +32,6 @@ class CreateProjectController extends AlignerController {
 
     public $result;
 
-
     public function __construct( $request, $response, $service, $app ) {
         $filterArgs = [
                 'project_name'     => [

@@ -89,12 +89,21 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
         $query = "SELECT * FROM segments as s
-        JOIN segments_match as sm ON s.id = sm.segment_id AND s.type = sm.type
-        WHERE s.id_job = ? AND s.type = ?
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ? 
         ORDER by sm.order";
         $stmt = $conn->prepare( $query );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $id_job, $type ] );
+    }
+
+    public function countByJobId($id_job, $type){
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT count(id) FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
+        $stmt->execute( [$id_job, $type] );
+
+        $result = $stmt->fetch();
+        return $result[0];
     }
 
     public function createList( Array $obj_arr ) {
