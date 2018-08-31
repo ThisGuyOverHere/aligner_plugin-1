@@ -9,10 +9,13 @@
 
 namespace Features\Aligner\Model;
 
+use DataAccess\ArrayAccessTrait;
+
 class Segments_SegmentStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+    use ArrayAccessTrait;
+
     public $id ;
     public $id_job ;
-    public $id_file ;
     public $type ;
     public $order ;
     public $next ;
