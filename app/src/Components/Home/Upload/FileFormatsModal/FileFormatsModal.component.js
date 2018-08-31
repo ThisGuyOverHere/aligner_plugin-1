@@ -17,6 +17,7 @@ class FileFormatsModal extends Component {
                     <div className="header">
                         <div className="sx-header">
                             <img src="/public/img/logo-ico.png"></img>
+                            <h1>Supported file formats</h1>
                         </div>
                         <div className="dx-header">
                             <span onClick={this.props.formatModalState}>

@@ -37,6 +37,11 @@
 	  img{
 		height: 22px;
 	  }
+	  h1{
+		color: $white;
+		font-size: 24px;
+		text-align: left;
+	  }
 	}
   }
   .content{
@@ -63,7 +68,7 @@
 		  display: inline-grid;
 		  li{
 			margin: 0;
-			padding: 8px;
+			padding: 4px;
 			text-align: left;
 			span{
 			  padding: 7px 0px 10px 40px;
@@ -71,6 +76,7 @@
 			  width: 60px;
 			  height: 35px;
 			  background-size: 25px !important;
+			  display: inline-block;
 			}
 		  }
 	  	}
