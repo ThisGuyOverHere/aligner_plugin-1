@@ -70,7 +70,7 @@ class Files_FileDao extends DataAccess_AbstractDao {
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM files where id = :id ");
         $stmt->execute( array( 'id' => $id ) );
-        $stmt->setFetchMode(\PDO::FETCH_CLASS, 'Files_FileStruct');
+        $stmt->setFetchMode(\PDO::FETCH_CLASS, 'Features\Aligner\Model\Files_FileStruct');
         return $stmt->fetch();
     }
 
