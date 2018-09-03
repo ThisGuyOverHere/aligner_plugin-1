@@ -1271,7 +1271,7 @@ class Alignment
         function buildScores($source, $target) {
 
             // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
-            $beadCosts = ['1-1' => 0, '2-1' => 100, '1-2' => 100, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
+            $beadCosts = ['1-1' => 0, '2-1' => 150, '1-2' => 150, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
 
             $m = [];
             foreach (range(0, count($source)) as $si) {
