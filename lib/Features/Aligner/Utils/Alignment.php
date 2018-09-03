@@ -1223,12 +1223,12 @@ class Alignment
         function eval_sents($sources, $targets) {
             $costIns = 1; $costRep = 1; $costDel = 1;
 
-            $ss = mergeSegments($sources)['content_clean'];
-            $ts = mergeSegments($targets)['content_clean'];
+            $sourceClean = mergeSegments($sources)['content_clean'];
+            $targetClean = mergeSegments($targets)['content_clean'];
 
             // Lowercase to better comparison
-            $ss = strtolower($ss);
-            $ts = strtolower($ts);
+            $ss = strtolower($sourceClean);
+            $ts = strtolower($targetClean);
 
             // Get all words, this is needed to remove common words and calculate distance only on different words (type, plurals, ...)
             $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
@@ -1245,13 +1245,27 @@ class Alignment
             $ss = implode('', $ss);
             $ts = implode('', $ts);
 
+            // Distance
             if (strlen($ss) == 0 || strlen($ts) == 0) {  // Check if we can return immediately the upper bound
-                return max(strlen($ss), strlen($ts));
+                $distance = max(strlen($ss), strlen($ts));
             } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
-                return levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+                $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
             } else {
-                return long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+                $distance = long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
             }
+
+            // Score
+            $len = min(strlen($sourceClean), strlen($targetClean));
+
+            if ($len > 0) {
+                $avg = (strlen($sourceClean) + strlen($targetClean)) / 2;
+
+                $score = 100 - 100 * min($distance / $avg, 1);  // Limit to 1 if distance > avg
+            } else {
+                $score = 0;
+            }
+
+            return [$distance, $score];
         }
 
         function buildScores($source, $target) {
@@ -1263,7 +1277,7 @@ class Alignment
             foreach (range(0, count($source)) as $si) {
                 foreach (range(0, count($target)) as $ti) {
                     if ($si == 0 && $ti == 0) {
-                        $m[0][0] = [0, 0, 0];
+                        $m[0][0] = [0, 0, 0, 0];
                     } else {
 
                         $value = null;
@@ -1277,9 +1291,10 @@ class Alignment
                                 $sources = array_slice($source, $si-$sd, $sd);
                                 $targets = array_slice($target, $ti-$td, $td);
 
-                                $score = $m[$si-$sd][$ti-$td][0] + eval_sents($sources, $targets) + $beadCost;
+                                list($distance, $score) = eval_sents($sources, $targets);
+                                $cost = $m[$si-$sd][$ti-$td][0] + $distance + $beadCost;
 
-                                $tuple = [$score, $sd, $td];
+                                $tuple = [$cost, $sd, $td, $score];
 
                                 // Emulate min function on tuple
                                 if ($value == null || $tuple[0] < $value[0]) {
@@ -1303,13 +1318,13 @@ class Alignment
             $ti = count($target);
 
             while (true) {
-                list($c, $sd, $td) = $scores[$si][$ti];
+                list($cost, $sd, $td, $score) = $scores[$si][$ti];
 
                 if ($sd == 0 && $td == 0) {
                     break;
                 }
 
-                $res[] = [[$si - $sd, $sd], [$ti - $td, $td]];
+                $res[] = [[$si - $sd, $sd], [$ti - $td, $td], $score];
 
                 $si -= $sd;
                 $ti -= $td;
@@ -1389,7 +1404,7 @@ class Alignment
                     $subAlignment = alignPart($subSource, $subTarget, $lastMatch);
 
                     $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
-                    $alignment[] = [[$match[0], 1], [$match[1], 1]];  // Add alignment for exact match
+                    $alignment[] = [[$match[0], 1], [$match[1], 1], 100];  // Add alignment for exact match
 
                     // Update lastMatch to skip current match
                     $lastMatch[0] = $match[0] + 1;
@@ -1445,7 +1460,7 @@ class Alignment
         $indexes = align($source_translated, $target);
 
         $alignment = [];
-        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length]] of the source/target slice
+        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length], score] of the source/target slice
             $si = $index[0][0];
             $ti = $index[1][0];
 
@@ -1453,8 +1468,9 @@ class Alignment
             $td = $index[1][1];
 
             $row = [
-                    'source' => mergeSegments(array_slice($source, $si, $sd)),
-                    'target' => mergeSegments(array_slice($target, $ti, $td))
+                'source' => mergeSegments(array_slice($source, $si, $sd)),
+                'target' => mergeSegments(array_slice($target, $ti, $td)),
+                'score' => $index[2]
             ];
 
             $alignment[] = $row;
