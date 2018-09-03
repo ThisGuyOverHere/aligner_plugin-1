@@ -11,6 +11,28 @@ namespace Features\Aligner\Utils;
 class Engines_GoogleTranslate extends \Engines_GoogleTranslate
 {
 
+    protected function _composeResponseAsMatch( array $argument, $decoded ){
+
+        $mt_result = new \Engines_Results_MT( $decoded );
+
+        if ( $mt_result->error->code < 0 ) {
+            $mt_result = $mt_result->get_as_array();
+            $mt_result['error'] = (array)$mt_result['error'];
+            return $mt_result;
+        }
+
+        $mt_match_res = new \Engines_Results_MyMemory_Matches(
+            $this->_resetSpecialStrings( $argument[ 'text' ] ),
+            $mt_result->translatedText,
+            100 - $this->getPenalty() . "%",
+            "MT-" . $this->getName(),
+            date( "Y-m-d" )
+        );
+
+        return $mt_match_res->get_as_array();
+
+    }
+
     public function getMulti( $_configs ) {
 
         $segments = array();
@@ -155,14 +177,13 @@ class Engines_GoogleTranslate extends \Engines_GoogleTranslate
         foreach ($all_args[1] as $key => $arg){
             $all_args[1][$key]['text'] = $arg['q'];
         }
-        //$all_args[ 1 ][ 'text' ] = $all_args[ 1 ][ 'q' ];
 
         $decoded = array();
-        foreach ($rawValues as $rawValue) {
+        foreach ($rawValues as $key => $rawValue) {
             if (is_string($rawValue)) {
                 $decoded_element = json_decode($rawValue, true);
                 if (isset($decoded_element["data"])) {
-                    $decoded[] = $this->_composeResponseAsMatch($all_args, $decoded_element);
+                    $decoded[] = $this->_composeResponseAsMatch($all_args[1][$key], $decoded_element);
                 } else {
                     $decoded = [
                         'error' => [
