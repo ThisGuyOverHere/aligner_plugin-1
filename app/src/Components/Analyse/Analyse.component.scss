@@ -49,11 +49,11 @@ h1{
 		padding: 16px 8px;
 		box-sizing: initial;
 		position: absolute;
-		background-color: #eeeeee;
+		background-color: $headerText;
 		top: -200px;
 		.text {
 		  height: 12px;
-		  background-color: #bbb;
+		  background-color: $lightGrey;
 		  margin-bottom: 8px;
 		  border-radius: 4px;
 		  animation: text-color 6s infinite;
@@ -98,12 +98,12 @@ h1{
   }
   40% {
 	top: 240px;
-	background-color: #eeeeee;
+	background-color: $headerText;
 	transform: scale(1);
   }
   50% {
 	top: 240px;
-	background-color: #3aa9dd;
+	background-color: $primary;
 	transform: scale(1.01);
   }
   65% {
@@ -117,7 +117,7 @@ h1{
   100% {
 	top: -50px;
 	opacity: 0;
-	background-color: #fff;
+	background-color: $white;
 	transform: scale(1);
   }
 }
@@ -128,12 +128,12 @@ h1{
   }
   40% {
 	top: 240px;
-	background-color: #eeeeee;
+	background-color: $headerText;
 	transform: scale(1);
   }
   50% {
 	top: 240px;
-	background-color: #3aa9dd;
+	background-color: $primary;
 	transform: scale(1.01);
   }
   65% {
@@ -147,22 +147,22 @@ h1{
   100% {
 	top: -50px;
 	opacity: 0;
-	background-color: #fff;
+	background-color: $white;
 	transform: scale(1);
   }
 }
 
 @keyframes text-color {
   0% {
-	background-color: #bbbbbb;
+	background-color: $lightGrey;
   }
   40% {
-	background-color: #bbbbbb;
+	background-color: $lightGrey;
   }
   50% {
 	background-color: #79c3e6;
   }
   100% {
-	background-color: #fff;
+	background-color: $white;
   }
 }
