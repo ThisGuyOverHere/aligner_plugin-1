@@ -16,10 +16,10 @@ class ExportModal extends Component {
                 <div className="overlay" onClick={this.onCloseExportModal}>
                 </div>
 
-                <div className="loginContainer">
+                <div className="exportContainer">
                     <div className="header">
                         <div className="sx-header">
-                          
+                            <img src="/public/img/logo-ico.png"></img>
                         </div>
                         <div className="dx-header">
                             <span onClick={this.onCloseExportModal}>
@@ -28,12 +28,9 @@ class ExportModal extends Component {
                         </div>
                     </div>
                     <div className="content">
-                        <div className="sx-content">
 
-                        </div>
-                        <div className="dx-content">
 
-                        </div>
+
                     </div>
                 </div>
             </div>
