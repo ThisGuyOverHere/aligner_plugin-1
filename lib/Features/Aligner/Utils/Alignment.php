@@ -1446,7 +1446,7 @@ class Alignment
                     'target'=>$target_lang);
             }
 
-            $input_chunks = array_chunk($input_segments,100,true);
+            $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
             foreach ($input_chunks as $chunk){
 
                 //Gets the translated segments and filters just the elements with the 'translation' key before merging
@@ -1465,7 +1465,6 @@ class Alignment
 
         // Variant on Church and Gale algorithm with Levenshtein distance
         $source_translated = translateSegments($source, $source_lang, $target_lang);
-
         $indexes = align($source_translated, $target);
 
         $alignment = [];
