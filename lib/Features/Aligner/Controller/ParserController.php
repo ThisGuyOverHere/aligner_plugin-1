@@ -78,14 +78,14 @@ class ParserController extends AlignerController {
             $source_element['order'] = ($key+1)*1000000000;
             $source_element['next'] = ($key+2)*1000000000;
             $source_element['id_job'] = $this->id_job;
-            $source_element['score'] = 0;
+            $source_element['score'] = $value['score'];
             $source_element['type'] = "source";
 
-            $target_element = []; ;
+            $target_element = [];
             $target_element['segment_id'] = $value['target']['id'];
             $target_element['order'] = ($key+1)*1000000000;
             $target_element['next'] = ($key+2)*1000000000;
-            $target_element['score'] = 0;
+            $target_element['score'] = $value['score'];
             $target_element['id_job'] = $this->id_job;
             $target_element['type'] = "target";
 
