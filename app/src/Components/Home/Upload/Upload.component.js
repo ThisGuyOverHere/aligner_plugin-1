@@ -5,8 +5,8 @@ import Dropzone from 'react-dropzone'
 import env from '../../../Constants/Env.constants'
 import {httpUpload} from '../../../HttpRequests/Upload.http';
 import {httpConversion, httpCreateProject, httpAlignJob} from "../../../HttpRequests/Alignment.http";
-import {Redirect} from "react-router";
-
+import {Redirect} from "react-router"
+import FileFormatsModal from "./FileFormatsModal/FileFormatsModal.component";
 
 class UploadComponent extends Component {
     static propTypes = {};
@@ -41,6 +41,7 @@ class UploadComponent extends Component {
             },
             sourceLang: 'en-US',
             targetLang: 'it-IT',
+            formatsModalOpen: false
         }
     }
 
@@ -170,6 +171,12 @@ class UploadComponent extends Component {
         })
     };
 
+    onFormatsModalClick = () => {
+        this.setState({
+            formatsModalOpen : !this.state.formatsModalOpen
+        });
+    };
+
     renderHtmlUpload = (status, data) =>{
         switch (status) {
             case 'start':
@@ -231,18 +238,11 @@ class UploadComponent extends Component {
                     </div>
 
                     <div className="row" id="projectNameInput">
-                        <div className="thirteen wide column">
+                        <div className="sixteen wide column">
                             <div className="ui input">
                                 <input className="form-control" name="pname" type="text" value={this.state.pName}
                                        onChange={this.ProjectNameChange}/>
                             </div>
-                        </div>
-
-                        <div className="three wide column">
-                            <p>
-                                <i aria-hidden='true' className='setting icon'/>
-                                <span>Settings</span>
-                            </p>
                         </div>
                     </div>
 
@@ -298,8 +298,10 @@ class UploadComponent extends Component {
                     <div className="row" id="buttonRow">
 
                         <div className="twelve wide column">
-                            <h4>MateCat supports <span> 71 file formats </span></h4>
+                            <h4>MateCat supports <span onClick={this.onFormatsModalClick}> 71 file formats </span></h4>
+                            {this.state.formatsModalOpen && <FileFormatsModal formatModalState = {this.onFormatsModalClick}/>}
                         </div>
+
 
                         <div className="four wide column">
                             <button className="ui primary button" onClick={this.startAlignment}

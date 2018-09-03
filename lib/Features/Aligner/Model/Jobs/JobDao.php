@@ -73,6 +73,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+
     /**
      * For now this is used by tests
      *
@@ -137,5 +138,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $jStruct;
 
     }
+
+
 
 }
