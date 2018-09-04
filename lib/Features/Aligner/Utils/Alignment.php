@@ -1445,18 +1445,41 @@ class Alignment
         function translateSegments($segments, $source_lang, $target_lang) {
             $result = [];
 
+            $config = Aligner::getConfig();
+
+            $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+            $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
+            $engineRecord->type = 'MT';
+
+            $engine = new \Features\Aligner\Utils\Engines_GoogleTranslate($engineRecord);
+
+            $input_segments = array();
+
             foreach ($segments as $segment) {
-                $segment['content_clean'] = translateSegment($segment['content_clean'], $source_lang, $target_lang);
-                $result[] = $segment;
+                $input_segments[] = array('segment'=>$segment['content_clean'],
+                    'source'=>$source_lang,
+                    'target'=>$target_lang);
             }
 
-            return $result;
+            $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
+            foreach ($input_chunks as $chunk){
+
+                //Gets the translated segments and filters just the elements with the 'translation' key before merging
+                $translation = $engine->getMulti($chunk);
+                $translation = array_map(function ($ar) {return $ar['translation'];}, $translation);
+                $result = array_merge($result,$translation);
+            }
+
+            foreach ($segments as $key => $segment){
+                $segments[$key]['content_clean'] = $result[$key];
+            }
+
+            return $segments;
         }
 
 
         // Variant on Church and Gale algorithm with Levenshtein distance
         $source_translated = translateSegments($source, $source_lang, $target_lang);
-
         $indexes = align($source_translated, $target);
 
         $alignment = [];

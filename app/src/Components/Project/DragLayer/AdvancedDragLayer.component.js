@@ -2,6 +2,10 @@ import * as React from 'react'
 import {DragLayer, XYCoord} from 'react-dnd'
 import {ItemTypes} from '../../../Constants/Draggable.constants';
 import SegmentDragLayer from './SegmentDragLayer.component';
+import keydown from 'react-keydown';
+import {Component} from "react";
+import ProjectActions from "../../../Actions/Project.actions";
+
 
 const layerStyles = {
     position: 'fixed',
@@ -11,10 +15,6 @@ const layerStyles = {
     top: 0,
     width: '100%',
     height: '100%',
-};
-const containerStyle = {
-    marginLeft: {value:'0px',important:true},
-    marginRight: {value:'0px',important:true}
 };
 
 function getItemStyles(props) {
@@ -35,41 +35,75 @@ function getItemStyles(props) {
 }
 
 
-const AdvancedDragLayer = props => {
-    const {item, itemType, isDragging} = props;
+class AdvancedDragLayer extends Component {
 
-    function renderItem() {
-        switch (itemType) {
-            case ItemTypes.ITEM:
-                return <SegmentDragLayer item={item}/>;
-            default:
-                return null
+    constructor(props) {
+        super(props)
+        this.state = {
+            merge: false
         }
     }
 
-    if (!isDragging) {
-        return null
+    renderItem = () => {
+        switch (this.props.itemType) {
+            case ItemTypes.ITEM:
+                return <SegmentDragLayer item={this.props.item}/>;
+            default:
+                return null
+        }
+    };
+
+    componentDidMount(){
+        document.addEventListener("keydown", this.setMergeStatus, false);
+        document.addEventListener("keyup", this.unsetMergeStatus, false);
+    }
+    componentWillUnmount(){
+        document.removeEventListener("keydown", this.setMergeStatus, false);
+        document.removeEventListener("keyup", this.unsetMergeStatus, false);
+        ProjectActions.setMergeStatus(false);
     }
 
-    return (
-        <div style={layerStyles}>
-            <div className="ui container" ref={(el) => {
-                if (el) {
-                    el.style.setProperty('margin', '0px', 'important');
-                }
-            }}>
-                <div className="ui grid middle aligned">
-                    <div className="fifteen wide column">
-                        <div className="ui grid top aligned">
-                            <div className="eight wide column">
-                                <div style={getItemStyles(props)}>{renderItem()}</div>
-                            </div>
-                        </div>
-                    </div>
+    render = () => {
+        const {isDragging} = this.props;
+        let mergeClass = ['merge-text'];
+        if (!isDragging) {
+            return null
+        }
+        if(this.state.merge){
+            mergeClass.push('active')
+        }
+
+        return (
+            <div style={layerStyles}>
+                <div className="ui container" ref={(el) => {
+                    if (el) {
+                        el.style.setProperty('margin', '0px', 'important');
+                    }
+                }}>
+                    <div className="grid-dropLayer" style={getItemStyles(this.props)}>{this.renderItem()}</div>
                 </div>
+                <p className={mergeClass.join(" ")}>CMD for Merge</p>
             </div>
-        </div>
-    )
+        )
+    }
+
+    setMergeStatus = (event) =>{
+        if(event.key === 'Alt'){
+            ProjectActions.setMergeStatus(true);
+            this.setState({
+                merge: true
+            });
+        }
+
+    };
+    unsetMergeStatus = (event) =>{
+        if(event.key === 'Alt'){
+            ProjectActions.setMergeStatus(false);
+            this.setState({
+                merge: false
+            });
+        }
+    }
 }
 
 export default DragLayer(monitor => ({
