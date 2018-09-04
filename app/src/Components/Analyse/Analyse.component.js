@@ -14,8 +14,7 @@ class AnalyseComponent extends Component {
         return (
             <div>
                 <h1>Matecat's intelligence is currently alligning your files, please wait</h1>
-                <PreAlignStatus pro = {this.props}/>
-
+                <PreAlignStatus props = {this.props}/>
                 <Animation/>
             </div>
         );

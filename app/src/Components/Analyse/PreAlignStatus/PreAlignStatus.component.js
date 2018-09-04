@@ -5,17 +5,15 @@ import env from "../../../Constants/Env.constants";
 import PropTypes from "prop-types";
 
 class PreAlignStatus extends Component {
-    static propTypes = {
-
-    };
+    static propTypes = {};
 
     constructor(props) {
         super(props);
         this.state = {
             algorithm: env.alignAlgorithmDefaultVersion,
             job: {
-                password: props.pro.match.params.password,
-                id: props.pro.match.params.jobID
+                password: props.props.match.params.password,
+                id: props.props.match.params.jobID
             },
             progress: 30,
         }
@@ -38,9 +36,7 @@ class PreAlignStatus extends Component {
 
     render() {
         if (this.state.progress === 100) {
-            console.log('here');
             return <Redirect to={'/job/' +  this.state.job.id  + '/' + this.state.job.password + '/align'}/>;
-            //return <Redirect to='/job/1/bb4e2ddd4635/align'/>;
         }else{
             return <div className="bar-container">
                 <div className='ui progress' data-percent={this.state.progress}>
