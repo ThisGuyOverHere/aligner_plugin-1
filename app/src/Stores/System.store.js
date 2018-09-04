@@ -13,6 +13,7 @@ let SystemStore = assign({}, EventEmitter.prototype, {
 
     statusLogin: false,
     statusExportModal: false,
+    statusResetPasswordModal: false,
 
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
@@ -30,6 +31,10 @@ AppDispatcher.register(function (action) {
         case SystemConstants.OPEN_EXPORT_MODAL:
             SystemStore.statusExportModal = action.status;
             SystemStore.emitChange(SystemConstants.OPEN_EXPORT_MODAL,action.status);
+            break;
+        case SystemConstants.OPEN_RESET_PASSWORD_MODAL:
+            SystemStore.statusResetPasswordModal = action.status;
+            SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL,action.status);
             break;
     }
 });

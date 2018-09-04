@@ -10,6 +10,11 @@ class LoginComponent extends Component {
         SystemActions.setLoginStatus(false);
     };
 
+    openResetPasswordModal = () =>{
+        SystemActions.setResetPasswordStatus(true);
+        this.onCloseLogin();
+    };
+
     render = () => {
         return (
             <div>
@@ -58,7 +63,8 @@ class LoginComponent extends Component {
                                     <button className="login-btn ui button primary disabled" tabIndex="3">
                                         <span className="button-loader "></span> Sign in
                                     </button>
-                                    <span className="forgot-password">Forgot password?</span></div>
+                                    <span className="forgot-password" onClick={this.openResetPasswordModal}>Forgot password?</span>
+                                </div>
                             </div>
                         </div>
                     </div>
