@@ -61,6 +61,7 @@ DROP TABLE IF EXISTS `sequences`;
 CREATE TABLE `sequences` (
   `id_segment` bigint(20) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+insert into sequences SET id_segment = 1;
 
 DROP TABLE IF EXISTS `segments`;
 CREATE TABLE `segments` (
