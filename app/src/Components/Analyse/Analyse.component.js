@@ -13,7 +13,9 @@ class AnalyseComponent extends Component {
     render() {
         return (
             <div>
-                <h1>Matecat's intelligence is currently alligning your files, please wait</h1>
+                <div id="title">
+                    <h1>Matecat's intelligence is currently aligning your files, please wait</h1>
+                </div>
                 <PreAlignStatus props = {this.props}/>
                 <Animation/>
             </div>
