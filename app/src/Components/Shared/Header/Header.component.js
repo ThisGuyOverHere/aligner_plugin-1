@@ -71,7 +71,7 @@ class HeaderComponent extends Component {
                         </span>
                     </div>
                     <div id="export">
-                        <button className="ui primary button">
+                        <button className="ui primary button" onClick={this.openExportModal}>
                             <span>
                                 Export
                                 <i aria-hidden='true' className="upload icon"></i>
@@ -112,5 +112,8 @@ class HeaderComponent extends Component {
         SystemActions.setLoginStatus(true)
     }
 
+    openExportModal = () =>{
+        SystemActions.setExportModalStatus(true)
+    }
 }
 export default HeaderComponent;

@@ -12,6 +12,7 @@ EventEmitter.prototype.setMaxListeners(0);
 let SystemStore = assign({}, EventEmitter.prototype, {
 
     statusLogin: false,
+    statusExportModal: false,
 
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
@@ -25,6 +26,10 @@ AppDispatcher.register(function (action) {
         case SystemConstants.OPEN_LOGIN:
             SystemStore.statusLogin = action.status;
             SystemStore.emitChange(SystemConstants.OPEN_LOGIN,action.status);
+            break;
+        case SystemConstants.OPEN_EXPORT_MODAL:
+            SystemStore.statusExportModal = action.status;
+            SystemStore.emitChange(SystemConstants.OPEN_EXPORT_MODAL,action.status);
             break;
     }
 });
