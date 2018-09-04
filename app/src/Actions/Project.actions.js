@@ -245,6 +245,30 @@ let ProjectActions = {
             actionType: ProjectConstants.MERGE_STATUS,
             status: status
         });
+    },
+
+    mergeSegments: function (from,to) {
+        let changes = [];
+
+        to.clean += from.clean;
+        to.raw += from.raw;
+
+        changes.push({
+            type: to.type,
+            action: 'update',
+            rif_order: to.order,
+            data: to
+        });
+        
+        changes.push({
+            type: from.type,
+            action: 'delete',
+            rif_order: from.order
+        });
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: changes
+        });
     }
 };
 
