@@ -79,34 +79,17 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function getTargetOrdered($id_job){
-        return self::getLimitedTypeOrderedByJobId($id_job, "target");
+    public static function getTargetOrdered($id_job, $where, $order, $amount){
+        return self::getTypeOrderedByJobId($id_job, "target",0, $where, $order, $amount);
     }
 
-    public static function getSourceOrdered($id_job){
-        return self::getLimitedTypeOrderedByJobId($id_job, "source");
+    public static function getSourceOrdered($id_job, $where, $order, $amount){
+        return self::getTypeOrderedByJobId($id_job, "source", 0, $where, $order, $amount);
     }
 
-    public static function getTypeOrderedByJobId($id_job, $type, $ttl = 0){
+    public static function getTypeOrderedByJobId($id_job, $type, $ttl = 0, $where, $order, $segmentAmount){
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
-        $query = "SELECT * FROM segments as s
-        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
-        WHERE sm.id_job = ? AND sm.type = ? and order in()
-        ORDER by sm.order";
-        $stmt = $conn->prepare( $query );
-
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $id_job, $type ] );
-    }
-
-    public static function getLimitedTypeOrderedByJobId($id_job, $type, $ttl = 0, $where = "center", $order, $segmentAmount = 0){
-        $thisDao = new self();
-        $conn = NewDatabase::obtain()->getConnection();
-
-        if(empty($segmentAmount)){
-            $config = Aligner::getConfig();
-            $segmentAmount = $config['SEGMENT_AMOUNT_PER_PAGE'];
-        }
 
         $queryBefore = "SELECT `order` FROM (SELECT sm.order FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
