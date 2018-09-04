@@ -1,4 +1,7 @@
 import SystemConstants from "../Constants/System.constants";
+import {httpLogin, httpMe} from "../HttpRequests/System.http";
+import {httpGetSegments} from "../HttpRequests/Alignment.http";
+import ProjectConstants from "../Constants/Project.constants";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 
@@ -34,7 +37,47 @@ let SystemActions = {
             actionType: SystemConstants.OPEN_RESET_PASSWORD_MODAL,
             status: status
         });
+    },
+
+    /**
+     *
+     */
+    checkUserStatus: function () {
+        httpMe()
+            .then(response => {
+                AppDispatcher.dispatch({
+                    actionType: SystemConstants.USER_STATUS,
+                    status: response.data.user
+                })
+            })
+            .catch( error => {
+                AppDispatcher.dispatch({
+                    actionType: SystemConstants.USER_STATUS,
+                    status: false
+                })
+            })
+    },
+
+    /**
+     *
+     * @param data , an object with email and password
+     */
+    login: function (data) {
+        httpLogin(data)
+            .then(response => {
+                AppDispatcher.dispatch({
+                    actionType: SystemConstants.USER_STATUS,
+                    status: response.data.user
+                })
+            })
+            .catch( error => {
+                AppDispatcher.dispatch({
+                    actionType: SystemConstants.USER_STATUS,
+                    status: false
+                })
+            })
     }
+
 };
 
 

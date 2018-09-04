@@ -7,6 +7,7 @@ import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
 import ExportModal from "../ExportModal/ExportModal.component";
 import ResetPasswordModal from "../ResetPasswordModal/ResetPasswordModal.component";
+import SystemActions from "../../../Actions/System.actions";
 
 class Layout extends Component {
     constructor(props) {
@@ -14,17 +15,21 @@ class Layout extends Component {
         this.state = {
             statusLogin: false,
             statusExportModal: false,
-            statusResetPasswordModal: false
+            statusResetPasswordModal: false,
+            user: false
         }
     }
 
     componentDidMount() {
+        SystemActions.checkUserStatus();
+        SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.addListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.addListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         SystemStore.addListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
     }
 
     componentWillUnmount() {
+        SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.removeListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.removeListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         SystemStore.removeListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
@@ -37,7 +42,7 @@ class Layout extends Component {
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
                 {this.state.statusLogin && <LoginComponent />}
                 {this.state.statusExportModal && <ExportModal />}
-                <HeaderComponent {...matchProps}/>
+                <HeaderComponent user = {this.state.user} {...matchProps}/>
                 <Component {...matchProps} />
                 <FooterComponent {...matchProps}/>
             </div>
@@ -60,7 +65,13 @@ class Layout extends Component {
         this.setState({
             statusResetPasswordModal: status
         })
-    }
+    };
+
+    userStatus = (status) => {
+        this.setState({
+            user: status
+        })
+    };
 }
 
 

@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 import { Link } from "react-router-dom";
-import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
 import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
+import User from "./User/User.component";
+import Mismatch from "./Mismatch/Mismatch.component";
+import Export from "./Export/Export.component";
 
 class HeaderComponent extends Component {
 
@@ -12,6 +14,7 @@ class HeaderComponent extends Component {
                 jobID: PropTypes.string
             })
         }).isRequired,
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
     };
 
     constructor(props) {
@@ -40,7 +43,7 @@ class HeaderComponent extends Component {
              prevState.job.id = null;
          }
         return prevState;
-    }
+    };
 
     renderHtmlNavigation = () => {
         if(this.state.job.id){
@@ -61,28 +64,9 @@ class HeaderComponent extends Component {
                     </div>
                 </li>
                 <li>
-                    <div id="mini_align_nav">
-                        <p id="aligned"> Mismatch 1 </p> / 5
-                        <span>
-                            <i className="icon angle up"></i>
-                        </span>
-                        <span>
-                            <i className="icon angle down"></i>
-                        </span>
-                    </div>
-                    <div id="export">
-                        <button className="ui primary button" onClick={this.openExportModal}>
-                            <span>
-                                Export
-                                <i aria-hidden='true' className="upload icon"></i>
-                            </span>
-                        </button>
-                    </div>
-                    <div id="user">
-                        <div className="ui user-nolog label" title="Login" onClick={this.openLogin}>
-                            <i className="icon user"></i>
-                        </div>
-                    </div>
+                    <Mismatch />
+                    <Export/>
+                    <User user={this.props.user}/>
                 </li>
             </ul>;
         } else {
@@ -90,11 +74,7 @@ class HeaderComponent extends Component {
                 <Link to="/">
                     <div id="logo"></div>
                 </Link>
-                <li id="user">
-                    <div className="ui user-nolog label" title="Login" onClick={this.openLogin}>
-                        <i className="icon user"></i>
-                    </div>
-                </li>
+                <User/>
             </ul>
         }
     };
@@ -107,12 +87,5 @@ class HeaderComponent extends Component {
         );
     }
 
-    openLogin = () =>{
-        SystemActions.setLoginStatus(true)
-    };
-
-    openExportModal = () =>{
-        SystemActions.setExportModalStatus(true)
-    };
 }
 export default HeaderComponent;

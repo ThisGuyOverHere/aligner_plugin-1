@@ -29,6 +29,9 @@ AppDispatcher.register(function (action) {
         case SystemConstants.OPEN_RESET_PASSWORD_MODAL:
             SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL,action.status);
             break;
+        case SystemConstants.USER_STATUS:
+            SystemStore.emitChange(SystemConstants.USER_STATUS,action.status);
+            break;
     }
 });
 

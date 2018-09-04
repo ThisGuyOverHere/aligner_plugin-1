@@ -1,0 +1,24 @@
+import axios, {post,get} from 'axios';
+import qs from 'qs';
+import env from "../Constants/Env.constants";
+
+/**
+ *
+ * @param data
+ * @param {String} data.email
+ * @param {String} data.password
+ * @return {Promise}
+ */
+export const httpLogin = (data) => {
+    const url = '/api/app/user/login';
+    return post(url, qs.stringify(data));
+};
+
+/**
+ *
+ * @return {Promise}
+ */
+export const httpMe = () => {
+    const url = '/api/app/user';
+    return get(url);
+};

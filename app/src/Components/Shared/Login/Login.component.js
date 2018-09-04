@@ -1,9 +1,16 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
+import {httpLogin} from "../../../HttpRequests/System.http";
 
 class LoginComponent extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            userData: {
+                email: ' ',
+                password: ' ',
+            }
+        }
     }
 
     onCloseLogin = () => {
@@ -13,6 +20,30 @@ class LoginComponent extends Component {
     openResetPasswordModal = () =>{
         SystemActions.setResetPasswordStatus(true);
         this.onCloseLogin();
+    };
+
+    EmailChange = (event) => {
+        this.setState({
+            userData: {
+                email: event.target.value,
+                password: this.state.userData.password,
+            }
+        });
+    };
+
+    PasswordChange = (event) => {
+        this.setState({
+            userData: {
+                email: this.state.userData.email,
+                password: event.target.value,
+            }
+        });
+    };
+
+    login = (event) => {
+        console.log(this.state.userData);
+        SystemActions.login(this.state.userData);
+        event.preventDefault();
     };
 
     render = () => {
@@ -47,24 +78,33 @@ class LoginComponent extends Component {
                                     <i className="google icon"></i>
                                     <span>Sign in with Google</span>
                                 </button>
-                                <div className="login-form-container">
+
+                                <form className="login-form-container" onSubmit={this.login}>
                                     <div className="form-divider">
                                         <div className="divider-line"></div>
                                         <span>OR</span>
                                         <div className="divider-line"></div>
                                     </div>
-                                    <div><input type="text" placeholder="Email"
-                                                name="emailAddress" tabIndex="1"></input>
+                                    <div>
+                                        <input type="text" placeholder="Email"
+                                               name="email" tabIndex="1"
+                                               onChange={this.EmailChange}
+                                               value={this.state.userData.email}>
+                                        </input>
                                     </div>
                                     <div>
                                         <input type="password" placeholder="Password (minimum 8 characters)"
-                                               name="password" tabIndex="2"></input>
+                                               name="password" tabIndex="2"
+                                               onChange={this.PasswordChange}
+                                               value={this.state.userData.password}>
+                                        </input>
                                     </div>
-                                    <button className="login-btn ui button primary disabled" tabIndex="3">
-                                        <span className="button-loader "></span> Sign in
+                                    <button className="login-btn ui button primary" tabIndex="3" type="submit">
+                                        <span className="button-loader"></span> Sign in
                                     </button>
                                     <span className="forgot-password" onClick={this.openResetPasswordModal}>Forgot password?</span>
-                                </div>
+                                </form>
+
                             </div>
                         </div>
                     </div>

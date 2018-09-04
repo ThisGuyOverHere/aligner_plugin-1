@@ -10,6 +10,9 @@
 
 @import "Components/Shared/NotFound/NotFound.component";
 @import "Components/Shared/Header/Header.component";
+@import "Components/Shared/Header/Export/Export.component";
+@import "Components/Shared/Header/User/User.component.scss";
+@import "Components/Shared/Header/Mismatch/Mismatch.component.scss";
 @import "Components/Shared/Footer/Footer.component";
 @import "Components/Shared/Login/Login.component";
 @import "Components/Shared/ExportModal/ExportModal.component";
