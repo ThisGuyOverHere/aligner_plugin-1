@@ -107,13 +107,12 @@ class HeaderComponent extends Component {
         );
     }
 
-
     openLogin = () =>{
         SystemActions.setLoginStatus(true)
-    }
+    };
 
     openExportModal = () =>{
         SystemActions.setExportModalStatus(true)
-    }
+    };
 }
 export default HeaderComponent;
