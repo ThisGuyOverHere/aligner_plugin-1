@@ -1320,7 +1320,7 @@ class Alignment
 
         function findAbsoluteMatches($source, $target) {
             // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
-            $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
+            $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
 
             $source = array_map(function ($item) use ($delimiters) {
                 $text = strtolower($item['content_clean']);
@@ -1353,14 +1353,27 @@ class Alignment
             return $commonSegments;
         }
 
+        function alignPart($source, $target, $offset) {
+            $scores = buildScores($source, $target);
+            $alignment = extractPath($source, $target, $scores);
+
+            // Adjust offset
+            $alignment = array_map(function ($item) use ($offset) {
+                $item[0][0] += $offset[0];
+                $item[1][0] += $offset[1];
+                return $item;
+            }, $alignment);
+
+            return $alignment;
+        }
+
         function align($source, $target) {
 
             $matches = findAbsoluteMatches($source, $target);
 
             // No exact match has been found, we need to align entire document
             if (empty($matches)) {
-                $scores = buildScores($source, $target);
-                $alignment = extractPath($source, $target, $scores);
+                $alignment = alignPart($source, $target, [0, 0]);
 
                 return $alignment;
             } else {
@@ -1373,15 +1386,7 @@ class Alignment
                     $subSource = array_slice($source, $lastMatch[0], $match[0] - $lastMatch[0]);
                     $subTarget = array_slice($target, $lastMatch[1], $match[1] - $lastMatch[1]);
 
-                    $scores = buildScores($subSource, $subTarget);
-                    $subAlignment = extractPath($subSource, $subTarget, $scores);
-
-                    // Adjust offset
-                    $subAlignment = array_map(function ($item) use ($lastMatch) {
-                        $item[0][0] += $lastMatch[0];
-                        $item[1][0] += $lastMatch[1];
-                        return $item;
-                    }, $subAlignment);
+                    $subAlignment = alignPart($subSource, $subTarget, $lastMatch);
 
                     $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
                     $alignment[] = [[$match[0], 1], [$match[1], 1]];  // Add alignment for exact match
@@ -1395,15 +1400,7 @@ class Alignment
                 $subSource = array_slice($source, $lastMatch[0]);
                 $subTarget = array_slice($target, $lastMatch[1]);
 
-                $scores = buildScores($subSource, $subTarget);
-                $subAlignment = extractPath($subSource, $subTarget, $scores);
-
-                // Adjust offset
-                $subAlignment = array_map(function ($item) use ($lastMatch) {
-                    $item[0][0] += $lastMatch[0];
-                    $item[1][0] += $lastMatch[1];
-                    return $item;
-                }, $subAlignment);
+                $subAlignment = alignPart($subSource, $subTarget, $lastMatch);
 
                 $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
 
@@ -1433,18 +1430,41 @@ class Alignment
         function translateSegments($segments, $source_lang, $target_lang) {
             $result = [];
 
+            $config = Aligner::getConfig();
+
+            $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+            $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
+            $engineRecord->type = 'MT';
+
+            $engine = new \Features\Aligner\Utils\Engines_GoogleTranslate($engineRecord);
+
+            $input_segments = array();
+
             foreach ($segments as $segment) {
-                $segment['content_clean'] = translateSegment($segment['content_clean'], $source_lang, $target_lang);
-                $result[] = $segment;
+                $input_segments[] = array('segment'=>$segment['content_clean'],
+                    'source'=>$source_lang,
+                    'target'=>$target_lang);
             }
 
-            return $result;
+            $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
+            foreach ($input_chunks as $chunk){
+
+                //Gets the translated segments and filters just the elements with the 'translation' key before merging
+                $translation = $engine->getMulti($chunk);
+                $translation = array_map(function ($ar) {return $ar['translation'];}, $translation);
+                $result = array_merge($result,$translation);
+            }
+
+            foreach ($segments as $key => $segment){
+                $segments[$key]['content_clean'] = $result[$key];
+            }
+
+            return $segments;
         }
 
 
         // Variant on Church and Gale algorithm with Levenshtein distance
         $source_translated = translateSegments($source, $source_lang, $target_lang);
-
         $indexes = align($source_translated, $target);
 
         $alignment = [];
