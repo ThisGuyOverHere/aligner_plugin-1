@@ -12,7 +12,17 @@ let SystemActions = {
             actionType: SystemConstants.OPEN_LOGIN,
             status: status
         });
+    },
 
+    /**
+     *
+     * @param {Boolean} status The status of Export Modal, true for open the modal and false for close
+     */
+    setExportModalStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.OPEN_EXPORT_MODAL,
+            status: status
+        });
     }
 };
 

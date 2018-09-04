@@ -4,7 +4,7 @@ import {Dropdown} from 'semantic-ui-react'
 import Dropzone from 'react-dropzone'
 import env from '../../../Constants/Env.constants'
 import {httpUpload} from '../../../HttpRequests/Upload.http';
-import {httpConversion, httpCreateProject, httpAlignJob} from "../../../HttpRequests/Alignment.http";
+import {httpConversion, httpCreateProject} from "../../../HttpRequests/Alignment.http";
 import {Redirect} from "react-router"
 import FileFormatsModal from "./FileFormatsModal/FileFormatsModal.component";
 
@@ -154,7 +154,6 @@ class UploadComponent extends Component {
             source_lang: this.state.sourceLang,
             target_lang: this.state.targetLang
         }).then(response => {
-
             this.setState({
                 job: {
                     id: response.data.job.id,
