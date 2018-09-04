@@ -10,8 +10,8 @@ namespace Features\Aligner\Utils;
 
 use Features\Aligner;
 
-class Alignment
-{
+class Alignment {
+
     /**
      * Naive algorithm, it only puts side by side source and target
      *
@@ -1423,24 +1423,6 @@ class Alignment
             }
         }
 
-        function translateSegment($segment, $source_lang, $target_lang) {
-            $config = Aligner::getConfig();
-
-            $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
-            $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
-            $engineRecord->type = 'MT';
-
-            $engine = new \Engines_GoogleTranslate($engineRecord);
-
-            $res = $engine->get([
-                    'source' => $source_lang,
-                    'target' => $target_lang,
-                    'segment' => $segment
-            ]);
-
-            return $res['translation'];
-        }
-
         // Pre-translate segments from source_lang to target_lang
         function translateSegments($segments, $source_lang, $target_lang) {
             $result = [];
@@ -1451,7 +1433,7 @@ class Alignment
             $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
             $engineRecord->type = 'MT';
 
-            $engine = new \Features\Aligner\Utils\Engines_GoogleTranslate($engineRecord);
+            $engine = new Engines_GoogleTranslate($engineRecord);
 
             $input_segments = array();
 
@@ -1480,6 +1462,7 @@ class Alignment
 
         // Variant on Church and Gale algorithm with Levenshtein distance
         $source_translated = translateSegments($source, $source_lang, $target_lang);
+
         $indexes = align($source_translated, $target);
 
         $alignment = [];
