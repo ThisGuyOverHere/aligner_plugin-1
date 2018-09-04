@@ -1,5 +1,5 @@
 const env = {
-    alignAlgorithmDefaultVersion: 1,
+    alignAlgorithmDefaultVersion: "3c",
     alignAlgorithmAllVersions: ["0","1","2","3","3b","3c"],
     languages: [
         {code:"af-ZA", value:"Afrikaans"},
@@ -160,8 +160,8 @@ const env = {
         {code:"zu-ZA", value:"Zulu"}
     ],
     segmentModel: {
-        clean: null,
-        raw: null,
+        content_clean: null,
+        content_raw: null,
         order: null,
         next: null
     },

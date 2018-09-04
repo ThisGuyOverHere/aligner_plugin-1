@@ -6,6 +6,7 @@
 @import "Components/Project/Job.component";
 @import "Components/Project/Row/Row.component";
 @import "Components/Project/Row/Segment/Segment.component";
+@import "Components/Project/DragLayer/AdvancedDragLayer.component";
 
 @import "Components/Shared/NotFound/NotFound.component";
 @import "Components/Shared/Header/Header.component";
@@ -15,3 +16,5 @@
 @import "Components/Shared/ResetPasswordModal/ResetPasswordModal.component";
 
 @import "Components/Analyse/Analyse.component";
+@import "Components/Analyse/Animation/Animation.component";
+@import "Components/Analyse/PreAlignStatus/PreAlignStatus.component";
