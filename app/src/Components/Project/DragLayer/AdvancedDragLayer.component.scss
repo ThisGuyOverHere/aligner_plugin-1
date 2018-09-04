@@ -1,0 +1,20 @@
+@import "../../../../assets/theme/variables";
+
+.grid-dropLayer{
+  display: grid;
+  grid-template-columns: 1fr 1fr 45px;
+  column-gap: 32px;
+}
+p.merge-text{
+  position: absolute;
+  z-index: 999;
+  bottom: 60px;
+  right: 24px;
+  background: #333;
+  color: #fff;
+  padding: 8px 32px;
+  &.active{
+    background-color: $primary;
+    color: $white;
+  }
+}

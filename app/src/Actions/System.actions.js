@@ -23,6 +23,17 @@ let SystemActions = {
             actionType: SystemConstants.OPEN_EXPORT_MODAL,
             status: status
         });
+    },
+
+    /**
+     *
+     * @param {Boolean} status The status of Reset Password Modal, true for open the modal and false for close
+     */
+    setResetPasswordStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.OPEN_RESET_PASSWORD_MODAL,
+            status: status
+        });
     }
 };
 

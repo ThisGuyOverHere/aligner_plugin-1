@@ -4,7 +4,8 @@ const ProjectConstants = keyMirror({
     RENDER_ROWS: null,
     GET_SEGMENTS: null,
     STORE_SEGMENTS: null,
-    CHANGE_SEGMENT_POSITION: null
+    CHANGE_SEGMENT_POSITION: null,
+    MERGE_STATUS: null
 });
 
 export default ProjectConstants;
