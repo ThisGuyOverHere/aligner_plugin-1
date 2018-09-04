@@ -77,12 +77,12 @@ class Alignment
             // Caluclate mean length: mean = len(trgfile) / len(srcfile)
 
             $sourceLength = array_reduce($source, function ($carry, $item) {
-                $carry += sentenceLength($item['clean']);
+                $carry += sentenceLength($item['content_clean']);
                 return $carry;
             }, 0);
 
             $targetLength = array_reduce($target, function ($carry, $item) {
-                $carry += sentenceLength($item['clean']);
+                $carry += sentenceLength($item['content_clean']);
                 return $carry;
             }, 0);
 
@@ -182,12 +182,12 @@ class Alignment
                 return $segments[0];
             } else {
                 return array_reduce($segments, function ($carry, $item) {
-                    $carry['raw'] .= $item['raw'];
-                    $carry['clean'] .= $item['clean'];
-                    $carry['words'] += $item['words'];
+                    $carry['content_raw'] .= $item['content_raw'];
+                    $carry['content_clean'] .= $item['content_clean'];
+                    $carry['raw_word_count'] += $item['raw_word_count'];
 
                     return $carry;
-                }, ['raw' => '', 'clean' => '', 'words' => 0]);
+                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
             }
         }
 
@@ -197,8 +197,8 @@ class Alignment
         $variance = 6.8;
         $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];
 
-        $sourceLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $source);
-        $targetLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $target);
+        $sourceLengths = array_map(function ($item) { return sentenceLength($item['content_clean']); }, $source);
+        $targetLengths = array_map(function ($item) { return sentenceLength($item['content_clean']); }, $target);
 
         $indexes = _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts);
         $indexes = array_reverse($indexes);
@@ -331,12 +331,12 @@ class Alignment
                 return $segments[0];
             } else {
                 return array_reduce($segments, function ($carry, $item) {
-                    $carry['raw'] .= $item['raw'];
-                    $carry['clean'] .= $item['clean'];
-                    $carry['words'] += $item['words'];
+                    $carry['content_raw'] .= $item['content_raw'];
+                    $carry['content_clean'] .= $item['content_clean'];
+                    $carry['raw_word_count'] += $item['raw_word_count'];
 
                     return $carry;
-                }, ['raw' => '', 'clean' => '', 'words' => 0]);
+                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
             }
         }
 
@@ -363,7 +363,7 @@ class Alignment
             $result = [];
 
             foreach ($segments as $segment) {
-                $segment['clean'] = translateSegment($segment['clean'], $source_lang, $target_lang);
+                $segment['content_clean'] = translateSegment($segment['content_clean'], $source_lang, $target_lang);
                 $result[] = $segment;
             }
 
@@ -377,8 +377,8 @@ class Alignment
         $variance = 6.8;
         $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];
 
-        $sourceLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $source_translated);
-        $targetLengths = array_map(function ($item) { return sentenceLength($item['clean']); }, $target);
+        $sourceLengths = array_map(function ($item) { return sentenceLength($item['content_clean']); }, $source_translated);
+        $targetLengths = array_map(function ($item) { return sentenceLength($item['content_clean']); }, $target);
 
         $indexes = _align($sourceLengths, $targetLengths, $mean, $variance, $beadCosts);
         $indexes = array_reverse($indexes);
@@ -461,12 +461,12 @@ class Alignment
                 return reset($segments);  // Here I'm not sure if array starts with index 0
             } else {
                 return array_reduce($segments, function ($carry, $item) {
-                    $carry['raw'] = trim($carry['raw'] . ' ' . $item['raw']);
-                    $carry['clean'] = trim($carry['clean'] . ' ' . $item['clean']);
-                    $carry['words'] += $item['words'];
+                    $carry['content_raw'] = trim($carry['content_raw'] . ' ' . $item['content_raw']);
+                    $carry['content_clean'] = trim($carry['content_clean'] . ' ' . $item['content_clean']);
+                    $carry['raw_word_count'] += $item['raw_word_count'];
 
                     return $carry;
-                }, ['raw' => '', 'clean' => '', 'words' => 0]);
+                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
             }
         }
 
@@ -505,7 +505,7 @@ class Alignment
 
                     // Calculate score here, using Levenshtein distance
                     // We need a value higher for better alignment
-                    $score = 1000 - long_levenshtein($ss['clean'], $ts['clean']);
+                    $score = 1000 - long_levenshtein($ss['content_clean'], $ts['content_clean']);
                     $scores[] = [$ti, $score];
                 }
 
@@ -922,7 +922,7 @@ class Alignment
             $result = [];
 
             foreach ($segments as $segment) {
-                $segment['clean'] = translateSegment($segment['clean'], $source_lang, $target_lang);
+                $segment['content_clean'] = translateSegment($segment['content_clean'], $source_lang, $target_lang);
                 $result[] = $segment;
             }
 
@@ -1021,20 +1021,20 @@ class Alignment
                 return reset($segments);  // Here I'm not sure if array starts with index 0
             } else {
                 return array_reduce($segments, function ($carry, $item) {
-                    $carry['raw'] = trim($carry['raw'] . ' ' . $item['raw']);
-                    $carry['clean'] = trim($carry['clean'] . ' ' . $item['clean']);
-                    $carry['words'] += $item['words'];
+                    $carry['content_raw'] = trim($carry['content_raw'] . ' ' . $item['content_raw']);
+                    $carry['content_clean'] = trim($carry['content_clean'] . ' ' . $item['content_clean']);
+                    $carry['raw_word_count'] += $item['raw_word_count'];
 
                     return $carry;
-                }, ['raw' => '', 'clean' => '', 'words' => 0]);
+                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
             }
         }
 
         function eval_sents($sources, $targets) {
             $costIns = 1; $costRep = 1; $costDel = 1;
 
-            $ss = mergeSegments($sources)['clean'];
-            $ts = mergeSegments($targets)['clean'];
+            $ss = mergeSegments($sources)['content_clean'];
+            $ts = mergeSegments($targets)['content_clean'];
 
             if (strlen($ss) < 255 && strlen($ts) < 255) {
                 return levenshtein($ss, $ts, $costIns, $costRep, $costDel);
@@ -1125,7 +1125,7 @@ class Alignment
             $result = [];
 
             foreach ($segments as $segment) {
-                $segment['clean'] = translateSegment($segment['clean'], $source_lang, $target_lang);
+                $segment['content_clean'] = translateSegment($segment['content_clean'], $source_lang, $target_lang);
                 $result[] = $segment;
             }
 
@@ -1210,12 +1210,12 @@ class Alignment
                 return reset($segments);  // Here I'm not sure if array starts with index 0
             } else {
                 return array_reduce($segments, function ($carry, $item) {
-                    $carry['raw'] = trim($carry['raw'] . ' ' . $item['raw']);
-                    $carry['clean'] = trim($carry['clean'] . ' ' . $item['clean']);
-                    $carry['words'] += $item['words'];
+                    $carry['content_raw'] = trim($carry['content_raw'] . ' ' . $item['content_raw']);
+                    $carry['content_clean'] = trim($carry['content_clean'] . ' ' . $item['content_clean']);
+                    $carry['raw_word_count'] += $item['raw_word_count'];
 
                     return $carry;
-                }, ['raw' => '', 'clean' => '', 'words' => 0]);
+                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
             }
         }
 
@@ -1223,8 +1223,8 @@ class Alignment
         function eval_sents($sources, $targets) {
             $costIns = 1; $costRep = 1; $costDel = 1;
 
-            $ss = mergeSegments($sources)['clean'];
-            $ts = mergeSegments($targets)['clean'];
+            $ss = mergeSegments($sources)['content_clean'];
+            $ts = mergeSegments($targets)['content_clean'];
 
             // Lowercase to better comparison
             $ss = strtolower($ss);
@@ -1323,14 +1323,14 @@ class Alignment
             $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
 
             $source = array_map(function ($item) use ($delimiters) {
-                $text = strtolower($item['clean']);
+                $text = strtolower($item['content_clean']);
                 $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
                 $text = implode('', $elements);
                 return $text;
             }, $source);
 
             $target = array_map(function ($item) use ($delimiters) {
-                $text = strtolower($item['clean']);
+                $text = strtolower($item['content_clean']);
                 $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
                 $text = implode('', $elements);
                 return $text;
@@ -1434,7 +1434,7 @@ class Alignment
             $result = [];
 
             foreach ($segments as $segment) {
-                $segment['clean'] = translateSegment($segment['clean'], $source_lang, $target_lang);
+                $segment['content_clean'] = translateSegment($segment['content_clean'], $source_lang, $target_lang);
                 $result[] = $segment;
             }
 
@@ -1492,7 +1492,7 @@ class Alignment
             ];
 
             foreach ($tagsRegex as $regex) {
-                preg_match_all($regex, $segment['raw'], $matches);
+                preg_match_all($regex, $segment['content_raw'], $matches);
 
                 if (!empty($matches)) {
                     $allMatches = array_merge($allMatches, $matches[0]); // $matches[0] contains all raw matches
@@ -1503,7 +1503,7 @@ class Alignment
         }
 
         function charactersInSegment($segment) {
-            return strlen(str_replace(' ', '', $segment['clean']));
+            return strlen(str_replace(' ', '', $segment['content_clean']));
         }
 
 
