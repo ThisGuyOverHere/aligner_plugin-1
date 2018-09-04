@@ -14,7 +14,7 @@ const RowTarget = {
             };
 
         if ((from.segment.order !== props.row[from.type].order)
-            && (!props.mergeStatus || (props.mergeStatus && props.row[from.type].clean))) {
+            && (!props.mergeStatus || (props.mergeStatus && props.row[from.type].content_clean))) {
             return true
         }
         return false
@@ -30,7 +30,12 @@ const RowTarget = {
                 from: from.segment.order,
                 to: props.row[from.type].order
             };
-        ProjectActions.changeSegmentPosition(log);
+
+        if(!props.mergeStatus){
+            ProjectActions.changeSegmentPosition(log);
+        }else{
+            ProjectActions.mergeSegments(from.segment, props.row[from.type])
+        }
 
         //send type and order of inverse segment in drop position.
         props.setAnimatedRow(inverse[from.type], props.row[inverse[from.type]].order);

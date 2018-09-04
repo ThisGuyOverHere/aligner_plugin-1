@@ -6,6 +6,7 @@ import EventEmitter from 'events';
 import ProjectConstants from '../Constants/Project.constants';
 import assign from 'object-assign';
 import {List, Set, fromJS} from 'immutable';
+import env from "../Constants/Env.constants";
 
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -32,6 +33,16 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
      * @param {Array} segments.target A list of target segments
      */
     storeSegments: function (segments) {
+        segments.source.map(item => {
+            item.order = parseInt(item.order);
+            item.next = parseInt(item.next);
+            return item;
+        });
+        segments.target.map(item => {
+            item.order = parseInt(item.order);
+            item.next = parseInt(item.next);
+            return item;
+        });
         const source = fromJS(segments.source);
         const target = fromJS(segments.target);
         /*TODO: remove this when we remove select algorithm*/
@@ -53,8 +64,10 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
      */
     storeMovements: function (changes) {
         changes.map(change => {
-            let index;
-            if(change.rif_order){
+            console.log(change);
+            let index,
+                prev;
+            if (change.rif_order) {
                 index = this.job[change.type].findIndex(i => i.get('order') === change.rif_order);
             }
             switch (change.action) {
@@ -62,10 +75,39 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     this.job[change.type] = this.job[change.type].delete(index);
 
                     //todo: fix for change prev, delete this when algorithm are in backend
-                    let prev = this.job[change.type].get(index-1);
-                    prev = prev.setIn(['next'],this.job[change.type].getIn([index,'order']));
-                    this.job[change.type] = this.job[change.type].set(index-1, prev);
+                    prev = this.job[change.type].get(index - 1);
+                    prev = prev.setIn(['next'], this.job[change.type].getIn([index, 'order']));
+                    this.job[change.type] = this.job[change.type].set(index - 1, prev);
 
+                    break;
+                case 'complex_delete':
+                    this.job[change.type] = this.job[change.type].delete(index);
+
+                    //todo: fix for change prev, delete this when algorithm are in backend
+                    prev = this.job[change.type].get(index - 1);
+                    prev = prev.setIn(['next'], this.job[change.type].getIn([index, 'order']));
+                    this.job[change.type] = this.job[change.type].set(index - 1, prev);
+
+                    //add element to end
+                    let last = this.job[change.type].last().toJS();
+                    let mock = Object.assign({}, env.segmentModel);
+                    mock.order = last.order + 1000000000;
+                    mock.type = last.type;
+                    //change next of second-last element
+                    last.next = mock.order;
+                    this.storeMovements([
+                        {
+                            action: 'push',
+                            type: last.type,
+                            data: mock
+                        },
+                        {
+                            action: 'update',
+                            rif_order: last.order,
+                            type: last.type,
+                            data: last
+                        }
+                    ]);
                     break;
                 case 'create':
                     this.job[change.type] = this.job[change.type].insert(index, fromJS(change.data));
@@ -109,7 +151,7 @@ AppDispatcher.register(function (action) {
             });
             break;
         case ProjectConstants.CHANGE_SEGMENT_POSITION:
-            ProjectStore.storeMovements(action.changes,action.type);
+            ProjectStore.storeMovements(action.changes, action.type);
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()

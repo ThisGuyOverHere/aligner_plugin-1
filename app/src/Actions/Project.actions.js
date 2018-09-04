@@ -2,7 +2,7 @@ import ProjectStore from "../Stores/Project.store";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
-import {httpAlignJob} from "../HttpRequests/Alignment.http";
+import {httpAlignJob, httpGetSegments} from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
 import {avgOrder} from "../Helpers/SegmentUtils.helper";
 
@@ -22,14 +22,13 @@ let ProjectActions = {
      *
      * @param {Number} jobID The Job ID of current project
      * @param {String} jobPassword The password of current Job ID
-     * @param {Number} algorithm The version of algorithm for alignment
      */
-    getSegments: function (jobID, jobPassword, algorithm = null) {
-        httpAlignJob(jobID, algorithm).then(response => {
-            AppDispatcher.dispatch({
-                actionType: ProjectConstants.STORE_SEGMENTS,
-                segments: response.data
-            });
+    getSegments: function (jobID, jobPassword) {
+            httpGetSegments(jobID).then(response => {
+                AppDispatcher.dispatch({
+                    actionType: ProjectConstants.STORE_SEGMENTS,
+                    segments: response.data
+                })
         });
     },
 
@@ -84,7 +83,7 @@ let ProjectActions = {
 
         //controllo se l'elemento in toIndex non sia vuoto, nel caso sia vuoto salto il punto 1 e 2 e 3
         //lo salto perchè quando si rimpiazza un buco non bisogna spostare l'elemento in posizione toIndex (i buchi si rimpiazzano e basta)
-        if (changeData.clean !== null) {
+        if (changeData.content_clean !== null) {
 
             changeData.order = avgOrder(toOrder, toNextOrder);
             changeData.next = toNextOrder;
@@ -148,7 +147,7 @@ let ProjectActions = {
          ******/
         //se l'elemento opposto al fromIndex non è vuoto creo il buco altrimenti cancello entrambi gli elementi
         // buco / buco si annulla
-        if (tmpJob[inverse[log.type]].getIn([fromIndex, 'clean'])) {
+        if (tmpJob[inverse[log.type]].getIn([fromIndex, 'content_clean'])) {
             mockToInverse.order = fromOrder;
             mockToInverse.next = tmpJob[log.type].getIn([fromIndex, 'next']);
 
@@ -247,11 +246,12 @@ let ProjectActions = {
         });
     },
 
-    mergeSegments: function (from,to) {
+    mergeSegments: function (from, to) {
         let changes = [];
 
-        to.clean += from.clean;
-        to.raw += from.raw;
+
+        to.content_clean += from.content_clean;
+        to.content_raw += from.content_raw;
 
         changes.push({
             type: to.type,
@@ -259,12 +259,13 @@ let ProjectActions = {
             rif_order: to.order,
             data: to
         });
-        
+
         changes.push({
             type: from.type,
-            action: 'delete',
+            action: 'complex_delete',
             rif_order: from.order
         });
+
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
             changes: changes

@@ -11,7 +11,7 @@ const ItemSource = {
         return props;
     },
     canDrag(props, monitor) {
-        return props.segment.clean;
+        return props.segment.content_clean;
     }
 };
 
@@ -30,7 +30,7 @@ class SegmentComponent extends Component {
         mergeStatus: PropTypes.bool,
         segment: PropTypes.shape({
             order: PropTypes.number.isRequired,
-            clean: PropTypes.oneOfType([() => {
+            content_clean: PropTypes.oneOfType([() => {
                 return null
             }, PropTypes.number]).isDefined,
             next: PropTypes.oneOfType([() => {
@@ -69,7 +69,7 @@ class SegmentComponent extends Component {
         const {left, top, isDragging, segment} = props;
         const transform = `translate3d(${left}px, ${top}px, 0)`;
         let background;
-        if (!segment.clean || isDragging) {
+        if (!segment.content_clean || isDragging) {
             background = {
                 border: '1px dashed #CBCBCB',
             }
@@ -108,7 +108,7 @@ class SegmentComponent extends Component {
         }
         return connectDragSource(
             <div className="segmentBox" style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
-                <p>{isDragging ? '' : segment.clean}</p>
+                <p>{isDragging ? '' : segment.content_clean}</p>
                 {this.props.mergeStatus && <span className="merge">
                     MERGE
                 </span>}

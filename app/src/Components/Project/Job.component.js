@@ -76,12 +76,6 @@ class JobComponent extends Component {
         return (
             <div className="align-project">
                 <div className="ui container">
-                    <select name="algorithm" id="algorithm" defaultValue={this.state.algorithm} onChange={this.changeAlgorithmVersion}>
-                        {algorithmElements}
-                    </select>
-                </div>
-
-                <div className="ui container">
                     {this.renderItems(this.state.job.rows)}
                     <AdvancedDragLayer/>
                 </div>

@@ -41,8 +41,7 @@ export const httpAlignJob = (jobID, algorithmVersion=null) => {
 };
 
 
-export const httpGetSegments = (jobID, algorithmVersion=null) => {
-    const algorithm = algorithmVersion ? algorithmVersion : env.alignAlgorithmDefaultVersion;
+export const httpGetSegments = (jobID) => {
     const url = '/plugins/aligner/segments/'+jobID;
     return get(url);
 };

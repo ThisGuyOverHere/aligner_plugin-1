@@ -226,7 +226,7 @@ class UploadComponent extends Component {
         classes.target.push(this.state.uploadTarget.status);
 
         if (this.state.job) {
-            return <Redirect push to={'/job/' + this.state.job.id + '/' + this.state.job.password + '/align'}/>;
+            return <Redirect push to={'/job/' + this.state.job.id + '/' + this.state.job.password + '/pre-align'}/>;
         }
 
         return (

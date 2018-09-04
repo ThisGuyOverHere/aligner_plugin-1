@@ -20,9 +20,8 @@ class PreAlignStatus extends Component {
     };
 
     componentDidMount() {
-      httpAlignJob(1, this.state.algorithm)
+      httpAlignJob(this.state.job.id, this.state.algorithm)
           .then( response => {
-              console.log(response);
               this.setState(
                   {
                       progress: 100,
