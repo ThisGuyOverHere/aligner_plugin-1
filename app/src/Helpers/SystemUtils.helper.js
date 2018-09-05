@@ -9,3 +9,13 @@ export const textEllipsisCenter = (text) => {
     }
     return text;
 };
+
+/**
+ *
+ * @param name
+ * @param surname
+ * @returns {string} the initials of user name
+ */
+export const getUserInitials = (name, surname) => {
+    return name.split(" ").map((n)=>n[0]).join("") + surname.split(" ").map((n)=>n[0]).join("") ;
+};

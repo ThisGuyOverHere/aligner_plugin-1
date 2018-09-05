@@ -12,38 +12,6 @@ class LoginComponent extends Component {
         }
     }
 
-    onCloseLogin = () => {
-        SystemActions.setLoginStatus(false);
-    };
-
-    openResetPasswordModal = () =>{
-        SystemActions.setResetPasswordStatus(true);
-        this.onCloseLogin();
-    };
-
-    EmailChange = (event) => {
-        this.setState({
-            userData: {
-                email: event.target.value,
-                password: this.state.userData.password,
-            }
-        });
-    };
-
-    PasswordChange = (event) => {
-        this.setState({
-            userData: {
-                email: this.state.userData.email,
-                password: event.target.value,
-            }
-        });
-    };
-
-    login = (event) => {
-        SystemActions.login(this.state.userData);
-        event.preventDefault();
-    };
-
     render = () => {
         return (
             <div>
@@ -111,7 +79,41 @@ class LoginComponent extends Component {
             </div>
 
         );
-    }
+    };
+
+
+
+    onCloseLogin = () => {
+        SystemActions.setLoginStatus(false);
+    };
+
+    openResetPasswordModal = () =>{
+        SystemActions.setResetPasswordStatus(true);
+        this.onCloseLogin();
+    };
+
+    EmailChange = (event) => {
+        this.setState({
+            userData: {
+                email: event.target.value,
+                password: this.state.userData.password,
+            }
+        });
+    };
+
+    PasswordChange = (event) => {
+        this.setState({
+            userData: {
+                email: this.state.userData.email,
+                password: event.target.value,
+            }
+        });
+    };
+
+    login = (event) => {
+        SystemActions.login(this.state.userData);
+        event.preventDefault();
+    };
 }
 
 export default LoginComponent;

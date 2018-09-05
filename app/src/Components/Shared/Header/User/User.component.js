@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../../Actions/System.actions";
 import PropTypes from "prop-types";
+import UserNotLogged from "./UserNotLogged/UserNotLogged.component";
+import UserLogged from "./UserLogged/UserLogged.component";
 
 class User extends Component {
 
     static propTypes = {
-
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
     };
 
     constructor(props) {
@@ -15,9 +17,11 @@ class User extends Component {
     render() {
         return (
             <div id="user">
-                <div className="ui user-nolog label" title="Login" onClick={this.openLogin}>
-                    <i className="icon user"></i>
-                </div>
+                {this.props.user ? (
+                    <UserLogged user={this.props.user} />
+                ) : (
+                    <UserNotLogged user={this.props.user} />
+                )}
             </div>
         );
     }

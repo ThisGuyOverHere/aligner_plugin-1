@@ -67,7 +67,12 @@ class Layout extends Component {
         })
     };
 
-    userStatus = (status) => {
+    userStatus = (status,fromLogin) => {
+        if(status && fromLogin){
+            setTimeout(()=>{
+                SystemActions.setLoginStatus(false);
+            },0)
+        }
         this.setState({
             user: status
         })

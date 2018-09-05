@@ -47,13 +47,15 @@ let SystemActions = {
             .then(response => {
                 AppDispatcher.dispatch({
                     actionType: SystemConstants.USER_STATUS,
-                    status: response.data.user
+                    status: response.data.user,
+                    fromLogin: false
                 })
             })
             .catch( error => {
                 AppDispatcher.dispatch({
                     actionType: SystemConstants.USER_STATUS,
-                    status: false
+                    status: false,
+                    fromLogin: false
                 })
             })
     },
@@ -64,16 +66,20 @@ let SystemActions = {
      */
     login: function (data) {
         httpLogin(data)
-            .then(response => {
-                AppDispatcher.dispatch({
-                    actionType: SystemConstants.USER_STATUS,
-                    status: response.data.user
+            .then(() => {
+                httpMe().then(response =>{
+                    AppDispatcher.dispatch({
+                            actionType: SystemConstants.USER_STATUS,
+                            status: response.data.user,
+                            fromLogin: true
+                    });
                 })
             })
             .catch( error => {
                 AppDispatcher.dispatch({
                     actionType: SystemConstants.USER_STATUS,
-                    status: false
+                    status: false,
+                    fromLogin: false
                 })
             })
     }

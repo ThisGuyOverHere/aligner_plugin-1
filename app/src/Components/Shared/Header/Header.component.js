@@ -66,6 +66,8 @@ class HeaderComponent extends Component {
                 <li>
                     <Mismatch />
                     <Export/>
+                </li>
+                <li>
                     <User user={this.props.user}/>
                 </li>
             </ul>;
@@ -74,7 +76,7 @@ class HeaderComponent extends Component {
                 <Link to="/">
                     <div id="logo"></div>
                 </Link>
-                <User/>
+                <User user={this.props.user}/>
             </ul>
         }
     };
