@@ -1,14 +1,13 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
-import {httpLogin} from "../../../HttpRequests/System.http";
 
 class LoginComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
             userData: {
-                email: ' ',
-                password: ' ',
+                email: '',
+                password: '',
             }
         }
     }
@@ -41,7 +40,6 @@ class LoginComponent extends Component {
     };
 
     login = (event) => {
-        console.log(this.state.userData);
         SystemActions.login(this.state.userData);
         event.preventDefault();
     };
