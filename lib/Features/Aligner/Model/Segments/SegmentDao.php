@@ -8,6 +8,8 @@
 
 namespace Features\Aligner\Model;
 
+use Features\Aligner;
+
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = "segments";
 
@@ -77,24 +79,67 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function getTargetOrdered($id_job){
-        return self::getTypeOrderedByJobId($id_job, "target");
+    public static function getTargetOrdered($id_job, $where, $order, $amount){
+        return self::getTypeOrderedByJobId($id_job, "target",0, $where, $order, $amount);
     }
 
-    public static function getSourceOrdered($id_job){
-        return self::getTypeOrderedByJobId($id_job, "source");
+    public static function getSourceOrdered($id_job, $where, $order, $amount){
+        return self::getTypeOrderedByJobId($id_job, "source", 0, $where, $order, $amount);
     }
 
-    public static function getTypeOrderedByJobId($id_job, $type, $ttl = 0){
+    public static function getTypeOrderedByJobId($id_job, $type, $ttl = 0, $where, $order, $segmentAmount){
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
+
+        $queryBefore = "SELECT `order` FROM (SELECT sm.order FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ? AND sm.order < ?
+        ORDER by sm.order DESC
+        LIMIT %u) as SM";
+
+        $queryAfter = "SELECT `order` FROM (SELECT sm.order FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ? AND sm.order > ?
+        ORDER by sm.order
+        LIMIT %u) as SM";
+
+        $queryCenter = "SELECT `order` FROM (SELECT sm.order FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ? AND sm.order < ?
+        ORDER by sm.order DESC
+        LIMIT %u) as SM1
+        UNION
+        SELECT `order` FROM (SELECT sm.order FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ? AND sm.order >= ?
+        ORDER by sm.order
+        LIMIT %u) as SM2";
+
+        switch ($where){
+            case 'before':
+                $subquery = sprintf( $queryBefore, $segmentAmount );
+                $queryParams = array( $id_job, $type, $order );
+                break;
+            case 'after':
+                $subquery = sprintf( $queryAfter, $segmentAmount );
+                $queryParams = array( $id_job, $type, $order );
+                break;
+            case 'center':
+                $subquery = sprintf( $queryCenter, floor($segmentAmount/2), ceil($segmentAmount/2) );
+                $queryParams = array( $id_job, $type, $order, $id_job, $type, $order );
+                break;
+        }
+
         $query = "SELECT * FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
-        WHERE sm.id_job = ? AND sm.type = ? 
+        WHERE sm.id_job = ? AND sm.type = ? and `order` in ($subquery)
         ORDER by sm.order";
+
+        $queryParams = array_merge( array( $id_job, $type ), $queryParams );
+
         $stmt = $conn->prepare( $query );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $id_job, $type ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), $queryParams );
     }
 
     public function countByJobId($id_job, $type){
