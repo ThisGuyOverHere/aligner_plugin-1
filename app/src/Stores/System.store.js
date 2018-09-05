@@ -32,6 +32,9 @@ AppDispatcher.register(function (action) {
         case SystemConstants.USER_STATUS:
             SystemStore.emitChange(SystemConstants.USER_STATUS,action.status,action.fromLogin);
             break;
+        case SystemConstants.LOGOUT:
+            SystemStore.emitChange(SystemConstants.LOGOUT,action.status);
+            break;
     }
 });
 

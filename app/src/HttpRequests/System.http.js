@@ -22,3 +22,12 @@ export const httpMe = () => {
     const url = '/api/app/user';
     return get(url);
 };
+
+/**
+ *
+ * @return {Promise}
+ */
+export const httpLogout = () => {
+    const url = '/api/app/user/logout';
+    return post(url , null);
+};

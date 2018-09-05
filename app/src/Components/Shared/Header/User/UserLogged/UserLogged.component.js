@@ -25,7 +25,7 @@ class UserLogged extends Component {
     }
 
     openLogout = () =>{
-        SystemActions.setLoginStatus(true)
+       SystemActions.setLogoutStatus(true);
     };
 
 }

@@ -1,5 +1,5 @@
 import SystemConstants from "../Constants/System.constants";
-import {httpLogin, httpMe} from "../HttpRequests/System.http";
+import {httpLogin, httpLogout, httpMe} from "../HttpRequests/System.http";
 import {httpGetSegments} from "../HttpRequests/Alignment.http";
 import ProjectConstants from "../Constants/Project.constants";
 
@@ -38,6 +38,18 @@ let SystemActions = {
             status: status
         });
     },
+
+    /**
+     *
+     * @param {Boolean} status The status of Logout Modal, true for open the modal and false for close
+     */
+    setLogoutStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.LOGOUT,
+            status: status
+        });
+    },
+
 
     /**
      *
@@ -82,7 +94,22 @@ let SystemActions = {
                     fromLogin: false
                 })
             })
-    }
+    },
+
+    logout: function () {
+      httpLogout()
+          .then( response => {
+              AppDispatcher.dispatch({
+                  actionType: SystemConstants.USER_STATUS,
+                  status: false,
+              });
+              console.log(response);
+
+          })
+          .catch( error => {
+              console.log(error);
+          })
+    },
 
 };
 
