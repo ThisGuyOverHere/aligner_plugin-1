@@ -255,11 +255,17 @@ let ProjectActions = {
 
     mergeSegments: function (from, to) {
         let changes = [];
+        const tmpJob = ProjectStore.job;
+        const inverse = {
+            source: 'target',
+            target: 'source'
+        };
+        const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
+        const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
 
-
-        to.content_clean += from.content_clean;
+        to.content_clean += " ";
+        to.content_clean +=  from.content_clean;
         to.content_raw += from.content_raw;
-
         changes.push({
             type: to.type,
             action: 'update',
@@ -267,11 +273,31 @@ let ProjectActions = {
             data: to
         });
 
-        changes.push({
-            type: from.type,
-            action: 'complex_delete',
-            rif_order: from.order
-        });
+        console.log(fromInverse);
+        if(!fromInverse.content_clean){
+            changes.push({
+                type: from.type,
+                action: 'complex_delete',
+                rif_order: from.order
+            });
+            changes.push({
+                type: fromInverse.type,
+                action: 'complex_delete',
+                rif_order: fromInverse.order
+            });
+
+        }else{
+            from.content_clean = null;
+            from.content_raw = null;
+            changes.push({
+                type: from.type,
+                action: 'update',
+                rif_order: from.order,
+                data: from
+            });
+        }
+
+
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,

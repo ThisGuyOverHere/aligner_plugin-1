@@ -34,18 +34,19 @@ const RowTarget = {
                 to: props.row[from.type].order
             };
 
+        if (!props.mergeStatus) {
+            ProjectActions.changeSegmentPosition(log);
+
+        } else {
+            ProjectActions.mergeSegments(from.segment, props.row[from.type])
+        }
+
         const rec = findDOMNode(component).getBoundingClientRect();
         const position = window.scrollY;
         //send type and order of inverse segment in drop position.
         setTimeout(() => {
             ProjectActions.animateChangeRowPosition(inverse[from.type], props.row[inverse[from.type]].order, position, rec);
         }, 0)
-
-        if (!props.mergeStatus) {
-            ProjectActions.changeSegmentPosition(log);
-        } else {
-            ProjectActions.mergeSegments(from.segment, props.row[from.type])
-        }
 
     }
 };
