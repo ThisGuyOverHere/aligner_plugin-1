@@ -1,0 +1,25 @@
+@import "../../../../../assets/theme/variables";
+
+#mini_align_nav {
+  margin-right: 24px;
+  #aligned {
+	color: $white;
+	display: inline-block;
+  }
+  span {
+	&:nth-child(2) {
+	  margin-left: 8px;
+	}
+	border: 1px solid $secondaryText;
+	border-radius: 2px;
+	font-size: 1.5rem;
+	position: relative;
+	top: 4px;
+	margin: 0px 2px;
+	cursor: pointer;
+	i {
+	  margin: 0px;
+	}
+  }
+}
+

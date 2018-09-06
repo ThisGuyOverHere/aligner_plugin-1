@@ -7,6 +7,8 @@ import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
 import ExportModal from "../ExportModal/ExportModal.component";
 import ResetPasswordModal from "../ResetPasswordModal/ResetPasswordModal.component";
+import SystemActions from "../../../Actions/System.actions";
+import LogoutComponent from "../Logout/Logout.component";
 
 class Layout extends Component {
     constructor(props) {
@@ -14,17 +16,25 @@ class Layout extends Component {
         this.state = {
             statusLogin: false,
             statusExportModal: false,
-            statusResetPasswordModal: false
+            statusResetPasswordModal: false,
+            statusLogout: false,
+            user: false,
+            loginError: false,
         }
     }
 
     componentDidMount() {
+        SystemActions.checkUserStatus();
+        SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
+        SystemStore.addListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.addListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.addListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         SystemStore.addListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
     }
 
     componentWillUnmount() {
+        SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
+        SystemStore.removeListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.removeListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.removeListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         SystemStore.removeListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
@@ -35,9 +45,10 @@ class Layout extends Component {
         return <Route {...rest} render={matchProps => (
             <div className="DefaultLayout">
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
-                {this.state.statusLogin && <LoginComponent />}
+                {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
                 {this.state.statusExportModal && <ExportModal />}
-                <HeaderComponent {...matchProps}/>
+                {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
+                <HeaderComponent user = {this.state.user} {...matchProps}/>
                 <Component {...matchProps} />
                 <FooterComponent {...matchProps}/>
             </div>
@@ -60,7 +71,29 @@ class Layout extends Component {
         this.setState({
             statusResetPasswordModal: status
         })
-    }
+    };
+
+    setLogoutStatus = (status) => {
+        this.setState({
+            statusLogout: status
+        })
+    };
+
+    userStatus = (status,fromLogin, error) => {
+        if(status && fromLogin && !error){
+            setTimeout(()=>{
+                SystemActions.setLoginStatus(false);
+            },0)
+        }
+        if(error){
+            this.setState({
+                loginError: true
+            })
+        }
+        this.setState({
+            user: status
+        })
+    };
 }
 
 

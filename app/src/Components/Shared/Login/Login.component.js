@@ -1,19 +1,23 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
+import {emailValidator} from "../../../Helpers/SystemUtils.helper";
+import PropTypes from "prop-types";
 
 class LoginComponent extends Component {
+
+
     constructor(props) {
         super(props);
+        this.state = {
+            userData: {
+                email: '',
+                password: '',
+            },
+            isValid: false,
+            validEmail: true,
+            validPassword: true,
+        }
     }
-
-    onCloseLogin = () => {
-        SystemActions.setLoginStatus(false);
-    };
-
-    openResetPasswordModal = () =>{
-        SystemActions.setResetPasswordStatus(true);
-        this.onCloseLogin();
-    };
 
     render = () => {
         return (
@@ -47,33 +51,107 @@ class LoginComponent extends Component {
                                     <i className="google icon"></i>
                                     <span>Sign in with Google</span>
                                 </button>
-                                <div className="login-form-container">
+
+                                <form className="login-form-container" onSubmit={this.login}>
                                     <div className="form-divider">
                                         <div className="divider-line"></div>
                                         <span>OR</span>
                                         <div className="divider-line"></div>
                                     </div>
-                                    <div><input type="text" placeholder="Email"
-                                                name="emailAddress" tabIndex="1"></input>
+                                    <div>
+                                        <input type="text" placeholder="Email"
+                                               name="email" tabIndex="1"
+                                               onChange={this.handleInputChange}
+                                               value={this.state.userData.email}>
+                                        </input>
+                                        <p className="error" hidden={this.state.validEmail}>Please insert a valida
+                                            email.</p>
                                     </div>
                                     <div>
                                         <input type="password" placeholder="Password (minimum 8 characters)"
-                                               name="password" tabIndex="2"></input>
+                                               name="password" tabIndex="2"
+                                               onChange={this.handleInputChange}
+                                               value={this.state.userData.password}>
+                                        </input>
+                                        <p className="error" hidden={this.state.validPassword}>Password must be at least
+                                            of 8 characters.</p>
                                     </div>
-                                    <button className="login-btn ui button primary disabled" tabIndex="3">
-                                        <span className="button-loader "></span> Sign in
+                                    <button className="login-btn ui button primary" tabIndex="3" type="submit"
+                                            disabled={!this.state.userData.password || !this.state.userData.email}>
+                                        <span className="button-loader"></span> Sign in
                                     </button>
+                                    <p className="error" hidden={!this.props.error}> Login failed </p>
                                     <span className="forgot-password" onClick={this.openResetPasswordModal}>Forgot password?</span>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
         );
-    }
+    };
+
+
+    onCloseLogin = () => {
+        SystemActions.setLoginStatus(false);
+    };
+
+    openResetPasswordModal = () => {
+        SystemActions.setResetPasswordStatus(true);
+        this.onCloseLogin();
+    };
+
+    EmailChange = (event) => {
+        this.setState({
+            userData: {
+                email: event.target.value,
+                password: this.state.userData.password,
+            }
+        });
+    };
+
+    PasswordChange = (event) => {
+        this.setState({
+            userData: {
+                email: this.state.userData.email,
+                password: event.target.value,
+            }
+        });
+    };
+
+    handleInputChange = (event) => {
+        let userData = this.state.userData;
+        const name = event.target.name;
+        const value = event.target.value;
+        userData[name] = value;
+
+        this.setState({
+            userData: userData
+        });
+    };
+
+    login = (event) => {
+        event.preventDefault();
+        if (emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8) {
+            console.log('here');
+            SystemActions.login(this.state.userData);
+            this.setState({
+                validEmail: true,
+                validPassword: true,
+                error: false
+            })
+        } else {
+            if (!emailValidator(this.state.userData.email)) {
+                this.setState({
+                    validEmail: false
+                })
+            } else {
+                this.setState({
+                    validPassword: false
+                })
+            }
+        }
+    };
 }
 
 export default LoginComponent;

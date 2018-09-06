@@ -36,21 +36,19 @@
   }
   .aligner-nav-nolog{
     justify-content: space-between;
-    #user{
-      i{
-        margin: 0 auto;
-      }
-    }
   }
 
-  .aligner-nav-log{
-    li{
+  .aligner-nav-log {
+    li {
       flex: 1;
       height: 38px;
-      &:nth-child(2){
+      &:nth-child(2) {
         text-align: center;
       }
-      &:nth-child(3){
+      &:nth-child(3) {
+        text-align: right;
+      }
+      &:nth-child(4) {
         text-align: right;
       }
     }
@@ -59,28 +57,28 @@
     #user,
     #final_title,
     #mini_align_nav,
-    #export{
+    #export {
       display: inline-block;
     }
-    #final_title{
+    #final_title {
       position: relative;
       bottom: 8px;
       left: 24px;
     }
-    #source_to_target{
-     span{
-       color: $white;
-       margin: 0px 16px;
-     }
+    #source_to_target {
+      span {
+        color: $white;
+        margin: 0px 16px;
+      }
     }
-    #mini_align_nav{
+    #mini_align_nav {
       margin-right: 24px;
-      #aligned{
+      #aligned {
         color: $white;
         display: inline-block;
       }
-      span{
-        &:nth-child(2){
+      span {
+        &:nth-child(2) {
           margin-left: 8px;
         }
         border: 1px solid $secondaryText;
@@ -90,53 +88,10 @@
         top: 4px;
         margin: 0px 2px;
         cursor: pointer;
-        i{
+        i {
           margin: 0px;
         }
       }
-    }
-    #export{
-      button{
-        width: 88px;
-        margin: 0px;
-        padding: 8px;
-        text-transform: none;
-        span{
-          i{
-            margin: 0 auto;
-            padding-left: 8px;
-          }
-
-        }
-      }
-    }
-    #user{
-      i{
-        margin: 0 auto;
-      }
-    }
-  }
-
-  .user-nolog{
-    align-items: center;
-    background: center/cover transparent;
-    border-radius: 50%;
-    box-sizing: border-box;
-    color: $white;
-    display: -ms-inline-flexbox;
-    display: inline-flex;
-    -ms-flex-pack: center;
-    justify-content: center;
-    position: relative;
-    font-size: 14px;
-    height: 36px;
-    width: 36px;
-    margin-left: 24px;
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px dashed;
-    &:hover{
-      color: $lightBlue
     }
   }
 }
