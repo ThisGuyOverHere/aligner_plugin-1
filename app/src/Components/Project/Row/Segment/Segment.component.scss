@@ -6,6 +6,15 @@
   z-index: 1;
   width: 100%;
   transition: box-shadow 600ms ease-in;
+  background:#ffffff;
+  box-shadow: 0px 1px 1px #CCCCCC;
+  &.empty{
+    border: 1px dashed #CBCBCB;
+    background: none;
+    p{
+      opacity: 0;
+    }
+  }
   .merge{
     width: 100%;
     border: 3px dashed $primary;
@@ -16,23 +25,6 @@
   }
 }
 
-/*.columnSegment{
-  transition: transform 300ms ease-in;
-  &.dropColumn {
-    .segmentBox {
-      box-shadow: 0 0 3px 1px #09beec3b !important;
-      transition: box-shadow 200ms ease-in;
-    }
-    &.dropped{
-      transform: perspective(1px) scale(1.02) translateZ(0px);
-      -webkit-transform: perspective(1px) scale(1.02) translateZ(0px);
-      *{
-        transform: perspective(1px) translateZ(0px);
-        -webkit-transform: perspective(1px) translateZ(0px);
-      }
-    }
-  }
-}*/
 
 @media screen and (-webkit-min-device-pixel-ratio: 2) {
   body {

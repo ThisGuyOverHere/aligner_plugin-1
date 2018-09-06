@@ -64,7 +64,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
      */
     storeMovements: function (changes) {
         changes.map(change => {
-            console.log(change);
             let index,
                 prev;
             if (change.rif_order) {

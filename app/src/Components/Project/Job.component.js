@@ -24,7 +24,8 @@ class JobComponent extends Component {
             },
             animateRowToOrder: {
                 type: null,
-                order: null
+                order: null,
+                yCoord: null
             },
             mergeStatus: false,
         };
@@ -76,7 +77,9 @@ class JobComponent extends Component {
         return (
             <div className="align-project">
                 <div className="ui container">
-                    {this.renderItems(this.state.job.rows)}
+                    <div id="scroll-area">
+                        {this.renderItems(this.state.job.rows)}
+                    </div>
                     <AdvancedDragLayer/>
                 </div>
             </div>
@@ -98,29 +101,6 @@ class JobComponent extends Component {
         })
     };
 
-    /**
-     *
-     * @param {String} type type of segment to check
-     * @param {Number} order order of segment to check
-     */
-    setAnimatedRow = (type,order) =>{
-        this.setState({
-            animateRowToOrder: {
-                type: type,
-                order: order
-            }
-        })
-    };
-
-
-    changeAlgorithmVersion = (e) => {
-        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword, e.target.value);
-
-        this.setState({
-            algorithm: e.target.value
-        });
-    };
-
     renderItems(array) {
         let values = [];
         if (array.length > 0) {
@@ -128,16 +108,14 @@ class JobComponent extends Component {
                 values.push(<RowComponent key={index}
                                           index={index}
                                           mergeStatus={this.state.mergeStatus}
-                                          row={row}
-                                          animate={this.state.animateRowToOrder.type && this.state.animateRowToOrder.order === row[this.state.animateRowToOrder.type].order}
-                                          setAnimatedRow={this.setAnimatedRow} />);
+                                          row={row}/>);
                 return row;
             });
         }
         return values;
     }
 
-    setMergeStatus = (status) =>{
+    setMergeStatus = (status) => {
         this.setState({
             mergeStatus: status
         })

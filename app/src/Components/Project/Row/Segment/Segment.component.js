@@ -66,27 +66,14 @@ class SegmentComponent extends Component {
     }
 
     getStyles = (props) => {
-        const {left, top, isDragging, segment} = props;
+        const {left, top, isDragging} = props;
         const transform = `translate3d(${left}px, ${top}px, 0)`;
-        let background;
-        if (!segment.content_clean || isDragging) {
-            background = {
-                border: '1px dashed #CBCBCB',
-            }
-        } else {
-            background = {
-                background: '#ffffff',
-                boxShadow: '0px 1px 1px #CCCCCC',
-            }
-        }
-
         return {
             transform,
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
             // because IE will ignore our custom "empty image" drag preview.
-            cursor: isDragging ? 'grabbing' : 'grab',
-            ...background,
+            cursor: isDragging ? 'grabbing' : 'grab'
         }
     };
 
@@ -99,16 +86,15 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDragSource, isDragging, canDrag, segment} = this.props;
-        let cursorDrag = 'not-allowed';
-        if (isDragging) {
-            cursorDrag = 'move';
-        } else if (canDrag && !isDragging) {
-            cursorDrag = 'move'
+        const {connectDragSource, isDragging, segment} = this.props;
+
+        let segmentClasses = ['segmentBox'];
+        if(isDragging || !segment.content_clean){
+            segmentClasses.push('empty')
         }
         return connectDragSource(
-            <div className="segmentBox" style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
-                <p>{isDragging ? '' : segment.content_clean}</p>
+            <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
+                <p>{segment.content_clean}</p>
                 {this.props.mergeStatus && <span className="merge">
                     MERGE
                 </span>}
