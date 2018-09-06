@@ -63,7 +63,7 @@ let SystemActions = {
                     fromLogin: false
                 })
             })
-            .catch( error => {
+            .catch(error => {
                 AppDispatcher.dispatch({
                     actionType: SystemConstants.USER_STATUS,
                     status: false,
@@ -79,36 +79,36 @@ let SystemActions = {
     login: function (data) {
         httpLogin(data)
             .then(() => {
-                httpMe().then(response =>{
+                httpMe().then(response => {
                     AppDispatcher.dispatch({
-                            actionType: SystemConstants.USER_STATUS,
-                            status: response.data.user,
-                            fromLogin: true
+                        actionType: SystemConstants.USER_STATUS,
+                        status: response.data.user,
+                        fromLogin: true,
+                        error: false
                     });
                 })
             })
-            .catch( error => {
+            .catch(error => {
                 AppDispatcher.dispatch({
                     actionType: SystemConstants.USER_STATUS,
                     status: false,
-                    fromLogin: false
+                    fromLogin: false,
+                    error: true
                 })
             })
     },
 
     logout: function () {
-      httpLogout()
-          .then( response => {
-              AppDispatcher.dispatch({
-                  actionType: SystemConstants.USER_STATUS,
-                  status: false,
-              });
-              console.log(response);
+        httpLogout()
+            .then(response => {
+                AppDispatcher.dispatch({
+                    actionType: SystemConstants.USER_STATUS,
+                    status: false,
+                });
+            })
+            .catch(error => {
 
-          })
-          .catch( error => {
-              console.log(error);
-          })
+            })
     },
 
 };

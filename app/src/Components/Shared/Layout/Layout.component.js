@@ -18,7 +18,8 @@ class Layout extends Component {
             statusExportModal: false,
             statusResetPasswordModal: false,
             statusLogout: false,
-            user: false
+            user: false,
+            loginError: false,
         }
     }
 
@@ -44,7 +45,7 @@ class Layout extends Component {
         return <Route {...rest} render={matchProps => (
             <div className="DefaultLayout">
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
-                {this.state.statusLogin && <LoginComponent />}
+                {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
                 {this.state.statusExportModal && <ExportModal />}
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
                 <HeaderComponent user = {this.state.user} {...matchProps}/>
@@ -78,11 +79,16 @@ class Layout extends Component {
         })
     };
 
-    userStatus = (status,fromLogin) => {
-        if(status && fromLogin){
+    userStatus = (status,fromLogin, error) => {
+        if(status && fromLogin && !error){
             setTimeout(()=>{
                 SystemActions.setLoginStatus(false);
             },0)
+        }
+        if(error){
+            this.setState({
+                loginError: true
+            })
         }
         this.setState({
             user: status

@@ -19,3 +19,17 @@ export const textEllipsisCenter = (text) => {
 export const getUserInitials = (name, surname) => {
     return name.split(" ").map((n)=>n[0]).join("") + surname.split(" ").map((n)=>n[0]).join("") ;
 };
+
+/**
+ *
+ * @param email
+ * @returns {boolean} true if the email is a valid one, false otherwise
+ */
+export const emailValidator = (email) => {
+    let re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if( re.test(email.toLowerCase()) ) {
+        return true;
+    }else{
+        return false;
+    }
+};

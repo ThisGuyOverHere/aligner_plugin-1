@@ -1,14 +1,21 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
+import {emailValidator} from "../../../Helpers/SystemUtils.helper";
+import PropTypes from "prop-types";
 
 class LoginComponent extends Component {
+
+
     constructor(props) {
         super(props);
         this.state = {
             userData: {
                 email: '',
                 password: '',
-            }
+            },
+            isValid: false,
+            validEmail: true,
+            validPassword: true,
         }
     }
 
@@ -57,6 +64,7 @@ class LoginComponent extends Component {
                                                onChange={this.EmailChange}
                                                value={this.state.userData.email}>
                                         </input>
+                                        <p className="error" hidden={this.state.validEmail} >Please insert a valida email.</p>
                                     </div>
                                     <div>
                                         <input type="password" placeholder="Password (minimum 8 characters)"
@@ -64,23 +72,22 @@ class LoginComponent extends Component {
                                                onChange={this.PasswordChange}
                                                value={this.state.userData.password}>
                                         </input>
+                                        <p className="error" hidden={this.state.validPassword} >Password must be at least of 8 characters.</p>
                                     </div>
-                                    <button className="login-btn ui button primary" tabIndex="3" type="submit">
+                                    <button className="login-btn ui button primary" tabIndex="3" type="submit"
+                                            disabled={!this.state.userData.password || !this.state.userData.email}>
                                         <span className="button-loader"></span> Sign in
                                     </button>
+                                    <p className="error" hidden={!this.props.error}> Login failed </p>
                                     <span className="forgot-password" onClick={this.openResetPasswordModal}>Forgot password?</span>
                                 </form>
-
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
         );
     };
-
 
 
     onCloseLogin = () => {
@@ -111,8 +118,26 @@ class LoginComponent extends Component {
     };
 
     login = (event) => {
-        SystemActions.login(this.state.userData);
         event.preventDefault();
+        if(emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8){
+            console.log('here');
+            SystemActions.login(this.state.userData);
+            this.setState({
+                validEmail: true,
+                validPassword: true,
+                error: false
+            })
+        }else{
+           if(!emailValidator(this.state.userData.email )){
+               this.setState({
+                   validEmail: false
+               })
+           }else{
+               this.setState({
+                   validPassword: false
+               })
+           }
+        }
     };
 }
 
