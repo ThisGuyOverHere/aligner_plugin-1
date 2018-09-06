@@ -24,11 +24,11 @@ let ProjectActions = {
      * @param {String} jobPassword The password of current Job ID
      */
     getSegments: function (jobID, jobPassword) {
-            httpGetSegments(jobID).then(response => {
-                AppDispatcher.dispatch({
-                    actionType: ProjectConstants.STORE_SEGMENTS,
-                    segments: response.data
-                })
+        httpGetSegments(jobID).then(response => {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.STORE_SEGMENTS,
+                segments: response.data
+            })
         });
     },
 
@@ -246,6 +246,13 @@ let ProjectActions = {
         });
     },
 
+    scrollToSegment: function (ref, y = false) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.SCROLL_TO_SEGMENT,
+            data: {ref: ref, y: y}
+        });
+    },
+
     mergeSegments: function (from, to) {
         let changes = [];
 
@@ -269,6 +276,17 @@ let ProjectActions = {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
             changes: changes
+        });
+    },
+    animateChangeRowPosition: function (type, order, position, rec) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.ANIMATE_ROW_POSITION,
+            data: {
+                type: type,
+                order: order,
+                position: position,
+                rec: rec
+            }
         });
     }
 };

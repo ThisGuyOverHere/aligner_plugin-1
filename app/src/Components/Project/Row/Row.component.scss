@@ -6,7 +6,7 @@
   grid-template-columns: 45px 1fr 1fr;
   column-gap: 16px;
   justify-content: center;
-  transition: background-color .3s ease-in, opacity .2s ease-in;
+  //transition: background-color .3s ease-in, opacity .2s ease-in;
   >div{
     &:first-child{
       align-self: center;
