@@ -1,7 +1,5 @@
 import SystemConstants from "../Constants/System.constants";
 import {httpLogin, httpLogout, httpMe} from "../HttpRequests/System.http";
-import {httpGetSegments} from "../HttpRequests/Alignment.http";
-import ProjectConstants from "../Constants/Project.constants";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 

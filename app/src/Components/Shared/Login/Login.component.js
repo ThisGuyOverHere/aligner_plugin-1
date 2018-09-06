@@ -61,18 +61,20 @@ class LoginComponent extends Component {
                                     <div>
                                         <input type="text" placeholder="Email"
                                                name="email" tabIndex="1"
-                                               onChange={this.EmailChange}
+                                               onChange={this.handleInputChange}
                                                value={this.state.userData.email}>
                                         </input>
-                                        <p className="error" hidden={this.state.validEmail} >Please insert a valida email.</p>
+                                        <p className="error" hidden={this.state.validEmail}>Please insert a valida
+                                            email.</p>
                                     </div>
                                     <div>
                                         <input type="password" placeholder="Password (minimum 8 characters)"
                                                name="password" tabIndex="2"
-                                               onChange={this.PasswordChange}
+                                               onChange={this.handleInputChange}
                                                value={this.state.userData.password}>
                                         </input>
-                                        <p className="error" hidden={this.state.validPassword} >Password must be at least of 8 characters.</p>
+                                        <p className="error" hidden={this.state.validPassword}>Password must be at least
+                                            of 8 characters.</p>
                                     </div>
                                     <button className="login-btn ui button primary" tabIndex="3" type="submit"
                                             disabled={!this.state.userData.password || !this.state.userData.email}>
@@ -94,7 +96,7 @@ class LoginComponent extends Component {
         SystemActions.setLoginStatus(false);
     };
 
-    openResetPasswordModal = () =>{
+    openResetPasswordModal = () => {
         SystemActions.setResetPasswordStatus(true);
         this.onCloseLogin();
     };
@@ -117,9 +119,20 @@ class LoginComponent extends Component {
         });
     };
 
+    handleInputChange = (event) => {
+        let userData = this.state.userData;
+        const name = event.target.name;
+        const value = event.target.value;
+        userData[name] = value;
+
+        this.setState({
+            userData: userData
+        });
+    };
+
     login = (event) => {
         event.preventDefault();
-        if(emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8){
+        if (emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8) {
             console.log('here');
             SystemActions.login(this.state.userData);
             this.setState({
@@ -127,16 +140,16 @@ class LoginComponent extends Component {
                 validPassword: true,
                 error: false
             })
-        }else{
-           if(!emailValidator(this.state.userData.email )){
-               this.setState({
-                   validEmail: false
-               })
-           }else{
-               this.setState({
-                   validPassword: false
-               })
-           }
+        } else {
+            if (!emailValidator(this.state.userData.email)) {
+                this.setState({
+                    validEmail: false
+                })
+            } else {
+                this.setState({
+                    validPassword: false
+                })
+            }
         }
     };
 }
