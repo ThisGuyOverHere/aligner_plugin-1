@@ -20,7 +20,6 @@ export default class SegmentDragLayer extends React.PureComponent {
         }: {};
         return {
             display: 'inline-block',
-            /*transition: 'transform .2s',*/
             cursor: 'grabbing',
             width: '100%',
             ...transform
@@ -33,12 +32,9 @@ export default class SegmentDragLayer extends React.PureComponent {
     };
 
     render() {
-        const {type,segment} = this.props.item;
-
         return (
             <div className="dragSegmentContainer" style={this.getStyles()}>
-                <SegmentComponent type={type}
-                                  segment={segment}/>
+                <SegmentComponent {...this.props.item} />
             </div>
         )
     }

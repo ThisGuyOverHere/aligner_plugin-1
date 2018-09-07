@@ -13,6 +13,9 @@
   }
   &.empty {
     border: 1px dashed $gray;
+    &.onDropHover{
+      border: 1px dashed $white;
+    }
     .segmentBox-content {
       background: none;
       box-shadow: none;
@@ -34,7 +37,7 @@
     }
 
   }
-  &.onDropHover {
+  &.onDropHover:not(.empty) {
     border: 1px dashed $white;
     .segmentBox-content {
       background: $white;
