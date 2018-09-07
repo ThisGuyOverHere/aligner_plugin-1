@@ -1204,6 +1204,13 @@ class Alignment {
             return $matrix[$str1Length][$str2Length];
         }
 
+        function leo_array_diff($a, $b) {
+            $map = array();
+            foreach($a as $val) $map[$val] = 1;
+            foreach($b as $val) unset($map[$val]);
+            return array_keys($map);
+        }
+        
         // Simple merge, for 1-N matches
         function mergeSegments($segments) {
             if (count($segments) == 1) {
@@ -1238,8 +1245,8 @@ class Alignment {
 
             $commonWords = array_intersect($ss, $ts);
 
-            $ss = array_diff($ss, $commonWords);
-            $ts = array_diff($ts, $commonWords);
+            $ss = leo_array_diff($ss, $commonWords);
+            $ts = leo_array_diff($ts, $commonWords);
 
             // Put back to string to allow calculations (without spaces, so we optimize characters)
             $ss = implode('', $ss);
