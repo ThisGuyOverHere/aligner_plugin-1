@@ -130,9 +130,11 @@ class RowComponent extends Component {
             }}>
                 <div>{this.props.index}</div>
                 <SegmentComponent type="source"
+                                  dropHover={isOver && canDrop && dragElType === 'source'}
                                   mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'source'}
                                   segment={this.props.row.source}/>
                 <SegmentComponent type="target"
+                                  dropHover={isOver && canDrop && dragElType === 'target'}
                                   mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'target'}
                                   segment={this.props.row.target}/>
             </div>
