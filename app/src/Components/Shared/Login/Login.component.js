@@ -5,6 +5,9 @@ import PropTypes from "prop-types";
 
 class LoginComponent extends Component {
 
+    static propTypes = {
+        error: PropTypes.bool
+    };
 
     constructor(props) {
         super(props);
@@ -77,7 +80,7 @@ class LoginComponent extends Component {
                                             of 8 characters.</p>
                                     </div>
                                     <button className="login-btn ui button primary" tabIndex="3" type="submit"
-                                            disabled={!this.state.userData.password || !this.state.userData.email}>
+                                            disabled={!this.state.isValid}>
                                         <span className="button-loader"></span> Sign in
                                     </button>
                                     <p className="error" hidden={!this.props.error}> Login failed </p>
@@ -101,24 +104,6 @@ class LoginComponent extends Component {
         this.onCloseLogin();
     };
 
-    EmailChange = (event) => {
-        this.setState({
-            userData: {
-                email: event.target.value,
-                password: this.state.userData.password,
-            }
-        });
-    };
-
-    PasswordChange = (event) => {
-        this.setState({
-            userData: {
-                email: this.state.userData.email,
-                password: event.target.value,
-            }
-        });
-    };
-
     handleInputChange = (event) => {
         let userData = this.state.userData;
         const name = event.target.name;
@@ -128,28 +113,39 @@ class LoginComponent extends Component {
         this.setState({
             userData: userData
         });
+
+        /* validators logic */
+        if( emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8 ){
+            this.setState({
+                isValid: true,
+            })
+        }
+
+        if( !emailValidator(this.state.userData.email) && this.state.userData.email !== '' ){
+            this.setState({
+                validEmail: false
+            })
+        }else {
+            this.setState({
+                validEmail: true
+            })
+        }
+
+        if( this.state.userData.password.length < 8 && this.state.userData.password !== '' ){
+            this.setState({
+                validPassword: false,
+            })
+        }else {
+            this.setState({
+                validPassword: true,
+            })
+        }
     };
 
     login = (event) => {
         event.preventDefault();
-        if (emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8) {
-            console.log('here');
+        if (this.state.isValid) {
             SystemActions.login(this.state.userData);
-            this.setState({
-                validEmail: true,
-                validPassword: true,
-                error: false
-            })
-        } else {
-            if (!emailValidator(this.state.userData.email)) {
-                this.setState({
-                    validEmail: false
-                })
-            } else {
-                this.setState({
-                    validPassword: false
-                })
-            }
         }
     };
 }

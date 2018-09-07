@@ -82,7 +82,6 @@ let SystemActions = {
                         actionType: SystemConstants.USER_STATUS,
                         status: response.data.user,
                         fromLogin: true,
-                        error: false
                     });
                 })
             })
