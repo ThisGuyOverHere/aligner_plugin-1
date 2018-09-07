@@ -1226,10 +1226,33 @@ class Alignment {
         // IMPROVED: we discard common words and perform levenshtein only on diff parts of string
         function eval_sents($sources, $targets) {
             $costIns = 1; $costRep = 1; $costDel = 1;
+            
+            switch (count($sources)){
+                case 0:
+                    $sourceClean = "";
+                    break;
+                case 1:
+                    $sourceClean = $sources[0]['content_clean'];
+                    break;
+                case 2:
+                    $sourceClean = $sources[0]['content_clean'].$sources[1]['content_clean'];
+                    break;
+            }
 
-            $sourceClean = mergeSegments($sources)['content_clean'];
-            $targetClean = mergeSegments($targets)['content_clean'];
-
+            switch (count($targets)){
+                case 0:
+                    $targetClean = "";
+                    break;
+                case 1:
+                    $targetClean = $targets[0]['content_clean'];
+                    break;
+                case 2:
+                    $targetClean = $targets[0]['content_clean'].$targets[1]['content_clean'];
+                    break;
+            }
+            
+            //$targetClean = mergeSegments($targets)['content_clean'];
+            
             // Lowercase to better comparison
             $ss = strtolower($sourceClean);
             $ts = strtolower($targetClean);
