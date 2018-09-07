@@ -1825,6 +1825,28 @@ class Alignment {
             return $clean;
         }
 
+        function mapAlignment($source, $target, $indexes) {
+            $alignment = [];
+
+            foreach ($indexes as $index) {
+                // Every index contains [[offset, length], [offset, length], score] of the source/target slice
+                list(list($si, $sd), list($ti, $td), $s) = $index;
+
+                $sa = array_slice($source, $si, $sd);
+                $ta = array_slice($target, $ti, $td);
+
+                $row = [
+                    'source' => (count($sa) == 1) ? $sa[0] : $sa,
+                    'target' => (count($ta) == 1) ? $ta[0] : $ta,
+                    'score' => $s
+                ];
+
+                $alignment[] = $row;
+            }
+
+            return $alignment;
+        }
+
 
         // Variant on Church and Gale algorithm with Levenshtein distance
 
@@ -1834,23 +1856,7 @@ class Alignment {
         $target_clean = cleanSegments($target);
 
         $indexes = align($source_clean, $target_clean);
-
-        $alignment = [];
-        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length], score] of the source/target slice
-            $si = $index[0][0];
-            $ti = $index[1][0];
-
-            $sd = $index[0][1];
-            $td = $index[1][1];
-
-            $row = [
-                'source' => mergeSegments(array_slice($source, $si, $sd)),
-                'target' => mergeSegments(array_slice($target, $ti, $td)),
-                'score' => $index[2]
-            ];
-
-            $alignment[] = $row;
-        }
+        $alignment = mapAlignment($source, $target, $indexes);
 
         return $alignment;
     }
