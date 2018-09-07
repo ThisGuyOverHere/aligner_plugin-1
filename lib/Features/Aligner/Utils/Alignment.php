@@ -1170,6 +1170,361 @@ class Alignment {
 
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
+            $matrix = [];
+
+            $str1Length = strlen($str1);
+            $str2Length = strlen($str2);
+
+            $row = [];
+            $row[0] = 0.0;
+            for ($j = 1; $j < $str2Length + 1; $j++) {
+                $row[$j] = $j * $costIns;
+            }
+
+            $matrix[0] = $row;
+
+            for ($i = 0; $i < $str1Length; $i++) {
+                $row = [];
+                $row[0] = ($i + 1) * $costDel;
+
+                for ($j = 0; $j < $str2Length; $j++) {
+                    $row[$j + 1] = min(
+                            $matrix[$i][$j + 1] + $costDel,
+                            $row[$j] + $costIns,
+                            $matrix[$i][$j] + ($str1[$i] === $str2[$j] ? 0.0 : $costRep)
+                    );
+                }
+
+                $matrix[$i + 1] = $row;
+            }
+
+            return $matrix[$str1Length][$str2Length];
+        }
+
+        function leo_array_diff($a, $b) {
+            $map = array();
+            foreach($a as $val) $map[$val] = 1;
+            foreach($b as $val) unset($map[$val]);
+            return array_keys($map);
+        }
+        
+        // Simple merge, for 1-N matches
+        function mergeSegments($segments) {
+            if (count($segments) == 1) {
+                return reset($segments);  // Here I'm not sure if array starts with index 0
+            } else {
+                return array_reduce($segments, function ($carry, $item) {
+                    $carry['content_raw'] = trim($carry['content_raw'] . ' ' . $item['content_raw']);
+                    $carry['content_clean'] = trim($carry['content_clean'] . ' ' . $item['content_clean']);
+                    $carry['raw_word_count'] += $item['raw_word_count'];
+
+                    return $carry;
+                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
+            }
+        }
+
+        // IMPROVED: we discard common words and perform levenshtein only on diff parts of string
+        function eval_sents($sources, $targets) {
+            $costIns = 1; $costRep = 1; $costDel = 1;
+            
+            switch (count($sources)){
+                case 0:
+                    $sourceClean = "";
+                    break;
+                case 1:
+                    $sourceClean = $sources[0]['content_clean'];
+                    break;
+                case 2:
+                    $sourceClean = $sources[0]['content_clean'].$sources[1]['content_clean'];
+                    break;
+            }
+
+            switch (count($targets)){
+                case 0:
+                    $targetClean = "";
+                    break;
+                case 1:
+                    $targetClean = $targets[0]['content_clean'];
+                    break;
+                case 2:
+                    $targetClean = $targets[0]['content_clean'].$targets[1]['content_clean'];
+                    break;
+            }
+            
+            //$targetClean = mergeSegments($targets)['content_clean'];
+            
+            // Lowercase to better comparison
+            $ss = strtolower($sourceClean);
+            $ts = strtolower($targetClean);
+
+            // Get all words, this is needed to remove common words and calculate distance only on different words (type, plurals, ...)
+            $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
+
+            $ss = preg_split($delimiters, $ss, null, PREG_SPLIT_NO_EMPTY);
+            $ts = preg_split($delimiters, $ts, null, PREG_SPLIT_NO_EMPTY);
+
+            $commonWords = array_intersect($ss, $ts);
+
+            $ss = leo_array_diff($ss, $commonWords);
+            $ts = leo_array_diff($ts, $commonWords);
+
+            // Put back to string to allow calculations (without spaces, so we optimize characters)
+            $ss = implode('', $ss);
+            $ts = implode('', $ts);
+
+            // Distance
+            if (strlen($ss) == 0 || strlen($ts) == 0) {  // Check if we can return immediately the upper bound
+                $distance = max(strlen($ss), strlen($ts));
+            } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
+                $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+            } else {
+                $distance = long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+            }
+
+            // Score
+            $len = min(strlen($sourceClean), strlen($targetClean));
+
+            if ($len > 0) {
+                $avg = (strlen($sourceClean) + strlen($targetClean)) / 2;
+
+                $score = 100 - 100 * min($distance / $avg, 1);  // Limit to 1 if distance > avg
+            } else {
+                $score = 0;
+            }
+
+            return [$distance, $score];
+        }
+
+        function buildScores($source, $target) {
+
+            // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
+            $beadCosts = ['1-1' => 0, '2-1' => 150, '1-2' => 150, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
+
+            $m = [];
+            foreach (range(0, count($source)) as $si) {
+                foreach (range(0, count($target)) as $ti) {
+                    if ($si == 0 && $ti == 0) {
+                        $m[0][0] = [0, 0, 0, 0];
+                    } else {
+
+                        $value = null;
+
+                        foreach ($beadCosts as $pair => $beadCost) {
+                            $sd = intval($pair[0]);
+                            $td = intval($pair[2]);
+
+                            if ($si - $sd >= 0 && $ti - $td >= 0) {
+
+                                $sources = array_slice($source, $si-$sd, $sd);
+                                $targets = array_slice($target, $ti-$td, $td);
+
+                                list($distance, $score) = eval_sents($sources, $targets);
+                                $cost = $m[$si-$sd][$ti-$td][0] + $distance + $beadCost;
+
+                                $tuple = [$cost, $sd, $td, $score];
+
+                                // Emulate min function on tuple
+                                if ($value == null || $tuple[0] < $value[0]) {
+                                    $value = $tuple;
+                                }
+                            }
+                        }
+
+                        $m[$si][$ti] = $value;
+                    }
+                }
+            }
+
+            return $m;
+        }
+
+        function extractPath($source, $target, $scores) {
+            $res = [];
+
+            $si = count($source);
+            $ti = count($target);
+
+            while (true) {
+                list($cost, $sd, $td, $score) = $scores[$si][$ti];
+
+                if ($sd == 0 && $td == 0) {
+                    break;
+                }
+
+                $res[] = [[$si - $sd, $sd], [$ti - $td, $td], $score];
+
+                $si -= $sd;
+                $ti -= $td;
+            }
+
+            return array_reverse($res);
+        }
+
+        function findAbsoluteMatches($source, $target) {
+            // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
+            $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
+
+            $source = array_map(function ($item) use ($delimiters) {
+                $text = strtolower($item['content_clean']);
+                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
+                $text = implode('', $elements);
+                return $text;
+            }, $source);
+
+            $target = array_map(function ($item) use ($delimiters) {
+                $text = strtolower($item['content_clean']);
+                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
+                $text = implode('', $elements);
+                return $text;
+            }, $target);
+
+            // We need to perform it twice to have both indexes
+            $commonST = array_intersect($source, $target);
+            $commonTS = array_intersect($target, $source);
+
+            $sourceIndexes = array_keys($commonST);
+            $targetIndexes = array_keys($commonTS);
+
+            // Indexes array are same size
+            $commonSegments = [];
+
+            foreach ($sourceIndexes as $key => $value) {
+                $commonSegments[] = [$value, $targetIndexes[$key]];  // Build pairs with source,target index of exact matches
+            }
+
+            return $commonSegments;
+        }
+
+        function alignPart($source, $target, $offset) {
+            $scores = buildScores($source, $target);
+            $alignment = extractPath($source, $target, $scores);
+
+            // Adjust offset
+            $alignment = array_map(function ($item) use ($offset) {
+                $item[0][0] += $offset[0];
+                $item[1][0] += $offset[1];
+                return $item;
+            }, $alignment);
+
+            return $alignment;
+        }
+
+        function align($source, $target) {
+
+            $matches = findAbsoluteMatches($source, $target);
+
+            // No exact match has been found, we need to align entire document
+            if (empty($matches)) {
+                $alignment = alignPart($source, $target, [0, 0]);
+
+                return $alignment;
+            } else {
+                // Perform alignment on all sub-array, then merge them
+                $alignment = [];
+                $lastMatch = [0, 0];
+
+                foreach ($matches as $match) {
+
+                    $subSource = array_slice($source, $lastMatch[0], $match[0] - $lastMatch[0]);
+                    $subTarget = array_slice($target, $lastMatch[1], $match[1] - $lastMatch[1]);
+
+                    $subAlignment = alignPart($subSource, $subTarget, $lastMatch);
+
+                    $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
+                    $alignment[] = [[$match[0], 1], [$match[1], 1], 100];  // Add alignment for exact match
+
+                    // Update lastMatch to skip current match
+                    $lastMatch[0] = $match[0] + 1;
+                    $lastMatch[1] = $match[1] + 1;
+                }
+
+                // Align last part of documents, after last exact match
+                $subSource = array_slice($source, $lastMatch[0]);
+                $subTarget = array_slice($target, $lastMatch[1]);
+
+                $subAlignment = alignPart($subSource, $subTarget, $lastMatch);
+
+                $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
+
+                return $alignment;
+            }
+        }
+
+        // Pre-translate segments from source_lang to target_lang
+        function translateSegments($segments, $source_lang, $target_lang) {
+            $result = [];
+
+            $config = Aligner::getConfig();
+
+            $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+            $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
+            $engineRecord->type = 'MT';
+
+            $engine = new Engines_GoogleTranslate($engineRecord);
+
+            $input_segments = array();
+
+            foreach ($segments as $segment) {
+                $input_segments[] = array('segment'=>$segment['content_clean'],
+                    'source'=>$source_lang,
+                    'target'=>$target_lang);
+            }
+
+            $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
+            foreach ($input_chunks as $chunk){
+
+                //Gets the translated segments and filters just the elements with the 'translation' key before merging
+                $translation = $engine->getMulti($chunk);
+                $translation = array_map(function ($ar) {return $ar['translation'];}, $translation);
+                $result = array_merge($result,$translation);
+            }
+
+            foreach ($segments as $key => $segment){
+                $segments[$key]['content_clean'] = $result[$key];
+            }
+
+            return $segments;
+        }
+
+
+        // Variant on Church and Gale algorithm with Levenshtein distance
+        $source_translated = translateSegments($source, $source_lang, $target_lang);
+
+        $indexes = align($source_translated, $target);
+
+        $alignment = [];
+        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length], score] of the source/target slice
+            $si = $index[0][0];
+            $ti = $index[1][0];
+
+            $sd = $index[0][1];
+            $td = $index[1][1];
+
+            $row = [
+                'source' => mergeSegments(array_slice($source, $si, $sd)),
+                'target' => mergeSegments(array_slice($target, $ti, $td)),
+                'score' => $index[2]
+            ];
+
+            $alignment[] = $row;
+        }
+
+        return $alignment;
+    }
+
+    /**
+     *  Alignment based on fixed window size for search and editing distance for scoring
+     *
+     * @param $source
+     * @param $target
+     * @param $source_lang
+     * @param $target_lang
+     * @return array
+     */
+    public function _alignSegmentsV4($source, $target, $source_lang, $target_lang) {
+
+        function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
+
             $str1Array = str_split($str1, 1);
             $str2Array = str_split($str2, 1);
 
@@ -1192,9 +1547,9 @@ class Alignment {
 
                 for ($j = 0; $j < $str2Length; $j++) {
                     $row[$j + 1] = min(
-                            $matrix[$i][$j + 1] + $costDel,
-                            $row[$j] + $costIns,
-                            $matrix[$i][$j] + ($str1Array[$i] === $str2Array[$j] ? 0.0 : $costRep)
+                        $matrix[$i][$j + 1] + $costDel,
+                        $row[$j] + $costIns,
+                        $matrix[$i][$j] + ($str1Array[$i] === $str2Array[$j] ? 0.0 : $costRep)
                     );
                 }
 
