@@ -110,10 +110,30 @@ class LoginComponent extends Component {
             userData: userData
         });
 
-        /* we will transfer all the validator logic here */
-        if(emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8 ){
+        /* validators logic */
+        if( emailValidator(this.state.userData.email) && this.state.userData.password.length >= 8 ){
             this.setState({
                 isValid: true,
+            })
+        }
+
+        if( !emailValidator(this.state.userData.email) && this.state.userData.email !== '' ){
+            this.setState({
+                validEmail: false
+            })
+        }else {
+            this.setState({
+                validEmail: true
+            })
+        }
+
+        if( this.state.userData.password.length < 8 && this.state.userData.password !== '' ){
+            this.setState({
+                validPassword: false,
+            })
+        }else {
+            this.setState({
+                validPassword: true,
             })
         }
     };
@@ -122,21 +142,6 @@ class LoginComponent extends Component {
         event.preventDefault();
         if (this.state.isValid) {
             SystemActions.login(this.state.userData);
-            this.setState({
-                validEmail: true,
-                validPassword: true,
-                error: false
-            })
-        } else {
-            if (!emailValidator(this.state.userData.email)) {
-                this.setState({
-                    validEmail: false
-                })
-            } else {
-                this.setState({
-                    validPassword: false
-                })
-            }
         }
     };
 }

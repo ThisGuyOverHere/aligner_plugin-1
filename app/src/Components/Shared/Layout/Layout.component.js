@@ -84,6 +84,9 @@ class Layout extends Component {
             setTimeout(()=>{
                 SystemActions.setLoginStatus(false);
             },0)
+            this.setState({
+                loginError: false
+            })
         }
         if(error){
             this.setState({
