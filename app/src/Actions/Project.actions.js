@@ -273,7 +273,6 @@ let ProjectActions = {
             data: to
         });
 
-        console.log(fromInverse);
         if(!fromInverse.content_clean){
             changes.push({
                 type: from.type,

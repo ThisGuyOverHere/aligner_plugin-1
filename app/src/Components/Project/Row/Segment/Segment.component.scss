@@ -1,21 +1,54 @@
 @import "../../../../../assets/theme/variables";
+
 .segmentBox {
-  padding: 20px 10px;
   font-size: 16px;
   text-align: left;
   z-index: 1;
   width: 100%;
-  transition: box-shadow 600ms ease-in;
-  background:#ffffff;
-  box-shadow: 0px 1px 1px #CCCCCC;
-  &.empty{
-    border: 1px dashed #CBCBCB;
-    background: none;
-    p{
-      opacity: 0;
+  &-content {
+    padding: 20px 10px;
+    transition: box-shadow 600ms ease-in, transform 200ms ease-in;
+    background: $white;
+    box-shadow: 0 1px 1px #CCCCCC;
+  }
+  &.empty {
+    border: 1px dashed $gray;
+    &.onDropHover{
+      border: 1px dashed $white;
+    }
+    .segmentBox-content {
+      background: none;
+      box-shadow: none;
+      p {
+        opacity: 0;
+      }
+    }
+
+  }
+  &.onDrag {
+    border: 1px dashed $white;
+
+    .segmentBox-content {
+      background: $primary-light;
+      box-shadow: none;
+      p {
+        opacity: 0;
+      }
+    }
+
+  }
+  &.onDropHover:not(.empty) {
+    border: 1px dashed $white;
+    .segmentBox-content {
+      background: $white;
+      box-shadow: none;
+      position: relative;
+      transform: translate(10px,30px);
+      opacity: 0.9;
     }
   }
-  .merge{
+
+  .merge {
     width: 100%;
     border: 3px dashed $primary;
     display: block;
@@ -24,7 +57,6 @@
     line-height: 64px;
   }
 }
-
 
 @media screen and (-webkit-min-device-pixel-ratio: 2) {
   body {
