@@ -313,6 +313,13 @@ let ProjectActions = {
                 rec: rec
             }
         });
+    },
+    addSegmentToSelection: function (order,type) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.ADD_SEGMENT_TO_SELECTION,
+            order: order,
+            type: type
+        });
     }
 };
 

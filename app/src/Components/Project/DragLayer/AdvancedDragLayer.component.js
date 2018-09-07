@@ -85,7 +85,7 @@ class AdvancedDragLayer extends Component {
                 <p className={mergeClass.join(" ")}>CMD for Merge</p>
             </div>
         )
-    }
+    };
 
     setMergeStatus = (event) =>{
         if(event.key === 'Alt'){

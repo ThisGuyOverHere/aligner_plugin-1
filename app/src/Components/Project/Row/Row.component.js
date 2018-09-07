@@ -68,8 +68,10 @@ class RowComponent extends Component {
         mergeStatus: PropTypes.bool.isRequired,
         setAnimatedRow: PropTypes.func,
         scrollY: PropTypes.any,
+        enableDrag: PropTypes.bool,
         rec: PropTypes.any,
-        row: PropTypes.object.isRequired
+        row: PropTypes.object.isRequired,
+        selection: PropTypes.object
     };
 
     constructor(props) {
@@ -114,7 +116,7 @@ class RowComponent extends Component {
 
     render() {
         let rowClass = ['project-row'];
-        const {connectDropTarget, isOver, canDrop, dragEl} = this.props;
+        const {connectDropTarget, isOver, canDrop, dragEl, selection, enableDrag} = this.props;
 
         const dragElType = dragEl ? dragEl.type : undefined;
         if (isOver && dragElType && canDrop) {
@@ -132,9 +134,13 @@ class RowComponent extends Component {
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
                                   mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'source'}
+                                  enableDrag={enableDrag}
+                                  selected={selection && selection.source}
                                   segment={this.props.row.source}/>
                 <SegmentComponent type="target"
                                   dropHover={isOver && canDrop && dragElType === 'target'}
+                                  enableDrag={enableDrag}
+                                  selected={selection && selection.target}
                                   mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'target'}
                                   segment={this.props.row.target}/>
             </div>

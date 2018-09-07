@@ -17,6 +17,15 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         source: List(),
         target: List()
     },
+    selection: {
+        source: {
+
+        },
+        target: {
+
+        },
+        count: 0
+    },
     mergeStatus: false,
 
     updateAll: function (volumeAnalysis, project) {
@@ -133,6 +142,29 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         }*/
     },
 
+    addSegmentToSelection: function (order,type) {
+        if(order>0){
+            this.selection[type][order] = 1 - (this.selection[type][order]|0);
+            this.selection.count = 0;
+            Object.keys(this.selection.source).map((key, index) => {
+                this.selection.count += this.selection.source[key];
+            });
+            Object.keys(this.selection.target).map((key, index) => {
+                this.selection.count += this.selection.target[key];
+            });
+        }else{
+            this.selection = {
+                source: {
+
+                },
+                target: {
+
+                },
+                count: 0
+            };
+        }
+    }
+
 });
 
 
@@ -159,6 +191,10 @@ AppDispatcher.register(function (action) {
         case ProjectConstants.MERGE_STATUS:
             ProjectStore.mergeStatus = action.status;
             ProjectStore.emitChange(ProjectConstants.MERGE_STATUS, action.status);
+            break;
+        case ProjectConstants.ADD_SEGMENT_TO_SELECTION:
+            ProjectStore.addSegmentToSelection(action.order,action.type);
+            ProjectStore.emitChange(ProjectConstants.ADD_SEGMENT_TO_SELECTION, ProjectStore.selection);
             break;
         default:
             ProjectStore.emitChange(action.actionType, action.data);

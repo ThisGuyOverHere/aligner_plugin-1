@@ -28,6 +28,11 @@ class JobComponent extends Component {
                 yCoord: null
             },
             mergeStatus: false,
+            selection: {
+                source: {},
+                target: {},
+                count: 0
+            }
         };
 
         ProjectActions.setJobID(this.props.match.params.jobID)
@@ -61,11 +66,13 @@ class JobComponent extends Component {
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
+        ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
     }
 
     componentWillUnmount() {
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
+        ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.removeListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
     }
 
@@ -103,10 +110,18 @@ class JobComponent extends Component {
 
     renderItems(array) {
         let values = [];
+        const enableDrag = this.state.selection.count === 0;
         if (array.length > 0) {
             array.map((row, index) => {
+                const selection = {
+                    source: !!this.state.selection.source[row.source.order],
+                    target: !!this.state.selection.target[row.target.order],
+                    count: this.state.selection.count
+                };
                 values.push(<RowComponent key={index}
                                           index={index}
+                                          enableDrag={enableDrag}
+                                          selection={selection}
                                           mergeStatus={this.state.mergeStatus}
                                           row={row}/>);
                 return row;
@@ -118,6 +133,12 @@ class JobComponent extends Component {
     setMergeStatus = (status) => {
         this.setState({
             mergeStatus: status
+        })
+    };
+
+    storeSelection = (selection) =>{
+        this.setState({
+            selection: selection
         })
     }
 }
