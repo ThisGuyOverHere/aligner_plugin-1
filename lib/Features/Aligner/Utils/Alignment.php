@@ -1170,13 +1170,10 @@ class Alignment {
 
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
-            $str1Array = str_split($str1, 1);
-            $str2Array = str_split($str2, 1);
-
             $matrix = [];
 
-            $str1Length = count($str1Array);
-            $str2Length = count($str2Array);
+            $str1Length = strlen($str1);
+            $str2Length = strlen($str2);
 
             $row = [];
             $row[0] = 0.0;
@@ -1194,7 +1191,7 @@ class Alignment {
                     $row[$j + 1] = min(
                             $matrix[$i][$j + 1] + $costDel,
                             $row[$j] + $costIns,
-                            $matrix[$i][$j] + ($str1Array[$i] === $str2Array[$j] ? 0.0 : $costRep)
+                            $matrix[$i][$j] + ($str1[$i] === $str2[$j] ? 0.0 : $costRep)
                     );
                 }
 
@@ -1290,8 +1287,8 @@ class Alignment {
                         $value = null;
 
                         foreach ($beadCosts as $pair => $beadCost) {
-                            $sd = intval(substr($pair, 0, 1));
-                            $td = intval(substr($pair, -1, 1));
+                            $sd = intval($pair[0]);
+                            $td = intval($pair[2]);
 
                             if ($si - $sd >= 0 && $ti - $td >= 0) {
 
