@@ -9,11 +9,13 @@ import MouseBackEnd from 'react-dnd-mouse-backend'
 
 import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
 import env from "../../Constants/Env.constants";
+import SplitComponent from "./Split/Split.component";
 
 class JobComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            segmentToSplit: {},
             algorithm: env.alignAlgorithmDefaultVersion,
             job: {
                 config: {
@@ -28,6 +30,7 @@ class JobComponent extends Component {
                 yCoord: null
             },
             mergeStatus: false,
+            splitModalStatus: false,
         };
 
         ProjectActions.setJobID(this.props.match.params.jobID)
@@ -59,12 +62,16 @@ class JobComponent extends Component {
     }
 
     componentDidMount() {
+        ProjectStore.addListener(ProjectConstants.SET_SPLIT_MODAL_STATUS, this.setStatusSplitModal);
+        ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
         ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
     }
 
     componentWillUnmount() {
+        ProjectStore.removeListener(ProjectConstants.SET_SPLIT_MODAL_STATUS, this.setStatusSplitModal);
+        ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.removeListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
     }
@@ -81,10 +88,23 @@ class JobComponent extends Component {
                         {this.renderItems(this.state.job.rows)}
                     </div>
                     <AdvancedDragLayer/>
+                    {this.state.splitModalStatus &&  <SplitComponent segment = {this.state.segmentToSplit}/>}
                 </div>
             </div>
         );
     }
+
+    setStatusSplitModal = (status) => {
+        this.setState({
+            splitModalStatus: status
+        })
+    };
+
+    setSegmentToSplit = (segment) => {
+        this.setState({
+            segmentToSplit: segment,
+        });
+    };
 
     setRows = (job) => {
         let rows = [];

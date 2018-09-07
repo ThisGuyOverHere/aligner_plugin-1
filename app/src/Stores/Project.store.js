@@ -160,6 +160,12 @@ AppDispatcher.register(function (action) {
             ProjectStore.mergeStatus = action.status;
             ProjectStore.emitChange(ProjectConstants.MERGE_STATUS, action.status);
             break;
+        case ProjectConstants.SET_SPLIT_MODAL_STATUS:
+            ProjectStore.emitChange(ProjectConstants.SET_SPLIT_MODAL_STATUS, action.status);
+            break;
+        case ProjectConstants.SEGMENT_TO_SPLIT:
+            ProjectStore.emitChange(ProjectConstants.SEGMENT_TO_SPLIT, action.segment);
+            break;
         default:
             ProjectStore.emitChange(action.actionType, action.data);
     }

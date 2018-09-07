@@ -313,6 +313,24 @@ let ProjectActions = {
                 rec: rec
             }
         });
+    },
+
+    /**
+     *
+     * @param status
+     */
+    splitModalStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.SET_SPLIT_MODAL_STATUS,
+            status: status,
+        });
+    },
+
+    setSegmentToSplit: function (segment) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.SEGMENT_TO_SPLIT,
+            segment: segment,
+        });
     }
 };
 
