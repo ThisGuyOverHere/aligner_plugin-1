@@ -27,6 +27,7 @@ function collect(connect, monitor) {
 class SegmentComponent extends Component {
     static propTypes = {
         type: PropTypes.string.isRequired,
+        dropHover: PropTypes.bool.isRequired,
         mergeStatus: PropTypes.bool,
         segment: PropTypes.shape({
             order: PropTypes.number.isRequired,
@@ -86,18 +87,28 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDragSource, isDragging, segment} = this.props;
+        const {connectDragSource, isDragging, segment, dropHover} = this.props;
 
         let segmentClasses = ['segmentBox'];
-        if(isDragging || !segment.content_clean){
+        if (!segment.content_clean) {
             segmentClasses.push('empty')
         }
+        if (isDragging) {
+            segmentClasses.push('onDrag')
+        }
+        if (dropHover) {
+            segmentClasses.push('onDropHover')
+        }
         return connectDragSource(
-            <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)} onDoubleClick={this.createSpaceSegment}>
-                <p>{segment.content_clean}</p>
-                {this.props.mergeStatus && <span className="merge">
+            <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
+                 onDoubleClick={this.createSpaceSegment}>
+                <div className="segmentBox-content">
+                    <p>{segment.content_clean}</p>
+                    {this.props.mergeStatus && <span className="merge">
                     MERGE
                 </span>}
+                </div>
+
             </div>
         );
     }
