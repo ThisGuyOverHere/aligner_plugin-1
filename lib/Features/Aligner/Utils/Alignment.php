@@ -1207,7 +1207,18 @@ class Alignment {
             foreach($b as $val) unset($map[$val]);
             return array_keys($map);
         }
-        
+
+        function custom_array_intersect($a, $b) {
+            $index = array_flip($a);
+            foreach ($b as $value) {
+                if (isset($index[$value])) unset($index[$value]);
+            }
+            foreach ($index as $key => $value) {
+                if (isset($a[$value])) unset($a[$value]);
+            }
+            return $a;
+        }
+
         // Simple merge, for 1-N matches
         function mergeSegments($segments) {
             if (count($segments) == 1) {
@@ -1263,7 +1274,8 @@ class Alignment {
             $ss = preg_split($delimiters, $ss, null, PREG_SPLIT_NO_EMPTY);
             $ts = preg_split($delimiters, $ts, null, PREG_SPLIT_NO_EMPTY);
 
-            $commonWords = array_intersect($ss, $ts);
+            $commonWords = custom_array_intersect($ss, $ts);
+            //$commonWords = array_intersect($ss,$ts);
 
             $ss = leo_array_diff($ss, $commonWords);
             $ts = leo_array_diff($ts, $commonWords);
@@ -1272,10 +1284,13 @@ class Alignment {
             $ss = implode('', $ss);
             $ts = implode('', $ts);
 
+            $slen = strlen($ss);
+            $tlen = strlen($ts);
+
             // Distance
-            if (strlen($ss) == 0 || strlen($ts) == 0) {  // Check if we can return immediately the upper bound
-                $distance = max(strlen($ss), strlen($ts));
-            } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
+            if ($slen == 0 || $tlen == 0) {  // Check if we can return immediately the upper bound
+                $distance = max($slen, $tlen);
+            } else if ($slen < 255 && $tlen < 255) {  // Check if we can use the efficient standard implementation
                 $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
             } else {
                 $distance = long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
@@ -1313,13 +1328,16 @@ class Alignment {
                             $sd = intval($pair[0]);
                             $td = intval($pair[2]);
 
-                            if ($si - $sd >= 0 && $ti - $td >= 0) {
+                            $sourceOffset = $si-$sd;
+                            $targetOffset = $ti-$td;
 
-                                $sources = array_slice($source, $si-$sd, $sd);
-                                $targets = array_slice($target, $ti-$td, $td);
+                            if ($sourceOffset >= 0 && $targetOffset >= 0) {
+
+                                $sources = array_slice($source, $sourceOffset, $sd);
+                                $targets = array_slice($target, $targetOffset, $td);
 
                                 list($distance, $score) = eval_sents($sources, $targets);
-                                $cost = $m[$si-$sd][$ti-$td][0] + $distance + $beadCost;
+                                $cost = $m[$sourceOffset][$targetOffset][0] + $distance + $beadCost;
 
                                 $tuple = [$cost, $sd, $td, $score];
 
@@ -1379,8 +1397,8 @@ class Alignment {
             }, $target);
 
             // We need to perform it twice to have both indexes
-            $commonST = array_intersect($source, $target);
-            $commonTS = array_intersect($target, $source);
+            $commonST = custom_array_intersect($source, $target);
+            $commonTS = custom_array_intersect($target, $source);
 
             $sourceIndexes = array_keys($commonST);
             $targetIndexes = array_keys($commonTS);
