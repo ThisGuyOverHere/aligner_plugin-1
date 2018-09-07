@@ -1523,6 +1523,13 @@ class Alignment {
      */
     public function _alignSegmentsV4($source, $target, $source_lang, $target_lang) {
 
+        function leo_array_diff($a, $b) {
+            $map = array();
+            foreach($a as $val) $map[$val] = 1;
+            foreach($b as $val) unset($map[$val]);
+            return array_keys($map);
+        }
+
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
             $str1Array = str_split($str1, 1);
@@ -1583,11 +1590,14 @@ class Alignment {
             $source = mergeSegments($sources);
             $target = mergeSegments($targets);
 
+            $sl = strlen(implode('', $source));
+            $tl = strlen(implode('', $target));
+
             // Remove common words
             $commonWords = array_intersect($source, $target);
 
-            $ss = array_diff($source, $commonWords);
-            $ts = array_diff($target, $commonWords);
+            $ss = leo_array_diff($source, $commonWords);
+            $ts = leo_array_diff($target, $commonWords);
 
             // Put back to string to allow calculations (without spaces, so we optimize characters)
             $ss = implode('', $ss);
@@ -1603,10 +1613,10 @@ class Alignment {
             }
 
             // Score
-            $len = min(count($source), count($target));
+            $len = min($sl, $tl);
 
             if ($len > 0) {
-                $avg = (count($source) + count($target)) / 2;
+                $avg = ($sl + $tl) / 2;
 
                 $score = 100 - 100 * min($distance / $avg, 1);  // Limit to 1 if distance > avg
             } else {
