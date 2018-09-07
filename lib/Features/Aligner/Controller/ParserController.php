@@ -65,6 +65,9 @@ class ParserController extends AlignerController {
             case 'v3c':
                 $alignment = $alignment_class->_alignSegmentsV3C($source_segments, $target_segments, $source_lang, $target_lang);
                 break;
+            case 'v4':
+                $alignment = $alignment_class->_alignSegmentsV4($source_segments, $target_segments, $source_lang, $target_lang);
+                break;
         }
 
         // DEBUG //
