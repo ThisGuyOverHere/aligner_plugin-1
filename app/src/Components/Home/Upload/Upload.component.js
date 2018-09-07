@@ -49,13 +49,27 @@ class UploadComponent extends Component {
     onSourceLanguageChange = (e, value) => {
         this.setState({
             sourceLang: value.value
-        })
+        });
+        if(this.state.uploadSource.name){
+            httpConversion({
+                file_name: this.state.uploadSource.name,
+                source_lang: this.state.targetLang,
+                target_lang: this.state.sourceLang
+            });
+        }
     };
 
     onTargetLanguageChange = (e, value) => {
         this.setState({
             targetLang: value.value
-        })
+        });
+        if(this.state.uploadTarget.name){
+            httpConversion({
+                file_name: this.state.uploadTarget.name,
+                source_lang: this.state.targetLang,
+                target_lang: this.state.sourceLang
+            });
+        }
     };
 
     ProjectNameChange = (event) => {
@@ -99,7 +113,6 @@ class UploadComponent extends Component {
                 }
             });
         });
-
 
 
     };
@@ -172,11 +185,11 @@ class UploadComponent extends Component {
 
     onFormatsModalClick = () => {
         this.setState({
-            formatsModalOpen : !this.state.formatsModalOpen
+            formatsModalOpen: !this.state.formatsModalOpen
         });
     };
 
-    renderHtmlUpload = (status, data) =>{
+    renderHtmlUpload = (status, data) => {
         switch (status) {
             case 'start':
                 return <p><span>+ Add Target file</span> (or drop it here).</p>;
@@ -206,7 +219,8 @@ class UploadComponent extends Component {
             case 'error':
                 return <p>
                     <i id="error-icon" aria-hidden='true'
-                       className='window close outline icon'/>Error during file upload : <span> Server problem occurred. </span>
+                       className='window close outline icon'/>Error during file upload
+                    : <span> Server problem occurred. </span>
                     <i id="delete-icon" aria-hidden='true'
                        className='trash alternate outline icon'/>
                     <i id="triangle" aria-hidden='true' className='triangle right icon'/>
@@ -237,68 +251,72 @@ class UploadComponent extends Component {
                     </div>
 
                     <div className="row" id="projectNameInput">
-                        <div className="sixteen wide column">
+                        <div className="five wide column">
                             <div className="ui input">
-                                <input className="form-control" name="pname" type="text" value={this.state.pName}
+                                <input id="project-name" className="form-control" name="pname" type="text" value={this.state.pName}
                                        onChange={this.ProjectNameChange}/>
                             </div>
                         </div>
                     </div>
 
                     <div className="row">
-                        <div className="six wide column">
-                            <Dropdown fluid search selection
-                                      options={this.state.languages}
-                                      defaultValue={this.state.sourceLang}
-                                      onChange={this.onSourceLanguageChange}
-                            />
+                        <div className="eight wide column">
+                            <div className="">
+                                <Dropdown fluid search selection
+                                          options={this.state.languages}
+                                          defaultValue={this.state.sourceLang}
+                                          onChange={this.onSourceLanguageChange}
+                                />
+                            </div>
+                            <div className="">
+                                <div className={classes.source.join(' ')}>
+                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
+                                        {
+                                            this.renderHtmlUpload(
+                                                this.state.uploadSource.status,
+                                                {
+                                                    filename: this.state.uploadSource.name,
+                                                    progress: this.state.uploadSource.progress,
+                                                    filesize: this.state.uploadSource.size
+                                                })
+                                        }
+                                    </Dropzone>
+                                </div>
+                            </div>
                         </div>
-                        <div className="ten wide column">
-                            <div className={classes.source.join(' ')}>
-                                <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
-                                    {
-                                        this.renderHtmlUpload(
-                                            this.state.uploadSource.status,
-                                            {
-                                                filename: this.state.uploadSource.name,
-                                                progress: this.state.uploadSource.progress,
-                                                filesize: this.state.uploadSource.size
-                                            })
-                                    }
-                                </Dropzone>
+
+                        <div className="eight wide column">
+                            <div className="">
+                                <Dropdown fluid search selection
+                                          options={this.state.languages}
+                                          defaultValue={this.state.targetLang}
+                                          onChange={this.onTargetLanguageChange}
+                                />
+                            </div>
+                            <div className="">
+                                <div className={classes.target.join(' ')}>
+                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
+                                        {
+                                            this.renderHtmlUpload(
+                                                this.state.uploadTarget.status,
+                                                {
+                                                    filename: this.state.uploadTarget.name,
+                                                    progress: this.state.uploadTarget.progress,
+                                                    filesize: this.state.uploadTarget.size,
+                                                })
+                                        }
+                                    </Dropzone>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="row">
-                        <div className="six wide column">
-                            <Dropdown fluid search selection
-                                      options={this.state.languages}
-                                      defaultValue={this.state.targetLang}
-                                      onChange={this.onTargetLanguageChange}
-                            />
-                        </div>
-                        <div className="ten wide column">
-                            <div className={classes.target.join(' ')}>
-                                <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
-                                    {
-                                        this.renderHtmlUpload(
-                                            this.state.uploadTarget.status,
-                                            {
-                                                filename: this.state.uploadTarget.name ,
-                                                progress: this.state.uploadTarget.progress,
-                                                filesize: this.state.uploadTarget.size,
-                                            })
-                                    }
-                                </Dropzone>
-                            </div>
-                        </div>
-                    </div>
                     <div className="row" id="buttonRow">
 
                         <div className="twelve wide column">
                             <h4>MateCat supports <span onClick={this.onFormatsModalClick}> 71 file formats </span></h4>
-                            {this.state.formatsModalOpen && <FileFormatsModal formatModalState = {this.onFormatsModalClick}/>}
+                            {this.state.formatsModalOpen &&
+                            <FileFormatsModal formatModalState={this.onFormatsModalClick}/>}
                         </div>
 
 
