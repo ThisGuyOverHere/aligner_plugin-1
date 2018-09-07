@@ -1170,13 +1170,10 @@ class Alignment {
 
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
-            $str1Array = str_split($str1, 1);
-            $str2Array = str_split($str2, 1);
-
             $matrix = [];
 
-            $str1Length = count($str1Array);
-            $str2Length = count($str2Array);
+            $str1Length = strlen($str1);
+            $str2Length = strlen($str2);
 
             $row = [];
             $row[0] = 0.0;
@@ -1194,7 +1191,7 @@ class Alignment {
                     $row[$j + 1] = min(
                             $matrix[$i][$j + 1] + $costDel,
                             $row[$j] + $costIns,
-                            $matrix[$i][$j] + ($str1Array[$i] === $str2Array[$j] ? 0.0 : $costRep)
+                            $matrix[$i][$j] + ($str1[$i] === $str2[$j] ? 0.0 : $costRep)
                     );
                 }
 
@@ -1204,6 +1201,13 @@ class Alignment {
             return $matrix[$str1Length][$str2Length];
         }
 
+        function leo_array_diff($a, $b) {
+            $map = array();
+            foreach($a as $val) $map[$val] = 1;
+            foreach($b as $val) unset($map[$val]);
+            return array_keys($map);
+        }
+        
         // Simple merge, for 1-N matches
         function mergeSegments($segments) {
             if (count($segments) == 1) {
@@ -1222,10 +1226,33 @@ class Alignment {
         // IMPROVED: we discard common words and perform levenshtein only on diff parts of string
         function eval_sents($sources, $targets) {
             $costIns = 1; $costRep = 1; $costDel = 1;
+            
+            switch (count($sources)){
+                case 0:
+                    $sourceClean = "";
+                    break;
+                case 1:
+                    $sourceClean = $sources[0]['content_clean'];
+                    break;
+                case 2:
+                    $sourceClean = $sources[0]['content_clean'].$sources[1]['content_clean'];
+                    break;
+            }
 
-            $sourceClean = mergeSegments($sources)['content_clean'];
-            $targetClean = mergeSegments($targets)['content_clean'];
-
+            switch (count($targets)){
+                case 0:
+                    $targetClean = "";
+                    break;
+                case 1:
+                    $targetClean = $targets[0]['content_clean'];
+                    break;
+                case 2:
+                    $targetClean = $targets[0]['content_clean'].$targets[1]['content_clean'];
+                    break;
+            }
+            
+            //$targetClean = mergeSegments($targets)['content_clean'];
+            
             // Lowercase to better comparison
             $ss = strtolower($sourceClean);
             $ts = strtolower($targetClean);
@@ -1238,8 +1265,8 @@ class Alignment {
 
             $commonWords = array_intersect($ss, $ts);
 
-            $ss = array_diff($ss, $commonWords);
-            $ts = array_diff($ts, $commonWords);
+            $ss = leo_array_diff($ss, $commonWords);
+            $ts = leo_array_diff($ts, $commonWords);
 
             // Put back to string to allow calculations (without spaces, so we optimize characters)
             $ss = implode('', $ss);
@@ -1283,8 +1310,8 @@ class Alignment {
                         $value = null;
 
                         foreach ($beadCosts as $pair => $beadCost) {
-                            $sd = intval(substr($pair, 0, 1));
-                            $td = intval(substr($pair, -1, 1));
+                            $sd = intval($pair[0]);
+                            $td = intval($pair[2]);
 
                             if ($si - $sd >= 0 && $ti - $td >= 0) {
 
