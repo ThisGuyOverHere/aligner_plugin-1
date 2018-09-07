@@ -44,7 +44,9 @@ class SegmentComponent extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            selected: false
+        };
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -99,8 +101,12 @@ class SegmentComponent extends Component {
         if (dropHover) {
             segmentClasses.push('onDropHover')
         }
+        if(this.state.selected){
+            segmentClasses.push('selected')
+        }
         return connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
+                 onClick={this.toggleSelectedSegment}
                  onDoubleClick={this.createSpaceSegment}>
                 <div className="segmentBox-content">
                     <p>{segment.content_clean}</p>
@@ -111,7 +117,13 @@ class SegmentComponent extends Component {
 
             </div>
         );
-    }
+    };
+
+    toggleSelectedSegment = () =>{
+      this.setState({
+          selected: !this.state.selected
+      })
+    };
 
     componentDidMount() {
         const {connectDragPreview} = this.props;
