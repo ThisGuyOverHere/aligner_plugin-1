@@ -5,6 +5,10 @@ import PropTypes from "prop-types";
 
 class LoginComponent extends Component {
 
+    static propTypes = {
+        error: PropTypes.bool
+    };
+
     constructor(props) {
         super(props);
         this.state = {
