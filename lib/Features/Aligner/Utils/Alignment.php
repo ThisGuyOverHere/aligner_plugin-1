@@ -1534,40 +1534,33 @@ class Alignment {
 
         // Simple merge, for 1-N matches
         function mergeSegments($segments) {
-            if (count($segments) == 1) {
+            if (count($segments) == 0) {
+                return [];
+            } else if (count($segments) == 1) {
                 return reset($segments);  // Here I'm not sure if array starts with index 0
             } else {
-                return array_reduce($segments, function ($carry, $item) {
-                    $carry['content_raw'] = trim($carry['content_raw'] . ' ' . $item['content_raw']);
-                    $carry['content_clean'] = trim($carry['content_clean'] . ' ' . $item['content_clean']);
-                    $carry['raw_word_count'] += $item['raw_word_count'];
+                $result = [];
 
-                    return $carry;
-                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
+                foreach ($segments as $segment) {
+                    $result = array_merge($result, $segment);
+                }
+
+                return $result;
             }
         }
 
-        // IMPROVED: we discard common words and perform levenshtein only on diff parts of string
+        // IMPROVED: tokenize strings and run Levenshtein on compressed string (it will check different words instead of different chars)
         function eval_sents($sources, $targets) {
             $costIns = 1; $costRep = 1; $costDel = 1;
 
-            $sourceClean = mergeSegments($sources)['content_clean'];
-            $targetClean = mergeSegments($targets)['content_clean'];
+            $source = mergeSegments($sources);
+            $target = mergeSegments($targets);
 
-            // Lowercase to better comparison
-            $ss = strtolower($sourceClean);
-            $ts = strtolower($targetClean);
+            // Remove common words
+            $commonWords = array_intersect($source, $target);
 
-            // Get all words, this is needed to remove common words and calculate distance only on different words (type, plurals, ...)
-            $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
-
-            $ss = preg_split($delimiters, $ss, null, PREG_SPLIT_NO_EMPTY);
-            $ts = preg_split($delimiters, $ts, null, PREG_SPLIT_NO_EMPTY);
-
-            $commonWords = array_intersect($ss, $ts);
-
-            $ss = array_diff($ss, $commonWords);
-            $ts = array_diff($ts, $commonWords);
+            $ss = array_diff($source, $commonWords);
+            $ts = array_diff($target, $commonWords);
 
             // Put back to string to allow calculations (without spaces, so we optimize characters)
             $ss = implode('', $ss);
@@ -1583,10 +1576,10 @@ class Alignment {
             }
 
             // Score
-            $len = min(strlen($sourceClean), strlen($targetClean));
+            $len = min(count($source), count($target));
 
             if ($len > 0) {
-                $avg = (strlen($sourceClean) + strlen($targetClean)) / 2;
+                $avg = (count($source) + count($target)) / 2;
 
                 $score = 100 - 100 * min($distance / $avg, 1);  // Limit to 1 if distance > avg
             } else {
@@ -1663,20 +1656,13 @@ class Alignment {
 
         function findAbsoluteMatches($source, $target) {
             // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
-            $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
 
-            $source = array_map(function ($item) use ($delimiters) {
-                $text = strtolower($item['content_clean']);
-                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
-                $text = implode('', $elements);
-                return $text;
+            $source = array_map(function ($item) {
+                return implode('', $item);
             }, $source);
 
-            $target = array_map(function ($item) use ($delimiters) {
-                $text = strtolower($item['content_clean']);
-                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
-                $text = implode('', $elements);
-                return $text;
+            $target = array_map(function ($item) {
+                return implode('', $item);
             }, $target);
 
             // We need to perform it twice to have both indexes
@@ -1751,7 +1737,7 @@ class Alignment {
             }
         }
 
-        // Pre-translate segments from source_lang to target_lang
+        // Pre-translate segments from source_lang to target_lang (it uses 'content_clean' format)
         function translateSegments($segments, $source_lang, $target_lang) {
             $result = [];
 
@@ -1766,9 +1752,7 @@ class Alignment {
             $input_segments = array();
 
             foreach ($segments as $segment) {
-                $input_segments[] = array('segment'=>$segment['content_clean'],
-                    'source'=>$source_lang,
-                    'target'=>$target_lang);
+                $input_segments[] = array('segment'=>$segment['content_clean'], 'source'=>$source_lang, 'target'=>$target_lang);
             }
 
             $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
@@ -1787,11 +1771,32 @@ class Alignment {
             return $segments;
         }
 
+        function cleanSegments($segments) {
+            $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
+
+            $clean = [];
+
+            foreach ($segments as $segment) {
+                $text = $segment['content_clean'];
+                $text = strtolower($text);
+
+                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
+
+                $clean[] = $elements;
+            }
+
+            return $clean;
+        }
+
 
         // Variant on Church and Gale algorithm with Levenshtein distance
+
         $source_translated = translateSegments($source, $source_lang, $target_lang);
 
-        $indexes = align($source_translated, $target);
+        $source_clean = cleanSegments($source_translated);
+        $target_clean = cleanSegments($target);
+
+        $indexes = align($source_clean, $target_clean);
 
         $alignment = [];
         foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length], score] of the source/target slice
