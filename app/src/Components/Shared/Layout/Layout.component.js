@@ -9,6 +9,7 @@ import ExportModal from "../ExportModal/ExportModal.component";
 import ResetPasswordModal from "../ResetPasswordModal/ResetPasswordModal.component";
 import SystemActions from "../../../Actions/System.actions";
 import LogoutComponent from "../Logout/Logout.component";
+import ToolbarComponent from "../Toolbar/Toolbar.component";
 
 class Layout extends Component {
     constructor(props) {
@@ -50,6 +51,7 @@ class Layout extends Component {
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
                 <HeaderComponent user = {this.state.user} {...matchProps}/>
                 <Component {...matchProps} />
+                <ToolbarComponent {...matchProps}/>
                 <FooterComponent {...matchProps}/>
             </div>
         )}/>
@@ -83,7 +85,7 @@ class Layout extends Component {
         if(status && fromLogin && !error){
             setTimeout(()=>{
                 SystemActions.setLoginStatus(false);
-            },0)
+            },0);
             this.setState({
                 loginError: false
             })
