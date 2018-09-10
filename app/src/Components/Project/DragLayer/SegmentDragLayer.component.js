@@ -35,7 +35,6 @@ export default class SegmentDragLayer extends React.PureComponent {
         }: {};
         return {
             display: 'inline-block',
-            cursor: 'grabbing',
             width: '100%',
             ...transform
         }

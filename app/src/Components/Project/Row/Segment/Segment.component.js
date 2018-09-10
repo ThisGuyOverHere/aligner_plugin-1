@@ -78,7 +78,7 @@ class SegmentComponent extends Component {
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
             // because IE will ignore our custom "empty image" drag preview.
-            cursor: isDragging ? 'grabbing' : 'grab'
+            cursor: 'default'
         }
     };
 
