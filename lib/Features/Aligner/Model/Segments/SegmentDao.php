@@ -201,6 +201,33 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function mergeSegments( $first_id, $second_id ) {
+
+        $query = "UPDATE segments INNER JOIN (SELECT segments.id,
+                      group_concat(segments.content_raw SEPARATOR ' ') as merged_raw, 
+                      group_concat(segments.content_clean SEPARATOR ' ') as merged_clean,
+                      sum(segments.raw_word_count) as word_count,
+                      MD5(group_concat(segments.content_raw SEPARATOR ' ')) as merged_hash
+                      FROM segments
+                      WHERE segments.id = ? OR segments.id = ?
+                  ) as i ON segments.id = i.id
+                  SET content_raw = i.merged_raw, 
+                  content_clean = i.merged_clean,
+                  content_hash = i.merged_hash,
+                  raw_word_count = i.word_count
+                  WHERE 
+                  i.id = segments.ID;
+                  DELETE FROM segments WHERE id = ?;";
+        $query_params = array($first_id, $second_id, $second_id);
+
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $stm = $conn->prepare( $query );
+            $stm->execute( $query_params );
+        } catch ( PDOException $e ) {
+                throw new Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
+        }
+    }
 
 
 }

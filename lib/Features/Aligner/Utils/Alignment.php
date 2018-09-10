@@ -1548,6 +1548,18 @@ class Alignment {
             return array_keys($map);
         }
 
+        function custom_array_intersect($a, $b) {
+            $index = array_flip($a);
+            foreach ($b as $value) {
+                if (isset($index[$value])) unset($index[$value]);
+            }
+            foreach ($index as $key => $value) {
+                if (isset($a[$value])) unset($a[$value]);
+            }
+            return $a;
+        }
+
+
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
             $str1Array = str_split($str1, 1);
@@ -1612,7 +1624,7 @@ class Alignment {
             $tl = strlen(implode('', $target));
 
             // Remove common words
-            $commonWords = array_intersect($source, $target);
+            $commonWords = custom_array_intersect($source, $target);
 
             $ss = leo_array_diff($source, $commonWords);
             $ts = leo_array_diff($target, $commonWords);
