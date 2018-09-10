@@ -1,91 +1,54 @@
 import React, {Component} from 'react';
+import ProjectStore from "../../../Stores/Project.store";
+import ProjectConstants from "../../../Constants/Project.constants";
+import ProjectActions from "../../../Actions/Project.actions";
+import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.component";
+import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
+import ToolbarContextualNavigationComponent from "./ToolbarContextualNavigation/ToolbarContextualNavigation.component";
 
 class ToolbarComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            merge: {
-                active: false,
-                disabled: false,
-                classList: [],
-            }
+            selection: {
+                source: {},
+                target: {},
+                count: 0
+            },
         };
+    }
+
+
+    componentDidMount() {
+        ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
+    }
+
+    componentWillUnmount() {
+        ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
     }
 
     render() {
         return (
             <div id="toolbar">
-                <div className="record-count">
-                    <ul>
-                        <li>
-                            <i className="icon close"></i>
-                        </li>
-                        <li>
-                            <p>
-                                <span className="label"> 2 </span>
-                                record selected
-                            </p>
-                        </li>
-                    </ul>
+                <div>
+                    {!!this.state.selection.count && <ToolbarSelectionComponent selection={this.state.selection}/>}
                 </div>
-                <div className="segment-actions">
-                    <ul>
-                        <li>
-                            <i
-                                className={"icon object ungroup outline"}
-                            >
-                            </i>
-                        </li>
-                        <li>
-                            <i
-                                className={"icon random" +
-                                this.state.merge.classList.join(' ') +
-                                (this.state.merge.disabled ? ' disabled' : '')}
-                                onClick={this.onMergeClick}>
-                            </i>
-                        </li>
-                        <li>
-                            <i
-                                className={"icon pin"}
-                            >
-                            </i>
-                        </li>
-                        <li>
-                            <i
-                                className={"icon eye"}
-                            >
-                            </i>
-                        </li>
-                    </ul>
+                <div>
+                    {!!this.state.selection.count && <ToolbarActionsComponent/> }
                 </div>
-                <div className="cmd-shortcut">
-                    <p><span>Shift+click</span> to select , <span>Esc</span> to deselect all </p>
+                <div>
+                    <ToolbarContextualNavigationComponent/>
                 </div>
             </div>
         );
     }
 
-    onMergeClick = () => {
-        if (this.state.merge.active) {
-            this.setState({
-                merge: {
-                    active: !this.state.merge.active,
-                    disabled: this.state.merge.disabled,
-                    classList: [''],
-                }
-            });
-        } else {
-            this.setState({
-                merge: {
-                    active: !this.state.merge.active,
-                    disabled: this.state.merge.disabled,
-                    classList: [' active'],
-                }
-            });
-        }
 
-
-    }
+    storeSelection = (selection) => {
+        this.setState({
+            selection: selection
+        })
+    };
 }
 
 export default ToolbarComponent;

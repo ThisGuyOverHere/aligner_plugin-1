@@ -1,7 +1,7 @@
 @import "../../../../assets/theme/variables";
 
 #toolbar {
-  padding: 0px 32px;
+  padding: 0 32px;
   z-index: 9999;
   position: fixed;
   height: 54px;
@@ -10,80 +10,11 @@
   width: 100%;
   bottom: 0;
   left: 0;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 45px 1fr 1fr 1fr;
   align-items: center;
   box-shadow: 0 -5px 10px 0 rgba(198, 198, 198, 0.50);
-  .record-count,
-  .segment-actions,
-  .cmd-shortcut {
-	padding: 16px 0px;
-	width: auto;
-  }
-  .record-count,
-  .segment-actions {
-	ul {
-	  list-style: none;
-	  padding: 0px;
-	  margin: 0px;
-	  li {
-		display: inline-block;
-		i {
-		  margin-right: 16px;
-		  cursor: pointer;
-		  &:hover{
-			color: $primary;
-		  }
-		  &.disabled{
-			cursor: not-allowed;
-		  }
-		  &.active{
-			color: $primary;
-		  }
-		}
-	  }
-	}
-  }
-  .record-count,
-  .cmd-shortcut{
-	width: 216px;
-  }
-  .record-count {
-	ul {
-	  li {
-		p {
-		  font-size: 14px;
-		  text-transform: uppercase;
-		  .label {
-			padding: 2px 16px;
-			border-radius: 16px;
-			background-color: $primary;
-			color: $white;
-			margin-right: 8px;
-			letter-spacing: -1px;
-		  }
-		}
-	  }
-	}
-  }
-  .segment-actions {
-	margin: 0 auto;
-	ul {
-	  li {
-		&:nth-child(4) {
-		  margin-right: 0px;
-		}
-	  }
-	}
-  }
-  .cmd-shortcut {
-	text-align: right;
-	p {
-	  font-size: 12px;
-	  span {
-		color: $black;
-		font-weight: 600;
-	  }
-	}
+  >:first-child{
+    grid-column-end: span 2;
   }
 }

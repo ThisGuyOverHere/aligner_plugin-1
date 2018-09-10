@@ -303,6 +303,14 @@ let ProjectActions = {
             changes: changes
         });
     },
+
+    /**
+     *
+     * @param type
+     * @param order
+     * @param position
+     * @param rec
+     */
     animateChangeRowPosition: function (type, order, position, rec) {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.ANIMATE_ROW_POSITION,
@@ -314,7 +322,12 @@ let ProjectActions = {
             }
         });
     },
-    addSegmentToSelection: function (order,type) {
+    /**
+     *
+     * @param {Number} order Send -1 for remove all selection
+     * @param {String} type
+     */
+    addSegmentToSelection: function (order,type=null) {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.ADD_SEGMENT_TO_SELECTION,
             order: order,

@@ -1,0 +1,28 @@
+@import "../../../../../assets/theme/variables";
+
+#toolbar {
+  .segment-actions {
+    ul {
+      list-style: none;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      li {
+        display: inline-block;
+        padding: 4px 8px;
+        i {
+          cursor: pointer;
+          &:hover {
+            color: $primary;
+          }
+          &.disabled {
+            cursor: not-allowed;
+          }
+          &.active {
+            color: $primary;
+          }
+        }
+      }
+    }
+  }
+}

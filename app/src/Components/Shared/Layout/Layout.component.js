@@ -52,7 +52,6 @@ class Layout extends Component {
                 <HeaderComponent user = {this.state.user} {...matchProps}/>
                 <Component {...matchProps} />
                 <ToolbarComponent {...matchProps}/>
-                <FooterComponent {...matchProps}/>
             </div>
         )}/>
     };

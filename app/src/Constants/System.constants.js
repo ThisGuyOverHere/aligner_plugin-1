@@ -5,6 +5,7 @@ const SystemConstants = keyMirror({
     OPEN_RESET_PASSWORD_MODAL: null,
     USER_STATUS: null,
     LOGOUT: null,
+    IN_DRAG: null
 });
 
 export default SystemConstants;
