@@ -100,19 +100,19 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     let last = this.job[change.type].last().toJS();
                     let mock = Object.assign({}, env.segmentModel);
                     mock.order = last.order + 1000000000;
-                    mock.type = last.type;
+                    mock.type = change.type;
                     //change next of second-last element
                     last.next = mock.order;
                     this.storeMovements([
                         {
                             action: 'push',
-                            type: last.type,
+                            type: change.type,
                             data: mock
                         },
                         {
                             action: 'update',
                             rif_order: last.order,
-                            type: last.type,
+                            type: change.type,
                             data: last
                         }
                     ]);

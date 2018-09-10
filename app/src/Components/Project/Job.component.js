@@ -11,6 +11,7 @@ import { default as TouchBackend } from 'react-dnd-touch-backend';
 
 import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
 import env from "../../Constants/Env.constants";
+import RowWrapperComponent from "./Row/RowWrapper.component";
 
 class JobComponent extends Component {
     constructor(props) {
@@ -120,7 +121,7 @@ class JobComponent extends Component {
                     target: !!this.state.selection.target[row.target.order],
                     count: this.state.selection.count
                 };
-                values.push(<RowComponent key={index}
+                values.push(<RowWrapperComponent key={index}
                                           index={index}
                                           enableDrag={enableDrag}
                                           selection={selection}

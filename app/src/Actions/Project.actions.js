@@ -238,7 +238,28 @@ let ProjectActions = {
 
     },
 
+    /**
+     *
+     * @param {Object} log A log of position and type of action
+     * @param {Number} log.order The position where create a space
+     * @param {String} log.type The type of segment: source or target
+     */
+    removeSpaceSegment: function (log) {
+        let changes = [];
 
+        //rimuovo il buco
+        changes.push({
+            type: log.type,
+            action: 'complex_delete',
+            rif_order: log.order
+        });
+
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: changes
+        });
+
+    },
     setMergeStatus: function (status) {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.MERGE_STATUS,
