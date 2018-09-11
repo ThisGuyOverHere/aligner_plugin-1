@@ -201,12 +201,23 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function mergeSegments( Array $first_segment, Array $second_segment ) {
+    public static function mergeSegments( Array $segments ) {
 
-        $raw_merge = $first_segment['content_raw'].' '.$second_segment['content_raw'];
-        $clean_merge = $first_segment['content_clean'].' '.$second_segment['content_clean'];
+        $raw_merge = "";
+        $clean_merge = "";
+        $merge_count = 0;
+
+        $segment_ids = array();
+        foreach ($segments as $segment) {
+            $raw_merge .= " ".$segment['content_raw'];
+            $clean_merge .= " ".$segment['content_clean'];
+            $merge_count += $segment['raw_word_count'];
+            $segment_ids[] = $segment['id'];
+        }
+
         $hash_merge = md5($raw_merge);
-        $merge_count = (int)$first_segment['raw_word_count']+(int)$second_segment['raw_word_count'];
+
+        $qMarks = str_repeat('?,', count($segments) - 2) . '?';
 
         $query = "UPDATE segments
                     SET content_raw = ?,
@@ -214,9 +225,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     content_hash = ?,
                     raw_word_count = ?
                     WHERE id = ?;
-                    DELETE FROM segments WHERE id = ?;";
+                    DELETE FROM segments WHERE id IN ($qMarks);";
 
-        $query_params = array($raw_merge, $clean_merge, $hash_merge, $merge_count, $first_segment['id'], $second_segment['id']);
+        $query_params = array_merge(array($raw_merge, $clean_merge, $hash_merge, $merge_count),$segment_ids);
+
+
         try {
             $conn = NewDatabase::obtain()->getConnection();
             $stm = $conn->prepare( $query );

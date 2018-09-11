@@ -31,7 +31,7 @@ class ParserController extends AlignerController {
         foreach ($segments as $segment){
             $new_segment['content_clean'].= ' '.$segment['content_clean'];
         }
-        Segments_SegmentDao::mergeSegments($segments[0], $segments[1]);
+        Segments_SegmentDao::mergeSegments($segments);
         return $new_segment;
     }
 
