@@ -2,9 +2,7 @@ import React, {Component} from 'react';
 import ProjectStore from "../../Stores/Project.store";
 import ProjectConstants from "../../Constants/Project.constants"
 import ProjectActions from '../../Actions/Project.actions';
-import RowComponent from './Row/Row.component';
 import {DragDropContext} from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
 import { default as TouchBackend } from 'react-dnd-touch-backend';
 
 
@@ -13,6 +11,7 @@ import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
 import env from "../../Constants/Env.constants";
 import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
+import ToolbarComponent from "./Toolbar/Toolbar.component";
 
 class JobComponent extends Component {
     constructor(props) {
@@ -107,6 +106,7 @@ class JobComponent extends Component {
                     </div>
                     <AdvancedDragLayer/>
                     {this.state.splitModalStatus &&  <SplitComponent segment = {this.state.segmentToSplit}/>}
+                    <ToolbarComponent/>
                 </div>
             </div>
         );

@@ -1,6 +1,6 @@
 @import "../../../../assets/theme/variables";
 
-.splitContainer{
+.splitContainer {
   z-index: 999;
   position: fixed;
   margin: auto;
@@ -13,52 +13,55 @@
   text-align: center;
   box-shadow: 0 1px 20px #6f6e6e;
   width: 600px;
-  .header{
-	background-color: $headerBlack;
-	height: 48px;
-	display: flex;
-	justify-content: space-between;
-	padding: 11px 10px 7px 23px;
-	border-radius: 4px 4px 0 0;
-	.dx-header{
-	  span{
-		position: relative;
-		bottom: 2px;
-		cursor: pointer;
-		color: $headerText;
-		font-size: 1.2rem;
-		&:hover{
-		  color: $red;
-		}
-	  }
-	}
-	.sx-header{
-	  img{
-		height: 22px;
-	  }
-	  h1{
-		color: $white;
-		font-size: 24px;
-		text-align: left;
-		display: inline;
-		margin-left: 8px;
-	  }
-	}
+  .header {
+    background-color: $headerBlack;
+    height: 48px;
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 10px 7px 23px;
+    border-radius: 4px 4px 0 0;
+    .dx-header {
+      span {
+        position: relative;
+        bottom: 2px;
+        cursor: pointer;
+        color: $headerText;
+        font-size: 1.2rem;
+        &:hover {
+          color: $red;
+        }
+      }
+    }
+    .sx-header {
+      img {
+        height: 22px;
+      }
+      h1 {
+        color: $white;
+        font-size: 24px;
+        text-align: left;
+        display: inline;
+        margin-left: 8px;
+      }
+    }
   }
-  .content{
-	border-radius: 0px 0px 4px 4px;
-	background-color: $white;
-	overflow: hidden;
-	min-height: 50px;
-	margin: 0 auto;
-	text-align: left;
-	padding: 24px;
-	#toSplit{
-	  border: 2px dotted #d5d5d5;
-	  padding: 16px;
-	  font-size: 14px;
-	  width: 100%;
-	  display: inline-block;
-	}
+  .content {
+    border-radius: 0px 0px 4px 4px;
+    background-color: $white;
+    overflow: hidden;
+    min-height: 50px;
+    margin: 0 auto;
+    text-align: left;
+    padding: 24px;
+    #toSplit {
+      border: 2px dotted #d5d5d5;
+      padding: 16px;
+      font-size: 14px;
+      width: 100%;
+      display: inline-block;
+      > * {
+        cursor: pointer;
+      }
+    }
   }
 }

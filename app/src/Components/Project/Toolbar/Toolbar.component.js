@@ -1,11 +1,9 @@
 import React, {Component} from 'react';
 import ProjectStore from "../../../Stores/Project.store";
 import ProjectConstants from "../../../Constants/Project.constants";
-import ProjectActions from "../../../Actions/Project.actions";
 import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.component";
 import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
 import ToolbarContextualNavigationComponent from "./ToolbarContextualNavigation/ToolbarContextualNavigation.component";
-import PropTypes from "prop-types";
 
 class ToolbarComponent extends Component {
 

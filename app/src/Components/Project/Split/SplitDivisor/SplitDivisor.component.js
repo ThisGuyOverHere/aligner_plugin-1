@@ -25,28 +25,18 @@ class SplitDivisor extends Component {
         let classes = ['icon-divisor'];
         if (temporary) {
             classes.push('inHover');
+        }else{
+            classes.push('splitted')
         }
         return (
             <span className="icon-container">
                 <span
-                    style={{
-                        display: !this.props.isIcon ? 'block' : 'none'
-                    }}
                     className={classes.join(" ")}
                     onClick={() => {
                         this.props.onClick(this.props.position)
                     }}>
-                    <i className="icon text cursor"></i>
-                </span>
-                <span
-                    style={{
-                        display: this.props.isIcon ? 'block' : 'none'
-                    }}
-                    className={classes.join(" ") + ' splitted'}
-                    onClick={() => {
-                        this.props.onClick(this.props.position)
-                    }}>
-                    <i className="icon arrows alternate horizontal"></i>
+                    {temporary ? <i className="icon text cursor"></i> :
+                        <i className="icon arrows alternate horizontal"></i>}
                 </span>
             </span>
         );

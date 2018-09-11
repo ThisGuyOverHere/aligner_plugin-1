@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import {getSegmentByOrder} from "../../../../Helpers/SegmentUtils.helper";
 import ToolbarActionsMergeComponent from "./ToolbarActionsMerge/ToolbarActionsMerge.component";
 import ToolbarActionsReverseComponent from "./ToolbarActionsReverse/ToolbarActionsReverse.component";
+import ToolbarActionsSplitcomponent from "./ToolbarActionsSplit/ToolbarActionsSplitcomponent";
 
 class ToolbarActionsComponent extends Component {
 
@@ -33,6 +34,9 @@ class ToolbarActionsComponent extends Component {
                     <li>
                         <ToolbarActionsMergeComponent selection={this.props.selection}/>
 
+                    </li>
+                    <li>
+                        <ToolbarActionsSplitcomponent selection={this.props.selection}/>
                     </li>
                     <li>
                         <i

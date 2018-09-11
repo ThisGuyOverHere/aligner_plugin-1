@@ -125,6 +125,9 @@ class SplitComponent extends Component {
      * @param index
      */
     onCharHover = (index) => {
+        if(this.state.splits[index]){
+            index = -1
+        }
         this.setState({
             temporarySplitPosition: index,
         });
@@ -178,11 +181,10 @@ class SplitComponent extends Component {
 
     /**
      * we will calculate the characters that will be signed at the right
-     * @param wordIndex
-     * @param range
+     * @param {Number} wordIndex
+     * @param {Array} range
      */
     rightSigned = (wordIndex, range) => {
-        console.log('here');
         for(let index = wordIndex; index < this.state.chars.length-2; index++){
             range[1] = index;
             if(this.state.wordDictionary[index+1] > 1){
@@ -191,7 +193,11 @@ class SplitComponent extends Component {
             }
         }
     };
-    // same function for the left chars
+    /**
+     * we will calculate the characters that will be signed at the left
+     * @param {Number} wordIndex
+     * @param {Array} range
+     */
     leftSigned = (wordIndex, range) => {
         for(let index = wordIndex; index > 0; index--){
             range[0] = index;

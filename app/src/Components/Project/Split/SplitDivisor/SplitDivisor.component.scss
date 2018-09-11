@@ -1,48 +1,29 @@
 @import "../../../../../assets/theme/variables";
 
 .icon-container {
-  width: 16px;
-  height: 8px;
-  display: inline-block;
-  margin: 0 8px;
-
   .icon-divisor {
-	height: 8px;
-	display: inline-block;
-	border-radius: 50px;
-	img {
-	  max-width: 100%;
-	  position: relative;
-	}
-	&.inHover {
-	  i {
-		cursor: pointer;
-		top: -2px;
-		font-size: 16px;
-		display: flex;
-		animation: divisor 300ms forwards;
-	  }
-	}
+    i {
+      display: inline;
+      font-size: 16px;
+      padding: 0 4px;
+    }
   }
   .splitted {
-	i {
-	  cursor: pointer;
-	  font-size: 16px;
-	  color: $primary;
-	  display: flex;
-	  &:hover {
-		color: $red;
-	  }
-	}
+    i {
+      color: $primary;
+      &:hover {
+        color: $red;
+      }
+    }
   }
 }
 
 @keyframes divisor {
   0% {
-	font-size: 0;
+    font-size: 0;
   }
   100% {
-	width: 100%;
+    width: 100%;
   }
 }
 
