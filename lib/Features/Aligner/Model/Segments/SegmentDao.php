@@ -48,14 +48,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return Projects_ProjectStruct
+     * @return Segments_SegmentStruct
      */
     public static function findById( $id, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM segments WHERE id = :id " );
-        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ 'id' => $id ] )[ 0 ];
 
     }
 
@@ -72,7 +72,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     public static function getDataForAlignment( $id_job, $type, $ttl = 0 ) {
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT id, content_clean FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
+        $stmt = $conn->prepare( "SELECT id, content_raw, content_clean, raw_word_count FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
         $stmt->execute( [$id_job, $type] );
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -201,6 +201,43 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function mergeSegments( Array $segments ) {
+
+        $raw_merge = "";
+        $clean_merge = "";
+        $merge_count = 0;
+
+        $segment_ids = array();
+        foreach ($segments as $segment) {
+            $raw_merge .= " ".$segment['content_raw'];
+            $clean_merge .= " ".$segment['content_clean'];
+            $merge_count += $segment['raw_word_count'];
+            $segment_ids[] = $segment['id'];
+        }
+
+        $hash_merge = md5($raw_merge);
+
+        $qMarks = str_repeat('?,', count($segments) - 2) . '?';
+
+        $query = "UPDATE segments
+                    SET content_raw = ?,
+                    content_clean = ?,
+                    content_hash = ?,
+                    raw_word_count = ?
+                    WHERE id = ?;
+                    DELETE FROM segments WHERE id IN ($qMarks);";
+
+        $query_params = array_merge(array($raw_merge, $clean_merge, $hash_merge, $merge_count),$segment_ids);
+
+
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $stm = $conn->prepare( $query );
+            $stm->execute( $query_params );
+        } catch ( PDOException $e ) {
+                throw new Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
+        }
+    }
 
 
 }

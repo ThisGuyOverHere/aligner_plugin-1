@@ -208,6 +208,12 @@ AppDispatcher.register(function (action) {
             ProjectStore.addSegmentToSelection(action.order, action.type);
             ProjectStore.emitChange(ProjectConstants.ADD_SEGMENT_TO_SELECTION, ProjectStore.selection);
             break;
+        case ProjectConstants.SET_SPLIT_MODAL_STATUS:
+            ProjectStore.emitChange(ProjectConstants.SET_SPLIT_MODAL_STATUS, action.status);
+            break;
+        case ProjectConstants.SEGMENT_TO_SPLIT:
+            ProjectStore.emitChange(ProjectConstants.SEGMENT_TO_SPLIT, action.segment);
+            break;
         default:
             ProjectStore.emitChange(action.actionType, action.data);
     }

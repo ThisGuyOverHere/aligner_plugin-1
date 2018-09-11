@@ -1207,7 +1207,18 @@ class Alignment {
             foreach($b as $val) unset($map[$val]);
             return array_keys($map);
         }
-        
+
+        function custom_array_intersect($a, $b) {
+            $index = array_flip($a);
+            foreach ($b as $value) {
+                if (isset($index[$value])) unset($index[$value]);
+            }
+            foreach ($index as $key => $value) {
+                if (isset($a[$value])) unset($a[$value]);
+            }
+            return $a;
+        }
+
         // Simple merge, for 1-N matches
         function mergeSegments($segments) {
             if (count($segments) == 1) {
@@ -1263,7 +1274,8 @@ class Alignment {
             $ss = preg_split($delimiters, $ss, null, PREG_SPLIT_NO_EMPTY);
             $ts = preg_split($delimiters, $ts, null, PREG_SPLIT_NO_EMPTY);
 
-            $commonWords = array_intersect($ss, $ts);
+            $commonWords = custom_array_intersect($ss, $ts);
+            //$commonWords = array_intersect($ss,$ts);
 
             $ss = leo_array_diff($ss, $commonWords);
             $ts = leo_array_diff($ts, $commonWords);
@@ -1272,10 +1284,13 @@ class Alignment {
             $ss = implode('', $ss);
             $ts = implode('', $ts);
 
+            $slen = strlen($ss);
+            $tlen = strlen($ts);
+
             // Distance
-            if (strlen($ss) == 0 || strlen($ts) == 0) {  // Check if we can return immediately the upper bound
-                $distance = max(strlen($ss), strlen($ts));
-            } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
+            if ($slen == 0 || $tlen == 0) {  // Check if we can return immediately the upper bound
+                $distance = max($slen, $tlen);
+            } else if ($slen < 255 && $tlen < 255) {  // Check if we can use the efficient standard implementation
                 $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
             } else {
                 $distance = long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
@@ -1313,13 +1328,16 @@ class Alignment {
                             $sd = intval($pair[0]);
                             $td = intval($pair[2]);
 
-                            if ($si - $sd >= 0 && $ti - $td >= 0) {
+                            $sourceOffset = $si-$sd;
+                            $targetOffset = $ti-$td;
 
-                                $sources = array_slice($source, $si-$sd, $sd);
-                                $targets = array_slice($target, $ti-$td, $td);
+                            if ($sourceOffset >= 0 && $targetOffset >= 0) {
+
+                                $sources = array_slice($source, $sourceOffset, $sd);
+                                $targets = array_slice($target, $targetOffset, $td);
 
                                 list($distance, $score) = eval_sents($sources, $targets);
-                                $cost = $m[$si-$sd][$ti-$td][0] + $distance + $beadCost;
+                                $cost = $m[$sourceOffset][$targetOffset][0] + $distance + $beadCost;
 
                                 $tuple = [$cost, $sd, $td, $score];
 
@@ -1379,8 +1397,8 @@ class Alignment {
             }, $target);
 
             // We need to perform it twice to have both indexes
-            $commonST = array_intersect($source, $target);
-            $commonTS = array_intersect($target, $source);
+            $commonST = custom_array_intersect($source, $target);
+            $commonTS = custom_array_intersect($target, $source);
 
             $sourceIndexes = array_keys($commonST);
             $targetIndexes = array_keys($commonTS);
@@ -1523,6 +1541,25 @@ class Alignment {
      */
     public function _alignSegmentsV4($source, $target, $source_lang, $target_lang) {
 
+        function leo_array_diff($a, $b) {
+            $map = array();
+            foreach($a as $val) $map[$val] = 1;
+            foreach($b as $val) unset($map[$val]);
+            return array_keys($map);
+        }
+
+        function custom_array_intersect($a, $b) {
+            $index = array_flip($a);
+            foreach ($b as $value) {
+                if (isset($index[$value])) unset($index[$value]);
+            }
+            foreach ($index as $key => $value) {
+                if (isset($a[$value])) unset($a[$value]);
+            }
+            return $a;
+        }
+
+
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
             $str1Array = str_split($str1, 1);
@@ -1561,40 +1598,36 @@ class Alignment {
 
         // Simple merge, for 1-N matches
         function mergeSegments($segments) {
-            if (count($segments) == 1) {
+            if (count($segments) == 0) {
+                return [];
+            } else if (count($segments) == 1) {
                 return reset($segments);  // Here I'm not sure if array starts with index 0
             } else {
-                return array_reduce($segments, function ($carry, $item) {
-                    $carry['content_raw'] = trim($carry['content_raw'] . ' ' . $item['content_raw']);
-                    $carry['content_clean'] = trim($carry['content_clean'] . ' ' . $item['content_clean']);
-                    $carry['raw_word_count'] += $item['raw_word_count'];
+                $result = [];
 
-                    return $carry;
-                }, ['content_raw' => '', 'content_clean' => '', 'raw_word_count' => 0]);
+                foreach ($segments as $segment) {
+                    $result = array_merge($result, $segment);
+                }
+
+                return $result;
             }
         }
 
-        // IMPROVED: we discard common words and perform levenshtein only on diff parts of string
+        // IMPROVED: tokenize strings and run Levenshtein on compressed string (it will check different words instead of different chars)
         function eval_sents($sources, $targets) {
             $costIns = 1; $costRep = 1; $costDel = 1;
 
-            $sourceClean = mergeSegments($sources)['content_clean'];
-            $targetClean = mergeSegments($targets)['content_clean'];
+            $source = mergeSegments($sources);
+            $target = mergeSegments($targets);
 
-            // Lowercase to better comparison
-            $ss = strtolower($sourceClean);
-            $ts = strtolower($targetClean);
+            $sl = strlen(implode('', $source));
+            $tl = strlen(implode('', $target));
 
-            // Get all words, this is needed to remove common words and calculate distance only on different words (type, plurals, ...)
-            $delimiters = '/\s|\t|\n|\r|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/';
+            // Remove common words
+            $commonWords = custom_array_intersect($source, $target);
 
-            $ss = preg_split($delimiters, $ss, null, PREG_SPLIT_NO_EMPTY);
-            $ts = preg_split($delimiters, $ts, null, PREG_SPLIT_NO_EMPTY);
-
-            $commonWords = array_intersect($ss, $ts);
-
-            $ss = array_diff($ss, $commonWords);
-            $ts = array_diff($ts, $commonWords);
+            $ss = leo_array_diff($source, $commonWords);
+            $ts = leo_array_diff($target, $commonWords);
 
             // Put back to string to allow calculations (without spaces, so we optimize characters)
             $ss = implode('', $ss);
@@ -1610,10 +1643,10 @@ class Alignment {
             }
 
             // Score
-            $len = min(strlen($sourceClean), strlen($targetClean));
+            $len = min($sl, $tl);
 
             if ($len > 0) {
-                $avg = (strlen($sourceClean) + strlen($targetClean)) / 2;
+                $avg = ($sl + $tl) / 2;
 
                 $score = 100 - 100 * min($distance / $avg, 1);  // Limit to 1 if distance > avg
             } else {
@@ -1690,20 +1723,13 @@ class Alignment {
 
         function findAbsoluteMatches($source, $target) {
             // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
-            $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
 
-            $source = array_map(function ($item) use ($delimiters) {
-                $text = strtolower($item['content_clean']);
-                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
-                $text = implode('', $elements);
-                return $text;
+            $source = array_map(function ($item) {
+                return implode('', $item);
             }, $source);
 
-            $target = array_map(function ($item) use ($delimiters) {
-                $text = strtolower($item['content_clean']);
-                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
-                $text = implode('', $elements);
-                return $text;
+            $target = array_map(function ($item) {
+                return implode('', $item);
             }, $target);
 
             // We need to perform it twice to have both indexes
@@ -1778,7 +1804,7 @@ class Alignment {
             }
         }
 
-        // Pre-translate segments from source_lang to target_lang
+        // Pre-translate segments from source_lang to target_lang (it uses 'content_clean' format)
         function translateSegments($segments, $source_lang, $target_lang) {
             $result = [];
 
@@ -1793,9 +1819,7 @@ class Alignment {
             $input_segments = array();
 
             foreach ($segments as $segment) {
-                $input_segments[] = array('segment'=>$segment['content_clean'],
-                    'source'=>$source_lang,
-                    'target'=>$target_lang);
+                $input_segments[] = array('segment'=>$segment['content_clean'], 'source'=>$source_lang, 'target'=>$target_lang);
             }
 
             $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
@@ -1814,28 +1838,55 @@ class Alignment {
             return $segments;
         }
 
+        function cleanSegments($segments) {
+            $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
+
+            $clean = [];
+
+            foreach ($segments as $segment) {
+                $text = $segment['content_clean'];
+                $text = strtolower($text);
+
+                $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
+
+                $clean[] = $elements;
+            }
+
+            return $clean;
+        }
+
+        function mapAlignment($source, $target, $indexes) {
+            $alignment = [];
+
+            foreach ($indexes as $index) {
+                // Every index contains [[offset, length], [offset, length], score] of the source/target slice
+                list(list($si, $sd), list($ti, $td), $s) = $index;
+
+                $sa = array_slice($source, $si, $sd);
+                $ta = array_slice($target, $ti, $td);
+
+                $row = [
+                    'source' => (count($sa) == 1) ? $sa[0] : $sa,
+                    'target' => (count($ta) == 1) ? $ta[0] : $ta,
+                    'score' => $s
+                ];
+
+                $alignment[] = $row;
+            }
+
+            return $alignment;
+        }
+
 
         // Variant on Church and Gale algorithm with Levenshtein distance
+
         $source_translated = translateSegments($source, $source_lang, $target_lang);
 
-        $indexes = align($source_translated, $target);
+        $source_clean = cleanSegments($source_translated);
+        $target_clean = cleanSegments($target);
 
-        $alignment = [];
-        foreach ($indexes as $index) {  // Every index contains [[offset, length], [offset, length], score] of the source/target slice
-            $si = $index[0][0];
-            $ti = $index[1][0];
-
-            $sd = $index[0][1];
-            $td = $index[1][1];
-
-            $row = [
-                'source' => mergeSegments(array_slice($source, $si, $sd)),
-                'target' => mergeSegments(array_slice($target, $ti, $td)),
-                'score' => $index[2]
-            ];
-
-            $alignment[] = $row;
-        }
+        $indexes = align($source_clean, $target_clean);
+        $alignment = mapAlignment($source, $target, $indexes);
 
         return $alignment;
     }

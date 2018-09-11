@@ -4,6 +4,7 @@ import {DragSource, ConnectDragPreview} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../Actions/Project.actions";
+import SystemActions from "../../../../Actions/System.actions";
 
 const ItemSource = {
     beginDrag(props) {
@@ -89,6 +90,11 @@ class SegmentComponent extends Component {
         });
     };
 
+    openSplitModal = () => {
+        //console.log(this.props.segment);
+        ProjectActions.splitModalStatus(true);
+        ProjectActions.setSegmentToSplit(this.props.segment);
+    };
 
     render = () => {
         const {connectDragSource, isDragging, segment, dropHover} = this.props;
@@ -108,8 +114,9 @@ class SegmentComponent extends Component {
         }
         return connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
+                 onDoubleClick={this.openSplitModal}
                  onClick={this.toggleSelectedSegment}
-                 onDoubleClick={this.createSpaceSegment}>
+                 >
                 <div className="segmentBox-content">
                     <p>{segment.content_clean}</p>
                     {this.props.mergeStatus && <span className="merge">

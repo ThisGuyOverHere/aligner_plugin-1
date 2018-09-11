@@ -100,7 +100,6 @@ let ProjectActions = {
             // creo un buco in corrispondenza dell'elemento spostato
             mockFrom.order = avgOrder(toInverseOrder, toNextInverseOrder);
             mockFrom.next = toNextInverseOrder;
-            mockFrom.type = inverse[log.type];
             changes.push({
                 type: inverse[log.type],
                 action: 'create',
@@ -418,6 +417,24 @@ let ProjectActions = {
             actionType: ProjectConstants.ADD_SEGMENT_TO_SELECTION,
             order: order,
             type: type
+        });
+    },
+
+    /**
+     *
+     * @param status
+     */
+    splitModalStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.SET_SPLIT_MODAL_STATUS,
+            status: status,
+        });
+    },
+
+    setSegmentToSplit: function (segment) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.SEGMENT_TO_SPLIT,
+            segment: segment,
         });
     }
 };
