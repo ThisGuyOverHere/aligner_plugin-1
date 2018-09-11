@@ -38,7 +38,7 @@ const RowTarget = {
             ProjectActions.changeSegmentPosition(log);
 
         } else {
-            ProjectActions.mergeSegments(from.segment, props.row[from.type])
+            ProjectActions.mergeSegments([from.segment], props.row[from.type])
         }
 
         const rec = findDOMNode(component).getBoundingClientRect();

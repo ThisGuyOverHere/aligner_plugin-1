@@ -100,6 +100,7 @@ let ProjectActions = {
             // creo un buco in corrispondenza dell'elemento spostato
             mockFrom.order = avgOrder(toInverseOrder, toNextInverseOrder);
             mockFrom.next = toNextInverseOrder;
+            mockFrom.type = inverse[log.type];
             changes.push({
                 type: inverse[log.type],
                 action: 'create',
@@ -150,6 +151,8 @@ let ProjectActions = {
         if (tmpJob[inverse[log.type]].getIn([fromIndex, 'content_clean'])) {
             mockToInverse.order = fromOrder;
             mockToInverse.next = tmpJob[log.type].getIn([fromIndex, 'next']);
+            mockToInverse.type = log.type
+
 
             changes.push({
                 type: log.type,
@@ -196,6 +199,7 @@ let ProjectActions = {
         //aggiungo il buco
         mock.order = avgOrder(prevOrder, log.order);
         mock.next = log.order;
+        mock.type = log.type;
         changes.push({
             type: log.type,
             action: 'create',
@@ -218,6 +222,7 @@ let ProjectActions = {
             lastSegment = tmpJob[inverse[log.type]].get(-1).toJS();
 
         lastMock.order = +lastSegment.order + env.orderElevation;
+        lastMock.type = inverse[log.type];
         lastSegment.next = lastMock.order;
         changes.push({
             type: inverse[log.type],
@@ -274,19 +279,60 @@ let ProjectActions = {
         });
     },
 
-    mergeSegments: function (from, to) {
+    /**
+     * @param {Array} fromArray
+     * @param {Object} fromArray[]
+     * @param {string} fromArray[].content_clean
+     * @param {string} fromArray[].content_raw
+     * @param {number} fromArray[].order
+     * @param {Object} to
+     * @param {string} to.content_clean
+     * @param {string} to.content_raw
+     * @param {number} to.order
+     */
+    mergeSegments: function (fromArray, to) {
         let changes = [];
         const tmpJob = ProjectStore.job;
         const inverse = {
             source: 'target',
             target: 'source'
         };
-        const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
-        const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
 
-        to.content_clean += " ";
-        to.content_clean +=  from.content_clean;
-        to.content_raw += from.content_raw;
+        fromArray.map(from=>{
+            const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
+            const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
+
+            to.content_clean += " ";
+            to.content_clean +=  from.content_clean;
+            to.content_raw += from.content_raw;
+
+            if(!fromInverse.content_clean){
+                changes.push({
+                    type: from.type,
+                    action: 'complex_delete',
+                    rif_order: from.order
+                });
+                changes.push({
+                    type: fromInverse.type,
+                    action: 'complex_delete',
+                    rif_order: fromInverse.order
+                });
+
+            }else{
+                from.content_clean = null;
+                from.content_raw = null;
+                changes.push({
+                    type: from.type,
+                    action: 'update',
+                    rif_order: from.order,
+                    data: from
+                });
+            }
+
+
+
+        });
+
         changes.push({
             type: to.type,
             action: 'update',
@@ -294,28 +340,7 @@ let ProjectActions = {
             data: to
         });
 
-        if(!fromInverse.content_clean){
-            changes.push({
-                type: from.type,
-                action: 'complex_delete',
-                rif_order: from.order
-            });
-            changes.push({
-                type: fromInverse.type,
-                action: 'complex_delete',
-                rif_order: fromInverse.order
-            });
 
-        }else{
-            from.content_clean = null;
-            from.content_raw = null;
-            changes.push({
-                type: from.type,
-                action: 'update',
-                rif_order: from.order,
-                data: from
-            });
-        }
 
 
 
