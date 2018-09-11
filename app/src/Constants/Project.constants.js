@@ -8,6 +8,7 @@ const ProjectConstants = keyMirror({
     MERGE_STATUS: null,
     SCROLL_TO_SEGMENT: null,
     ANIMATE_ROW_POSITION: null,
+    ADD_SEGMENT_TO_SELECTION: null,
     SET_SPLIT_MODAL_STATUS: null,
     SEGMENT_TO_SPLIT: null,
 });

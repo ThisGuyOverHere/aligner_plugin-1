@@ -3,12 +3,15 @@ import ProjectStore from "../../Stores/Project.store";
 import ProjectConstants from "../../Constants/Project.constants"
 import ProjectActions from '../../Actions/Project.actions';
 import RowComponent from './Row/Row.component';
-import SegmentComponent from './Row/Segment/Segment.component';
 import {DragDropContext} from 'react-dnd';
-import MouseBackEnd from 'react-dnd-mouse-backend'
+import HTML5Backend from 'react-dnd-html5-backend';
+import { default as TouchBackend } from 'react-dnd-touch-backend';
+
+
 
 import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
 import env from "../../Constants/Env.constants";
+import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
 
 class JobComponent extends Component {
@@ -31,6 +34,19 @@ class JobComponent extends Component {
             },
             mergeStatus: false,
             splitModalStatus: false,
+            selection: {
+                source: {
+                    count: 0,
+                    list: [],
+                    map: {}
+                },
+                target: {
+                    count: 0,
+                    list: [],
+                    map: {}
+                },
+                count: 0
+            }
         };
 
         ProjectActions.setJobID(this.props.match.params.jobID)
@@ -66,6 +82,7 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
+        ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
     }
 
@@ -73,6 +90,7 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.SET_SPLIT_MODAL_STATUS, this.setStatusSplitModal);
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
+        ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.removeListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
     }
 
@@ -123,10 +141,18 @@ class JobComponent extends Component {
 
     renderItems(array) {
         let values = [];
+        const enableDrag = this.state.selection.count === 0;
         if (array.length > 0) {
             array.map((row, index) => {
-                values.push(<RowComponent key={index}
+                const selection = {
+                    source: !!this.state.selection.source.map[row.source.order],
+                    target: !!this.state.selection.target.map[row.target.order],
+                    count: this.state.selection.count
+                };
+                values.push(<RowWrapperComponent key={index}
                                           index={index}
+                                          enableDrag={enableDrag}
+                                          selection={selection}
                                           mergeStatus={this.state.mergeStatus}
                                           row={row}/>);
                 return row;
@@ -139,7 +165,16 @@ class JobComponent extends Component {
         this.setState({
             mergeStatus: status
         })
+    };
+
+    storeSelection = (selection) =>{
+        this.setState({
+            selection: selection
+        })
     }
 }
 
-export default DragDropContext(MouseBackEnd)(JobComponent);
+export default DragDropContext(TouchBackend({
+    enableMouseEvents: true,
+    touchSlop: 5
+}))(JobComponent);

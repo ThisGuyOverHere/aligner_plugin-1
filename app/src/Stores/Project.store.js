@@ -17,6 +17,20 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         source: List(),
         target: List()
     },
+    selection: {
+        source: {
+            count: 0,
+            list: [],
+            map: {}
+
+        },
+        target: {
+            count: 0,
+            list: [],
+            map: {}
+        },
+        count: 0
+    },
     mergeStatus: false,
 
     updateAll: function (volumeAnalysis, project) {
@@ -91,19 +105,19 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     let last = this.job[change.type].last().toJS();
                     let mock = Object.assign({}, env.segmentModel);
                     mock.order = last.order + 1000000000;
-                    mock.type = last.type;
+                    mock.type = change.type;
                     //change next of second-last element
                     last.next = mock.order;
                     this.storeMovements([
                         {
                             action: 'push',
-                            type: last.type,
+                            type: change.type,
                             data: mock
                         },
                         {
                             action: 'update',
                             rif_order: last.order,
-                            type: last.type,
+                            type: change.type,
                             data: last
                         }
                     ]);
@@ -133,6 +147,36 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         }*/
     },
 
+    addSegmentToSelection: function (order, type) {
+        if (order > 0) {
+            if (this.selection[type].map[order]) {
+                this.selection[type].map[order] = false;
+                this.selection[type].list.splice(this.selection[type].list.indexOf(order), 1);
+            } else {
+                this.selection[type].map[order] = true;
+                this.selection[type].list.push(order);
+            }
+            this.selection.count = this.selection.source.list.length + this.selection.target.list.length;
+            this.selection.source.count = this.selection.source.list.length;
+            this.selection.target.count = this.selection.target.list.length;
+        } else {
+            this.selection = {
+                source: {
+                    count: 0,
+                    list: [],
+                    map: {}
+
+                },
+                target: {
+                    count: 0,
+                    list: [],
+                    map: {}
+                },
+                count: 0
+            };
+        }
+    }
+
 });
 
 
@@ -159,6 +203,10 @@ AppDispatcher.register(function (action) {
         case ProjectConstants.MERGE_STATUS:
             ProjectStore.mergeStatus = action.status;
             ProjectStore.emitChange(ProjectConstants.MERGE_STATUS, action.status);
+            break;
+        case ProjectConstants.ADD_SEGMENT_TO_SELECTION:
+            ProjectStore.addSegmentToSelection(action.order, action.type);
+            ProjectStore.emitChange(ProjectConstants.ADD_SEGMENT_TO_SELECTION, ProjectStore.selection);
             break;
         case ProjectConstants.SET_SPLIT_MODAL_STATUS:
             ProjectStore.emitChange(ProjectConstants.SET_SPLIT_MODAL_STATUS, action.status);

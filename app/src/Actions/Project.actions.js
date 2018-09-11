@@ -150,6 +150,8 @@ let ProjectActions = {
         if (tmpJob[inverse[log.type]].getIn([fromIndex, 'content_clean'])) {
             mockToInverse.order = fromOrder;
             mockToInverse.next = tmpJob[log.type].getIn([fromIndex, 'next']);
+            mockToInverse.type = log.type
+
 
             changes.push({
                 type: log.type,
@@ -196,6 +198,7 @@ let ProjectActions = {
         //aggiungo il buco
         mock.order = avgOrder(prevOrder, log.order);
         mock.next = log.order;
+        mock.type = log.type;
         changes.push({
             type: log.type,
             action: 'create',
@@ -218,6 +221,7 @@ let ProjectActions = {
             lastSegment = tmpJob[inverse[log.type]].get(-1).toJS();
 
         lastMock.order = +lastSegment.order + env.orderElevation;
+        lastMock.type = inverse[log.type];
         lastSegment.next = lastMock.order;
         changes.push({
             type: inverse[log.type],
@@ -238,7 +242,28 @@ let ProjectActions = {
 
     },
 
+    /**
+     *
+     * @param {Object} log A log of position and type of action
+     * @param {Number} log.order The position where create a space
+     * @param {String} log.type The type of segment: source or target
+     */
+    removeSpaceSegment: function (log) {
+        let changes = [];
 
+        //rimuovo il buco
+        changes.push({
+            type: log.type,
+            action: 'complex_delete',
+            rif_order: log.order
+        });
+
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: changes
+        });
+
+    },
     setMergeStatus: function (status) {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.MERGE_STATUS,
@@ -253,19 +278,59 @@ let ProjectActions = {
         });
     },
 
-    mergeSegments: function (from, to) {
+    /**
+     * @param {Array} fromArray
+     * @param {Object} fromArray[]
+     * @param {string} fromArray[].content_clean
+     * @param {string} fromArray[].content_raw
+     * @param {number} fromArray[].order
+     * @param {Object} to
+     * @param {string} to.content_clean
+     * @param {string} to.content_raw
+     * @param {number} to.order
+     */
+    mergeSegments: function (fromArray, to) {
         let changes = [];
         const tmpJob = ProjectStore.job;
         const inverse = {
             source: 'target',
             target: 'source'
         };
-        const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
-        const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
 
-        to.content_clean += " ";
-        to.content_clean +=  from.content_clean;
-        to.content_raw += from.content_raw;
+        fromArray.map(from => {
+            const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
+            const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
+
+            to.content_clean += " ";
+            to.content_clean += from.content_clean;
+            to.content_raw += from.content_raw;
+
+            if (!fromInverse.content_clean) {
+                changes.push({
+                    type: from.type,
+                    action: 'complex_delete',
+                    rif_order: from.order
+                });
+                changes.push({
+                    type: fromInverse.type,
+                    action: 'complex_delete',
+                    rif_order: fromInverse.order
+                });
+
+            } else {
+                from.content_clean = null;
+                from.content_raw = null;
+                changes.push({
+                    type: from.type,
+                    action: 'update',
+                    rif_order: from.order,
+                    data: from
+                });
+            }
+
+
+        });
+
         changes.push({
             type: to.type,
             action: 'update',
@@ -273,36 +338,64 @@ let ProjectActions = {
             data: to
         });
 
-        if(!fromInverse.content_clean){
-            changes.push({
-                type: from.type,
-                action: 'complex_delete',
-                rif_order: from.order
-            });
-            changes.push({
-                type: fromInverse.type,
-                action: 'complex_delete',
-                rif_order: fromInverse.order
-            });
-
-        }else{
-            from.content_clean = null;
-            from.content_raw = null;
-            changes.push({
-                type: from.type,
-                action: 'update',
-                rif_order: from.order,
-                data: from
-            });
-        }
-
-
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
             changes: changes
         });
     },
+
+    /**
+     *
+     * @param {Object} segment1
+     * @param {String} segment1.type
+     * @param {String} segment1.content_clean
+     * @param {String} segment1.content_raw
+     * @param {Number} segment1.order
+     * @param {Number} segment1.next
+     * @param {Object} segment2
+     * @param {String} segment2.content_clean
+     * @param {String} segment2.content_raw
+     * @param {Number} segment2.order
+     * @param {Number} segment2.next
+     * @param {String} segment2.type
+     */
+    reverseTwoSegments: function (segment1, segment2) {
+
+        let tmpSegment1 = Object.assign({}, segment1);
+        let tmpSegment2 = Object.assign({}, segment2);
+
+        tmpSegment1.content_clean = segment2.content_clean;
+        tmpSegment1.content_raw = segment2.content_raw;
+
+        tmpSegment2.content_clean = segment1.content_clean;
+        tmpSegment2.content_raw = segment1.content_raw;
+
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: [
+                {
+                    type: tmpSegment1.type,
+                    action: 'update',
+                    rif_order: tmpSegment1.order,
+                    data: tmpSegment1
+                },
+                {
+                    type: tmpSegment2.type,
+                    action: 'update',
+                    rif_order: tmpSegment2.order,
+                    data: tmpSegment2
+                }]
+        });
+    },
+
+    /**
+     *
+     * @param type
+     * @param order
+     * @param position
+     * @param rec
+     */
     animateChangeRowPosition: function (type, order, position, rec) {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.ANIMATE_ROW_POSITION,
@@ -312,6 +405,18 @@ let ProjectActions = {
                 position: position,
                 rec: rec
             }
+        });
+    },
+    /**
+     *
+     * @param {Number} order Send -1 for remove all selection
+     * @param {String} type
+     */
+    addSegmentToSelection: function (order, type = null) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.ADD_SEGMENT_TO_SELECTION,
+            order: order,
+            type: type
         });
     },
 

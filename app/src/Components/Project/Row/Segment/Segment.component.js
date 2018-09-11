@@ -12,7 +12,10 @@ const ItemSource = {
         return props;
     },
     canDrag(props, monitor) {
-        return props.segment.content_clean;
+        return props.segment.content_clean && props.enableDrag;
+    },
+    endDrag(props, monitor, component) {
+
     }
 };
 
@@ -30,6 +33,8 @@ class SegmentComponent extends Component {
         type: PropTypes.string.isRequired,
         dropHover: PropTypes.bool.isRequired,
         mergeStatus: PropTypes.bool,
+        selected: PropTypes.bool,
+        enableDrag: PropTypes.bool,
         segment: PropTypes.shape({
             order: PropTypes.number.isRequired,
             content_clean: PropTypes.oneOfType([() => {
@@ -44,7 +49,7 @@ class SegmentComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {}
+        this.state = {};
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -74,7 +79,7 @@ class SegmentComponent extends Component {
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
             // because IE will ignore our custom "empty image" drag preview.
-            cursor: isDragging ? 'grabbing' : 'grab'
+            cursor: 'default'
         }
     };
 
@@ -104,9 +109,14 @@ class SegmentComponent extends Component {
         if (dropHover) {
             segmentClasses.push('onDropHover')
         }
+        if (this.props.selected) {
+            segmentClasses.push('selected')
+        }
         return connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
-                 onDoubleClick={this.openSplitModal}>
+                 onDoubleClick={this.openSplitModal}
+                 onClick={this.toggleSelectedSegment}
+                 >
                 <div className="segmentBox-content">
                     <p>{segment.content_clean}</p>
                     {this.props.mergeStatus && <span className="merge">
@@ -116,7 +126,13 @@ class SegmentComponent extends Component {
 
             </div>
         );
-    }
+    };
+
+    toggleSelectedSegment = () => {
+        if(this.props.segment.content_clean){
+            ProjectActions.addSegmentToSelection(this.props.segment.order, this.props.type)
+        }
+    };
 
     componentDidMount() {
         const {connectDragPreview} = this.props;

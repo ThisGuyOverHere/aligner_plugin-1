@@ -162,6 +162,7 @@ const env = {
     segmentModel: {
         content_clean: null,
         content_raw: null,
+        type: null,
         order: null,
         next: null
     },
