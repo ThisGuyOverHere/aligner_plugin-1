@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import ProjectActions from "../../../../Actions/Project.actions";
 import PropTypes from "prop-types";
 import {getSegmentByOrder} from "../../../../Helpers/SegmentUtils.helper";
+import ToolbarActionsMergeComponent from "./ToolbarActionsMerge/ToolbarActionsMerge.component";
+import ToolbarActionsReverseComponent from "./ToolbarActionsReverse/ToolbarActionsReverse.component";
 
 class ToolbarActionsComponent extends Component {
 
@@ -22,33 +24,15 @@ class ToolbarActionsComponent extends Component {
     }
 
     render() {
-        let mergeDisabled = false;
-        let mergeClasses = ['icon', 'random'];
-        //check status of merge action
-        if (
-            !((this.props.selection.source.count === 0 && this.props.selection.target.count > 1)
-                || (this.props.selection.target.count === 0 && this.props.selection.source.count > 1))
-        ) {
-            mergeDisabled = true;
-            mergeClasses.push('disabled');
-        }
-
-
         return (
             <div className="segment-actions">
                 <ul>
                     <li>
-                        <i
-                            className={"icon object ungroup outline"}
-                        >
-                        </i>
+                        <ToolbarActionsReverseComponent selection={this.props.selection}/>
                     </li>
                     <li>
-                        <button
-                            disabled={mergeDisabled}
-                            onClick={this.onMergeClick}>
-                            <i className={mergeClasses.join(" ")}></i>
-                        </button>
+                        <ToolbarActionsMergeComponent selection={this.props.selection}/>
+
                     </li>
                     <li>
                         <i
@@ -66,24 +50,6 @@ class ToolbarActionsComponent extends Component {
             </div>
         );
     }
-
-    onMergeClick = () => {
-        const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-        let targets = [];
-        let source = {};
-        this.props.selection[type].list.reverse().map((e, index) => {
-            const segment = getSegmentByOrder(this.props.selection[type].list[index], type);
-            if (index > 0) {
-                targets.push(segment)
-            }else{
-                source = segment;
-            }
-        });
-        ProjectActions.mergeSegments(targets,source);
-        ProjectActions.addSegmentToSelection(-1);
-    };
-
-
 }
 
 export default ToolbarActionsComponent;

@@ -18,14 +18,17 @@
             box-shadow: none;
             outline: none;
           }
+          &:disabled {
+            i{
+              cursor: not-allowed;
+              opacity: .45!important;
+            }
+          }
         }
         i {
           cursor: pointer;
           &:hover {
             color: $primary;
-          }
-          &.disabled {
-            cursor: not-allowed;
           }
           &.active {
             color: $primary;

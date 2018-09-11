@@ -298,15 +298,15 @@ let ProjectActions = {
             target: 'source'
         };
 
-        fromArray.map(from=>{
+        fromArray.map(from => {
             const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
             const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
 
             to.content_clean += " ";
-            to.content_clean +=  from.content_clean;
+            to.content_clean += from.content_clean;
             to.content_raw += from.content_raw;
 
-            if(!fromInverse.content_clean){
+            if (!fromInverse.content_clean) {
                 changes.push({
                     type: from.type,
                     action: 'complex_delete',
@@ -318,7 +318,7 @@ let ProjectActions = {
                     rif_order: fromInverse.order
                 });
 
-            }else{
+            } else {
                 from.content_clean = null;
                 from.content_raw = null;
                 changes.push({
@@ -328,7 +328,6 @@ let ProjectActions = {
                     data: from
                 });
             }
-
 
 
         });
@@ -341,12 +340,53 @@ let ProjectActions = {
         });
 
 
-
-
-
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
             changes: changes
+        });
+    },
+
+    /**
+     *
+     * @param {Object} segment1
+     * @param {String} segment1.type
+     * @param {String} segment1.content_clean
+     * @param {String} segment1.content_raw
+     * @param {Number} segment1.order
+     * @param {Number} segment1.next
+     * @param {Object} segment2
+     * @param {String} segment2.content_clean
+     * @param {String} segment2.content_raw
+     * @param {Number} segment2.order
+     * @param {Number} segment2.next
+     * @param {String} segment2.type
+     */
+    reverseTwoSegments: function (segment1, segment2) {
+
+        let tmpSegment1 = Object.assign({}, segment1);
+        let tmpSegment2 = Object.assign({}, segment2);
+
+        tmpSegment1.content_clean = segment2.content_clean;
+        tmpSegment1.content_raw = segment2.content_raw;
+
+        tmpSegment2.content_clean = segment1.content_clean;
+        tmpSegment2.content_raw = segment1.content_raw;
+
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: [
+                {
+                    type: tmpSegment1.type,
+                    action: 'update',
+                    rif_order: tmpSegment1.order,
+                    data: tmpSegment1
+                },
+                {
+                    type: tmpSegment2.type,
+                    action: 'update',
+                    rif_order: tmpSegment2.order,
+                    data: tmpSegment2
+                }]
         });
     },
 
@@ -373,7 +413,7 @@ let ProjectActions = {
      * @param {Number} order Send -1 for remove all selection
      * @param {String} type
      */
-    addSegmentToSelection: function (order,type=null) {
+    addSegmentToSelection: function (order, type = null) {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.ADD_SEGMENT_TO_SELECTION,
             order: order,
