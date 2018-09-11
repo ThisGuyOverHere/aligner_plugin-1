@@ -1,17 +1,17 @@
 import React, {Component} from 'react';
 import ProjectActions from "../../../../Actions/Project.actions";
+import PropTypes from "prop-types";
+import {getSegmentByOrder} from "../../../../Helpers/SegmentUtils.helper";
 
 class ToolbarActionsComponent extends Component {
 
+    static propTypes = {
+        selection: PropTypes.object.isRequired
+    };
+
     constructor(props) {
         super(props);
-        this.state = {
-            merge: {
-                active: false,
-                disabled: false,
-                classList: [],
-            }
-        };
+        this.state = {};
     }
 
 
@@ -22,6 +22,18 @@ class ToolbarActionsComponent extends Component {
     }
 
     render() {
+        let mergeDisabled = false;
+        let mergeClasses = ['icon', 'random'];
+        //check status of merge action
+        if (
+            !((this.props.selection.source.count === 0 && this.props.selection.target.count > 1)
+                || (this.props.selection.target.count === 0 && this.props.selection.source.count > 1))
+        ) {
+            mergeDisabled = true;
+            mergeClasses.push('disabled');
+        }
+
+
         return (
             <div className="segment-actions">
                 <ul>
@@ -32,12 +44,11 @@ class ToolbarActionsComponent extends Component {
                         </i>
                     </li>
                     <li>
-                        <i
-                            className={"icon random" +
-                            this.state.merge.classList.join(' ') +
-                            (this.state.merge.disabled ? ' disabled' : '')}
+                        <button
+                            disabled={mergeDisabled}
                             onClick={this.onMergeClick}>
-                        </i>
+                            <i className={mergeClasses.join(" ")}></i>
+                        </button>
                     </li>
                     <li>
                         <i
@@ -57,23 +68,19 @@ class ToolbarActionsComponent extends Component {
     }
 
     onMergeClick = () => {
-        if (this.state.merge.active) {
-            this.setState({
-                merge: {
-                    active: !this.state.merge.active,
-                    disabled: this.state.merge.disabled,
-                    classList: [''],
-                }
-            });
-        } else {
-            this.setState({
-                merge: {
-                    active: !this.state.merge.active,
-                    disabled: this.state.merge.disabled,
-                    classList: [' active'],
-                }
-            });
-        }
+        const type = this.props.selection.source.count > 0 ? 'source' : 'target';
+        let targets = [];
+        let source = {};
+        this.props.selection[type].list.reverse().map((e, index) => {
+            const segment = getSegmentByOrder(this.props.selection[type].list[index], type);
+            if (index > 0) {
+                targets.push(segment)
+            }else{
+                source = segment;
+            }
+        });
+        ProjectActions.mergeSegments(targets,source);
+        ProjectActions.addSegmentToSelection(-1);
     };
 
 

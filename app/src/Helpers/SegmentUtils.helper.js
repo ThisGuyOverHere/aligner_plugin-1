@@ -1,3 +1,5 @@
+import ProjectStore from '../Stores/Project.store';
+
 /**
  *
  * @param {Number} x current order position of element
@@ -8,3 +10,6 @@ export const avgOrder = (x, y) => {
     return x + (y - x) / 2;
 };
 
+export const getSegmentByOrder = (order,type) => {
+    return ProjectStore.job[type].find(e=>e.get('order') === order).toJS()
+}

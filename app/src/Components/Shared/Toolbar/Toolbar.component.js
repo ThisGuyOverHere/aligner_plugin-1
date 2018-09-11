@@ -5,14 +5,24 @@ import ProjectActions from "../../../Actions/Project.actions";
 import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.component";
 import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
 import ToolbarContextualNavigationComponent from "./ToolbarContextualNavigation/ToolbarContextualNavigation.component";
+import PropTypes from "prop-types";
 
 class ToolbarComponent extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             selection: {
-                source: {},
-                target: {},
+                source: {
+                    count: 0,
+                    list: [],
+                    map: {}
+                },
+                target: {
+                    count: 0,
+                    list: [],
+                    map: {}
+                },
                 count: 0
             },
         };
@@ -34,7 +44,7 @@ class ToolbarComponent extends Component {
                     {!!this.state.selection.count && <ToolbarSelectionComponent selection={this.state.selection}/>}
                 </div>
                 <div>
-                    {!!this.state.selection.count && <ToolbarActionsComponent/> }
+                    {!!this.state.selection.count && <ToolbarActionsComponent selection={this.state.selection}/>}
                 </div>
                 <div>
                     <ToolbarContextualNavigationComponent/>

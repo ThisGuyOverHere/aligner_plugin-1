@@ -19,10 +19,15 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
     },
     selection: {
         source: {
+            count: 0,
+            list: [],
+            map: {}
 
         },
         target: {
-
+            count: 0,
+            list: [],
+            map: {}
         },
         count: 0
     },
@@ -142,23 +147,30 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         }*/
     },
 
-    addSegmentToSelection: function (order,type) {
-        if(order>0){
-            this.selection[type][order] = 1 - (this.selection[type][order]|0);
-            this.selection.count = 0;
-            Object.keys(this.selection.source).map((key, index) => {
-                this.selection.count += this.selection.source[key];
-            });
-            Object.keys(this.selection.target).map((key, index) => {
-                this.selection.count += this.selection.target[key];
-            });
-        }else{
+    addSegmentToSelection: function (order, type) {
+        if (order > 0) {
+            if (this.selection[type].map[order]) {
+                this.selection[type].map[order] = false;
+                this.selection[type].list.splice(this.selection[type].list.indexOf(order), 1);
+            } else {
+                this.selection[type].map[order] = true;
+                this.selection[type].list.push(order);
+            }
+            this.selection.count = this.selection.source.list.length + this.selection.target.list.length;
+            this.selection.source.count = this.selection.source.list.length;
+            this.selection.target.count = this.selection.target.list.length;
+        } else {
             this.selection = {
                 source: {
+                    count: 0,
+                    list: [],
+                    map: {}
 
                 },
                 target: {
-
+                    count: 0,
+                    list: [],
+                    map: {}
                 },
                 count: 0
             };
@@ -193,7 +205,7 @@ AppDispatcher.register(function (action) {
             ProjectStore.emitChange(ProjectConstants.MERGE_STATUS, action.status);
             break;
         case ProjectConstants.ADD_SEGMENT_TO_SELECTION:
-            ProjectStore.addSegmentToSelection(action.order,action.type);
+            ProjectStore.addSegmentToSelection(action.order, action.type);
             ProjectStore.emitChange(ProjectConstants.ADD_SEGMENT_TO_SELECTION, ProjectStore.selection);
             break;
         default:

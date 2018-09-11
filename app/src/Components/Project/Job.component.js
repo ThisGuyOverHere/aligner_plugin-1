@@ -32,8 +32,16 @@ class JobComponent extends Component {
             },
             mergeStatus: false,
             selection: {
-                source: {},
-                target: {},
+                source: {
+                    count: 0,
+                    list: [],
+                    map: {}
+                },
+                target: {
+                    count: 0,
+                    list: [],
+                    map: {}
+                },
                 count: 0
             }
         };
@@ -117,8 +125,8 @@ class JobComponent extends Component {
         if (array.length > 0) {
             array.map((row, index) => {
                 const selection = {
-                    source: !!this.state.selection.source[row.source.order],
-                    target: !!this.state.selection.target[row.target.order],
+                    source: !!this.state.selection.source.map[row.source.order],
+                    target: !!this.state.selection.target.map[row.target.order],
                     count: this.state.selection.count
                 };
                 values.push(<RowWrapperComponent key={index}
