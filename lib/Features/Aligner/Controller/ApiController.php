@@ -11,11 +11,14 @@ namespace Features\Aligner\Controller;
 
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
+use Features\Aligner\Model\Segments_SegmentMatchDao;
+use Features\Aligner\Utils\AlignUtils;
 
 class ApiController extends AlignerController {
 
     public function merge(){
 
+        //TODO UPDATE WITH SEGMENTS FROM AND TO
         $data = array();
 
         $segments = array();
@@ -71,6 +74,7 @@ class ApiController extends AlignerController {
         $deleteQueries = "DELETE FROM segments WHERE id IN ($qMarks);
         DELETE FROM segment_match WHERE order IN ($qMarks) AND id_job = ? AND type = ? ;";
 
+        //TODO avoid using this method, make more connections and put each operation in transactions.
         $query = $segmentQuery . $matchQuery . $deleteQueries;
         $query_params = array_merge( $segmentParams, $matchParams, $deleted_ids, $deleted_orders, array($job_id, $type) );
 
@@ -83,10 +87,75 @@ class ApiController extends AlignerController {
         }
     }
 
-    public function split(){}
+    public function split(){
+
+        $order = 0;
+        $job = "";
+        $type = "";
+        $position = 0;
+
+        $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type);
+        $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type);
+
+        $avg_order = ($split_match['order'] + $split_match['next'])/2;
+        $first_raw = substr($split_segment['content_raw'],0, $position);
+        $second_raw = substr($split_segment['content_raw'], $position);
+        $first_hash = md5($first_raw);
+        $second_hash = md5($second_raw);
+
+        $first_clean = AlignUtils::_cleanSegment($first_raw, $split_segment['language_code']);
+        $second_clean = AlignUtils::_cleanSegment($second_raw, $split_segment['language_code']);
+        $first_count = AlignUtils::_countWordsInSegment($first_raw, $split_segment['language_code']);
+        $second_count = AlignUtils::_countWordsInSegment($second_raw, $split_segment['language_code']);
+
+        $new_segment = $split_segment;
+        $new_match = $split_match;
+
+        $firstSegmentQuery = "UPDATE segments
+        SET content_raw = ?,
+        content_clean = ?,
+        content_hash = ?,
+        raw_word_count = ?
+        WHERE id = ?";
+        $firstSegmentParams = array($first_raw, $first_clean, $first_hash, $first_count, $split_segment['id']);
+
+        $firstMatchQuery = "UPDATE segments_match
+        SET next = ?
+        WHERE order = ? AND job = ? AND type = ?";
+        $firstMatchParams = array($avg_order, $order, $job, $type);
+
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $stm = $conn->prepare( $firstSegmentQuery );
+            $stm->execute( $firstSegmentParams );
+            $stm = $conn->prepare( $firstMatchQuery );
+            $stm->execute( $firstMatchParams );
+        } catch ( \PDOException $e ) {
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $firstSegmentParams - $firstMatchParams", -2 );
+        }
+
+        //New segment creation
+
+        $new_id = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, 1);
+
+        $new_segment['id'] = $new_id;
+        $new_segment['content_raw'] = $second_raw;
+        $new_segment['content_clean'] = $second_clean;
+        $new_segment['content_hash'] = $second_hash;
+        $new_segment['raw_word_count'] = $second_count;
+
+        $segmentsDao = new Segments_SegmentDao;
+        $segmentsDao->createList( array($new_segment) );
+
+        // New segment_match creation
+
+        $new_match['segment_id'] = $new_id;
+        $new_match['order'] = $avg_order;
+
+    }
 
     public function move(){
-
+        
     }
 
 }
