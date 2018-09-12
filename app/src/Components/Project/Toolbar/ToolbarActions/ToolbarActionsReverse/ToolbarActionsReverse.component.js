@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
 import {getSegmentByOrder} from "../../../../../Helpers/SegmentUtils.helper";
+import {Popup} from "semantic-ui-react";
 
 class ToolbarActionsReverseComponent extends Component {
     static propTypes = {
@@ -21,24 +22,25 @@ class ToolbarActionsReverseComponent extends Component {
     }
 
     render() {
-        let reverseDisabled = false;
+        let disabled = false;
         //check reverse
         if (
             !((this.props.selection.source.count === 0 && this.props.selection.target.count === 2)
                 || (this.props.selection.target.count === 0 && this.props.selection.source.count === 2))
         ) {
-            reverseDisabled = true;
+            disabled = true;
         }
+        const comp = <span>
+                <button
+                    disabled={disabled}
+                    onClick={this.onReverseClick}>
+                    <i className="icon sync"></i>
+                    reverse
+                </button>
+            </span>;
         return (
-            <button
-                disabled={reverseDisabled}
-                onClick={this.onReverseClick}
-            >
-                <i
-                    className="icon object ungroup outline"
-                >
-                </i>
-            </button>
+            <Popup trigger={comp} content='shortcut alt+R' on='hover' inverted />
+
         );
     }
 

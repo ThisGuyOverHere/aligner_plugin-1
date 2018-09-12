@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
-import ProjectActions from "../../../../Actions/Project.actions";
 import PropTypes from "prop-types";
-import {getSegmentByOrder} from "../../../../Helpers/SegmentUtils.helper";
 import ToolbarActionsMergeComponent from "./ToolbarActionsMerge/ToolbarActionsMerge.component";
 import ToolbarActionsReverseComponent from "./ToolbarActionsReverse/ToolbarActionsReverse.component";
-import ToolbarActionsSplitcomponent from "./ToolbarActionsSplit/ToolbarActionsSplitcomponent";
+import ToolbarActionsSplitComponent from "./ToolbarActionsSplit/ToolbarActionsSplit.component";
+import ToolbarActionsAlignWrapperComponent from "./ToolbarActionsAlignWrapper/ToolbarActionsAlignWrapper.component";
 
 class ToolbarActionsComponent extends Component {
 
@@ -24,6 +23,7 @@ class ToolbarActionsComponent extends Component {
     componentWillUnmount() {
     }
 
+
     render() {
         return (
             <div className="segment-actions">
@@ -36,9 +36,12 @@ class ToolbarActionsComponent extends Component {
 
                     </li>
                     <li>
-                        <ToolbarActionsSplitcomponent selection={this.props.selection}/>
+                        <ToolbarActionsAlignWrapperComponent selection={this.props.selection}/>
                     </li>
                     <li>
+                        <ToolbarActionsSplitComponent selection={this.props.selection}/>
+                    </li>
+                    {/*<li>
                         <i
                             className={"icon pin"}
                         >
@@ -46,10 +49,10 @@ class ToolbarActionsComponent extends Component {
                     </li>
                     <li>
                         <i
-                            className={"icon eye"}
+                            className={"icon eye slash"}
                         >
                         </i>
-                    </li>
+                    </li>*/}
                 </ul>
             </div>
         );

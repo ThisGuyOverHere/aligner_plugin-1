@@ -32,7 +32,7 @@ class ToolbarSelectionComponent extends Component {
                     <li>
                         <p>
                             <span className="label"> {this.props.selection.count} </span>
-                            record selected
+                            segment{this.props.selection.count > 1 ? 's' : null} selected
                         </p>
                     </li>
                 </ul>

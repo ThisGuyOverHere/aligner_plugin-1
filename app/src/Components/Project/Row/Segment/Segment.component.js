@@ -8,11 +8,11 @@ import SystemActions from "../../../../Actions/System.actions";
 
 const ItemSource = {
     beginDrag(props) {
-
+        ProjectActions.addSegmentToSelection(-1);
         return props;
     },
     canDrag(props, monitor) {
-        return props.segment.content_clean && props.enableDrag;
+        return props.segment.content_clean;
     },
     endDrag(props, monitor, component) {
 

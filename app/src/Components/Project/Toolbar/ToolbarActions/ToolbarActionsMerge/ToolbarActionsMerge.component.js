@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
 import {getSegmentByOrder} from "../../../../../Helpers/SegmentUtils.helper";
+import {Popup} from "semantic-ui-react";
 
 class ToolbarActionsMergeComponent extends Component {
 
@@ -23,20 +24,22 @@ class ToolbarActionsMergeComponent extends Component {
 
     render() {
         //check status of merge action
-        let mergeDisabled = false;
+        let disabled = false;
         let mergeClasses = ['icon', 'random'];
         if (
             !((this.props.selection.source.count === 0 && this.props.selection.target.count > 1)
                 || (this.props.selection.target.count === 0 && this.props.selection.source.count > 1))
         ) {
-            mergeDisabled = true;
+            disabled = true;
         }
+        const comp = <span><button
+            disabled={disabled}
+            onClick={this.onMergeClick}>
+            <i className={mergeClasses.join(" ")}></i>
+            merge
+        </button></span>;
         return (
-            <button
-                disabled={mergeDisabled}
-                onClick={this.onMergeClick}>
-                <i className={mergeClasses.join(" ")}></i>
-            </button>
+            <Popup trigger={comp} content='shortcut alt+M' on='hover' inverted/>
         );
     }
 

@@ -142,7 +142,8 @@ class JobComponent extends Component {
 
     renderItems(array) {
         let values = [];
-        const enableDrag = this.state.selection.count === 0;
+        //if we can have complex regular for enable drag&drop use this var
+        const enableDrag = true;
         if (array.length > 0) {
             array.map((row, index) => {
                 const selection = {

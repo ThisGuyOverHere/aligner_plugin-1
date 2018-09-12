@@ -2,8 +2,9 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
 import {getSegmentByOrder} from "../../../../../Helpers/SegmentUtils.helper";
+import {Popup} from "semantic-ui-react";
 
-class ToolbarActionsSplitcomponent extends Component {
+class ToolbarActionsSplitComponent extends Component {
 
     static propTypes = {
         selection: PropTypes.object.isRequired
@@ -23,17 +24,20 @@ class ToolbarActionsSplitcomponent extends Component {
 
     render() {
         //check status of split action
-        let splitDisabled = false;
+        let disabled = false;
         let splitClasses = ['icon', 'arrows','alternate','horizontal'];
         if (this.props.selection.count > 1) {
-            splitDisabled = true;
+            disabled = true;
         }
+        const comp = <button
+            disabled={disabled}
+            onClick={this.onSplitClick}>
+            <i className={splitClasses.join(" ")}></i>
+            split
+        </button>;
         return (
-            <button
-                disabled={splitDisabled}
-                onClick={this.onSplitClick}>
-                <i className={splitClasses.join(" ")}></i>
-            </button>
+            <Popup trigger={comp} content='shortcut alt+R' on='hover' inverted />
+
         );
     }
 
@@ -45,4 +49,4 @@ class ToolbarActionsSplitcomponent extends Component {
 
 }
 
-export default ToolbarActionsSplitcomponent;
+export default ToolbarActionsSplitComponent;

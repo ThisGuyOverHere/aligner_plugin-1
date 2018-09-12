@@ -12,11 +12,26 @@
         padding: 4px 8px;
         button {
           -webkit-appearance: none;
+          text-align: center;
           border: none;
           box-shadow: none;
+          font-size: 13px;
+          font-weight: 100;
+
           &:active, &:focus {
             box-shadow: none;
             outline: none;
+          }
+          i {
+            display: block;
+            margin: 0 auto;
+            cursor: pointer;
+            &:hover {
+              color: $primary;
+            }
+            &.active {
+              color: $primary;
+            }
           }
           &:disabled {
             i{
@@ -25,15 +40,7 @@
             }
           }
         }
-        i {
-          cursor: pointer;
-          &:hover {
-            color: $primary;
-          }
-          &.active {
-            color: $primary;
-          }
-        }
+
       }
     }
   }

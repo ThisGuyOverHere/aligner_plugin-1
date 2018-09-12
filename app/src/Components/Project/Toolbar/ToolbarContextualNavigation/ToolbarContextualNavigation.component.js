@@ -37,23 +37,10 @@ class ToolbarContextualNavigationComponent extends Component {
         return (
             <div>
                 {this.state.inDrag ? <div className="cmd-shortcut">
-                        <p><span className={mergeClasses.join(" ")}>ALT+MOVE</span> to merge</p>
+                        <p><span className={mergeClasses.join(" ")}>alt + drop</span> to merge</p>
                     </div>
-                    : <div className="navigation">
-                        <ul className="inline-list align-middle" style={{float: 'right'}}>
-                            <li className="list-inline__item">
-                                <a href="https://www.matecat.com/open-source/" target="_blank">Open source</a>
-                            </li>
-                            <li className="list-inline__item">
-                                <a target="_blank" href="/api/docs">API</a>
-                            </li>
-                            <li className="list-inline__item">
-                                <a href="https://www.matecat.com/terms" target="_blank">Terms</a>
-                            </li>
-                            <li className="list-inline__item">
-                                <a href="https://blog.matecat.com" target="_blank">Blog</a>
-                            </li>
-                        </ul>
+                    : <div className="cmd-shortcut">
+                        <p><span>select </span> or <span>drag and drop </span> to align</p>
                     </div>}
 
             </div>
