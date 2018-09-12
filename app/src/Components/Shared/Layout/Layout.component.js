@@ -47,7 +47,7 @@ class Layout extends Component {
             <div className="DefaultLayout">
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
                 {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
-                {this.state.statusExportModal && <ExportModal />}
+                {this.state.statusExportModal && <ExportModal user = {this.state.user} error = {this.state.loginError}/>}
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
                 <HeaderComponent user = {this.state.user} {...matchProps}/>
                 <Component {...matchProps} />
