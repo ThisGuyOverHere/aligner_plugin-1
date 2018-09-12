@@ -13,8 +13,8 @@ class SplitComponent extends Component {
         super(props);
         this.state = {
             splitModalStatus: false,
-            segmentContent: this.props.segment.content_clean,
-            chars: this.props.segment.content_clean.split(""),
+            segmentContent: this.props.segment.content_raw,
+            chars: this.props.segment.content_raw.split(""),
             splits: {},
             charDictionary: this.fillDictionaries().charDictionary,
             wordDictionary: this.fillDictionaries().wordDictionary,
@@ -52,6 +52,7 @@ class SplitComponent extends Component {
                             <p id="toSplit" onMouseLeave={() => this.onCharHover(-1)}>
                                 {this.renderItems()}
                             </p>
+                            <button className="ui button primary" onClick={this.onSave}>Save</button>
                         </div>
                     </div>
                 </div>
@@ -62,12 +63,12 @@ class SplitComponent extends Component {
     renderItems = () => {
         let items = [];
         let countSplittedItems = 0;
-        let range = [-1,-1];
+        let range = [-1, -1];
         const wordIndex = this.state.charDictionary[this.state.temporarySplitPosition];
 
-        if (this.state.temporarySplitPosition > -1){
-            this.leftSigned(wordIndex,range);
-            this.rightSigned(wordIndex,range);
+        if (this.state.temporarySplitPosition > -1) {
+            this.leftSigned(wordIndex, range);
+            this.rightSigned(wordIndex, range);
         }
 
         this.state.chars.map((element, index) => {
@@ -104,8 +105,7 @@ class SplitComponent extends Component {
     };
 
     onCloseSplitModal = () => {
-        ProjectActions.splitModalStatus(false);
-        ProjectActions.setSegmentToSplit({});
+        ProjectActions.openSegmentToSplit(false);
     };
 
     /**
@@ -113,11 +113,13 @@ class SplitComponent extends Component {
      * @param index
      */
     onCharClick = (index) => {
-        let splits = this.state.splits;
-        splits[index] ? splits[index] = false : splits[index] = true;
-        this.setState({
-            splits: splits
-        })
+        if (index !== this.state.chars.length - 1) {
+            let splits = this.state.splits;
+            splits[index] ? splits[index] = false : splits[index] = true;
+            this.setState({
+                splits: splits
+            })
+        }
     };
 
     /**
@@ -125,7 +127,7 @@ class SplitComponent extends Component {
      * @param index
      */
     onCharHover = (index) => {
-        if(this.state.splits[index]){
+        if (this.state.splits[index] || index === this.state.chars.length - 1) {
             index = -1
         }
         this.setState({
@@ -140,11 +142,11 @@ class SplitComponent extends Component {
      */
     fillDictionaries = () => {
         // words in our phrase splitted by space
-        const words = this.props.segment.content_clean.split(" ");
+        const words = this.props.segment.content_raw.split(" ");
         // dictionaries structure
         let dictionaries = {
-            charDictionary : {},
-            wordDictionary : {},
+            charDictionary: {},
+            wordDictionary: {},
         };
         let charIndex = 0;
         let wordIndex = 0;
@@ -185,10 +187,10 @@ class SplitComponent extends Component {
      * @param {Array} range
      */
     rightSigned = (wordIndex, range) => {
-        for(let index = wordIndex; index < this.state.chars.length-2; index++){
+        for (let index = wordIndex; index < this.state.chars.length - 2; index++) {
             range[1] = index;
-            if(this.state.wordDictionary[index+1] > 1){
-                range[1] = index+1;
+            if (this.state.wordDictionary[index + 1] > 1) {
+                range[1] = index + 1;
                 break
             }
         }
@@ -199,14 +201,26 @@ class SplitComponent extends Component {
      * @param {Array} range
      */
     leftSigned = (wordIndex, range) => {
-        for(let index = wordIndex; index > 0; index--){
+        for (let index = wordIndex; index > 0; index--) {
             range[0] = index;
-            if(this.state.wordDictionary[index] > 1){
-                range[0] = index-1;
+            if (this.state.wordDictionary[index] > 1) {
+                range[0] = index - 1;
                 break
             }
         }
     };
+
+
+    onSave = () => {
+        let positions = [];
+        Object.keys(this.state.splits).map(position => {
+            if (this.state.splits[position]) {
+                positions.push(position);
+            }
+        });
+
+        ProjectActions.splitSegment(this.props.segment,positions);
+    }
 }
 
 export default SplitComponent;

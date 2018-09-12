@@ -71,30 +71,22 @@ class SegmentComponent extends Component {
 
     }
 
-    getStyles = (props) => {
-        const {left, top, isDragging} = props;
-        const transform = `translate3d(${left}px, ${top}px, 0)`;
-        return {
-            transform,
-            WebkitTransform: transform,
-            // IE fallback: hide the real node using CSS when dragging
-            // because IE will ignore our custom "empty image" drag preview.
-            cursor: 'default'
+    componentDidMount() {
+        const {connectDragPreview} = this.props;
+        if (connectDragPreview) {
+            // Use empty image as a drag preview so browsers don't draw it
+            // and we can draw whatever we want on the custom drag layer instead.
+            connectDragPreview(getEmptyImage(), {
+                // IE fallback: specify that we'd rather screenshot the node
+                // when it already knows it's being dragged so we can hide it with CSS.
+                captureDraggingState: true,
+            })
         }
-    };
+    }
 
-    createSpaceSegment = () => {
-        ProjectActions.createSpaceSegment({
-            order: this.props.segment.order,
-            type: this.props.type
-        });
-    };
+    componentWillUnmount() {
+    }
 
-    openSplitModal = () => {
-        //console.log(this.props.segment);
-        ProjectActions.splitModalStatus(true);
-        ProjectActions.setSegmentToSplit(this.props.segment);
-    };
 
     render = () => {
         const {connectDragSource, isDragging, segment, dropHover} = this.props;
@@ -134,21 +126,24 @@ class SegmentComponent extends Component {
         }
     };
 
-    componentDidMount() {
-        const {connectDragPreview} = this.props;
-        if (connectDragPreview) {
-            // Use empty image as a drag preview so browsers don't draw it
-            // and we can draw whatever we want on the custom drag layer instead.
-            connectDragPreview(getEmptyImage(), {
-                // IE fallback: specify that we'd rather screenshot the node
-                // when it already knows it's being dragged so we can hide it with CSS.
-                captureDraggingState: true,
-            })
-        }
-    }
 
-    componentWillUnmount() {
-    }
+    openSplitModal = () => {
+        ProjectActions.openSegmentToSplit(this.props.segment);
+    };
+
+
+    getStyles = (props) => {
+        const {left, top, isDragging} = props;
+        const transform = `translate3d(${left}px, ${top}px, 0)`;
+        return {
+            transform,
+            WebkitTransform: transform,
+            // IE fallback: hide the real node using CSS when dragging
+            // because IE will ignore our custom "empty image" drag preview.
+            cursor: 'default'
+        }
+    };
+
 }
 
 export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);

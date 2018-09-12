@@ -39,8 +39,7 @@ class ToolbarActionsSplitcomponent extends Component {
 
     onSplitClick = () => {
         const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-        let targets = [];
-        let source = {};
+        ProjectActions.openSegmentToSplit(getSegmentByOrder(this.props.selection[type].list[0],type));
         ProjectActions.addSegmentToSelection(-1);
     };
 

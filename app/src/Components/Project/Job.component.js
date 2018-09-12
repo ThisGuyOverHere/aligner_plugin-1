@@ -77,7 +77,6 @@ class JobComponent extends Component {
     }
 
     componentDidMount() {
-        ProjectStore.addListener(ProjectConstants.SET_SPLIT_MODAL_STATUS, this.setStatusSplitModal);
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
@@ -86,7 +85,6 @@ class JobComponent extends Component {
     }
 
     componentWillUnmount() {
-        ProjectStore.removeListener(ProjectConstants.SET_SPLIT_MODAL_STATUS, this.setStatusSplitModal);
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
@@ -112,16 +110,19 @@ class JobComponent extends Component {
         );
     }
 
-    setStatusSplitModal = (status) => {
-        this.setState({
-            splitModalStatus: status
-        })
-    };
-
     setSegmentToSplit = (segment) => {
-        this.setState({
-            segmentToSplit: segment,
-        });
+        if(segment){
+            this.setState({
+                segmentToSplit: segment,
+                splitModalStatus: true
+            });
+        }else{
+            this.setState({
+                segmentToSplit: null,
+                splitModalStatus: false
+            });
+        }
+
     };
 
     setRows = (job) => {

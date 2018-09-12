@@ -303,6 +303,7 @@ let ProjectActions = {
 
             to.content_clean += " ";
             to.content_clean += from.content_clean;
+            to.content_raw += " ";
             to.content_raw += from.content_raw;
 
             if (!fromInverse.content_clean) {
@@ -422,19 +423,26 @@ let ProjectActions = {
 
     /**
      *
-     * @param status
+     * @param {Object} segment Segment to open, use false for close modal split
      */
-    splitModalStatus: function (status) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.SET_SPLIT_MODAL_STATUS,
-            status: status,
-        });
-    },
-
-    setSegmentToSplit: function (segment) {
+    openSegmentToSplit: function (segment) {
         AppDispatcher.dispatch({
             actionType: ProjectConstants.SEGMENT_TO_SPLIT,
             segment: segment,
+        });
+    },
+
+    /**
+     * @param {Object} segment The segment to split
+     * @param {Array} positions An array of chars positions where split segment string content
+     * @param {Number} positions[] the position
+     */
+
+    splitSegment: function (segment, positions) {
+        positions.push(segment.content_raw.length);
+        let contentSegments = [];
+        positions.map((e, index) => {
+            contentSegments.push(segment.content_raw.substring((+positions[index - 1] + 1 || 0), +e + 1))
         });
     }
 };
