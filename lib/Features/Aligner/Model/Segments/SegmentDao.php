@@ -75,7 +75,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT segments.* 
         FROM segments INNER JOIN segments_match ON segment_id = segments.id
-        WHERE segments_match.order = ? segments_match.id_job = ? AND segments_match.type = ? ORDER BY id ASC" );
+        WHERE segments_match.order = ? AND segments_match.id_job = ? AND segments_match.type = ? ORDER BY id ASC" );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [$order, $id_job , $type] );
 

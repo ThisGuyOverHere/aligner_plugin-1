@@ -29,6 +29,7 @@ class Aligner extends BaseFeature
         route( '/parse/[:version]/[:id_job]', 'GET', 'Features\Aligner\Controller\ParserController', 'jobParser' );
         route( '/job/[:id_job]/[:password]/information', 'GET', 'Features\Aligner\Controller\JobController', 'information' );
         route( '/segments/[:id_job]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
+        route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\ApiController', 'split' );
 
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }

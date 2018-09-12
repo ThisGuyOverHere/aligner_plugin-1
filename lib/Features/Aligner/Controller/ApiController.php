@@ -89,15 +89,22 @@ class ApiController extends AlignerController {
 
     public function split(){
 
-        $order = 0;
-        $job = "";
-        $type = "";
-        $position = 0;
+        //TODO Split in multiple positions
+        $order = $this->params['order'];
+        $job = $this->params['id_job'];
+        $type = $this->params['type'];
+        $other_order = $this->params['other_order'];
+        $other_type =  ($type == 'target') ? 'source' : 'target';
 
-        $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type);
-        $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type);
+        $position = $this->params['positions'][0];
+
+        //Gets from 0 since they are returned as an array
+        $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)[0]->toArray();
+        $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type)[0]->toArray();
+        $other_match = Segments_SegmentMatchDao::getSegmentMatch($other_order, $job, $other_type)[0]->toArray();
 
         $avg_order = ($split_match['order'] + $split_match['next'])/2;
+        $other_avg = ($other_match['order'] + $other_match['next'])/2;
         $first_raw = substr($split_segment['content_raw'],0, $position);
         $second_raw = substr($split_segment['content_raw'], $position);
         $first_hash = md5($first_raw);
@@ -119,10 +126,15 @@ class ApiController extends AlignerController {
         WHERE id = ?";
         $firstSegmentParams = array($first_raw, $first_clean, $first_hash, $first_count, $split_segment['id']);
 
-        $firstMatchQuery = "UPDATE segments_match
+        $firstMatchQuery = "UPDATE segments_match as sm
         SET next = ?
-        WHERE order = ? AND job = ? AND type = ?";
+        WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $firstMatchParams = array($avg_order, $order, $job, $type);
+
+        $otherMatchQuery = "UPDATE segments_match as sm
+        SET next = ?
+        WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $otherMatchParams = array($other_avg, $other_order, $job, $other_type);
 
         try {
             $conn = NewDatabase::obtain()->getConnection();
@@ -130,6 +142,8 @@ class ApiController extends AlignerController {
             $stm->execute( $firstSegmentParams );
             $stm = $conn->prepare( $firstMatchQuery );
             $stm->execute( $firstMatchParams );
+            $stm = $conn->prepare( $otherMatchQuery );
+            $stm->execute( $otherMatchParams );
         } catch ( \PDOException $e ) {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $firstSegmentParams - $firstMatchParams", -2 );
         }
@@ -138,7 +152,7 @@ class ApiController extends AlignerController {
 
         $new_id = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, 1);
 
-        $new_segment['id'] = $new_id;
+        $new_segment['id'] = $new_id[0];
         $new_segment['content_raw'] = $second_raw;
         $new_segment['content_clean'] = $second_clean;
         $new_segment['content_hash'] = $second_hash;
@@ -149,13 +163,20 @@ class ApiController extends AlignerController {
 
         // New segment_match creation
 
-        $new_match['segment_id'] = $new_id;
+        $new_match['segment_id'] = $new_id[0];
         $new_match['order'] = $avg_order;
+
+        $null_match = $new_match;
+        $null_match['segment_id'] = null;
+        $null_match['type'] = $other_type;
+
+        $segmentsMatchDao = new Segments_SegmentMatchDao;
+        $segmentsMatchDao->createList( array( $new_match, $null_match ) );
 
     }
 
     public function move(){
-        
+
     }
 
 }
