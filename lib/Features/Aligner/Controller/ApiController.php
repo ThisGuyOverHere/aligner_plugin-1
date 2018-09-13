@@ -18,11 +18,11 @@ class ApiController extends AlignerController {
 
     public function merge(){
 
-        //TODO UPDATE WITH SEGMENTS FROM AND TO
         $segments = array();
         $orders = $this->params['order'];
         $type = $this->params['type'];
         $job  = $this->params['id_job'];
+        $job_password = $this->params['password'];
 
         sort($segment_orders);
         foreach ($orders as $order){
@@ -78,7 +78,24 @@ class ApiController extends AlignerController {
             $conn->rollBack();
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
         }
-        
+
+        $operations = array();
+        $operations[] = array(
+            'type' => $type,
+            'action' => 'update',
+            'order' => $first_segment['order'],
+            'data' => Segments_SegmentDao::getFromOrderJobIdAndType($first_segment['order'], $job, $type)
+        );
+
+        foreach ($deleted_orders as $order){
+            $operations[] = array(
+                'type' => $type,
+                'action' => 'delete',
+                'order' => $order
+            );
+        }
+
+        return $this->response->json($operations);
 
     }
 
