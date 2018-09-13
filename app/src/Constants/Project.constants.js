@@ -5,6 +5,7 @@ const ProjectConstants = keyMirror({
     GET_SEGMENTS: null,
     STORE_SEGMENTS: null,
     CHANGE_SEGMENT_POSITION: null,
+    REQUIRE_SEGMENT_CHANGE_POSITION: null,
     MERGE_STATUS: null,
     SCROLL_TO_SEGMENT: null,
     ANIMATE_ROW_POSITION: null,

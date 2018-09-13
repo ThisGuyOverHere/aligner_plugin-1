@@ -433,6 +433,20 @@ let ProjectActions = {
     },
 
     /**
+     *
+     * @param {Object} log A log of move action from frontend
+     * @param {String} log.type The type of segment: source or target
+     * @param {Number} log.from The row's order of Drag action
+     * @param {Number} log.to The row's order of Drop action
+     */
+    requireChangeSegmentPosition: function (log) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION,
+            data: log,
+        });
+    },
+
+    /**
      * @param {Object} segment The segment to split
      * @param {Array} positions An array of chars positions where split segment string content
      * @param {Number} positions[] the position

@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../../Constants/Draggable.constants';
-import {DragSource, ConnectDragPreview} from 'react-dnd';
+import {DragSource} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../Actions/Project.actions";
-import SystemActions from "../../../../Actions/System.actions";
 
 const ItemSource = {
     beginDrag(props) {

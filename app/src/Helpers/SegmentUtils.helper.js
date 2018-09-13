@@ -12,4 +12,14 @@ export const avgOrder = (x, y) => {
 
 export const getSegmentByOrder = (order,type) => {
     return ProjectStore.job[type].find(e=>e.get('order') === order).toJS()
-}
+};
+
+
+export const getSegmentIndexByOrder = (order,type) => {
+    return ProjectStore.job[type].findIndex(i => i.get('order') === order);
+};
+
+
+export const getSegmentByIndex = (index,type) => {
+    return ProjectStore.job[type].get(index).toJS();
+};

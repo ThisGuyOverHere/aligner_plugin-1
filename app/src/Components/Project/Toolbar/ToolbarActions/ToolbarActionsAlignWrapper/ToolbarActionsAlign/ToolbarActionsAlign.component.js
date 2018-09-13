@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {Popup} from "semantic-ui-react";
+import ProjectActions from "../../../../../../Actions/Project.actions";
+import {getSegmentByIndex, getSegmentIndexByOrder} from "../../../../../../Helpers/SegmentUtils.helper";
 
 class ToolbarActionsAlignComponent extends Component {
 
@@ -40,7 +42,17 @@ class ToolbarActionsAlignComponent extends Component {
     }
 
     onClick = () => {
-        const type = this.props.selection.source.count > 0 ? 'source' : 'target';
+        const sourceIndex = getSegmentIndexByOrder(this.props.selection.source.list[0],'source');
+        const targetToOrder = getSegmentByIndex(sourceIndex,'target').order;
+
+        const log = {
+            type: 'target',
+            from: this.props.selection.target.list[0],
+            to: targetToOrder
+        };
+
+        ProjectActions.requireChangeSegmentPosition(log);
+        ProjectActions.addSegmentToSelection(-1);
     };
 
 }
