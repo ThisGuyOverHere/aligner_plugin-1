@@ -66,15 +66,20 @@ class ApiController extends AlignerController {
 
         try {
             $conn = NewDatabase::obtain()->getConnection();
+            $conn->beginTransaction();
             $stm = $conn->prepare( $segmentQuery );
             $stm->execute( $segmentParams );
             $stm = $conn->prepare( $deleteQuery );
             $stm->execute( $deleted_ids );
             $stm = $conn->prepare( $matchQuery );
             $stm->execute( $matchParams );
+            $conn->commit();
         } catch ( \PDOException $e ) {
+            $conn->rollBack();
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
         }
+        
+
     }
 
     public function split(){
@@ -181,15 +186,20 @@ class ApiController extends AlignerController {
 
         try {
             $conn = NewDatabase::obtain()->getConnection();
+            $conn->beginTransaction();
             $stm = $conn->prepare( $firstSegmentQuery );
             $stm->execute( $firstSegmentParams );
             $stm = $conn->prepare( $firstMatchQuery );
             $stm->execute( $firstMatchParams );
             $stm = $conn->prepare( $otherMatchQuery );
             $stm->execute( $otherMatchParams );
+            $conn->commit();
         } catch ( \PDOException $e ) {
+            $conn->rollBack();
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $firstSegmentParams - $firstMatchParams", -2 );
         }
+
+        //Format returned segments
 
         $source = array();
         $target = array();
