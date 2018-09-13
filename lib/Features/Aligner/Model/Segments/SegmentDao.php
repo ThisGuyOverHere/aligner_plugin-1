@@ -81,6 +81,20 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getFromOrderInterval($order_start, $order_end, $id_job, $type, $ttl = 0){
+
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match ON segment_id = segments.id
+        WHERE segments_match.order >= ? AND segments_match.order < ?
+        AND segments_match.id_job = ? AND segments_match.type = ? 
+        ORDER BY segments_match.order ASC" );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [$order_start, $order_end, $id_job , $type] );
+
+    }
+
     public static function getDataForAlignment( $id_job, $type, $ttl = 0 ) {
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT id, content_raw, content_clean, raw_word_count FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );

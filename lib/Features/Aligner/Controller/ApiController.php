@@ -19,12 +19,12 @@ class ApiController extends AlignerController {
     public function merge(){
 
         //TODO UPDATE WITH SEGMENTS FROM AND TO
-        $data = array();
+        $data = $this->params['data'];
 
         $segments = array();
         $segment_orders = array();
-        $type = $data[0]['type'];
-        $job_id = $data[0]['job'];
+        $type = $this->params['type'];
+        $id_job = $this->params['job'];
         foreach ($data as $item){
             $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType($item['order'], $item['job'], $item['type']);
             $segment_orders[] = $item['order'];
@@ -64,7 +64,7 @@ class ApiController extends AlignerController {
                     SET sm1.next = sm2.next
                     WHERE (sm1.order = ? AND sm1.id_job = ? AND sm1.type = ?) AND 
                     (sm2.order = ? AND sm2.id_job = ? AND sm2.type = ?)";
-        $matchParams = array($order1, $job_id, $type, $order2, $job_id, $type);
+        $matchParams = array($order1, $id_job, $type, $order2, $id_job, $type);
 
         $qMarks = str_repeat('?,', count($segments) - 2) . '?';
 
@@ -76,7 +76,7 @@ class ApiController extends AlignerController {
 
         //TODO avoid using this method, make more connections and put each operation in transactions.
         $query = $segmentQuery . $matchQuery . $deleteQueries;
-        $query_params = array_merge( $segmentParams, $matchParams, $deleted_ids, $deleted_orders, array($job_id, $type) );
+        $query_params = array_merge( $segmentParams, $matchParams, $deleted_ids, $deleted_orders, array($id_job, $type) );
 
         try {
             $conn = NewDatabase::obtain()->getConnection();
@@ -88,6 +88,7 @@ class ApiController extends AlignerController {
     }
 
     public function split(){
+
         $order = $this->params['order'];
         $job = $this->params['id_job'];
         $type = $this->params['type'];
@@ -103,6 +104,11 @@ class ApiController extends AlignerController {
         $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)[0]->toArray();
         $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type)[0]->toArray();
         $other_match = Segments_SegmentMatchDao::getSegmentMatch($other_order, $job, $other_type)[0]->toArray();
+
+        $order_start = $split_match['order'];
+        $order_end = $split_match['next'];
+        $other_order_start = $split_match['order'];
+        $other_order_end = $split_match['next'];
 
         $avg_order = $split_match['order'] + ($split_match['next'] - $split_match['order'])/2;
         $other_avg = $other_match['order'] + ($other_match['next'] - $other_match['order'])/2;
@@ -194,7 +200,64 @@ class ApiController extends AlignerController {
         } catch ( \PDOException $e ) {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $firstSegmentParams - $firstMatchParams", -2 );
         }
-        return true;
+
+        $source = array();
+        $target = array();
+
+        //Check which segments to retrieve for source/target
+        $source_start = ($type == 'source') ? $order_start : $other_order_start;
+        $source_end   = ($type == 'source') ? $order_end : $other_order_end;
+        $target_start = ($type == 'target') ? $order_start : $other_order_start;
+        $target_end   = ($type == 'target') ? $order_end : $other_order_end;
+
+        $sourceSegments = Segments_SegmentDao::getFromOrderInterval($source_start, $source_end, $job, 'source');
+        $targetSegments = Segments_SegmentDao::getFromOrderInterval($target_start, $target_end, $job, 'target');
+
+        $source[] = array(
+            'type' => 'source',
+            'action' => 'update',
+            'order' => $source_start,
+            'data' => array_shift($sourceSegments)
+        );
+        $source_order = $source_start;
+
+        foreach ($sourceSegments as $sourceSegment) {
+
+            $source_order = $source_order + ($source_end - $source_order)/2;
+
+            $source[] = array(
+                'type' => 'source',
+                'action' => 'insert',
+                'order' => $source_order,
+                'data' => $sourceSegment
+            );
+
+        }
+
+        $target[] = array(
+            'type' => 'target',
+            'action' => 'update',
+            'order' => $target_start,
+            'data' => array_shift($targetSegments)
+        );
+        $target_order = $target_start;
+
+        foreach ($targetSegments as $targetSegment) {
+
+            $target_order = $target_order + ($target_end - $target_order)/2;
+
+            $target[] = array(
+                'type' => 'target',
+                'action' => 'insert',
+                'order' => $target_order,
+                'data' => $targetSegment
+            );
+
+        }
+
+        return $this->response->json(array("source" => $source, "target" => $target));
+
+        //return true;
 
     }
 
