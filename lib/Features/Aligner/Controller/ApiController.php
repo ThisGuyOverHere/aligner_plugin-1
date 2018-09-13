@@ -95,21 +95,8 @@ class ApiController extends AlignerController {
         $other_type =  ($type == 'target') ? 'source' : 'target';
         $positions = $this->params['positions'];
 
-        return $this->recursive_split($order, $job, $type, $other_order, $other_type, $positions);
-
-    }
-
-    public function recursive_split($order, $job, $type, $other_order, $other_type, $positions){
-
-        //TODO Split in multiple positions
-
         if(empty($positions)){
             return true;
-        }
-
-        $position = array_shift($positions);
-        foreach ($positions as $key => $value){
-            $positions[$key] -= $position;
         }
 
         //Gets from 0 since they are returned as an array
@@ -119,15 +106,19 @@ class ApiController extends AlignerController {
 
         $avg_order = $split_match['order'] + ($split_match['next'] - $split_match['order'])/2;
         $other_avg = $other_match['order'] + ($other_match['next'] - $other_match['order'])/2;
-        $first_raw = substr($split_segment['content_raw'],0, $position);
-        $second_raw = substr($split_segment['content_raw'], $position);
-        $first_hash = md5($first_raw);
-        $second_hash = md5($second_raw);
 
+        $raw_contents = array();
+        $full_raw = $split_segment['content_raw'];
+        $positions[] = strlen(($full_raw));
+        foreach ($positions as $key => $position) {
+            $start = ($key == 0) ? 0 : $positions[$key-1];
+            $raw_contents[] = substr($full_raw, $start, $position - $start);
+        }
+
+        $first_raw = array_shift($raw_contents);
+        $first_hash = md5($first_raw);
         $first_clean = AlignUtils::_cleanSegment($first_raw, $split_segment['language_code']);
-        $second_clean = AlignUtils::_cleanSegment($second_raw, $split_segment['language_code']);
         $first_count = AlignUtils::_countWordsInSegment($first_raw, $split_segment['language_code']);
-        $second_count = AlignUtils::_countWordsInSegment($second_raw, $split_segment['language_code']);
 
         $new_segment = $split_segment;
         $new_match = $split_match;
@@ -151,6 +142,47 @@ class ApiController extends AlignerController {
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $otherMatchParams = array($other_avg, $other_order, $job, $other_type);
 
+
+        //New segment creation
+
+        $new_id = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count($raw_contents));
+        $new_segments = array();
+        $new_matches = array();
+        $new_null_matches = array();
+        foreach ($new_id as $key => $id) {
+
+            //create new segments
+            $new_segment['id'] = $id;
+            $new_segment['content_raw'] = array_shift($raw_contents);
+            $new_segment['content_clean'] = AlignUtils::_cleanSegment($new_segment['content_raw']);
+            $new_segment['content_hash'] = md5($new_segment['content_raw']);
+            $new_segment['raw_word_count'] = AlignUtils::_countWordsInSegment($new_segment['content_raw']);
+            $new_segments[] = $new_segment;
+
+            //create new matches
+            $new_match['segment_id'] = $id;
+            $new_match['order'] = $avg_order;
+            $avg_order = $new_match['order'] + ($split_match['next'] -  $new_match['order'])/2;
+            $new_match['next'] = ($key != count($new_id)-1) ? $avg_order : $split_match['next'];
+            $new_matches[] = $new_match;
+
+            //create new null matches
+            $null_match['segment_id'] = null;
+            $null_match['order'] = $other_avg;
+            $other_avg = $null_match['order'] + ($other_match['next'] - $null_match['order'])/2;
+            $null_match['next'] = ($key != count($new_id)-1) ? $other_avg : $other_match['next'];
+            $new_null_matches[] = $null_match;
+
+        }
+
+        $segmentsDao = new Segments_SegmentDao;
+        $segmentsDao->createList($new_segments);
+
+        $segmentsMatchDao = new Segments_SegmentMatchDao;
+        $segmentsMatchDao->createList( array_merge($new_matches,$new_null_matches) );
+
+        //$this->recursive_split($avg_order, $job, $type, $other_avg, $other_type, $positions);
+
         try {
             $conn = NewDatabase::obtain()->getConnection();
             $stm = $conn->prepare( $firstSegmentQuery );
@@ -162,34 +194,8 @@ class ApiController extends AlignerController {
         } catch ( \PDOException $e ) {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $firstSegmentParams - $firstMatchParams", -2 );
         }
-
-        //New segment creation
-
-        $new_id = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, 1);
-
-        $new_segment['id'] = $new_id[0];
-        $new_segment['content_raw'] = $second_raw;
-        $new_segment['content_clean'] = $second_clean;
-        $new_segment['content_hash'] = $second_hash;
-        $new_segment['raw_word_count'] = $second_count;
-
-        $segmentsDao = new Segments_SegmentDao;
-        $segmentsDao->createList( array($new_segment) );
-
-        // New segment_match creation
-
-        $new_match['segment_id'] = $new_id[0];
-        $new_match['order'] = $avg_order;
-
-        $null_match['segment_id'] = null;
-        $null_match['order'] = $other_avg;
-
-        $segmentsMatchDao = new Segments_SegmentMatchDao;
-        $segmentsMatchDao->createList( array( $new_match, $null_match ) );
-
-        $this->recursive_split($avg_order, $job, $type, $other_avg, $other_type, $positions);
-
         return true;
+
     }
 
     public function move(){
