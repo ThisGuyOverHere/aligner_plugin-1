@@ -19,35 +19,29 @@ class ApiController extends AlignerController {
     public function merge(){
 
         //TODO UPDATE WITH SEGMENTS FROM AND TO
-        $data = $this->params['data'];
-
         $segments = array();
-        $segment_orders = array();
+        $orders = $this->params['order'];
         $type = $this->params['type'];
-        $id_job = $this->params['job'];
-        foreach ($data as $item){
-            $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType($item['order'], $item['job'], $item['type']);
-            $segment_orders[] = $item['order'];
-        }
+        $job  = $this->params['id_job'];
 
         sort($segment_orders);
-        $order1 = $segment_orders[0];
-        $order2 = array_slice($segment_orders,-1);
+        foreach ($orders as $order){
+            $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)->toArray();
+        }
 
-        $raw_merge = "";
-        $clean_merge = "";
-        $merge_count = 0;
 
-        $segment_ids = array();
+        $first_segment = array_shift($segments);
+        $raw_merge = $first_segment['content_raw'];
+        $clean_merge = $first_segment['content_clean'];
+        $merge_count = $first_segment['raw_word_count'];
+
         foreach ($segments as $segment) {
             $raw_merge .= " ".$segment['content_raw'];
             $clean_merge .= " ".$segment['content_clean'];
             $merge_count += $segment['raw_word_count'];
-            $segment_ids[] = $segment['id'];
+            $deleted_ids[] = $segment['id'];
+            $deleted_orders[] = $segment['order'];
         }
-
-        sort($segment_ids);
-        $id1 = $segment_ids;
 
         $hash_merge = md5($raw_merge);
 
@@ -57,31 +51,27 @@ class ApiController extends AlignerController {
                     content_hash = ?,
                     raw_word_count = ?
                     WHERE id = ?;";
-        $segmentParams = array($raw_merge, $clean_merge, $hash_merge, $merge_count, $id1);
+        $segmentParams = array($raw_merge, $clean_merge, $hash_merge, $merge_count, $first_segment['id']);
 
-        $matchQuery = "UPDATE segments_match as sm1,
-                    segments_match as sm2
-                    SET sm1.next = sm2.next
-                    WHERE (sm1.order = ? AND sm1.id_job = ? AND sm1.type = ?) AND 
-                    (sm2.order = ? AND sm2.id_job = ? AND sm2.type = ?)";
-        $matchParams = array($order1, $id_job, $type, $order2, $id_job, $type);
 
-        $qMarks = str_repeat('?,', count($segments) - 2) . '?';
+        $qMarks = str_repeat('?,', count($segments) - 1) . '?';
 
-        $deleted_ids = array_slice($segment_ids, 1, count($segments)-1);
-        $deleted_orders = array_slice($segment_ids, 1, count($segments)-1);
+        $deleteQuery = "DELETE FROM segments WHERE id IN ($qMarks);";
 
-        $deleteQueries = "DELETE FROM segments WHERE id IN ($qMarks);
-        DELETE FROM segment_match WHERE order IN ($qMarks) AND id_job = ? AND type = ? ;";
 
-        //TODO avoid using this method, make more connections and put each operation in transactions.
-        $query = $segmentQuery . $matchQuery . $deleteQueries;
-        $query_params = array_merge( $segmentParams, $matchParams, $deleted_ids, $deleted_orders, array($id_job, $type) );
+        $matchQuery = "UPDATE segments_match as sm
+                    SET sm.segment_id = null
+                    WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
+        $matchParams = array_merge($deleted_orders, array($job, $type));
 
         try {
             $conn = NewDatabase::obtain()->getConnection();
-            $stm = $conn->prepare( $query );
-            $stm->execute( $query_params );
+            $stm = $conn->prepare( $segmentQuery );
+            $stm->execute( $segmentParams );
+            $stm = $conn->prepare( $deleteQuery );
+            $stm->execute( $deleted_ids );
+            $stm = $conn->prepare( $matchQuery );
+            $stm->execute( $matchParams );
         } catch ( \PDOException $e ) {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
         }
@@ -101,9 +91,9 @@ class ApiController extends AlignerController {
         }
 
         //Gets from 0 since they are returned as an array
-        $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)[0]->toArray();
-        $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type)[0]->toArray();
-        $other_match = Segments_SegmentMatchDao::getSegmentMatch($other_order, $job, $other_type)[0]->toArray();
+        $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)->toArray();
+        $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type)->toArray();
+        $other_match = Segments_SegmentMatchDao::getSegmentMatch($other_order, $job, $other_type)->toArray();
 
         $order_start = $split_match['order'];
         $order_end = $split_match['next'];
