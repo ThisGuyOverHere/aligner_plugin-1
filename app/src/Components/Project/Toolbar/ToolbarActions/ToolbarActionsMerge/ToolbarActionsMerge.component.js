@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
-import {getSegmentByOrder} from "../../../../../Helpers/SegmentUtils.helper";
 import {Popup} from "semantic-ui-react";
 
 class ToolbarActionsMergeComponent extends Component {
@@ -45,17 +44,8 @@ class ToolbarActionsMergeComponent extends Component {
 
     onMergeClick = () => {
         const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-        let targets = [];
-        let source = {};
-        this.props.selection[type].list.reverse().map((e, index) => {
-            const segment = getSegmentByOrder(this.props.selection[type].list[index], type);
-            if (index > 0) {
-                targets.push(segment)
-            } else {
-                source = segment;
-            }
-        });
-        ProjectActions.mergeSegments(targets, source);
+        const segments = this.props.selection[type].list.sort();
+        ProjectActions.mergeSegments(segments, type);
         ProjectActions.addSegmentToSelection(-1);
     };
 

@@ -4,8 +4,7 @@ let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
 import {httpAlignJob, httpGetSegments} from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
-import {avgOrder} from "../Helpers/SegmentUtils.helper";
-
+import {avgOrder, getSegmentByIndex, getSegmentByOrder, getSegmentIndexByOrder} from "../Helpers/SegmentUtils.helper";
 
 let ProjectActions = {
     /**
@@ -277,40 +276,55 @@ let ProjectActions = {
             data: {ref: ref, y: y}
         });
     },
-
     /**
-     * @param {Array} fromArray
-     * @param {Object} fromArray[]
-     * @param {string} fromArray[].content_clean
-     * @param {string} fromArray[].content_raw
-     * @param {number} fromArray[].order
-     * @param {Object} to
-     * @param {string} to.content_clean
-     * @param {string} to.content_raw
-     * @param {number} to.order
+     *
+     * @param {Object} selection a map with source and target lists
+     * @param {Array} selection.source.list
+     * @param {Number} selection.source.list[] the order of segment
+     * @param {Array} selection.target.list
+     * @param {Number} selection.target.list[] the order of segment
      */
-    mergeSegments: function (fromArray, to) {
+    mergeAndAlignSegments: function(selection){
         let changes = [];
-        const tmpJob = ProjectStore.job;
+        if(selection.source.count> 1){
+            changes.push(...this.getLogsForMergeSegments(selection.source.list.sort(),'source'));
+        }
+        if(selection.target.count> 0){
+            changes.push(...this.getLogsForMergeSegments(selection.target.list.sort(),'target'));
+        }
+
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: changes
+        });
+
+    },
+
+    getLogsForMergeSegments: function (segments,type) {
+        let changes = [];
         const inverse = {
             source: 'target',
             target: 'source'
         };
 
-        fromArray.map(from => {
-            const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
-            const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
+        let toMergeSegment = getSegmentByOrder(segments[0],type);
 
-            to.content_clean += " ";
-            to.content_clean += from.content_clean;
-            to.content_raw += " ";
-            to.content_raw += from.content_raw;
+        for (let x = 1; x < segments.length; x++) {
+            const segment = getSegmentByOrder(segments[x],type);
+
+            const fromIndex = getSegmentIndexByOrder(segments[x],type);
+            const fromInverse = getSegmentByIndex(fromIndex, inverse[type]);
+
+            toMergeSegment.content_clean += " ";
+            toMergeSegment.content_clean += segment.content_clean;
+            toMergeSegment.content_raw += " ";
+            toMergeSegment.content_raw += segment.content_raw;
 
             if (!fromInverse.content_clean) {
                 changes.push({
-                    type: from.type,
+                    type: segment.type,
                     action: 'complex_delete',
-                    rif_order: from.order
+                    rif_order: segment.order
                 });
                 changes.push({
                     type: fromInverse.type,
@@ -319,26 +333,37 @@ let ProjectActions = {
                 });
 
             } else {
-                from.content_clean = null;
-                from.content_raw = null;
+                segment.content_clean = null;
+                segment.content_raw = null;
                 changes.push({
-                    type: from.type,
+                    type: segment.type,
                     action: 'update',
-                    rif_order: from.order,
-                    data: from
+                    rif_order: segment.order,
+                    data: segment
                 });
             }
-
-
-        });
-
+        }
         changes.push({
-            type: to.type,
+            type: toMergeSegment.type,
             action: 'update',
-            rif_order: to.order,
-            data: to
+            rif_order: toMergeSegment.order,
+            data: toMergeSegment
         });
 
+        return changes;
+    },
+
+    /**
+     * @param {Array} segments
+     * @param {Object} segments[]
+     * @param {string} segments[].content_clean
+     * @param {string} segments[].content_raw
+     * @param {number} segments[].order
+     * @param {string} type
+     */
+    mergeSegments: function (segments,type) {
+
+        const changes = this.getLogsForMergeSegments(segments,type);
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,

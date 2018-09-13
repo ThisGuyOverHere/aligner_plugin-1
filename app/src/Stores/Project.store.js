@@ -7,6 +7,7 @@ import ProjectConstants from '../Constants/Project.constants';
 import assign from 'object-assign';
 import {List, Set, fromJS} from 'immutable';
 import env from "../Constants/Env.constants";
+import {getSegmentByIndex} from "../Helpers/SegmentUtils.helper";
 
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -77,6 +78,10 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
      * @param {String} changes[].type The type of segments (target or source)
      */
     storeMovements: function (changes) {
+        const inverse = {
+            source: 'target',
+            target: 'source'
+        };
         changes.map(change => {
             let index,
                 prev;
@@ -129,6 +134,25 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     this.job[change.type] = this.job[change.type].push(fromJS(change.data));
                     break;
                 case 'update':
+                    /*if (!change.data.content_clean) {
+                        const inverseSegment = this.job[inverse[change.type]].get(index);
+                        if (!inverseSegment.content_clean) {
+                            changes.push({
+                                    type: inverseSegment.type,
+                                    action: 'complex_delete',
+                                    rif_order: inverseSegment.order
+                                },
+                                {
+                                    type: change.data.type,
+                                    action: 'complex_delete',
+                                    rif_order: change.data.order
+                                });
+                        } else {
+                            this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
+                        }
+                    } else {
+                        this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
+                    }*/
                     this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
                     break;
             }

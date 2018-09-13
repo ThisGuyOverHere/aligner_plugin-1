@@ -34,7 +34,7 @@ const RowTarget = {
             component.alignSegments(log);
 
         } else {
-            ProjectActions.mergeSegments([from.segment], props.row[from.type])
+            ProjectActions.mergeSegments([props.row[from.type].order,from.segment.order],from.segment.type)
         }
     }
 };

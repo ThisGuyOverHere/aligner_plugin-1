@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {Popup} from "semantic-ui-react";
+import ProjectActions from "../../../../../../Actions/Project.actions";
 
 class ToolbarActionsMergeAndAlignComponent extends Component {
 
@@ -41,7 +42,7 @@ class ToolbarActionsMergeAndAlignComponent extends Component {
     }
 
     onClick = () => {
-        const type = this.props.selection.source.count > 0 ? 'source' : 'target';
+        ProjectActions.mergeAndAlignSegments(this.props.selection);
     };
 
 }
