@@ -88,23 +88,37 @@ class ApiController extends AlignerController {
     }
 
     public function split(){
-
-        //TODO Split in multiple positions
         $order = $this->params['order'];
         $job = $this->params['id_job'];
         $type = $this->params['type'];
         $other_order = $this->params['other_order'];
         $other_type =  ($type == 'target') ? 'source' : 'target';
+        $positions = $this->params['positions'];
 
-        $position = $this->params['positions'][0];
+        return $this->recursive_split($order, $job, $type, $other_order, $other_type, $positions);
+
+    }
+
+    public function recursive_split($order, $job, $type, $other_order, $other_type, $positions){
+
+        //TODO Split in multiple positions
+
+        if(empty($positions)){
+            return true;
+        }
+
+        $position = array_shift($positions);
+        foreach ($positions as $key => $value){
+            $positions[$key] -= $position;
+        }
 
         //Gets from 0 since they are returned as an array
         $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)[0]->toArray();
         $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type)[0]->toArray();
         $other_match = Segments_SegmentMatchDao::getSegmentMatch($other_order, $job, $other_type)[0]->toArray();
 
-        $avg_order = ($split_match['order'] + $split_match['next'])/2;
-        $other_avg = ($other_match['order'] + $other_match['next'])/2;
+        $avg_order = $split_match['order'] + ($split_match['next'] - $split_match['order'])/2;
+        $other_avg = $other_match['order'] + ($other_match['next'] - $other_match['order'])/2;
         $first_raw = substr($split_segment['content_raw'],0, $position);
         $second_raw = substr($split_segment['content_raw'], $position);
         $first_hash = md5($first_raw);
@@ -117,6 +131,7 @@ class ApiController extends AlignerController {
 
         $new_segment = $split_segment;
         $new_match = $split_match;
+        $null_match = $other_match;
 
         $firstSegmentQuery = "UPDATE segments
         SET content_raw = ?,
@@ -166,13 +181,15 @@ class ApiController extends AlignerController {
         $new_match['segment_id'] = $new_id[0];
         $new_match['order'] = $avg_order;
 
-        $null_match = $new_match;
         $null_match['segment_id'] = null;
-        $null_match['type'] = $other_type;
+        $null_match['order'] = $other_avg;
 
         $segmentsMatchDao = new Segments_SegmentMatchDao;
         $segmentsMatchDao->createList( array( $new_match, $null_match ) );
 
+        $this->recursive_split($avg_order, $job, $type, $other_avg, $other_type, $positions);
+
+        return true;
     }
 
     public function move(){
