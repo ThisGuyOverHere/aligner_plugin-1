@@ -58,4 +58,15 @@ class AlignUtils
         return $wordCount;
     }
 
+    public static function _getNewOrderValue($first_order, $next_order){
+        if($first_order && $next_order){
+            return $first_order + ( $next_order - $first_order )/2;
+        } else if(!$first_order && !$next_order) {
+            return null;
+        } else {
+            $order = ($first_order == null) ? $next_order/2 : $first_order + 1000000000;
+            return $order;
+        }
+    }
+
 }
