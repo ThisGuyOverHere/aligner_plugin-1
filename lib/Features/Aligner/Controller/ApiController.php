@@ -301,4 +301,98 @@ class ApiController extends AlignerController {
 
     }
 
+    public function addGap(){
+        $order = $this->params['order'];
+        $job = $this->params['id_job'];
+        $type = $this->params['type'];
+        $other_type = ($type == 'target') ? 'source' : 'target';
+
+        $gap_segment = array();
+        $balance_segment = array();
+
+        $previous_segment = Segments_SegmentMatchDao::getPreviousSegmentMatch($order, $job, $type);
+        $previous_order = (empty($previous_segment)) ? 0 : $previous_segment['order'];
+
+        $gap_segment['order'] = AlignUtils::_getNewOrderValue($previous_order,$order);
+        $gap_segment['next'] = $order;
+        $gap_segment['segment_id'] = null;
+        $gap_segment['score'] = 100;
+        $gap_segment['id_job'] = $job;
+        $gap_segment['type'] = $type;
+
+        $operations = array();
+        $operations[] = array(
+            'type' => $type,
+            'action' => 'insert',
+            'order' => $gap_segment['order'],
+            'data' => null
+        );
+
+        $last_segment = Segments_SegmentMatchDao::getLastSegmentMatch($job, $other_type);
+        $balance_segment['order'] = $last_segment['order'] + 1000000000;
+        $balance_segment['next'] = null;
+        $balance_segment['segment_id'] = null;
+        $balance_segment['score'] = 100;
+        $balance_segment['id_job'] = $job;
+        $balance_segment['type'] = $other_type;
+
+        $operations[] = array(
+            'type' => $other_type,
+            'action' => 'insert',
+            'order' => $balance_segment['order'],
+            'data' => null
+        );
+
+
+        if(!empty($previous_segment)){
+            $gapQuery = "UPDATE segments_match as sm
+            SET next = ?
+            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+            $gapParams = array($gap_segment['order'], $previous_order, $job, $type);
+
+            $previous_segment['next'] = $gap_segment['order'];
+
+            $operations[] = array(
+                'type' => $type,
+                'action' => 'update',
+                'order' => $previous_segment['order'],
+                'data' => $previous_segment
+            );
+
+        }
+
+        $balanceQuery = "UPDATE segments_match as sm
+            SET next = ?
+            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $balanceParams = array($balance_segment['order'], $last_segment['order'], $job, $other_type);
+
+        $last_segment['next'] = $balance_segment['order'];
+
+        $operations[] = array(
+            'type' => $other_type,
+            'action' => 'update',
+            'order' => $last_segment['order'],
+            'data' => $last_segment
+        );
+
+        $segmentsMatchDao = new Segments_SegmentMatchDao;
+        $segmentsMatchDao->createList( array($gap_segment,$balance_segment) );
+
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $conn->beginTransaction();
+            if(!empty($previous_segment)){
+                $stm = $conn->prepare( $gapQuery );
+                $stm->execute( $gapParams );
+            }
+            $stm = $conn->prepare( $balanceQuery );
+            $stm->execute( $balanceParams );
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Order no. $order ", -2 );
+        }
+
+        return $this->response->json($operations);
+    }
 }
