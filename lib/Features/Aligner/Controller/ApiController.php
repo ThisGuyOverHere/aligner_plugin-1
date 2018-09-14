@@ -172,9 +172,9 @@ class ApiController extends AlignerController {
             //create new segments
             $new_segment['id'] = $id;
             $new_segment['content_raw'] = array_shift($raw_contents);
-            $new_segment['content_clean'] = AlignUtils::_cleanSegment($new_segment['content_raw']);
+            $new_segment['content_clean'] = AlignUtils::_cleanSegment($new_segment['content_raw'],$new_segment['language_code']);
             $new_segment['content_hash'] = md5($new_segment['content_raw']);
-            $new_segment['raw_word_count'] = AlignUtils::_countWordsInSegment($new_segment['content_raw']);
+            $new_segment['raw_word_count'] = AlignUtils::_countWordsInSegment($new_segment['content_raw'],$new_segment['language_code']);
             $new_segments[] = $new_segment;
 
             //create new matches
