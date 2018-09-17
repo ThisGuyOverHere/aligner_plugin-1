@@ -238,8 +238,6 @@ class ApiController extends AlignerController {
         $segmentsMatchDao = new Segments_SegmentMatchDao;
         $segmentsMatchDao->createList( array_merge($new_matches,$new_null_matches) );
 
-        //$this->recursive_split($avg_order, $job, $type, $inverse_avg, $inverse_type, $positions);
-
         try {
             $conn = NewDatabase::obtain()->getConnection();
             $conn->beginTransaction();
@@ -267,9 +265,8 @@ class ApiController extends AlignerController {
         $target_end   = ($type == 'target') ? $order_end : $inverse_order_end;
 
         $segments =  array_merge(array($split_segment),$new_segments);
-        $empty_array = array_fill(0,count($segments)-1, null);
-        $sourceSegments = ($type == 'source') ? $segments : array_merge(array($inverse_segment),$empty_array);
-        $targetSegments = ($type == 'target') ? $segments : array_merge(array($inverse_segment),$empty_array);
+        $sourceSegments = ($type == 'source') ? $segments : array_merge(array($inverse_segment),$null_segments);
+        $targetSegments = ($type == 'target') ? $segments : array_merge(array($inverse_segment),$null_segments);
 
         $source[] = array(
             'type' => 'source',
