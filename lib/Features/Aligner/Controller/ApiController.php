@@ -104,8 +104,8 @@ class ApiController extends AlignerController {
         $order = $this->params['order'];
         $job = $this->params['id_job'];
         $type = $this->params['type'];
-        $other_order = $this->params['other_order'];
-        $other_type =  ($type == 'target') ? 'source' : 'target';
+        $inverse_order = $this->params['inverse_order'];
+        $inverse_type =  ($type == 'target') ? 'source' : 'target';
         $positions = $this->params['positions'];
 
         if(empty($positions)){
@@ -114,20 +114,20 @@ class ApiController extends AlignerController {
 
         //Gets from 0 since they are returned as an array
         $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)->toArray();
-        $other_segment = Segments_SegmentDao::getFromOrderJobIdAndType($other_order, $job, $type)->toArray();
+        $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType($inverse_order, $job, $type)->toArray();
         $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type)->toArray();
-        $other_match = Segments_SegmentMatchDao::getSegmentMatch($other_order, $job, $other_type)->toArray();
+        $inverse_match = Segments_SegmentMatchDao::getSegmentMatch($inverse_order, $job, $inverse_type)->toArray();
 
         $order_start = $split_match['order'];
         $order_end = $split_match['next'];
-        $other_order_start = $split_match['order'];
-        $other_order_end = $split_match['next'];
+        $inverse_order_start = $split_match['order'];
+        $inverse_order_end = $split_match['next'];
 
         $avg_order = AlignUtils::_getNewOrderValue($order_start,$order_end);
-        $other_avg = AlignUtils::_getNewOrderValue($other_order_start,$other_order_end);
+        $inverse_avg = AlignUtils::_getNewOrderValue($inverse_order_start,$inverse_order_end);
 
         $split_segment['next'] = $avg_order;
-        $other_segment['next'] = $other_avg;
+        $inverse_segment['next'] = $inverse_avg;
 
         $raw_contents = array();
         $full_raw = $split_segment['content_raw'];
@@ -144,7 +144,7 @@ class ApiController extends AlignerController {
 
         $new_segment = $split_segment;
         $new_match = $split_match;
-        $null_match = $other_match;
+        $null_match = $inverse_match;
 
         $firstSegmentQuery = "UPDATE segments
         SET content_raw = ?,
@@ -164,10 +164,10 @@ class ApiController extends AlignerController {
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $firstMatchParams = array($avg_order, $order, $job, $type);
 
-        $otherMatchQuery = "UPDATE segments_match as sm
+        $inverseMatchQuery = "UPDATE segments_match as sm
         SET next = ?
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $otherMatchParams = array($other_avg, $other_order, $job, $other_type);
+        $inverseMatchParams = array($inverse_avg, $inverse_order, $job, $inverse_type);
 
 
         //New segment creation
@@ -199,12 +199,12 @@ class ApiController extends AlignerController {
 
             //create new null matches
             $null_match['segment_id'] = null;
-            $null_match['order'] = $other_avg;
+            $null_match['order'] = $inverse_avg;
 
             //If we split the last segment we add new next values for the new segments
-            $other_avg = ($other_match['next'] != null) ? AlignUtils::_getNewOrderValue($null_match['order'],$other_match['next']) : $other_avg + 1000000000;
+            $inverse_avg = ($inverse_match['next'] != null) ? AlignUtils::_getNewOrderValue($null_match['order'],$inverse_match['next']) : $inverse_avg + 1000000000;
 
-            $null_match['next'] = ($key != count($new_id)-1) ? $other_avg : $other_match['next'];
+            $null_match['next'] = ($key != count($new_id)-1) ? $inverse_avg : $inverse_match['next'];
             $new_null_matches[] = $null_match;
 
             $new_segments[] = $new_segment;
@@ -216,7 +216,7 @@ class ApiController extends AlignerController {
         $segmentsMatchDao = new Segments_SegmentMatchDao;
         $segmentsMatchDao->createList( array_merge($new_matches,$new_null_matches) );
 
-        //$this->recursive_split($avg_order, $job, $type, $other_avg, $other_type, $positions);
+        //$this->recursive_split($avg_order, $job, $type, $inverse_avg, $inverse_type, $positions);
 
         try {
             $conn = NewDatabase::obtain()->getConnection();
@@ -225,8 +225,8 @@ class ApiController extends AlignerController {
             $stm->execute( $firstSegmentParams );
             $stm = $conn->prepare( $firstMatchQuery );
             $stm->execute( $firstMatchParams );
-            $stm = $conn->prepare( $otherMatchQuery );
-            $stm->execute( $otherMatchParams );
+            $stm = $conn->prepare( $inverseMatchQuery );
+            $stm->execute( $inverseMatchParams );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -239,15 +239,15 @@ class ApiController extends AlignerController {
         $target = array();
 
         //Check which segments to retrieve for source/target
-        $source_start = ($type == 'source') ? $order_start : $other_order_start;
-        $source_end   = ($type == 'source') ? $order_end : $other_order_end;
-        $target_start = ($type == 'target') ? $order_start : $other_order_start;
-        $target_end   = ($type == 'target') ? $order_end : $other_order_end;
+        $source_start = ($type == 'source') ? $order_start : $inverse_order_start;
+        $source_end   = ($type == 'source') ? $order_end : $inverse_order_end;
+        $target_start = ($type == 'target') ? $order_start : $inverse_order_start;
+        $target_end   = ($type == 'target') ? $order_end : $inverse_order_end;
 
         $segments =  array_merge(array($split_segment),$new_segments);
         $empty_array = array_fill(0,count($segments)-1, null);
-        $sourceSegments = ($type == 'source') ? $segments : array_merge(array($other_segment),$empty_array);
-        $targetSegments = ($type == 'target') ? $segments : array_merge(array($other_segment),$empty_array);
+        $sourceSegments = ($type == 'source') ? $segments : array_merge(array($inverse_segment),$empty_array);
+        $targetSegments = ($type == 'target') ? $segments : array_merge(array($inverse_segment),$empty_array);
 
         $source[] = array(
             'type' => 'source',
