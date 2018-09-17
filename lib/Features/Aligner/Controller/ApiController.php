@@ -318,6 +318,75 @@ class ApiController extends AlignerController {
 
     public function move(){
 
+        $order = $this->params['order'];
+        $job = $this->params['id_job'];
+        $type = $this->params['type'];
+        $inverse_type = ($type == 'target') ? 'source' : 'target';
+        $destination = $this->params['destination'];
+        $inverse_destination = $this->params['inverse_destination'];
+
+        $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType($order,$job,$type)->toArray();
+
+        //$destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination, $job, $type);
+        //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $job, $type);
+
+        //Create new match between destination and destination->prev with starting segment
+        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($destination, $job, $type);
+        if(!empty($referenceMatch)){
+            $referenceMatch = $referenceMatch->toArray();
+        }
+        $reference_order = (!empty($referenceMatch)) ? $referenceMatch['order'] : 0;
+        $new_order = AlignUtils::_getNewOrderValue($reference_order,$destination);
+        $new_match = $referenceMatch;
+        $new_match['order'] = $new_order;
+        $new_match['next'] = $destination;
+        $new_match['score'] = 100;
+        $new_match['segment_id'] = $movingSegment['id'];
+
+        //Create a new empty match on the opposite side of the row
+        $inverseReference = Segments_SegmentMatchDao::getSegmentMatch($inverse_destination, $job, $inverse_type)->toArray();
+        $new_inverse_order = AlignUtils::_getNewOrderValue($inverseReference['order'], $inverseReference['next']);
+        $new_gap = $inverseReference;
+        $new_gap['order'] = $new_inverse_order;
+        $new_gap['next'] = $inverseReference['next'];
+        $new_gap['score'] = 100;
+        $new_gap['segment_id'] = null;
+
+        //Set original match to empty and edit old next positions
+
+        $moveUpdateQuery = "UPDATE segments_match as sm
+            SET sm.segment_id = NULL
+            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $moveParams = array($order, $job, $type);
+
+        $nextUpdateQuery = "UPDATE segments_match as sm
+            SET sm.next = ?
+            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $nextParams = array($new_order, $referenceMatch['order'], $job, $type);
+
+        $gapUpdateQuery = "UPDATE segments_match as sm
+            SET sm.next = ?
+            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $gapParams = array($new_inverse_order, $inverseReference['order'], $job, $inverse_type);
+
+        $segmentsMatchDao = new Segments_SegmentMatchDao;
+        $segmentsMatchDao->createList( array( $new_match,$new_gap ) );
+
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $conn->beginTransaction();
+            $stm = $conn->prepare( $moveUpdateQuery );
+            $stm->execute( $moveParams );
+            $stm = $conn->prepare( $nextUpdateQuery );
+            $stm->execute( $nextParams );
+            $stm = $conn->prepare( $gapUpdateQuery );
+            $stm->execute( $gapParams );
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $moveParams ", -2 );
+        }
+
     }
 
     public function addGap(){
