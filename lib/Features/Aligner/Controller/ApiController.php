@@ -35,13 +35,21 @@ class ApiController extends AlignerController {
         $clean_merge = $first_segment['content_clean'];
         $merge_count = $first_segment['raw_word_count'];
 
-        foreach ($segments as $segment) {
+        foreach ($segments as $key => $segment) {
             $raw_merge .= " ".$segment['content_raw'];
             $clean_merge .= " ".$segment['content_clean'];
             $merge_count += $segment['raw_word_count'];
             $deleted_ids[] = $segment['id'];
             $deleted_orders[] = $segment['order'];
+            $segments[$key]['order'] = (int) $segments[$key]['order'];
+            $segments[$key]['next'] = (int) $segments[$key]['next'];
         }
+
+        $first_segment['content_raw'] = $raw_merge;
+        $first_segment['content_clean'] = $clean_merge;
+        $first_segment['raw_word_count'] = $merge_count;
+        $first_segment['order'] = (int) $first_segment['order'];
+        $first_segment['next'] = (int) $first_segment['next'];
 
         $hash_merge = md5($raw_merge);
 
@@ -76,22 +84,22 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $segmentParams", -2 );
         }
 
         $operations = array();
         $operations[] = array(
             'type' => $type,
             'action' => 'update',
-            'order' => $first_segment['order'],
-            'data' => Segments_SegmentDao::getFromOrderJobIdAndType($first_segment['order'], $job, $type)
+            'rif_order' => $first_segment['order'],
+            'data' => $first_segment
         );
 
         foreach ($deleted_orders as $order){
             $operations[] = array(
                 'type' => $type,
                 'action' => 'delete',
-                'order' => $order
+                'rif_order' => (int) $order
             );
         }
 
@@ -126,6 +134,8 @@ class ApiController extends AlignerController {
         $avg_order = AlignUtils::_getNewOrderValue($order_start,$order_end);
         $inverse_avg = AlignUtils::_getNewOrderValue($inverse_order_start,$inverse_order_end);
 
+        $split_segment['order'] = (int) $split_segment['order'];
+        $inverse_segment['order'] = (int) $split_segment['order'];
         $split_segment['next'] = $avg_order;
         $inverse_segment['next'] = $inverse_avg;
 
@@ -188,13 +198,13 @@ class ApiController extends AlignerController {
             //create new matches
             $new_match['segment_id'] = $id;
             $new_match['order'] = $avg_order;
-            $new_segment['order'] = $new_match['order'];
+            $new_segment['order'] = (int) $new_match['order'];
 
             //If we split the last segment we add new next values for the new segments
             $avg_order = ($split_match['next'] != null) ? AlignUtils::_getNewOrderValue($new_match['order'], $split_match['next']) : $avg_order + 1000000000;
 
-            $new_match['next'] = ($key != count($new_id)-1) ? $avg_order : $split_match['next'];
-            $new_segment['next'] = $new_match['next'];
+            $new_match['next'] = ($key != count($new_id)-1) ? $avg_order : (int)$split_match['next'];
+            $new_segment['next'] = (int) $new_match['next'];
             $new_matches[] = $new_match;
 
             //create new null matches
@@ -204,7 +214,7 @@ class ApiController extends AlignerController {
             //If we split the last segment we add new next values for the new segments
             $inverse_avg = ($inverse_match['next'] != null) ? AlignUtils::_getNewOrderValue($null_match['order'],$inverse_match['next']) : $inverse_avg + 1000000000;
 
-            $null_match['next'] = ($key != count($new_id)-1) ? $inverse_avg : $inverse_match['next'];
+            $null_match['next'] = ($key != count($new_id)-1) ? $inverse_avg : (int) $inverse_match['next'];
             $new_null_matches[] = $null_match;
 
             $new_segments[] = $new_segment;
@@ -252,42 +262,42 @@ class ApiController extends AlignerController {
         $source[] = array(
             'type' => 'source',
             'action' => 'update',
-            'order' => $source_start,
+            'rif_order' => (int) $source_start,
             'data' => array_shift($sourceSegments)
         );
         $source_order = $source_start;
 
         foreach ($sourceSegments as $sourceSegment) {
 
-            $source_order = AlignUtils::_getNewOrderValue($source_order,$source_end);
-
             $source[] = array(
                 'type' => 'source',
-                'action' => 'insert',
-                'order' => $source_order,
+                'action' => 'create',
+                'rif_order' => (int) $source_order,
                 'data' => $sourceSegment
             );
+
+            $source_order = AlignUtils::_getNewOrderValue($source_order,$source_end);
 
         }
 
         $target[] = array(
             'type' => 'target',
             'action' => 'update',
-            'order' => $target_start,
+            'rif_order' => (int) $target_start,
             'data' => array_shift($targetSegments)
         );
         $target_order = $target_start;
 
         foreach ($targetSegments as $targetSegment) {
 
-            $target_order = AlignUtils::_getNewOrderValue($target_order,$target_end);
-
             $target[] = array(
                 'type' => 'target',
-                'action' => 'insert',
-                'order' => $target_order,
+                'action' => 'create',
+                'rif_order' => (int)$target_order,
                 'data' => $targetSegment
             );
+
+            $target_order = AlignUtils::_getNewOrderValue($target_order,$target_end);
 
         }
 
@@ -307,56 +317,57 @@ class ApiController extends AlignerController {
         $type = $this->params['type'];
         $other_type = ($type == 'target') ? 'source' : 'target';
 
-        $gap_segment = array();
-        $balance_segment = array();
+        $gap_match = array();
+        $balance_match = array();
 
-        $previous_segment = Segments_SegmentMatchDao::getPreviousSegmentMatch($order, $job, $type);
-        $previous_order = (empty($previous_segment)) ? 0 : $previous_segment['order'];
+        $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch($order, $job, $type);
+        $previous_order = (empty($previous_match)) ? 0 : $previous_match['order'];
 
-        $gap_segment['order'] = AlignUtils::_getNewOrderValue($previous_order,$order);
-        $gap_segment['next'] = $order;
-        $gap_segment['segment_id'] = null;
-        $gap_segment['score'] = 100;
-        $gap_segment['id_job'] = $job;
-        $gap_segment['type'] = $type;
+        $gap_match['order'] = AlignUtils::_getNewOrderValue($previous_order,$order);
+        $gap_match['next'] = $order;
+        $gap_match['segment_id'] = null;
+        $gap_match['score'] = 100;
+        $gap_match['id_job'] = $job;
+        $gap_match['type'] = $type;
 
         $operations = array();
         $operations[] = array(
             'type' => $type,
-            'action' => 'insert',
-            'order' => $gap_segment['order'],
+            'action' => 'create',
+            'order' => (int) $previous_order,
             'data' => null
         );
 
-        $last_segment = Segments_SegmentMatchDao::getLastSegmentMatch($job, $other_type);
-        $balance_segment['order'] = $last_segment['order'] + 1000000000;
-        $balance_segment['next'] = null;
-        $balance_segment['segment_id'] = null;
-        $balance_segment['score'] = 100;
-        $balance_segment['id_job'] = $job;
-        $balance_segment['type'] = $other_type;
+        $last_match = Segments_SegmentMatchDao::getLastSegmentMatch($job, $other_type);
+        $last_match['order'] = (int) $last_match['order'];
+        $balance_match['order'] = $last_match['order'] + 1000000000;
+        $balance_match['next'] = null;
+        $balance_match['segment_id'] = null;
+        $balance_match['score'] = 100;
+        $balance_match['id_job'] = $job;
+        $balance_match['type'] = $other_type;
 
         $operations[] = array(
             'type' => $other_type,
-            'action' => 'insert',
-            'order' => $balance_segment['order'],
+            'action' => 'push',
             'data' => null
         );
 
 
-        if(!empty($previous_segment)){
+        if(!empty($previous_match)){
+            $previous_match['order'] = (int) $previous_match['order'];
             $gapQuery = "UPDATE segments_match as sm
             SET next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-            $gapParams = array($gap_segment['order'], $previous_order, $job, $type);
+            $gapParams = array($gap_match['order'], $previous_order, $job, $type);
 
-            $previous_segment['next'] = $gap_segment['order'];
+            $previous_match['next'] = (int) $gap_match['order'];
 
             $operations[] = array(
                 'type' => $type,
                 'action' => 'update',
-                'order' => $previous_segment['order'],
-                'data' => $previous_segment
+                'order' => (int) $previous_match['order'],
+                'data' => $previous_match
             );
 
         }
@@ -364,24 +375,24 @@ class ApiController extends AlignerController {
         $balanceQuery = "UPDATE segments_match as sm
             SET next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $balanceParams = array($balance_segment['order'], $last_segment['order'], $job, $other_type);
+        $balanceParams = array($balance_match['order'], $last_match['order'], $job, $other_type);
 
-        $last_segment['next'] = $balance_segment['order'];
+        $last_match['next'] = (int) $balance_match['order'];
 
         $operations[] = array(
             'type' => $other_type,
             'action' => 'update',
-            'order' => $last_segment['order'],
-            'data' => $last_segment
+            'order' => (int) $last_match['order'],
+            'data' => $last_match
         );
 
         $segmentsMatchDao = new Segments_SegmentMatchDao;
-        $segmentsMatchDao->createList( array($gap_segment,$balance_segment) );
+        $segmentsMatchDao->createList( array($gap_match,$balance_match) );
 
         try {
             $conn = NewDatabase::obtain()->getConnection();
             $conn->beginTransaction();
-            if(!empty($previous_segment)){
+            if(!empty($previous_match)){
                 $stm = $conn->prepare( $gapQuery );
                 $stm->execute( $gapParams );
             }
