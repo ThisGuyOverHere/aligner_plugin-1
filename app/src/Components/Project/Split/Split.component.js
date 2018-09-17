@@ -7,6 +7,11 @@ import SplitDivisor from "./SplitDivisor/SplitDivisor.component";
 class SplitComponent extends Component {
     static propTypes = {
         segment: PropTypes.object,
+        inverseSegmentOrder: PropTypes.number,
+        jobConf: PropTypes.shape({
+            password: PropTypes.string,
+            id: PropTypes.any
+        })
     };
 
     constructor(props) {
@@ -218,8 +223,16 @@ class SplitComponent extends Component {
                 positions.push(position);
             }
         });
-
-        ProjectActions.splitSegment(this.props.segment,positions);
+        const data = {
+            type: this.props.segment.type,
+            order: this.props.segment.order,
+            inverseOrder: this.props.inverseSegmentOrder,
+            positions: positions
+        };
+        ProjectActions.splitSegment(this.props.jobConf.id, this.props.jobConf.password,data);
+        setTimeout(()=>{
+            ProjectActions.openSegmentToSplit(false);
+        },0)
     }
 }
 

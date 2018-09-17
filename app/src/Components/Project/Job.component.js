@@ -3,8 +3,7 @@ import ProjectStore from "../../Stores/Project.store";
 import ProjectConstants from "../../Constants/Project.constants"
 import ProjectActions from '../../Actions/Project.actions';
 import {DragDropContext} from 'react-dnd';
-import { default as TouchBackend } from 'react-dnd-touch-backend';
-
+import {default as TouchBackend} from 'react-dnd-touch-backend';
 
 
 import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
@@ -24,7 +23,11 @@ class JobComponent extends Component {
                     password: this.props.match.params.password,
                     id: this.props.match.params.jobID
                 },
-                rows: []
+                rows: [],
+                rowsDictionary: {
+                    source: {},
+                    target: {}
+                }
             },
             animateRowToOrder: {
                 type: null,
@@ -103,7 +106,9 @@ class JobComponent extends Component {
                         {this.renderItems(this.state.job.rows)}
                     </div>
                     <AdvancedDragLayer/>
-                    {this.state.splitModalStatus &&  <SplitComponent segment = {this.state.segmentToSplit}/>}
+                    {this.state.splitModalStatus &&
+                    <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
+                                    inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
                     <ToolbarComponent/>
                 </div>
             </div>
@@ -111,12 +116,13 @@ class JobComponent extends Component {
     }
 
     setSegmentToSplit = (segment) => {
-        if(segment){
+        if (segment) {
             this.setState({
                 segmentToSplit: segment,
+                inverseOrder: this.state.job.rowsDictionary[segment.type][segment.order],
                 splitModalStatus: true
             });
-        }else{
+        } else {
             this.setState({
                 segmentToSplit: null,
                 splitModalStatus: false
@@ -127,16 +133,24 @@ class JobComponent extends Component {
 
     setRows = (job) => {
         let rows = [];
+        let previousJob = this.state.job;
+        let rowsDictionary = {
+            source: {},
+            target: {}
+        };
         job.source.map((e, index) => {
+            rowsDictionary.source[e.order] = job.target[index].order;
+            rowsDictionary.target[job.target[index].order] = e.order;
             rows.push({
                 source: e,
                 target: job.target[index]
             });
         });
+
+        previousJob.rows = rows;
+        previousJob.rowsDictionary = rowsDictionary;
         this.setState({
-            job: {
-                rows: rows
-            }
+            job: previousJob
         })
     };
 
@@ -152,11 +166,11 @@ class JobComponent extends Component {
                     count: this.state.selection.count
                 };
                 values.push(<RowWrapperComponent key={index}
-                                          index={index}
-                                          enableDrag={enableDrag}
-                                          selection={selection}
-                                          mergeStatus={this.state.mergeStatus}
-                                          row={row}/>);
+                                                 index={index}
+                                                 enableDrag={enableDrag}
+                                                 selection={selection}
+                                                 mergeStatus={this.state.mergeStatus}
+                                                 row={row}/>);
                 return row;
             });
         }
@@ -169,7 +183,7 @@ class JobComponent extends Component {
         })
     };
 
-    storeSelection = (selection) =>{
+    storeSelection = (selection) => {
         this.setState({
             selection: selection
         })

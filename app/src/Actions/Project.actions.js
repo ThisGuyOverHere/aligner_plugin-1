@@ -2,7 +2,7 @@ import ProjectStore from "../Stores/Project.store";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
-import {httpAlignJob, httpGetSegments} from "../HttpRequests/Alignment.http";
+import {httpAlignJob, httpGetSegments, httpSplitSegment} from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
 import {avgOrder, getSegmentByIndex, getSegmentByOrder, getSegmentIndexByOrder} from "../Helpers/SegmentUtils.helper";
 
@@ -187,6 +187,7 @@ let ProjectActions = {
 
     },
 
+    //todo: move to utilis
     getLogsForMergeSegments: function (segments, type) {
         let changes = [];
         const inverse = {
@@ -346,17 +347,33 @@ let ProjectActions = {
     },
 
     /**
-     * @param {Object} segment The segment to split
-     * @param {Array} positions An array of chars positions where split segment string content
-     * @param {Number} positions[] the position
+     * @param {Number} jobID
+     * @param {String} jobPassword
+     * @param {Object} data
+     * @param {String} data.type
+     * @param {Number} data.order
+     * @param {Number} data.inverseOrder
+     * @param {Array} data.positions
      */
 
-    splitSegment: function (segment, positions) {
-        positions.push(segment.content_raw.length);
-        let contentSegments = [];
-        positions.map((e, index) => {
-            contentSegments.push(segment.content_raw.substring((+positions[index - 1] + 1 || 0), +e + 1))
-        });
+    splitSegment: function (jobID,jobPassword,data) {
+
+        httpSplitSegment(jobID,jobPassword,data).then(response =>{
+            if(!response.errors){
+                const logs = [...response.data.source,...response.data.target];
+                AppDispatcher.dispatch({
+                    actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                    changes: logs
+                });
+            }else{
+                response.errors.map(e=>{
+                    console.error(e.message);
+                })
+            }
+
+        }, error =>{
+            console.error(error)
+        })
     }
 };
 
