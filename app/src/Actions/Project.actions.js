@@ -51,125 +51,61 @@ let ProjectActions = {
             mockToInverse = Object.assign({}, env.segmentModel);
 
         const inverse = {
-                source: 'target',
-                target: 'source'
-            },
-            toOrder = tmpJob[log.type].getIn([toIndex, 'order']),
-            toNextOrder = tmpJob[log.type].getIn([+toIndex + 1, 'order']),
-            toInverseOrder = tmpJob[inverse[log.type]].getIn([toIndex, 'order']),
-            toNextInverseOrder = tmpJob[inverse[log.type]].getIn([+toIndex + 1, 'order']),
-            fromOrder = tmpJob[log.type].getIn([fromIndex, 'order']),
-            fromNextOrder = tmpJob[log.type].getIn([+fromIndex + 1, 'order']),
-            fromInverseOrder = tmpJob[inverse[log.type]].getIn([fromIndex, 'order']),
-            fromNextInverseOrder = tmpJob[inverse[log.type]].getIn([+fromIndex + 1, 'order']);
-
+            source: 'target',
+            target: 'source'
+        };
 
         /*
-        * 1. Creo elemento successivo all'arrivo con il contenuto di quello di arrivo (prima dello spostamento)
-        * 2. Creo elemento in corrispondenza del type opposto del punto 1
-        * 3. Cambio il next dell'elemento precedente al punto 2
-        * 4. Aggiorno elemento di arrivo mettendoci il segmento draggato
-        * 5. Aggiorno elemento di partenza creando un buco
-        * (se c'è un buco dall'altra parte non lo creo, ma cancello entrambi i segmenti)
+        * 1. creo un buco in corrispondenza della partenza
+        * 2. sostituisco l'elemento in posizione di arrivo
+        * 3. creo un elemento sotto la posizione di arrivo nella posizione opposta ed un buco nella stessa posizione
+        *
         * */
 
-
-        /******
-         *  1 *
-         ******/
-
-        changeData = tmpJob[log.type].get(toIndex).toJS();
-
-        //controllo se l'elemento in toIndex non sia vuoto, nel caso sia vuoto salto il punto 1 e 2 e 3
-        //lo salto perchè quando si rimpiazza un buco non bisogna spostare l'elemento in posizione toIndex (i buchi si rimpiazzano e basta)
-        if (changeData.content_clean !== null) {
-
-            changeData.order = avgOrder(toOrder, toNextOrder);
-            changeData.next = toNextOrder;
-            changes.push({
-                type: log.type,
-                action: 'create',
-                rif_order: toNextOrder,
-                data: changeData
-            });
-
-            /******
-             *  2 *
-             ******/
-            // creo un buco in corrispondenza dell'elemento spostato
-            mockFrom.order = avgOrder(toInverseOrder, toNextInverseOrder);
-            mockFrom.next = toNextInverseOrder;
-            changes.push({
-                type: inverse[log.type],
-                action: 'create',
-                rif_order: toNextInverseOrder,
-                data: mockFrom
-            });
-
-            /******
-             *  3 *
-             ******/
-            //cambio il next dell'elemento precedente al buco creato al punto 2
-            changeData = tmpJob[inverse[log.type]].get(toIndex).toJS();
-            changeData.next = mockFrom.order;
-            changes.push({
-                type: inverse[log.type],
-                action: 'update',
-                rif_order: toInverseOrder,
-                data: changeData
-            });
-        }
-
-
-        /******
-         *  4 *
-         ******/
-        // sostituisco l'elemento draggato (fromIndex) con quello nella posizione toIndex
-        changeData = tmpJob[log.type].get(fromIndex).toJS();
-        changeData.order = toOrder;
-        changeData.next = tmpJob[log.type].getIn([toIndex, 'next']);
-
-        //se l'elemento del punto 1 è stato creato, il punto due avrà un next diverso
-        //se invece c'era un buco nel punto 1 non cambia nulla, poichè non abbiamo creato nuovi elementi successivi
-        if (changes.length > 0) {
-            changeData.next = changes[0].data.order
-        }
+        //1
         changes.push({
             type: log.type,
             action: 'update',
-            rif_order: toOrder,
-            data: changeData
+            isEmptySegment: true,
+            rif_order: log.from
         });
 
-        /******
-         *  5 *
-         ******/
-        //se l'elemento opposto al fromIndex non è vuoto creo il buco altrimenti cancello entrambi gli elementi
-        // buco / buco si annulla
-        if (tmpJob[inverse[log.type]].getIn([fromIndex, 'content_clean'])) {
-            mockToInverse.order = fromOrder;
-            mockToInverse.next = tmpJob[log.type].getIn([fromIndex, 'next']);
-            mockToInverse.type = log.type
+        let segmentToPosition = tmpJob[log.type].get(toIndex).toJS();
+        let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1).toJS();
+        let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
+        let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1).toJS();
+
+        segmentfromPosition.order = segmentToPosition.order;
+        segmentfromPosition.next = segmentToPosition.next;
+
+        //2
+        changes.push({
+            type: log.type,
+            action: 'update',
+            rif_order: log.to,
+            data: segmentfromPosition
+        });
 
 
+        if (segmentToPosition.content_clean) {
+            //3
+            segmentToPosition.order = avgOrder(segmentToPosition.order, segmentToPosition.next);
+            segmentToPosition.next = segmentNextToPosition.order;
             changes.push({
                 type: log.type,
-                action: 'update',
-                rif_order: fromOrder,
-                data: mockToInverse
+                action: 'create',
+                rif_order: segmentNextToPosition.order,
+                data: segmentToPosition
             });
-        } else {
-            changes.push({
-                type: log.type,
-                action: 'delete',
-                rif_order: fromOrder
-            });
+
             changes.push({
                 type: inverse[log.type],
-                action: 'delete',
-                rif_order: fromInverseOrder
+                action: 'create',
+                rif_order: inverseSegmentToPosition.order,
+                isEmptySegment: true
             });
         }
+
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
@@ -184,59 +120,15 @@ let ProjectActions = {
      * @param {String} log.type The type of segment: source or target
      */
     createSpaceSegment: function (log) {
-        const tmpJob = ProjectStore.job,
-            index = tmpJob[log.type].findIndex(i => i.get('order') === log.order),
-            prevOrder = tmpJob[log.type].getIn([+index - 1, 'order']),
-            inverse = {
-                source: 'target',
-                target: 'source'
-            };
-        let changes = [],
-            mock = Object.assign({}, env.segmentModel);
-
-        //aggiungo il buco
-        mock.order = avgOrder(prevOrder, log.order);
-        mock.next = log.order;
-        mock.type = log.type;
-        changes.push({
-            type: log.type,
-            action: 'create',
-            rif_order: log.order,
-            data: mock
-        });
-
-        //cambio il next dell'elemento precedente al buco
-        let changeData = tmpJob[log.type].get(+index - 1).toJS();
-        changeData.next = mock.order;
-        changes.push({
-            type: log.type,
-            action: 'update',
-            rif_order: changeData.order,
-            data: changeData
-        });
-
-        //aggiungo un buco a fine lista inversa
-        let lastMock = Object.assign({}, env.segmentModel),
-            lastSegment = tmpJob[inverse[log.type]].get(-1).toJS();
-
-        lastMock.order = +lastSegment.order + env.orderElevation;
-        lastMock.type = inverse[log.type];
-        lastSegment.next = lastMock.order;
-        changes.push({
-            type: inverse[log.type],
-            action: 'update',
-            rif_order: lastSegment.order,
-            data: lastSegment
-        });
-        changes.push({
-            type: inverse[log.type],
-            action: 'push',
-            data: lastMock
-        });
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-            changes: changes
+            changes: [{
+                type: log.type,
+                action: 'create',
+                rif_order: log.order,
+                isEmptySegment: true
+            }]
         });
 
     },
@@ -248,18 +140,13 @@ let ProjectActions = {
      * @param {String} log.type The type of segment: source or target
      */
     removeSpaceSegment: function (log) {
-        let changes = [];
-
-        //rimuovo il buco
-        changes.push({
-            type: log.type,
-            action: 'complex_delete',
-            rif_order: log.order
-        });
-
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-            changes: changes
+            changes: [{
+                type: log.type,
+                action: 'delete',
+                rif_order: log.order
+            }]
         });
 
     },
@@ -284,13 +171,13 @@ let ProjectActions = {
      * @param {Array} selection.target.list
      * @param {Number} selection.target.list[] the order of segment
      */
-    mergeAndAlignSegments: function(selection){
+    mergeAndAlignSegments: function (selection) {
         let changes = [];
-        if(selection.source.count> 1){
-            changes.push(...this.getLogsForMergeSegments(selection.source.list.sort(),'source'));
+        if (selection.source.count > 1) {
+            changes.push(...this.getLogsForMergeSegments(selection.source.list.sort(), 'source'));
         }
-        if(selection.target.count> 0){
-            changes.push(...this.getLogsForMergeSegments(selection.target.list.sort(),'target'));
+        if (selection.target.count > 0) {
+            changes.push(...this.getLogsForMergeSegments(selection.target.list.sort(), 'target'));
         }
 
         AppDispatcher.dispatch({
@@ -300,19 +187,19 @@ let ProjectActions = {
 
     },
 
-    getLogsForMergeSegments: function (segments,type) {
+    getLogsForMergeSegments: function (segments, type) {
         let changes = [];
         const inverse = {
             source: 'target',
             target: 'source'
         };
 
-        let toMergeSegment = getSegmentByOrder(segments[0],type);
+        let toMergeSegment = getSegmentByOrder(segments[0], type);
 
         for (let x = 1; x < segments.length; x++) {
-            const segment = getSegmentByOrder(segments[x],type);
+            const segment = getSegmentByOrder(segments[x], type);
 
-            const fromIndex = getSegmentIndexByOrder(segments[x],type);
+            const fromIndex = getSegmentIndexByOrder(segments[x], type);
             const fromInverse = getSegmentByIndex(fromIndex, inverse[type]);
 
             toMergeSegment.content_clean += " ";
@@ -320,28 +207,15 @@ let ProjectActions = {
             toMergeSegment.content_raw += " ";
             toMergeSegment.content_raw += segment.content_raw;
 
-            if (!fromInverse.content_clean) {
-                changes.push({
-                    type: segment.type,
-                    action: 'complex_delete',
-                    rif_order: segment.order
-                });
-                changes.push({
-                    type: fromInverse.type,
-                    action: 'complex_delete',
-                    rif_order: fromInverse.order
-                });
+            segment.content_clean = null;
+            segment.content_raw = null;
+            changes.push({
+                type: segment.type,
+                action: 'update',
+                rif_order: segment.order,
+                isEmptySegment: true
+            });
 
-            } else {
-                segment.content_clean = null;
-                segment.content_raw = null;
-                changes.push({
-                    type: segment.type,
-                    action: 'update',
-                    rif_order: segment.order,
-                    data: segment
-                });
-            }
         }
         changes.push({
             type: toMergeSegment.type,
@@ -361,9 +235,9 @@ let ProjectActions = {
      * @param {number} segments[].order
      * @param {string} type
      */
-    mergeSegments: function (segments,type) {
+    mergeSegments: function (segments, type) {
 
-        const changes = this.getLogsForMergeSegments(segments,type);
+        const changes = this.getLogsForMergeSegments(segments, type);
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
