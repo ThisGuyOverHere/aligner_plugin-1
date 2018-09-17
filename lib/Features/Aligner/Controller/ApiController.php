@@ -165,7 +165,7 @@ class ApiController extends AlignerController {
         $firstSegmentParams = array($first_raw, $first_clean, $first_hash, $first_count, $split_segment['id']);
 
         $split_segment['content_raw'] = $first_raw;
-        $split_segment['content_clean'] = $first_count;
+        $split_segment['content_clean'] = $first_clean;
         $split_segment['content_hash'] = $first_hash;
         $split_segment['raw_word_count'] = $first_count;
 
@@ -338,13 +338,16 @@ class ApiController extends AlignerController {
         $gap_match['score'] = 100;
         $gap_match['id_job'] = $job;
         $gap_match['type'] = $type;
+        $gap_match['content_raw'] = null;
+        $gap_match['content_clean'] = null;
+        $gap_match['raw_word_count'] = null;
 
         $operations = array();
         $operations[] = array(
             'type' => $type,
             'action' => 'create',
-            'order' => (int) $previous_order,
-            'data' => null
+            'rif_order' => (int) $previous_order,
+            'data' => $gap_match
         );
 
         $last_match = Segments_SegmentMatchDao::getLastSegmentMatch($job, $other_type);
@@ -355,11 +358,14 @@ class ApiController extends AlignerController {
         $balance_match['score'] = 100;
         $balance_match['id_job'] = $job;
         $balance_match['type'] = $other_type;
+        $balance_match['content_raw'] = null;
+        $balance_match['content_clean'] = null;
+        $balance_match['raw_word_count'] = null;
 
         $operations[] = array(
             'type' => $other_type,
             'action' => 'push',
-            'data' => null
+            'data' => $balance_match
         );
 
 
@@ -372,11 +378,15 @@ class ApiController extends AlignerController {
 
             $previous_match['next'] = (int) $gap_match['order'];
 
+            $previous_segment = Segments_SegmentDao::getFromOrderJobIdAndType($previous_order, $job, $type)->toArray();
+            $previous_segment['order'] = (int) $previous_segment['order'];
+            $previous_segment['next'] = (int) $gap_match['order'];
+
             $operations[] = array(
                 'type' => $type,
                 'action' => 'update',
-                'order' => (int) $previous_match['order'],
-                'data' => $previous_match
+                'rif_order' => (int) $previous_match['order'],
+                'data' => $previous_segment
             );
 
         }
@@ -388,11 +398,22 @@ class ApiController extends AlignerController {
 
         $last_match['next'] = (int) $balance_match['order'];
 
+        $last_segment = Segments_SegmentDao::getFromOrderJobIdAndType($last_match['order'], $job, $type);
+        if(!empty($last_segment)){
+            $last_segment = $last_segment->toArray();
+        }
+        $last_segment['type'] = $other_type;
+        $last_segment['content_raw'] = (!empty($last_segment['content_raw'])) ? $last_segment['content_raw'] : null;
+        $last_segment['content_clean'] = (!empty($last_segment['content_clean'])) ? $last_segment['content_clean'] : null;
+        $last_segment['raw_word_count'] = (!empty($last_segment['raw_word_count'])) ? $last_segment['raw_word_count'] : null;
+        $last_segment['order'] = (int) $last_segment['order'];
+        $last_segment['next'] = (int) $last_match['next'];
+
         $operations[] = array(
             'type' => $other_type,
             'action' => 'update',
-            'order' => (int) $last_match['order'],
-            'data' => $last_match
+            'rif_order' => (int) $last_match['order'],
+            'data' => $last_segment
         );
 
         $segmentsMatchDao = new Segments_SegmentMatchDao;
