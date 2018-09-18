@@ -108,9 +108,6 @@ class ApiController extends AlignerController {
     }
 
 
-
-
-
     public function split(){
 
         $order = $this->params['order'];
@@ -147,8 +144,8 @@ class ApiController extends AlignerController {
         $full_raw = $split_segment['content_raw'];
         $positions[] = strlen(($full_raw));
         foreach ($positions as $key => $position) {
-            $start = ($key == 0) ? 0 : $positions[$key-1];
-            $raw_contents[] = substr($full_raw, $start, $position - $start);
+            $start = ($key == 0) ? 0 : $positions[$key-1] + 1;
+            $raw_contents[] = substr($full_raw, $start, ($position + 1) - $start);
         }
 
         $first_raw = array_shift($raw_contents);
@@ -278,18 +275,15 @@ class ApiController extends AlignerController {
             'rif_order' => (int) $source_start,
             'data' => array_shift($sourceSegments)
         );
-        $source_order = $source_start;
 
         foreach ($sourceSegments as $sourceSegment) {
 
             $source[] = array(
                 'type' => 'source',
                 'action' => 'create',
-                'rif_order' => (int) $source_order,
+                'rif_order' => (int) $source_end,
                 'data' => $sourceSegment
             );
-
-            $source_order = AlignUtils::_getNewOrderValue($source_order,$source_end);
 
         }
 
@@ -299,18 +293,16 @@ class ApiController extends AlignerController {
             'rif_order' => (int) $target_start,
             'data' => array_shift($targetSegments)
         );
-        $target_order = $target_start;
 
         foreach ($targetSegments as $targetSegment) {
 
             $target[] = array(
                 'type' => 'target',
                 'action' => 'create',
-                'rif_order' => (int)$target_order,
+                'rif_order' => (int)$target_end,
                 'data' => $targetSegment
             );
 
-            $target_order = AlignUtils::_getNewOrderValue($target_order,$target_end);
 
         }
 
@@ -434,7 +426,7 @@ class ApiController extends AlignerController {
         $operations[] = array(
             'type' => $type,
             'action' => 'create',
-            'rif_order' => (int) $previous_order,
+            'rif_order' => (int) $order,
             'data' => $gap_match
         );
 
