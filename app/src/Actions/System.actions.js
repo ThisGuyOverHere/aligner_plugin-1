@@ -108,6 +108,13 @@ let SystemActions = {
             })
     },
 
+    setInDrag: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.IN_DRAG,
+            status: status
+        });
+    }
+
 };
 
 

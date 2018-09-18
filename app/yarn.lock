@@ -3000,6 +3000,13 @@ react-dnd-mouse-backend@^0.1.1:
   dependencies:
     react-dnd "^2.1.2"
 
+react-dnd-touch-backend@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/react-dnd-touch-backend/-/react-dnd-touch-backend-0.5.1.tgz#2c60e65491fee90169a8421630c7cd5bfc6eef37"
+  dependencies:
+    invariant "^2.2.4"
+    react-dnd "^5.0.0"
+
 react-dnd@^2.1.2:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/react-dnd/-/react-dnd-2.6.0.tgz#7fa25676cf827d58a891293e3c1ab59da002545a"

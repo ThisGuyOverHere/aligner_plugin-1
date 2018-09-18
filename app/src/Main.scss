@@ -5,12 +5,21 @@
 
 @import "Components/Project/Job.component";
 @import "Components/Project/Row/Row.component";
+@import "Components/Project/Row/RowWrapper.component";
+@import "Components/Project/Row/ActionsBetweenLines/ActionsbetweenLines.component";
 @import "Components/Project/Row/Segment/Segment.component";
 @import "Components/Project/DragLayer/AdvancedDragLayer.component";
+@import "Components/Project/Split/Split.component";
+@import "Components/Project/Split/SplitCharComponent/SplitCharComponent.component";
+@import "Components/Project/Split/SplitDivisor/SplitDivisor.component";
 
 @import "Components/Shared/NotFound/NotFound.component";
 @import "Components/Shared/Header/Header.component";
 @import "Components/Shared/Header/Export/Export.component";
+@import "Components/Shared/ExportModal/ExportModalLogged/ExportModalLogged.component";
+@import "Components/Shared/ExportModal/ExportModalNotLogged/ExportModalNotLogged.component";
+@import "Components/Shared/ExportModal/ExportModalSendEmail/ExportModalSendEmail.component";
+@import "Components/Shared/ExportModal/ExportModalLogged/ExportModalLogged.component";
 @import "Components/Shared/Header/User/User.component.scss";
 @import "Components/Shared/Header/User/UserLogged/UserLogged.component";
 @import "Components/Shared/Header/User/UserNotLogged/UserNotLogged.component";
@@ -20,7 +29,10 @@
 @import "Components/Shared/Logout/Logout.component";
 @import "Components/Shared/ExportModal/ExportModal.component";
 @import "Components/Shared/ResetPasswordModal/ResetPasswordModal.component";
-@import "Components/Shared/Toolbar/Toolbar.component";
+@import "Components/Project/Toolbar/Toolbar.component";
+@import "Components/Project/Toolbar/ToolbarActions/ToolbarActions.component";
+@import "Components/Project/Toolbar/ToolbarSelection/ToolbarSelection.component";
+@import "Components/Project/Toolbar/ToolbarContextualNavigation/ToolbarContextualNavigation";
 
 @import "Components/Analyse/Analyse.component";
 @import "Components/Analyse/Animation/Animation.component";

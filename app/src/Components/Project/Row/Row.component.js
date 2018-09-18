@@ -24,10 +24,6 @@ const RowTarget = {
     },
     drop(props, monitor, component) {
         const from = monitor.getItem(),
-            inverse = {
-                'source': 'target',
-                'target': 'target'
-            },
             log = {
                 type: from.type,
                 from: from.segment.order,
@@ -35,19 +31,11 @@ const RowTarget = {
             };
 
         if (!props.mergeStatus) {
-            ProjectActions.changeSegmentPosition(log);
+            component.alignSegments(log);
 
         } else {
-            ProjectActions.mergeSegments(from.segment, props.row[from.type])
+            ProjectActions.mergeSegments([props.row[from.type].order,from.segment.order],from.segment.type)
         }
-
-        const rec = findDOMNode(component).getBoundingClientRect();
-        const position = window.scrollY;
-        //send type and order of inverse segment in drop position.
-        setTimeout(() => {
-            ProjectActions.animateChangeRowPosition(inverse[from.type], props.row[inverse[from.type]].order, position, rec);
-        }, 0)
-
     }
 };
 
@@ -68,8 +56,10 @@ class RowComponent extends Component {
         mergeStatus: PropTypes.bool.isRequired,
         setAnimatedRow: PropTypes.func,
         scrollY: PropTypes.any,
+        enableDrag: PropTypes.bool,
         rec: PropTypes.any,
-        row: PropTypes.object.isRequired
+        row: PropTypes.object.isRequired,
+        selection: PropTypes.object
     };
 
     constructor(props) {
@@ -103,18 +93,20 @@ class RowComponent extends Component {
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.ANIMATE_ROW_POSITION, this.animateRow);
+        ProjectStore.addListener(ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION, this.alignSegments);
         ProjectStore.addListener(ProjectConstants.SCROLL_TO_SEGMENT, this.scrollToThisSegment);
 
     }
 
     componentWillUnmount() {
         ProjectStore.removeListener(ProjectConstants.ANIMATE_ROW_POSITION, this.animateRow);
+        ProjectStore.removeListener(ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION, this.alignSegments);
         ProjectStore.removeListener(ProjectConstants.SCROLL_TO_SEGMENT, this.scrollToThisSegment);
     }
 
     render() {
         let rowClass = ['project-row'];
-        const {connectDropTarget, isOver, canDrop, dragEl} = this.props;
+        const {connectDropTarget, isOver, canDrop, dragEl, selection, enableDrag} = this.props;
 
         const dragElType = dragEl ? dragEl.type : undefined;
         if (isOver && dragElType && canDrop) {
@@ -132,9 +124,13 @@ class RowComponent extends Component {
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
                                   mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'source'}
+                                  enableDrag={enableDrag}
+                                  selected={selection && selection.source}
                                   segment={this.props.row.source}/>
                 <SegmentComponent type="target"
                                   dropHover={isOver && canDrop && dragElType === 'target'}
+                                  enableDrag={enableDrag}
+                                  selected={selection && selection.target}
                                   mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'target'}
                                   segment={this.props.row.target}/>
             </div>
@@ -175,6 +171,34 @@ class RowComponent extends Component {
             this.setState({
                 animated: false
             })
+        }
+    };
+
+    /**
+     *
+     * @param {Object} log A log of move action from frontend
+     * @param {String} log.type The type of segment: source or target
+     * @param {Number} log.from The row's order of Drag action
+     * @param {Number} log.to The row's order of Drop action
+     */
+    alignSegments = (log) =>{
+        if(log.to === this.props.row[log.type].order){
+            const inverse = {
+                'source': 'target',
+                'target': 'source'
+            };
+            const rec = findDOMNode(this.ref).getBoundingClientRect();
+            const position = window.scrollY;
+            const inverseOrder = this.props.row[inverse[log.type]].order
+
+
+            setTimeout(() => {
+                ProjectActions.changeSegmentPosition(log);
+                //send type and order of inverse segment in drop position.
+                setTimeout(() => {
+                    ProjectActions.animateChangeRowPosition(inverse[log.type],inverseOrder, position, rec);
+                }, 0)
+            },0)
         }
     };
 
