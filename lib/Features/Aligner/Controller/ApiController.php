@@ -107,6 +107,10 @@ class ApiController extends AlignerController {
 
     }
 
+
+
+
+
     public function split(){
 
         $order = $this->params['order'];
@@ -316,6 +320,10 @@ class ApiController extends AlignerController {
 
     }
 
+
+
+
+
     public function move(){
 
         $order = $this->params['order'];
@@ -327,6 +335,7 @@ class ApiController extends AlignerController {
 
         $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType($order,$job,$type)->toArray();
 
+    
         //$destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination, $job, $type);
         //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $job, $type);
 
@@ -342,6 +351,9 @@ class ApiController extends AlignerController {
         $new_match['next'] = $destination;
         $new_match['score'] = 100;
         $new_match['segment_id'] = $movingSegment['id'];
+        $new_match['type'] = $type;
+        $new_match['id_job'] = $job;
+
 
         //Create a new empty match on the opposite side of the row
         $inverseReference = Segments_SegmentMatchDao::getSegmentMatch($inverse_destination, $job, $inverse_type)->toArray();
@@ -351,6 +363,9 @@ class ApiController extends AlignerController {
         $new_gap['next'] = $inverseReference['next'];
         $new_gap['score'] = 100;
         $new_gap['segment_id'] = null;
+        $new_gap['type'] = $type;
+        $new_gap['id_job'] = $job;
+
 
         //Set original match to empty and edit old next positions
 
@@ -388,6 +403,10 @@ class ApiController extends AlignerController {
         }
 
     }
+
+
+
+
 
     public function addGap(){
         $order = $this->params['order'];
