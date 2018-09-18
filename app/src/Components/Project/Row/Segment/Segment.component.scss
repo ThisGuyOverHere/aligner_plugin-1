@@ -43,8 +43,13 @@
       background: $white;
       box-shadow: none;
       position: relative;
-      transform: translate(10px,30px);
-      opacity: 0.9;
+    }
+    &:not(.onDropHoverMerge){
+      .segmentBox-content{
+        transform: translate(10px,30px);
+        opacity: 0.9;
+
+      }
     }
   }
 
