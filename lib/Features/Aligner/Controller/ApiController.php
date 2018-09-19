@@ -506,7 +506,6 @@ class ApiController extends AlignerController {
             'data' => $balance_match
         );
 
-
         if(!empty($previous_match)){
             $previous_match['order'] = (int) $previous_match['order'];
             $gapQuery = "UPDATE segments_match as sm
@@ -574,4 +573,106 @@ class ApiController extends AlignerController {
 
         return $this->response->json($operations);
     }
+
+
+
+
+
+    public function delete(){
+
+        $matches= $this->params['matches'];
+        $job = $this->params['id_job'];
+
+        $sources = array();
+        $targets = array();
+
+        foreach ($matches as $match){
+            if($match['type'] == 'target'){
+                $targets[] = $match['order'];
+            } else {
+                $sources[] = $match['order'];
+            }
+        }
+
+        if(count($targets) != count($sources)){
+            throw new \Exception( "There is a different amount of source matches and target matches, Deletion cancelled", -2 );
+        }
+
+        $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray($sources, $job, 'source');
+        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray($sources, $job, 'source');
+
+        foreach ($sourceMatches as $sourceMatch) {
+            if($sourceMatch['segment_id']!=null){
+                throw new \Exception( "Segment Matches contain reference to existing segments, Deletion cancelled", -2 );
+            }
+        }
+
+        foreach ($targetMatches as $targetMatch) {
+            if($targetMatch['segment_id']!=null){
+                throw new \Exception( "Segment Matches contain reference to existing segments, Deletion cancelled", -2 );
+            }
+        }
+
+        if(!empty($sources)){
+
+            $qMarksSource = str_repeat('?,', count($sources) - 1) . '?';
+
+            $updateSourceQuery = "UPDATE segments_match AS sm1, segments_match AS sm2
+            SET sm1.next = sm2.next
+            WHERE sm1.next IN ($qMarksSource) AND sm2.order IN ($qMarksSource)
+            AND sm1.type = 'source' AND sm2.type = 'source'
+            AND sm1.id_job = ? AND sm2.id_job = ?;";
+            $updateSourceParams = array_merge($sources, $sources, array($job, $job));
+
+            $deleteSourceQuery = "DELETE FROM segments_match
+            USING segments_match
+            WHERE segments_match.order IN ($qMarksSource)
+            AND segments_match.type = 'source'
+            AND segments_match.id_job = ?;";
+            $deleteSourceParams = array_merge($sources, array($job));
+
+        }
+
+        if(!empty($targets)){
+
+            $qMarksTarget = str_repeat('?,', count($targets) - 1) . '?';
+
+            $updateTargetQuery = "UPDATE segments_match AS sm1, segments_match AS sm2
+            SET sm1.next = sm2.next
+            WHERE sm1.next IN ($qMarksTarget) AND sm2.order IN ($qMarksTarget)
+            AND sm1.type = 'target' AND sm2.type = 'target'
+            AND sm1.id_job = ? AND sm2.id_job = ?;";
+            $updateTargetParams = array_merge($targets, $targets, array($job, $job));
+
+            $deleteTargetQuery = "DELETE FROM segments_match 
+            WHERE segments_match.order IN ($qMarksSource)
+            AND segments_match.type = 'target'
+            AND segments_match.id_job = ?;";
+            $deleteTargetParams = array_merge($targets, array($job));
+
+        }
+
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $conn->beginTransaction();
+            if(!empty($sources)){
+                $stm = $conn->prepare( $updateSourceQuery );
+                $stm->execute( $updateSourceParams );
+                $stm = $conn->prepare( $deleteSourceQuery );
+                $stm->execute( $deleteSourceParams );
+            }
+            if(!empty($targets)){
+                $stm = $conn->prepare( $updateTargetQuery );
+                $stm->execute( $updateTargetParams );
+                $stm = $conn->prepare( $deleteTargetQuery );
+                $stm->execute( $deleteTargetParams );
+            }
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() , -2 );
+        }
+
+    }
+
 }
