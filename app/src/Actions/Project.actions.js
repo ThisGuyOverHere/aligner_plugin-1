@@ -464,6 +464,18 @@ let ProjectActions = {
     },
 
     /**
+     * on action hover in toolbar dispatch type of action
+     * @param type
+     */
+    onActionHover: function (type) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.ON_ACTION_HOVER,
+            type: type,
+        });
+    },
+
+
+    /**
      *
      * @param {Array} changes A List of rows to apply actions
      * @param {Object} changes[]

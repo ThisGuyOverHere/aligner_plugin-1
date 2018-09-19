@@ -284,6 +284,9 @@ AppDispatcher.register(function (action) {
         case ProjectConstants.SEGMENT_TO_SPLIT:
             ProjectStore.emitChange(ProjectConstants.SEGMENT_TO_SPLIT, action.segment);
             break;
+        case ProjectConstants.ON_ACTION_HOVER:
+            ProjectStore.emitChange(ProjectConstants.ON_ACTION_HOVER, action.type);
+            break;
         default:
             ProjectStore.emitChange(action.actionType, action.data);
     }
