@@ -374,7 +374,19 @@ let ProjectActions = {
         }, error =>{
             console.error(error)
         })
-    }
+    },
+
+    /**
+     * on action hover in toolbar dispatch type of action
+     * @param type
+     */
+    onActionHover: function (type) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.ON_ACTION_HOVER,
+            type: type,
+        });
+    },
+
 };
 
 
