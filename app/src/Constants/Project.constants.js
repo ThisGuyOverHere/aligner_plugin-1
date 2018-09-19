@@ -12,6 +12,7 @@ const ProjectConstants = keyMirror({
     ADD_SEGMENT_TO_SELECTION: null,
     SET_SPLIT_MODAL_STATUS: null,
     SEGMENT_TO_SPLIT: null,
+    DELETE_ROWS: null
 });
 
 export default ProjectConstants;

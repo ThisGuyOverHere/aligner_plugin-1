@@ -133,7 +133,7 @@ class JobComponent extends Component {
 
     setRows = (job) => {
         let rows = [];
-        let changes = [];
+        let deletes = [];
         let previousJob = this.state.job;
         let rowsDictionary = {
             source: {},
@@ -149,23 +149,13 @@ class JobComponent extends Component {
                     target: job.target[index]
                 });
             }else{
-                changes.push({
-                    type: 'source',
-                    action: 'delete',
-                    rif_order: e.order
-                });
-                changes.push({
-                    type: 'target',
-                    action: 'delete',
-                    rif_order: job.target[index].order
-                });
+                deletes.push(index);
             }
         });
 
-        if(changes.length>0){
-            console.log(changes);
+        if(deletes.length>0){
             setTimeout(()=>{
-                ProjectActions.requireDirectChangesToStore(changes);
+                ProjectActions.deleteEmptyRows(deletes);
             },0);
 
         }

@@ -43,6 +43,7 @@ class ToolbarActionsMergeAndAlignComponent extends Component {
 
     onClick = () => {
         ProjectActions.mergeAndAlignSegments(this.props.selection);
+        ProjectActions.addSegmentToSelection(-1);
     };
 
 }

@@ -97,6 +97,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             if (change.rif_order) {
                 index = this.job[change.type].findIndex(i => i.get('order') === change.rif_order);
             }
+            console.log(change.action+' '+change.type);
             switch (change.action) {
                 case 'delete':
                     if(this.job[change.type].getIn([+index + 1, 'order'])){
@@ -108,10 +109,17 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     this.job[change.type] = this.job[change.type].delete(index);
 
                     //add empty space to the end for consistency of two list
-                    this.storeMovements([{
-                        type: change.type,
-                        action: 'push'
-                    }]);
+                    if( this.job[inverse[change.type]].last().get('content_clean')){
+                        this.storeMovements([{
+                            type: change.type,
+                            action: 'push'
+                        }]);
+                    }else{
+                        //delete the last empty space inverse segment
+                        this.job[inverse[change.type]] = this.job[inverse[change.type]].delete(this.job[inverse[change.type]].size - 1);
+                        // change next of previous inverse segment
+                        this.job[inverse[change.type]] = this.job[inverse[change.type]].setIn([this.job[inverse[change.type]].size-1,'next'], null);
+                    }
                     break;
                 case 'create':
                     if (change.isEmptySegment) {
@@ -119,28 +127,17 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                         change.data.type = change.type;
                         change.data.order = avgOrder(this.job[change.type].getIn([+index - 1, 'order']), this.job[change.type].getIn([index, 'order']))
                     }
-                    let createInverseSegment = this.job[inverse[change.type]].get(index).toJS();
-                    //let's check if we are creating an empty line
-                    if (!change.data.content_clean && !createInverseSegment.content_clean) {
-                        //have a empty line, delete the inverse
-                        this.storeMovements([{
-                            type: inverse[change.type],
-                            action: 'delete',
-                            rif_order: createInverseSegment.order
-                        }]);
 
-                    } else {
-                        //create the element
-                        this.job[change.type] = this.job[change.type].setIn([+index - 1, 'next'], change.data.order);
-                        change.data.next = this.job[change.type].getIn([index, 'order']);
-                        this.job[change.type] = this.job[change.type].insert(index, fromJS(change.data));
+                    //create the element
+                    this.job[change.type] = this.job[change.type].setIn([+index - 1, 'next'], change.data.order);
+                    change.data.next = this.job[change.type].getIn([index, 'order']);
+                    this.job[change.type] = this.job[change.type].insert(index, fromJS(change.data));
 
-                        //add empty space to the end for consistency of two list
-                        this.storeMovements([{
-                            type: inverse[change.type],
-                            action: 'push'
-                        }]);
-                    }
+                    //add empty space to the end for consistency of two list
+                    this.storeMovements([{
+                        type: inverse[change.type],
+                        action: 'push'
+                    }]);
 
                     break;
                 case 'push':
@@ -149,23 +146,14 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     if (!deleteInverseLastSegment.next) {
                         //we have the last page
                         //check if is a empty segment
-                        if (deleteInverseLastSegment.content_clean) {
-
-                            //prepare mock for push
-                            mock.next = null;
-                            mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
-                            mock.type = change.type;
-                            //edit previous last element segment next param.
-                            this.job[change.type] = this.job[change.type].setIn([this.job[change.type].size-1,'next'], mock.order);
-                            //add empty space at the end of list
-                            this.job[change.type] = this.job[change.type].push(fromJS(mock));
-
-                        } else {
-                            //delete the last empty space inverse segment
-                            this.job[inverse[change.type]] = this.job[inverse[change.type]].delete(this.job[inverse[change.type]].size - 1);
-                            // change next of previous inverse segment
-                            this.job[inverse[change.type]] = this.job[inverse[change.type]].setIn([this.job[inverse[change.type]].size-1,'next'], null);
-                        }
+                        //prepare mock for push
+                        mock.next = null;
+                        mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
+                        mock.type = change.type;
+                        //edit previous last element segment next param.
+                        this.job[change.type] = this.job[change.type].setIn([this.job[change.type].size-1,'next'], mock.order);
+                        //add empty space at the end of list
+                        this.job[change.type] = this.job[change.type].push(fromJS(mock));
 
                     } else {
                         //delete from local storage the last inverse element
@@ -174,28 +162,12 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     break;
                 case 'update':
                     if (change.isEmptySegment) {
-                        let createInverseSegment = this.job[inverse[change.type]].get(index).toJS();
-                        //let's check if we are creating an empty line
-                        if (!createInverseSegment.content_clean) {
-                            //have a empty line, delete the inverse
-                            this.storeMovements([{
-                                type: inverse[change.type],
-                                action: 'delete',
-                                rif_order: createInverseSegment.order
-                            }]);
-                            this.storeMovements([{
-                                type: change.type,
-                                action: 'delete',
-                                rif_order: change.rif_order
-                            }]);
-                        }else{
-                            const el = this.job[change.type].get(index).toJS();
-                            change.data = Object.assign({}, env.segmentModel);
-                            change.data.type = change.type;
-                            change.data.order = el.order;
-                            change.data.next = el.next;
-                            this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
-                        }
+                        const el = this.job[change.type].get(index).toJS();
+                        change.data = Object.assign({}, env.segmentModel);
+                        change.data.type = change.type;
+                        change.data.order = el.order;
+                        change.data.next = el.next;
+                        this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
                     }else{
                         this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
                     }
@@ -215,7 +187,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             console.log(arrayT[x].order+'       '+arrayT[x].next);
         }*/
 
-        //Todo: remove this test
+        /*//Todo: remove this test
         const arrayS = this.job.source.toJS();
         console.log('#### SOURCE #####');
         for(let x= 0; x< arrayS.length; x++){
@@ -225,9 +197,22 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         console.log('#### TARGET #####');
         for(let x= 0; x < arrayT.length; x++){
             console.log('['+x+']   '+arrayT[x].order+'       '+arrayT[x].next);
-        }
+        }*/
     },
+    deleteEmptyRows: function(deletes){
+        console.log(deletes);
 
+        deletes.map(index =>{
+            this.job.source = this.job.source.delete(index);
+            this.job.target = this.job.target.delete(index);
+            
+            // change next of previous inverse segment
+            const nextTarget = this.job.target.getIn([index,'order']) || null ;
+            const nextSource = this.job.source.getIn([index,'order']) || null;
+            this.job.target = this.job.target.setIn([+index-1,'next'], nextTarget);
+            this.job.source = this.job.source.setIn([+index-1, 'next'], nextSource);
+        });
+    },
     addSegmentToSelection: function (order, type) {
         if (order > 0) {
             if (this.selection[type].map[order]) {
@@ -276,6 +261,13 @@ AppDispatcher.register(function (action) {
             break;
         case ProjectConstants.CHANGE_SEGMENT_POSITION:
             ProjectStore.storeMovements(action.changes, action.type);
+            ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
+                source: ProjectStore.job.source.toJS(),
+                target: ProjectStore.job.target.toJS()
+            });
+            break;
+        case ProjectConstants.DELETE_ROWS:
+            ProjectStore.deleteEmptyRows(action.deletes);
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
