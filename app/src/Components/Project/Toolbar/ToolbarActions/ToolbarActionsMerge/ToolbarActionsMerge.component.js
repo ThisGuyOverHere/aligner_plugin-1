@@ -11,7 +11,9 @@ class ToolbarActionsMergeComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            type: 'merge'
+        };
     }
 
 
@@ -31,15 +33,20 @@ class ToolbarActionsMergeComponent extends Component {
         ) {
             disabled = true;
         }
-        const comp = <span><button
+        return <span><button
             disabled={disabled}
+            onMouseOut={this.onMouseLeave}
+            onMouseOver={this.onHover}
             onClick={this.onMergeClick}>
             <i className={mergeClasses.join(" ")}></i>
             merge
         </button></span>;
-        return (
-            <Popup trigger={comp} content='shortcut alt+M' on='hover' inverted/>
-        );
+        /*
+         return (
+        <Popup trigger={comp} content='shortcut alt+M' on='hover' inverted/>
+    );
+    */
+
     }
 
     onMergeClick = () => {
@@ -47,6 +54,15 @@ class ToolbarActionsMergeComponent extends Component {
         const segments = this.props.selection[type].list.sort();
         ProjectActions.mergeSegments(segments, type);
         ProjectActions.addSegmentToSelection(-1);
+        ProjectActions.onActionHover(null);
+    };
+
+    onHover = () => {
+        ProjectActions.onActionHover(this.state.type);
+    };
+
+    onMouseLeave = () => {
+        ProjectActions.onActionHover(null);
     };
 
 }

@@ -1,6 +1,4 @@
 import React, {Component} from 'react';
-import PropTypes from "prop-types";
-import ProjectActions from "../../../../Actions/Project.actions";
 import ProjectStore from "../../../../Stores/Project.store";
 import ProjectConstants from "../../../../Constants/Project.constants";
 import SystemConstants from "../../../../Constants/System.constants";
@@ -12,39 +10,84 @@ class ToolbarContextualNavigationComponent extends Component {
         super(props);
         this.state = {
             inDrag: false,
-            merge: false
+            merge: false,
+            type_of_action: null,
         };
     }
 
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.MERGE_STATUS, this.mergeStatus);
+        ProjectStore.addListener(ProjectConstants.ON_ACTION_HOVER, this.setActionHoveredType);
         SystemStore.addListener(SystemConstants.IN_DRAG, this.dragStatus);
     }
 
     componentWillUnmount() {
         ProjectStore.removeListener(ProjectConstants.MERGE_STATUS, this.mergeStatus);
+        ProjectStore.removeListener(ProjectConstants.ON_ACTION_HOVER, this.setActionHoveredType);
         SystemStore.removeListener(SystemConstants.IN_DRAG, this.dragStatus);
     }
 
     render() {
-        let mergeClasses=[]
-        if(this.state.merge){
+        let mergeClasses = [];
+        if (this.state.merge) {
             mergeClasses.push('active')
         }
 
-
-        return (
-            <div>
-                {this.state.inDrag ? <div className="cmd-shortcut">
-                        <p><span className={mergeClasses.join(" ")}>alt + drop</span> to merge</p>
+        switch (this.state.type_of_action) {
+            case 'split':
+                return (
+                    <div>
+                        <div className="cmd-shortcut">
+                            <p><span className={mergeClasses.join(" ")}>alt+S</span> to split</p>
+                        </div>
                     </div>
-                    : <div className="cmd-shortcut">
-                        <p><span>select </span> or <span>drag and drop </span> to align</p>
-                    </div>}
+                );
+            case 'reverse':
+                return (
+                    <div>
+                        <div className="cmd-shortcut">
+                            <p><span className={mergeClasses.join(" ")}>alt+R</span> to reverse</p>
+                        </div>
+                    </div>
+                );
+            case 'merge':
+                return (
+                    <div>
+                        <div className="cmd-shortcut">
+                            <p><span className={mergeClasses.join(" ")}>alt+M</span> to merge</p>
+                        </div>
+                    </div>
+                );
+            case 'align':
+                return (
+                    <div>
+                        <div className="cmd-shortcut">
+                            <p><span className={mergeClasses.join(" ")}>alt+A</span> to align</p>
+                        </div>
+                    </div>
+                );
+            case 'merge&align':
+                return (
+                    <div>
+                        <div className="cmd-shortcut">
+                            <p><span className={mergeClasses.join(" ")}>alt+W</span> to Merge & Align</p>
+                        </div>
+                    </div>
+                );
+            default:
+                return (
+                    <div>
+                        {this.state.inDrag ? <div className="cmd-shortcut">
+                                <p><span className={mergeClasses.join(" ")}>alt + drop</span> to merge</p>
+                            </div>
+                            : <div className="cmd-shortcut">
+                                <p><span>select </span> or <span>drag and drop </span> to align</p>
+                            </div>}
 
-            </div>
-        );
+                    </div>
+                );
+        }
     }
 
     mergeStatus = (status) => {
@@ -56,6 +99,12 @@ class ToolbarContextualNavigationComponent extends Component {
     dragStatus = (status) => {
         this.setState({
             inDrag: status
+        });
+    };
+
+    setActionHoveredType = (type) => {
+        this.setState({
+            type_of_action: type
         });
     };
 
