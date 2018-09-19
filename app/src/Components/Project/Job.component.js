@@ -133,6 +133,7 @@ class JobComponent extends Component {
 
     setRows = (job) => {
         let rows = [];
+        let changes = [];
         let previousJob = this.state.job;
         let rowsDictionary = {
             source: {},
@@ -141,11 +142,33 @@ class JobComponent extends Component {
         job.source.map((e, index) => {
             rowsDictionary.source[e.order] = job.target[index].order;
             rowsDictionary.target[job.target[index].order] = e.order;
-            rows.push({
-                source: e,
-                target: job.target[index]
-            });
+            //todo: send API for remove empty/empty from DB
+            if(e.content_clean || job.target[index].content_clean){
+                rows.push({
+                    source: e,
+                    target: job.target[index]
+                });
+            }else{
+                changes.push({
+                    type: 'source',
+                    action: 'delete',
+                    rif_order: e.order
+                });
+                changes.push({
+                    type: 'target',
+                    action: 'delete',
+                    rif_order: job.target[index].order
+                });
+            }
         });
+
+        if(changes.length>0){
+            console.log(changes);
+            setTimeout(()=>{
+                ProjectActions.requireDirectChangesToStore(changes);
+            },0);
+
+        }
 
         previousJob.rows = rows;
         previousJob.rowsDictionary = rowsDictionary;

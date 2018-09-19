@@ -51,12 +51,17 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
     storeSegments: function (segments) {
         segments.source.map(item => {
             item.order = parseInt(item.order);
-            item.next = parseInt(item.next);
+            if(item.next){
+                item.next = parseInt(item.next);
+            }
+
             return item;
         });
         segments.target.map(item => {
             item.order = parseInt(item.order);
-            item.next = parseInt(item.next);
+            if(item.next){
+                item.next = parseInt(item.next);
+            }
             return item;
         });
         const source = fromJS(segments.source);
@@ -69,12 +74,14 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
     },
     /**
      *
-     * @param {Object[]} changes A List of rows to apply actions
+     * @param {Array} changes A List of rows to apply actions
+     * @param {Object} changes[]
      * @param {String} changes[].action The action to application on local row
      * @param {String} changes[].rif_order Depending on the received action takes different meanings.
      * if changes[].action = 'create' we refer to next order row.
      * if changes[].action = 'delete' we refer to row to delete.
      * if changes[].action = 'update' we refer to row to update.
+     * if changes[].action = 'push' ignore rif_order.
      * @param {String} changes[].data The new row
      * @param {String} changes[].type The type of segments (target or source)
      * @param {boolean} changes[].isEmptySegment use this for set the mock from order of index
@@ -92,7 +99,12 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             }
             switch (change.action) {
                 case 'delete':
-                    this.job[change.type] = this.job[change.type].setIn([+index - 1, 'next'], this.job[change.type].getIn([+index + 1, 'order']));
+                    if(this.job[change.type].getIn([+index + 1, 'order'])){
+                        this.job[change.type] = this.job[change.type].setIn([+index - 1, 'next'], this.job[change.type].getIn([+index + 1, 'order']));
+                    }else{
+                        this.job[change.type] = this.job[change.type].setIn([+index - 1, 'next'], null);
+                    }
+
                     this.job[change.type] = this.job[change.type].delete(index);
 
                     //add empty space to the end for consistency of two list
@@ -140,6 +152,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                         if (deleteInverseLastSegment.content_clean) {
 
                             //prepare mock for push
+                            mock.next = null;
                             mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
                             mock.type = change.type;
                             //edit previous last element segment next param.

@@ -374,7 +374,31 @@ let ProjectActions = {
         }, error =>{
             console.error(error)
         })
+    },
+
+    /**
+     *
+     * @param {Array} changes A List of rows to apply actions
+     * @param {Object} changes[]
+     * @param {String} changes[].action The action to application on local row
+     * @param {String} changes[].rif_order Depending on the received action takes different meanings.
+     * if changes[].action = 'create' we refer to next order row.
+     * if changes[].action = 'delete' we refer to row to delete.
+     * if changes[].action = 'update' we refer to row to update.
+     * if changes[].action = 'push' ignore rif_order.
+     * @param {String} changes[].data The new row
+     * @param {String} changes[].type The type of segments (target or source)
+     * @param {boolean} changes[].isEmptySegment use this for set the mock from order of index
+     */
+    requireDirectChangesToStore: function (changes) {
+        //todo: call backend for propagate;
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: changes
+        });
     }
+
+
 };
 
 
