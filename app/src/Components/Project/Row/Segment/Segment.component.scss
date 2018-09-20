@@ -11,6 +11,7 @@
     background: $white;
     box-shadow: 0 1px 1px #CCCCCC;
     user-select: none;
+    height: 100%;
   }
   &.empty {
     border: 1px dashed $gray;
