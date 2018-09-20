@@ -10,6 +10,7 @@
     transition: box-shadow 600ms ease-in, transform 200ms ease-in;
     background: $white;
     box-shadow: 0 1px 1px #CCCCCC;
+    user-select: none;
   }
   &.empty {
     border: 1px dashed $gray;
