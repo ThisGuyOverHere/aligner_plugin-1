@@ -29,7 +29,14 @@ class SegmentsController extends AlignerController {
         if(empty($amount)){$amount = $config['SEGMENT_AMOUNT_PER_PAGE'];}
 
         $target = Segments_SegmentDao::getTargetOrdered($id_job, $where, $order_target, $amount);
+        foreach ($target as $key => $segment){
+            $target[$key]->content_raw = Aligner\Utils\AlignUtils::_mark_xliff_tags($segment->content_raw);
+        }
+
         $source = Segments_SegmentDao::getSourceOrdered($id_job, $where, $order_source, $amount);
+        foreach ($source as $key => $segment){
+            $source[$key]->content_raw = Aligner\Utils\AlignUtils::_mark_xliff_tags($segment->content_raw);
+        }
         $this->response->json(['target' => $target, 'source' => $source]);
 
     }

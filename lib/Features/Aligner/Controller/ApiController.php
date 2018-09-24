@@ -141,11 +141,12 @@ class ApiController extends AlignerController {
         $inverse_segment['next'] = $inverse_avg;
 
         $raw_contents = array();
-        $full_raw = $split_segment['content_raw'];
+        $full_raw = AlignUtils::_mark_xliff_tags($split_segment['content_raw']);
         $positions[] = strlen(($full_raw));
         foreach ($positions as $key => $position) {
             $start = ($key == 0) ? 0 : $positions[$key-1] + 1;
-            $raw_contents[] = substr($full_raw, $start, ($position + 1) - $start);
+            $raw_substring = substr($full_raw, $start, ($position + 1) - $start);
+            $raw_contents[] = AlignUtils::_restore_xliff_tags($raw_substring);
         }
 
         $first_raw = array_shift($raw_contents);
@@ -268,6 +269,14 @@ class ApiController extends AlignerController {
         $segments =  array_merge(array($split_segment),$new_segments);
         $sourceSegments = ($type == 'source') ? $segments : array_merge(array($inverse_segment),$null_segments);
         $targetSegments = ($type == 'target') ? $segments : array_merge(array($inverse_segment),$null_segments);
+
+        foreach ($sourceSegments as $key => $segment){
+            $sourceSegments[$key]['content_raw'] = AlignUtils::_mark_xliff_tags($segment['content_raw']);
+        }
+
+        foreach ($targetSegments as $key => $segment){
+            $targetSegments[$key]['content_raw'] = AlignUtils::_mark_xliff_tags($segment['content_raw']);
+        }
 
         $source[] = array(
             'type' => 'source',
