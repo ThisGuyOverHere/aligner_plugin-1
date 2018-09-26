@@ -44,7 +44,7 @@ class JobController extends AlignerController {
                 'target_lang'           => $job->target,
                 'total_source_segments' => $count_source_segments,
                 'total_target_segments' => $count_target_segments,
-            'miss_alignments' => $miss_alignments
+                'miss_alignments' => $miss_alignments
         ];
 
 

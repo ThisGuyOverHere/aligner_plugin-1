@@ -75,8 +75,8 @@ class ApiController extends AlignerController {
                     WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
         $matchParams = array_merge($deleted_orders, array($job, $type));
 
+        $conn = NewDatabase::obtain()->getConnection();
         try {
-            $conn = NewDatabase::obtain()->getConnection();
             $conn->beginTransaction();
             $stm = $conn->prepare( $segmentQuery );
             $stm->execute( $segmentParams );
@@ -114,7 +114,7 @@ class ApiController extends AlignerController {
     public function split(){
 
         $order = $this->params['order'];
-        $job = $this->params['id_job'];
+        $id_job = $this->params['id_job'];
         $type = $this->params['type'];
         $inverse_order = $this->params['inverse_order'];
         $inverse_type = ($type == 'target') ? 'source' : 'target';
@@ -125,10 +125,10 @@ class ApiController extends AlignerController {
         }
 
         //Gets from 0 since they are returned as an array
-        $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)->toArray();
-        $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType($inverse_order, $job, $inverse_type)->toArray();
-        $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $job, $type)->toArray();
-        $inverse_match = Segments_SegmentMatchDao::getSegmentMatch($inverse_order, $job, $inverse_type)->toArray();
+        $split_segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $type)->toArray();
+        $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType($inverse_order, $id_job, $inverse_type)->toArray();
+        $split_match = Segments_SegmentMatchDao::getSegmentMatch($order, $id_job, $type)->toArray();
+        $inverse_match = Segments_SegmentMatchDao::getSegmentMatch($inverse_order, $id_job, $inverse_type)->toArray();
 
         $order_start = $split_match['order'];
         $order_end = $split_match['next'];
@@ -177,81 +177,83 @@ class ApiController extends AlignerController {
         $firstMatchQuery = "UPDATE segments_match as sm
         SET next = ?
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $firstMatchParams = array($avg_order, $order, $job, $type);
+        $firstMatchParams = array($avg_order, $order, $id_job, $type);
 
         $inverseMatchQuery = "UPDATE segments_match as sm
         SET next = ?
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $inverseMatchParams = array($inverse_avg, $inverse_order, $job, $inverse_type);
+        $inverseMatchParams = array($inverse_avg, $inverse_order, $id_job, $inverse_type);
 
 
         //New segment creation
-
-        $new_id = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count($raw_contents));
-        $new_segments = array();
-        $null_segments = array();
-        $new_matches = array();
-        $new_null_matches = array();
-
-        $null_segment = $inverse_segment;
-        $null_segment['id'] = null;
-        $null_segment['content_raw'] = null;
-        $null_segment['content_clean'] = null;
-        $null_segment['content_hash'] = null;
-        $null_segment['raw_word_count'] = null;
-
-        foreach ($new_id as $key => $id) {
-
-            //create new segments
-            $new_segment['id'] = $id;
-            $new_segment['content_raw'] = array_shift($raw_contents);
-            $new_segment['content_clean'] = AlignUtils::_cleanSegment($new_segment['content_raw'],$new_segment['language_code']);
-            $new_segment['content_hash'] = md5($new_segment['content_raw']);
-            $new_segment['raw_word_count'] = AlignUtils::_countWordsInSegment($new_segment['content_raw'],$new_segment['language_code']);
-
-            //create new matches
-            $new_match['segment_id'] = $id;
-            $new_match['order'] = $avg_order;
-            $new_segment['order'] = (int) $new_match['order'];
-
-            //If we split the last segment we add new next values for the new segments
-            $avg_order = ($split_match['next'] != null) ? AlignUtils::_getNewOrderValue($new_match['order'], $split_match['next']) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
-
-            $new_match['next'] = ($key != count($new_id)-1) ? $avg_order : (int)$split_match['next'];
-            $new_segment['next'] = (int) $new_match['next'];
-            $new_matches[] = $new_match;
-
-            //create new null matches
-            $null_match['segment_id'] = null;
-            $null_match['order'] = $inverse_avg;
-            $null_segment['order'] = $inverse_avg;
-
-            //If we split the last segment we add new next values for the new segments
-            $inverse_avg = ($inverse_match['next'] != null) ? AlignUtils::_getNewOrderValue($null_match['order'],$inverse_match['next']) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
-
-            $null_match['next'] = ($key != count($new_id)-1) ? $inverse_avg : (int) $inverse_match['next'];
-            $null_segment['next'] = $null_match['next'];
-            $new_null_matches[] = $null_match;
-
-            $new_segments[] = $new_segment;
-            $null_segments[] = $null_segment;
-        }
-
-        $segmentsDao = new Segments_SegmentDao;
-        $segmentsDao->createList($new_segments);
-
-        $segmentsMatchDao = new Segments_SegmentMatchDao;
-        $segmentsMatchDao->createList( array_merge($new_matches,$new_null_matches) );
-
+        $conn = NewDatabase::obtain()->getConnection();
         try {
-            $conn = NewDatabase::obtain()->getConnection();
             $conn->beginTransaction();
+
+            $new_ids = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count($raw_contents));
+            $new_segments = array();
+            $null_segments = array();
+            $new_matches = array();
+            $new_null_matches = array();
+
+            $null_segment = $inverse_segment;
+            $null_segment['id'] = null;
+            $null_segment['content_raw'] = null;
+            $null_segment['content_clean'] = null;
+            $null_segment['content_hash'] = null;
+            $null_segment['raw_word_count'] = null;
+
+            foreach ($new_ids as $key => $id) {
+
+
+                //create new segments
+                $new_segment['id'] = $id;
+                $new_segment['content_raw'] = array_shift($raw_contents);
+                $new_segment['content_clean'] = AlignUtils::_cleanSegment($new_segment['content_raw'],$new_segment['language_code']);
+                $new_segment['content_hash'] = md5($new_segment['content_raw']);
+                $new_segment['raw_word_count'] = AlignUtils::_countWordsInSegment($new_segment['content_raw'],$new_segment['language_code']);
+
+                //create new matches
+                $new_match['segment_id'] = $id;
+                $new_match['order'] = $avg_order;
+                $new_segment['order'] = (int) $new_match['order'];
+
+                //If we split the last segment we add new next values for the new segments
+                $avg_order = ($split_match['next'] != null) ? AlignUtils::_getNewOrderValue($new_match['order'], $split_match['next']) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+
+                $new_match['next'] = ($key != count($new_ids)-1) ? $avg_order : (int)$split_match['next'];
+                $new_segment['next'] = (int) $new_match['next'];
+                $new_matches[] = $new_match;
+
+                //create new null matches
+                $null_match['segment_id'] = null;
+                $null_match['order'] = $inverse_avg;
+                $null_segment['order'] = $inverse_avg;
+
+                //If we split the last segment we add new next values for the new segments
+                $inverse_avg = ($inverse_match['next'] != null) ? AlignUtils::_getNewOrderValue($null_match['order'],$inverse_match['next']) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+
+                $null_match['next'] = ($key != count($new_ids)-1) ? $inverse_avg : (int) $inverse_match['next'];
+                $null_segment['next'] = $null_match['next'];
+                $new_null_matches[] = $null_match;
+
+                $new_segments[] = $new_segment;
+                $null_segments[] = $null_segment;
+            }
+
+            $segmentsDao = new Segments_SegmentDao;
+            $segmentsDao->createList($new_segments);
+
+            $segmentsMatchDao = new Segments_SegmentMatchDao;
+            $segmentsMatchDao->createList( array_merge($new_matches,$new_null_matches) );
+
             $stm = $conn->prepare( $firstSegmentQuery );
             $stm->execute( $firstSegmentParams );
             $stm = $conn->prepare( $firstMatchQuery );
             $stm->execute( $firstMatchParams );
             $stm = $conn->prepare( $inverseMatchQuery );
             $stm->execute( $inverseMatchParams );
+
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -319,14 +321,7 @@ class ApiController extends AlignerController {
         }
 
         return $this->response->json(array("source" => $source, "target" => $target));
-
-        //return true;
-
     }
-
-
-
-
 
     public function move(){
 
@@ -442,9 +437,8 @@ class ApiController extends AlignerController {
             'data' => $inverseSegment
         );
 
-
+        $conn = NewDatabase::obtain()->getConnection();
         try {
-            $conn = NewDatabase::obtain()->getConnection();
             $conn->beginTransaction();
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->createList( array( $new_match,$new_gap ) );
@@ -568,8 +562,9 @@ class ApiController extends AlignerController {
         $segmentsMatchDao = new Segments_SegmentMatchDao;
         $segmentsMatchDao->createList( array($gap_match,$balance_match) );
 
+        $conn = NewDatabase::obtain()->getConnection();
         try {
-            $conn = NewDatabase::obtain()->getConnection();
+
             $conn->beginTransaction();
             if(!empty($previous_match)){
                 $stm = $conn->prepare( $gapQuery );
@@ -664,8 +659,9 @@ class ApiController extends AlignerController {
 
         }
 
+        $conn = NewDatabase::obtain()->getConnection();
         try {
-            $conn = NewDatabase::obtain()->getConnection();
+
             $conn->beginTransaction();
             if(!empty($sources)){
                 $stm = $conn->prepare( $updateSourceQuery );
