@@ -13,6 +13,7 @@ use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\AlignUtils;
+use Features\Aligner\Utils\Constants;
 
 class ApiController extends AlignerController {
 
@@ -34,6 +35,8 @@ class ApiController extends AlignerController {
         $raw_merge = $first_segment['content_raw'];
         $clean_merge = $first_segment['content_clean'];
         $merge_count = $first_segment['raw_word_count'];
+
+        $deleted_orders = [];
 
         foreach ($segments as $key => $segment) {
             $raw_merge .= " ".$segment['content_raw'];
@@ -212,7 +215,7 @@ class ApiController extends AlignerController {
             $new_segment['order'] = (int) $new_match['order'];
 
             //If we split the last segment we add new next values for the new segments
-            $avg_order = ($split_match['next'] != null) ? AlignUtils::_getNewOrderValue($new_match['order'], $split_match['next']) : $avg_order + 1000000000;
+            $avg_order = ($split_match['next'] != null) ? AlignUtils::_getNewOrderValue($new_match['order'], $split_match['next']) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
             $new_match['next'] = ($key != count($new_id)-1) ? $avg_order : (int)$split_match['next'];
             $new_segment['next'] = (int) $new_match['next'];
@@ -224,7 +227,7 @@ class ApiController extends AlignerController {
             $null_segment['order'] = $inverse_avg;
 
             //If we split the last segment we add new next values for the new segments
-            $inverse_avg = ($inverse_match['next'] != null) ? AlignUtils::_getNewOrderValue($null_match['order'],$inverse_match['next']) : $inverse_avg + 1000000000;
+            $inverse_avg = ($inverse_match['next'] != null) ? AlignUtils::_getNewOrderValue($null_match['order'],$inverse_match['next']) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
             $null_match['next'] = ($key != count($new_id)-1) ? $inverse_avg : (int) $inverse_match['next'];
             $null_segment['next'] = $null_match['next'];
@@ -499,7 +502,7 @@ class ApiController extends AlignerController {
 
         $last_match = Segments_SegmentMatchDao::getLastSegmentMatch($job, $other_type);
         $last_match['order'] = (int) $last_match['order'];
-        $balance_match['order'] = $last_match['order'] + 1000000000;
+        $balance_match['order'] = $last_match['order'] + Constants::DISTANCE_INT_BETWEEN_MATCHES;
         $balance_match['next'] = null;
         $balance_match['segment_id'] = null;
         $balance_match['score'] = 100;

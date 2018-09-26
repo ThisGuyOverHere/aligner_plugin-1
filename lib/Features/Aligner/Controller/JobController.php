@@ -38,7 +38,7 @@ class JobController extends AlignerController {
         $segmentMatchDao = new Segments_SegmentMatchDao;
         $miss_alignments = $segmentMatchDao->missAlignments($id_job);
 
-        $informations = [
+        $information = [
                 'job_name'              => $project->name,
                 'source_lang'           => $job->source,
                 'target_lang'           => $job->target,
@@ -48,7 +48,7 @@ class JobController extends AlignerController {
         ];
 
 
-        return $this->response->json( $informations );
+        return $this->response->json( $information );
 
     }
 }

@@ -18,6 +18,7 @@ use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\Alignment;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
+use Features\Aligner\Utils\Constants;
 
 
 class ParserController extends AlignerController {
@@ -96,8 +97,8 @@ class ParserController extends AlignerController {
                 }
             }
             $source_element['segment_id'] = $value['source']['id'];
-            $source_element['order'] = ($key+1)*1000000000;
-            $source_element['next'] = ($key+2)*1000000000;
+            $source_element['order'] = ($key+1)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $source_element['next'] = ($key+2)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
             $source_element['id_job'] = $this->id_job;
             $source_element['score'] = $value['score'];
             $source_element['type'] = "source";
@@ -112,8 +113,8 @@ class ParserController extends AlignerController {
             }
 
             $target_element['segment_id'] = $value['target']['id'];
-            $target_element['order'] = ($key+1)*1000000000;
-            $target_element['next'] = ($key+2)*1000000000;
+            $target_element['order'] = ($key+1)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $target_element['next'] = ($key+2)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
             $target_element['score'] = $value['score'];
             $target_element['id_job'] = $this->id_job;
             $target_element['type'] = "target";
