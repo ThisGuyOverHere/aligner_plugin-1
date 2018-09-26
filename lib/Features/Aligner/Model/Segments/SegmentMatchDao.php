@@ -63,6 +63,18 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id_job, 'type' => $type ] )[0];
     }
 
+    public static function getMatchesFromOrderArray( Array $orders, $id_job, $type, $ttl = 0 ){
+        $thisDao = new self();
+        $qMarks = str_repeat('?,', count($orders) - 1) . '?';
+        $sql = "SELECT * FROM segments_match as sm WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
+        $params = array_merge($orders, array($id_job, $type) );
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $segmentMatches = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
+        return $segmentMatches;
+    }
+
     public function createList( Array $obj_arr ) {
 
         $obj_arr = array_chunk( $obj_arr, 100 );
