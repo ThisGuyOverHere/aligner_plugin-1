@@ -271,7 +271,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     content_hash = ?,
                     raw_word_count = ?
                     WHERE id = ?;";
-        $query_params = array_merge($id, $contents);
+        $query_params = array_merge(array($id), $contents);
         try {
             $conn = NewDatabase::obtain()->getConnection();
             $stm = $conn->prepare( $query );

@@ -120,7 +120,7 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function nullifySegmentsInMatches($job, $type, Array $orders){
+    public static function nullifySegmentsInMatches(Array $orders, $job, $type ){
         $qMarks = str_repeat('?,', count($orders) - 1) . '?';
 
         $query = "UPDATE segments_match as sm
@@ -133,7 +133,21 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
             $stm = $conn->prepare( $query );
             $stm->execute( $params );
         } catch ( PDOException $e ) {
-            throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $job, $type, $orders", -2 );
+            throw new Exception( "Segment ID nullification in SegmentaMatch- DB Error: " . $e->getMessage() . " - $job, $type, $orders", -2 );
+        }
+    }
+
+    public static function updateNextSegment($new_order, $order, $job, $type){
+        $query = "UPDATE segments_match as sm
+        SET sm.next = ?
+        WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $params = array($new_order, $order, $job, $type);
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $stm = $conn->prepare( $query );
+            $stm->execute( $params );
+        } catch ( PDOException $e ) {
+            throw new Exception( "SegmentMatch update - DB Error: " . $e->getMessage() . " - $order, $job, $type, $new_order", -2 );
         }
     }
 

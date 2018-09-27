@@ -49,7 +49,7 @@ class ApiController extends AlignerController {
             $segments[$key]['next'] = (int) $segments[$key]['next'];
         }
 
-        Segments_SegmentMatchDao::nullifySegmentsInMatches($job,$type,$deleted_orders);
+        Segments_SegmentMatchDao::nullifySegmentsInMatches($deleted_orders, $job, $type);
         $hash_merge = md5($raw_merge);
 
         $first_segment['content_raw'] = $raw_merge;
@@ -90,6 +90,9 @@ class ApiController extends AlignerController {
 
 
     public function split(){
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $conn->beginTransaction();
 
         $order = $this->params['order'];
         $job = $this->params['id_job'];
@@ -139,29 +142,24 @@ class ApiController extends AlignerController {
         $new_match = $split_match;
         $null_match = $inverse_match;
 
-        $firstSegmentQuery = "UPDATE segments
-        SET content_raw = ?,
-        content_clean = ?,
-        content_hash = ?,
-        raw_word_count = ?
-        WHERE id = ?";
-        $firstSegmentParams = array($first_raw, $first_clean, $first_hash, $first_count, $split_segment['id']);
+        Segments_SegmentDao::updateSegmentContent($split_segment['id'], array($first_raw, $first_clean, $first_hash, $first_count));
 
         $split_segment['content_raw'] = $first_raw;
         $split_segment['content_clean'] = $first_clean;
         $split_segment['content_hash'] = $first_hash;
         $split_segment['raw_word_count'] = $first_count;
 
-        $firstMatchQuery = "UPDATE segments_match as sm
-        SET sm.next = ?
-        WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $firstMatchParams = array($avg_order, $order, $job, $type);
 
-        $inverseMatchQuery = "UPDATE segments_match as sm
-        SET sm.next = ?
-        WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $inverseMatchParams = array($inverse_avg, $inverse_order, $job, $inverse_type);
+        Segments_SegmentMatchDao::updateNextSegment($avg_order, $order, $job, $type);
+        Segments_SegmentMatchDao::updateNextSegment($inverse_avg, $inverse_order, $job, $inverse_type);
 
+
+        try {
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment Split - DB Error: " . $e->getMessage(), -2 );
+        }
 
         //New segment creation
 
@@ -220,21 +218,6 @@ class ApiController extends AlignerController {
 
         $segmentsMatchDao = new Segments_SegmentMatchDao;
         $segmentsMatchDao->createList( array_merge($new_matches,$new_null_matches) );
-
-        try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $conn->beginTransaction();
-            $stm = $conn->prepare( $firstSegmentQuery );
-            $stm->execute( $firstSegmentParams );
-            $stm = $conn->prepare( $firstMatchQuery );
-            $stm->execute( $firstMatchParams );
-            $stm = $conn->prepare( $inverseMatchQuery );
-            $stm->execute( $inverseMatchParams );
-            $conn->commit();
-        } catch ( \PDOException $e ) {
-            $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $firstSegmentParams - $firstMatchParams", -2 );
-        }
 
         //Format returned segments
 
