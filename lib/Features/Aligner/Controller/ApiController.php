@@ -206,8 +206,8 @@ class ApiController extends AlignerController {
             $segmentsMatchDao->createList( array_merge( $new_matches, $new_null_matches ) );
 
             Segments_SegmentDao::updateSegmentContent( $original_segment ['id'], [ $first_raw, $first_clean, $first_hash, $first_count ] );
-            Segments_SegmentMatchDao::updateNextSegment( $update_order, $order, $id_job, $type );
-            Segments_SegmentMatchDao::updateNextSegment( $inverse_update_order, $inverse_order, $id_job, $inverse_type );
+            Segments_SegmentMatchDao::updateNextSegmentMatch( $update_order, $order, $id_job, $type );
+            Segments_SegmentMatchDao::updateNextSegmentMatch( $inverse_update_order, $inverse_order, $id_job, $inverse_type );
 
             $conn->commit();
         } catch ( \PDOException $e ) {
@@ -386,9 +386,9 @@ class ApiController extends AlignerController {
             //Set original match to empty and edit old next positions
             Segments_SegmentMatchDao::nullifySegmentsInMatches( array($order), $job, $type );
             if ( $reference_order != 0 ) {
-                Segments_SegmentMatchDao::updateNextSegment( $new_order, $referenceMatch[ 'order' ], $job, $type );
+                Segments_SegmentMatchDao::updateNextSegmentMatch( $new_order, $referenceMatch[ 'order' ], $job, $type );
             }
-            Segments_SegmentMatchDao::updateNextSegment( $new_inverse_order, $inverseReference[ 'order' ], $job, $inverse_type );
+            Segments_SegmentMatchDao::updateNextSegmentMatch( $new_inverse_order, $inverseReference[ 'order' ], $job, $inverse_type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -495,9 +495,9 @@ class ApiController extends AlignerController {
             $segmentsMatchDao->createList( [ $gap_match, $balance_match ] );
 
             if ( !empty( $previous_match ) ) {
-                Segments_SegmentMatchDao::updateNextSegment( $gap_match[ 'order' ], $previous_order, $job, $type );
+                Segments_SegmentMatchDao::updateNextSegmentMatch( $gap_match[ 'order' ], $previous_order, $job, $type );
             }
-            Segments_SegmentMatchDao::updateNextSegment( $balance_match[ 'order' ], $last_match[ 'order' ], $job, $other_type );
+            Segments_SegmentMatchDao::updateNextSegmentMatch( $balance_match[ 'order' ], $last_match[ 'order' ], $job, $other_type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -542,60 +542,17 @@ class ApiController extends AlignerController {
             }
         }
 
-        if ( !empty( $sources ) ) {
-
-            $qMarksSource = str_repeat( '?,', count( $sources ) - 1 ) . '?';
-
-            $updateSourceQuery  = "UPDATE segments_match AS sm1, segments_match AS sm2
-            SET sm1.next = sm2.next
-            WHERE sm1.next IN ($qMarksSource) AND sm2.order IN ($qMarksSource)
-            AND sm1.type = 'source' AND sm2.type = 'source'
-            AND sm1.id_job = ? AND sm2.id_job = ?;";
-            $updateSourceParams = array_merge( $sources, $sources, [ $job, $job ] );
-
-            $deleteSourceQuery  = "DELETE FROM segments_match
-            USING segments_match
-            WHERE segments_match.order IN ($qMarksSource)
-            AND segments_match.type = 'source'
-            AND segments_match.id_job = ?;";
-            $deleteSourceParams = array_merge( $sources, [ $job ] );
-
-        }
-
-        if ( !empty( $targets ) ) {
-
-            $qMarksTarget = str_repeat( '?,', count( $targets ) - 1 ) . '?';
-
-            $updateTargetQuery  = "UPDATE segments_match AS sm1, segments_match AS sm2
-            SET sm1.next = sm2.next
-            WHERE sm1.next IN ($qMarksTarget) AND sm2.order IN ($qMarksTarget)
-            AND sm1.type = 'target' AND sm2.type = 'target'
-            AND sm1.id_job = ? AND sm2.id_job = ?;";
-            $updateTargetParams = array_merge( $targets, $targets, [ $job, $job ] );
-
-            $deleteTargetQuery  = "DELETE FROM segments_match 
-            WHERE segments_match.order IN ($qMarksTarget)
-            AND segments_match.type = 'target'
-            AND segments_match.id_job = ?;";
-            $deleteTargetParams = array_merge( $targets, [ $job ] );
-
-        }
-
         $conn = NewDatabase::obtain()->getConnection();
         try {
 
             $conn->beginTransaction();
             if ( !empty( $sources ) ) {
-                $stm = $conn->prepare( $updateSourceQuery );
-                $stm->execute( $updateSourceParams );
-                $stm = $conn->prepare( $deleteSourceQuery );
-                $stm->execute( $deleteSourceParams );
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($sources, $job,'source');
+                Segments_SegmentMatchDao::deleteMatches($sources,$job,'source');
             }
             if ( !empty( $targets ) ) {
-                $stm = $conn->prepare( $updateTargetQuery );
-                $stm->execute( $updateTargetParams );
-                $stm = $conn->prepare( $deleteTargetQuery );
-                $stm->execute( $deleteTargetParams );
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($targets, $job,'target');
+                Segments_SegmentMatchDao::deleteMatches($targets,$job,'target');
             }
             $conn->commit();
         } catch ( \PDOException $e ) {
