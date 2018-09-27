@@ -22,12 +22,11 @@ class ApiController extends AlignerController {
         $segments     = [];
         $orders       = $this->params[ 'order' ];
         $type         = $this->params[ 'type' ];
-        $job          = $this->params[ 'id_job' ];
-        $job_password = $this->params[ 'password' ];
+        $id_job          = $this->params[ 'id_job' ];
 
         sort( $orders );
         foreach ( $orders as $order ) {
-            $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $job, $type )->toArray();
+            $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         }
 
         $full_segments = $segments;
@@ -62,7 +61,7 @@ class ApiController extends AlignerController {
         try {
             $conn->beginTransaction();
             Segments_SegmentDao::mergeSegments($full_segments);
-            Segments_SegmentMatchDao::nullifySegmentsInMatches($deleted_orders, $job, $type);
+            Segments_SegmentMatchDao::nullifySegmentsInMatches($deleted_orders, $id_job, $type);
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -281,23 +280,23 @@ class ApiController extends AlignerController {
     public function move() {
 
         $order               = $this->params[ 'order' ];
-        $job                 = $this->params[ 'id_job' ];
+        $id_job                 = $this->params[ 'id_job' ];
         $type                = $this->params[ 'type' ];
         $inverse_type        = ( $type == 'target' ) ? 'source' : 'target';
         $destination         = $this->params[ 'destination' ];
         $inverse_destination = $this->params[ 'inverse_destination' ];
 
-        $movingSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $job, $type )->toArray();
+        $movingSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         $movingSegment[ 'order' ] = (int)$movingSegment[ 'order' ];
         $movingSegment[ 'next' ]  = (int)$movingSegment[ 'next' ];
 
         $operations = [];
 
-        //$destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination, $job, $type);
-        //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $job, $type);
+        //$destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination, $id_job, $type);
+        //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $id_job, $type);
 
         //Create new match between destination and destination->prev with starting segment
-        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $job, $type );
+        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $id_job, $type );
         if ( !empty( $referenceMatch ) ) {
             $referenceMatch = $referenceMatch->toArray();
         }
@@ -309,7 +308,7 @@ class ApiController extends AlignerController {
         $new_match[ 'score' ]          = 100;
         $new_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
         $new_match[ 'type' ]           = $type;
-        $new_match[ 'id_job' ]         = $job;
+        $new_match[ 'id_job' ]         = $id_job;
         $new_match[ 'content_raw' ]    = null;
         $new_match[ 'content_clean' ]  = null;
         $new_match[ 'raw_word_count' ] = null;
@@ -322,7 +321,7 @@ class ApiController extends AlignerController {
         ];
 
         //Create a new empty match on the opposite side of the row
-        $inverseReference            = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $job, $inverse_type )->toArray();
+        $inverseReference            = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $id_job, $inverse_type )->toArray();
         $new_inverse_order           = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
         $new_gap                     = $inverseReference;
         $new_gap[ 'order' ]          = (int)$new_inverse_order;
@@ -330,7 +329,7 @@ class ApiController extends AlignerController {
         $new_gap[ 'score' ]          = 100;
         $new_gap[ 'segment_id' ]     = null;
         $new_gap[ 'type' ]           = $inverse_type;
-        $new_gap[ 'id_job' ]         = $job;
+        $new_gap[ 'id_job' ]         = $id_job;
         $new_gap[ 'content_raw' ]    = null;
         $new_gap[ 'content_clean' ]  = null;
         $new_gap[ 'raw_word_count' ] = null;
@@ -353,7 +352,7 @@ class ApiController extends AlignerController {
 
         if ( $reference_order != 0 ) {
 
-            $referenceSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $job, $type )->toArray();
+            $referenceSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $id_job, $type )->toArray();
             $referenceSegment[ 'order' ] = (int)$referenceSegment[ 'order' ];
             $referenceSegment[ 'next' ]  = $new_order;
 
@@ -367,7 +366,7 @@ class ApiController extends AlignerController {
 
 
 
-        $inverseSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $job, $inverse_type )->toArray();
+        $inverseSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
         $inverseSegment[ 'order' ] = (int)$inverseSegment[ 'order' ];
         $inverseSegment[ 'next' ]  = (int)$inverseSegment[ 'next' ];
 
@@ -384,11 +383,11 @@ class ApiController extends AlignerController {
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->createList( [ $new_match, $new_gap ] );
             //Set original match to empty and edit old next positions
-            Segments_SegmentMatchDao::nullifySegmentsInMatches( array($order), $job, $type );
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( array($order), $id_job, $type );
             if ( $reference_order != 0 ) {
-                Segments_SegmentMatchDao::updateNextSegmentMatch( $new_order, $referenceMatch[ 'order' ], $job, $type );
+                Segments_SegmentMatchDao::updateNextSegmentMatch( $new_order, $referenceMatch[ 'order' ], $id_job, $type );
             }
-            Segments_SegmentMatchDao::updateNextSegmentMatch( $new_inverse_order, $inverseReference[ 'order' ], $job, $inverse_type );
+            Segments_SegmentMatchDao::updateNextSegmentMatch( $new_inverse_order, $inverseReference[ 'order' ], $id_job, $inverse_type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -402,21 +401,21 @@ class ApiController extends AlignerController {
 
     public function addGap() {
         $order      = $this->params[ 'order' ];
-        $job        = $this->params[ 'id_job' ];
+        $id_job        = $this->params[ 'id_job' ];
         $type       = $this->params[ 'type' ];
         $other_type = ( $type == 'target' ) ? 'source' : 'target';
 
         $gap_match     = [];
         $balance_match = [];
 
-        $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order, $job, $type );
+        $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order, $id_job, $type );
         $previous_order = ( empty( $previous_match ) ) ? 0 : $previous_match[ 'order' ];
 
         $gap_match[ 'order' ]          = AlignUtils::_getNewOrderValue( $previous_order, $order );
         $gap_match[ 'next' ]           = $order;
         $gap_match[ 'segment_id' ]     = null;
         $gap_match[ 'score' ]          = 100;
-        $gap_match[ 'id_job' ]         = $job;
+        $gap_match[ 'id_job' ]         = $id_job;
         $gap_match[ 'type' ]           = $type;
         $gap_match[ 'content_raw' ]    = null;
         $gap_match[ 'content_clean' ]  = null;
@@ -430,13 +429,13 @@ class ApiController extends AlignerController {
                 'data'      => $gap_match
         ];
 
-        $last_match                        = Segments_SegmentMatchDao::getLastSegmentMatch( $job, $other_type );
+        $last_match                        = Segments_SegmentMatchDao::getLastSegmentMatch( $id_job, $other_type );
         $last_match[ 'order' ]             = (int)$last_match[ 'order' ];
         $balance_match[ 'order' ]          = $last_match[ 'order' ] + Constants::DISTANCE_INT_BETWEEN_MATCHES;
         $balance_match[ 'next' ]           = null;
         $balance_match[ 'segment_id' ]     = null;
         $balance_match[ 'score' ]          = 100;
-        $balance_match[ 'id_job' ]         = $job;
+        $balance_match[ 'id_job' ]         = $id_job;
         $balance_match[ 'type' ]           = $other_type;
         $balance_match[ 'content_raw' ]    = null;
         $balance_match[ 'content_clean' ]  = null;
@@ -453,7 +452,7 @@ class ApiController extends AlignerController {
 
             $previous_match[ 'next' ] = (int)$gap_match[ 'order' ];
 
-            $previous_segment            = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $job, $type )->toArray();
+            $previous_segment            = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $id_job, $type )->toArray();
             $previous_segment[ 'order' ] = (int)$previous_segment[ 'order' ];
             $previous_segment[ 'next' ]  = (int)$gap_match[ 'order' ];
 
@@ -468,7 +467,7 @@ class ApiController extends AlignerController {
 
         $last_match[ 'next' ] = (int)$balance_match[ 'order' ];
 
-        $last_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $last_match[ 'order' ], $job, $type );
+        $last_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $last_match[ 'order' ], $id_job, $type );
         if ( !empty( $last_segment ) ) {
             $last_segment = $last_segment->toArray();
         }
@@ -495,9 +494,9 @@ class ApiController extends AlignerController {
             $segmentsMatchDao->createList( [ $gap_match, $balance_match ] );
 
             if ( !empty( $previous_match ) ) {
-                Segments_SegmentMatchDao::updateNextSegmentMatch( $gap_match[ 'order' ], $previous_order, $job, $type );
+                Segments_SegmentMatchDao::updateNextSegmentMatch( $gap_match[ 'order' ], $previous_order, $id_job, $type );
             }
-            Segments_SegmentMatchDao::updateNextSegmentMatch( $balance_match[ 'order' ], $last_match[ 'order' ], $job, $other_type );
+            Segments_SegmentMatchDao::updateNextSegmentMatch( $balance_match[ 'order' ], $last_match[ 'order' ], $id_job, $other_type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -510,7 +509,7 @@ class ApiController extends AlignerController {
     public function delete() {
 
         $matches = $this->params[ 'matches' ];
-        $job     = $this->params[ 'id_job' ];
+        $id_job     = $this->params[ 'id_job' ];
 
         $sources = [];
         $targets = [];
@@ -527,8 +526,8 @@ class ApiController extends AlignerController {
             throw new \Exception( "There is a different amount of source matches and target matches, Deletion cancelled", -2 );
         }
 
-        $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $job, 'source' );
-        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $job, 'source' );
+        $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
+        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
 
         foreach ( $sourceMatches as $sourceMatch ) {
             if ( $sourceMatch[ 'segment_id' ] != null ) {
@@ -547,12 +546,12 @@ class ApiController extends AlignerController {
 
             $conn->beginTransaction();
             if ( !empty( $sources ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($sources, $job,'source');
-                Segments_SegmentMatchDao::deleteMatches($sources,$job,'source');
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($sources, $id_job,'source');
+                Segments_SegmentMatchDao::deleteMatches($sources,$id_job,'source');
             }
             if ( !empty( $targets ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($targets, $job,'target');
-                Segments_SegmentMatchDao::deleteMatches($targets,$job,'target');
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($targets, $id_job,'target');
+                Segments_SegmentMatchDao::deleteMatches($targets,$id_job,'target');
             }
             $conn->commit();
         } catch ( \PDOException $e ) {
