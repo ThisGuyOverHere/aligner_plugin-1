@@ -22,12 +22,11 @@ class ApiController extends AlignerController {
         $segments     = [];
         $orders       = $this->params[ 'order' ];
         $type         = $this->params[ 'type' ];
-        $job          = $this->params[ 'id_job' ];
-        $job_password = $this->params[ 'password' ];
+        $id_job          = $this->params[ 'id_job' ];
 
         sort( $segment_orders );
         foreach ( $orders as $order ) {
-            $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $job, $type )->toArray();
+            $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         }
 
         $first_segment = array_shift( $segments );
@@ -73,7 +72,7 @@ class ApiController extends AlignerController {
         $matchQuery  = "UPDATE segments_match as sm
                     SET sm.segment_id = null
                     WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
-        $matchParams = array_merge( $deleted_orders, [ $job, $type ] );
+        $matchParams = array_merge( $deleted_orders, [ $id_job, $type ] );
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
@@ -318,13 +317,13 @@ class ApiController extends AlignerController {
     public function move() {
 
         $order               = $this->params[ 'order' ];
-        $job                 = $this->params[ 'id_job' ];
+        $id_job                 = $this->params[ 'id_job' ];
         $type                = $this->params[ 'type' ];
         $inverse_type        = ( $type == 'target' ) ? 'source' : 'target';
         $destination         = $this->params[ 'destination' ];
         $inverse_destination = $this->params[ 'inverse_destination' ];
 
-        $movingSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $job, $type )->toArray();
+        $movingSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         $movingSegment[ 'order' ] = (int)$movingSegment[ 'order' ];
         $movingSegment[ 'next' ]  = (int)$movingSegment[ 'next' ];
 
@@ -334,7 +333,7 @@ class ApiController extends AlignerController {
         //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $job, $type);
 
         //Create new match between destination and destination->prev with starting segment
-        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $job, $type );
+        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $id_job, $type );
         if ( !empty( $referenceMatch ) ) {
             $referenceMatch = $referenceMatch->toArray();
         }
@@ -346,7 +345,7 @@ class ApiController extends AlignerController {
         $new_match[ 'score' ]          = 100;
         $new_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
         $new_match[ 'type' ]           = $type;
-        $new_match[ 'id_job' ]         = $job;
+        $new_match[ 'id_job' ]         = $id_job;
         $new_match[ 'content_raw' ]    = null;
         $new_match[ 'content_clean' ]  = null;
         $new_match[ 'raw_word_count' ] = null;
@@ -359,7 +358,7 @@ class ApiController extends AlignerController {
         ];
 
         //Create a new empty match on the opposite side of the row
-        $inverseReference            = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $job, $inverse_type )->toArray();
+        $inverseReference            = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $id_job, $inverse_type )->toArray();
         $new_inverse_order           = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
         $new_gap                     = $inverseReference;
         $new_gap[ 'order' ]          = (int)$new_inverse_order;
@@ -367,7 +366,7 @@ class ApiController extends AlignerController {
         $new_gap[ 'score' ]          = 100;
         $new_gap[ 'segment_id' ]     = null;
         $new_gap[ 'type' ]           = $inverse_type;
-        $new_gap[ 'id_job' ]         = $job;
+        $new_gap[ 'id_job' ]         = $id_job;
         $new_gap[ 'content_raw' ]    = null;
         $new_gap[ 'content_clean' ]  = null;
         $new_gap[ 'raw_word_count' ] = null;
@@ -384,7 +383,7 @@ class ApiController extends AlignerController {
         $moveUpdateQuery = "UPDATE segments_match as sm
             SET sm.segment_id = NULL
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $moveParams      = [ $order, $job, $type ];
+        $moveParams      = [ $order, $id_job, $type ];
 
         $movingSegment[ 'id' ] = null;
 
@@ -399,9 +398,9 @@ class ApiController extends AlignerController {
             $nextUpdateQuery = "UPDATE segments_match as sm
             SET sm.next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-            $nextParams      = [ $new_order, $referenceMatch[ 'order' ], $job, $type ];
+            $nextParams      = [ $new_order, $referenceMatch[ 'order' ], $id_job, $type ];
 
-            $referenceSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $job, $type )->toArray();
+            $referenceSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $id_job, $type )->toArray();
             $referenceSegment[ 'order' ] = (int)$referenceSegment[ 'order' ];
             $referenceSegment[ 'next' ]  = $new_order;
 
@@ -416,9 +415,9 @@ class ApiController extends AlignerController {
         $gapUpdateQuery = "UPDATE segments_match as sm
             SET sm.next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $gapParams      = [ $new_inverse_order, $inverseReference[ 'order' ], $job, $inverse_type ];
+        $gapParams      = [ $new_inverse_order, $inverseReference[ 'order' ], $id_job, $inverse_type ];
 
-        $inverseSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $job, $inverse_type )->toArray();
+        $inverseSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
         $inverseSegment[ 'order' ] = (int)$inverseSegment[ 'order' ];
         $inverseSegment[ 'next' ]  = (int)$inverseSegment[ 'next' ];
 
@@ -455,21 +454,21 @@ class ApiController extends AlignerController {
 
     public function addGap() {
         $order      = $this->params[ 'order' ];
-        $job        = $this->params[ 'id_job' ];
+        $id_job        = $this->params[ 'id_job' ];
         $type       = $this->params[ 'type' ];
         $other_type = ( $type == 'target' ) ? 'source' : 'target';
 
         $gap_match     = [];
         $balance_match = [];
 
-        $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order, $job, $type );
+        $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order, $id_job, $type );
         $previous_order = ( empty( $previous_match ) ) ? 0 : $previous_match[ 'order' ];
 
         $gap_match[ 'order' ]          = AlignUtils::_getNewOrderValue( $previous_order, $order );
         $gap_match[ 'next' ]           = $order;
         $gap_match[ 'segment_id' ]     = null;
         $gap_match[ 'score' ]          = 100;
-        $gap_match[ 'id_job' ]         = $job;
+        $gap_match[ 'id_job' ]         = $id_job;
         $gap_match[ 'type' ]           = $type;
         $gap_match[ 'content_raw' ]    = null;
         $gap_match[ 'content_clean' ]  = null;
@@ -483,13 +482,13 @@ class ApiController extends AlignerController {
                 'data'      => $gap_match
         ];
 
-        $last_match                        = Segments_SegmentMatchDao::getLastSegmentMatch( $job, $other_type );
+        $last_match                        = Segments_SegmentMatchDao::getLastSegmentMatch( $id_job, $other_type );
         $last_match[ 'order' ]             = (int)$last_match[ 'order' ];
         $balance_match[ 'order' ]          = $last_match[ 'order' ] + Constants::DISTANCE_INT_BETWEEN_MATCHES;
         $balance_match[ 'next' ]           = null;
         $balance_match[ 'segment_id' ]     = null;
         $balance_match[ 'score' ]          = 100;
-        $balance_match[ 'id_job' ]         = $job;
+        $balance_match[ 'id_job' ]         = $id_job;
         $balance_match[ 'type' ]           = $other_type;
         $balance_match[ 'content_raw' ]    = null;
         $balance_match[ 'content_clean' ]  = null;
@@ -506,11 +505,11 @@ class ApiController extends AlignerController {
             $gapQuery                  = "UPDATE segments_match as sm
             SET next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-            $gapParams                 = [ $gap_match[ 'order' ], $previous_order, $job, $type ];
+            $gapParams                 = [ $gap_match[ 'order' ], $previous_order, $id_job, $type ];
 
             $previous_match[ 'next' ] = (int)$gap_match[ 'order' ];
 
-            $previous_segment            = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $job, $type )->toArray();
+            $previous_segment            = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $id_job, $type )->toArray();
             $previous_segment[ 'order' ] = (int)$previous_segment[ 'order' ];
             $previous_segment[ 'next' ]  = (int)$gap_match[ 'order' ];
 
@@ -526,11 +525,11 @@ class ApiController extends AlignerController {
         $balanceQuery  = "UPDATE segments_match as sm
             SET next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $balanceParams = [ $balance_match[ 'order' ], $last_match[ 'order' ], $job, $other_type ];
+        $balanceParams = [ $balance_match[ 'order' ], $last_match[ 'order' ], $id_job, $other_type ];
 
         $last_match[ 'next' ] = (int)$balance_match[ 'order' ];
 
-        $last_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $last_match[ 'order' ], $job, $type );
+        $last_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $last_match[ 'order' ], $id_job, $type );
         if ( !empty( $last_segment ) ) {
             $last_segment = $last_segment->toArray();
         }
@@ -574,7 +573,7 @@ class ApiController extends AlignerController {
     public function delete() {
 
         $matches = $this->params[ 'matches' ];
-        $job     = $this->params[ 'id_job' ];
+        $id_job  = $this->params[ 'id_job' ];
 
         $sources = [];
         $targets = [];
@@ -591,8 +590,8 @@ class ApiController extends AlignerController {
             throw new \Exception( "There is a different amount of source matches and target matches, Deletion cancelled", -2 );
         }
 
-        $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $job, 'source' );
-        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $job, 'source' );
+        $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
+        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
 
         foreach ( $sourceMatches as $sourceMatch ) {
             if ( $sourceMatch[ 'segment_id' ] != null ) {
@@ -615,14 +614,14 @@ class ApiController extends AlignerController {
             WHERE sm1.next IN ($qMarksSource) AND sm2.order IN ($qMarksSource)
             AND sm1.type = 'source' AND sm2.type = 'source'
             AND sm1.id_job = ? AND sm2.id_job = ?;";
-            $updateSourceParams = array_merge( $sources, $sources, [ $job, $job ] );
+            $updateSourceParams = array_merge( $sources, $sources, [ $id_job, $id_job ] );
 
             $deleteSourceQuery  = "DELETE FROM segments_match
             USING segments_match
             WHERE segments_match.order IN ($qMarksSource)
             AND segments_match.type = 'source'
             AND segments_match.id_job = ?;";
-            $deleteSourceParams = array_merge( $sources, [ $job ] );
+            $deleteSourceParams = array_merge( $sources, [ $id_job ] );
 
         }
 
@@ -635,13 +634,13 @@ class ApiController extends AlignerController {
             WHERE sm1.next IN ($qMarksTarget) AND sm2.order IN ($qMarksTarget)
             AND sm1.type = 'target' AND sm2.type = 'target'
             AND sm1.id_job = ? AND sm2.id_job = ?;";
-            $updateTargetParams = array_merge( $targets, $targets, [ $job, $job ] );
+            $updateTargetParams = array_merge( $targets, $targets, [ $id_job, $id_job ] );
 
             $deleteTargetQuery  = "DELETE FROM segments_match 
             WHERE segments_match.order IN ($qMarksTarget)
             AND segments_match.type = 'target'
             AND segments_match.id_job = ?;";
-            $deleteTargetParams = array_merge( $targets, [ $job ] );
+            $deleteTargetParams = array_merge( $targets, [ $id_job ] );
 
         }
 
