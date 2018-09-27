@@ -64,7 +64,7 @@ class HeaderComponent extends Component {
                     </div>
                 </li>
                 <li>
-                    <Mismatch />
+                    {/*<Mismatch />*/}
                     <Export/>
                 </li>
                 <li>

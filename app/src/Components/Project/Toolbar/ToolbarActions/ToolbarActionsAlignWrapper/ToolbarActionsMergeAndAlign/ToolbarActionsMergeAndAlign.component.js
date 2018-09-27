@@ -11,7 +11,9 @@ class ToolbarActionsMergeAndAlignComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            type: 'merge&align'
+        };
     }
 
 
@@ -30,19 +32,33 @@ class ToolbarActionsMergeAndAlignComponent extends Component {
             && this.props.selection.target.count > 0) {
             disabled = false;
         }
-        const comp = <button
+        return <button
             disabled={disabled}
+            onMouseOut={this.onMouseLeave}
+            onMouseOver={this.onHover}
             onClick={this.onClick}>
             <i className={classes.join(" ")}></i>
             Merge and Align
         </button>;
-        return (
-            <Popup trigger={comp} content='shortcut alt+A' on='hover' inverted/>
-        );
+        /* return (
+             <Popup trigger={comp} content='shortcut alt+A' on='hover' inverted/>
+         );
+         */
     }
 
     onClick = () => {
         ProjectActions.mergeAndAlignSegments(this.props.selection);
+        ProjectActions.addSegmentToSelection(-1);
+        ProjectActions.onActionHover(null);
+        ProjectActions.onActionHover(null);
+    };
+
+    onHover = () => {
+        ProjectActions.onActionHover(this.state.type);
+    };
+
+    onMouseLeave = () => {
+        ProjectActions.onActionHover(null);
     };
 
 }

@@ -12,7 +12,9 @@ class ToolbarActionsAlignComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            type: 'align'
+        };
     }
 
 
@@ -30,20 +32,22 @@ class ToolbarActionsAlignComponent extends Component {
             && this.props.selection.target.count === 1) {
             disabled = false;
         }
-        const comp = <button
+        return <button
             disabled={disabled}
+            onMouseOut={this.onMouseLeave}
+            onMouseOver={this.onHover}
             onClick={this.onClick}>
             <i className={classes.join(" ")}></i>
             Align
         </button>;
-        return (
+        /*return (
             <Popup trigger={comp} content='shortcut alt+A' on='hover' inverted/>
-        );
+        );*/
     }
 
     onClick = () => {
-        const sourceIndex = getSegmentIndexByOrder(this.props.selection.source.list[0],'source');
-        const targetToOrder = getSegmentByIndex(sourceIndex,'target').order;
+        const sourceIndex = getSegmentIndexByOrder(this.props.selection.source.list[0], 'source');
+        const targetToOrder = getSegmentByIndex(sourceIndex, 'target').order;
 
         const log = {
             type: 'target',
@@ -53,6 +57,15 @@ class ToolbarActionsAlignComponent extends Component {
 
         ProjectActions.requireChangeSegmentPosition(log);
         ProjectActions.addSegmentToSelection(-1);
+        ProjectActions.onActionHover(null);
+    };
+
+    onHover = () => {
+        ProjectActions.onActionHover(this.state.type);
+    };
+
+    onMouseLeave = () => {
+        ProjectActions.onActionHover(null);
     };
 
 }

@@ -11,7 +11,9 @@ class ToolbarActionsReverseComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            type: 'reverse'
+        };
     }
 
 
@@ -30,18 +32,23 @@ class ToolbarActionsReverseComponent extends Component {
         ) {
             disabled = true;
         }
-        const comp = <span>
+        return <span>
                 <button
                     disabled={disabled}
+                    onMouseOut={this.onMouseLeave}
+                    onMouseOver={this.onHover}
                     onClick={this.onReverseClick}>
                     <i className="icon sync"></i>
                     reverse
                 </button>
             </span>;
-        return (
-            <Popup trigger={comp} content='shortcut alt+R' on='hover' inverted />
+        /*
+         return (
+             <Popup trigger={comp} content='shortcut alt+R' on='hover' inverted />
 
-        );
+         );
+
+         */
     }
 
     onReverseClick = () => {
@@ -50,6 +57,15 @@ class ToolbarActionsReverseComponent extends Component {
         const segment2 = getSegmentByOrder(this.props.selection[type].list[1], type);
         ProjectActions.reverseTwoSegments(segment1, segment2);
         ProjectActions.addSegmentToSelection(-1);
+        ProjectActions.onActionHover(null);
+    };
+
+    onHover = () => {
+        ProjectActions.onActionHover(this.state.type);
+    };
+
+    onMouseLeave = () => {
+        ProjectActions.onActionHover(null);
     };
 
 }

@@ -176,9 +176,18 @@ let ProjectActions = {
         if (selection.source.count > 1) {
             changes.push(...this.getLogsForMergeSegments(selection.source.list.sort(), 'source'));
         }
-        if (selection.target.count > 0) {
+        if (selection.target.count > 1) {
             changes.push(...this.getLogsForMergeSegments(selection.target.list.sort(), 'target'));
         }
+
+        const sourceIndex = getSegmentIndexByOrder(selection.source.list[0],'source');
+        const targetToOrder = getSegmentByIndex(sourceIndex,'target').order;
+        const log = {
+            type: 'target',
+            from: selection.target.list[0],
+            to: targetToOrder
+        };
+        changes.push(...this.getChangeSegmentPosition(log));
 
         AppDispatcher.dispatch({
             actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
@@ -224,6 +233,84 @@ let ProjectActions = {
             rif_order: toMergeSegment.order,
             data: toMergeSegment
         });
+
+        return changes;
+    },
+
+
+    /**
+     *
+     * @param {Object} log A log of move action from frontend
+     * @param {String} log.type The type of segment: source or target
+     * @param {Number} log.from The row's order of Drag action
+     * @param {Number} log.to The row's order of Drop action
+     */
+    getChangeSegmentPosition: function (log) { //todo: move to utilis
+
+
+        let tmpJob = ProjectStore.job,
+            changeData,
+            changes = [],
+            fromIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.from),
+            toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to),
+            mockFrom = Object.assign({}, env.segmentModel),
+            mockToInverse = Object.assign({}, env.segmentModel);
+
+        const inverse = {
+            source: 'target',
+            target: 'source'
+        };
+
+        /*
+        * 1. creo un buco in corrispondenza della partenza
+        * 2. sostituisco l'elemento in posizione di arrivo
+        * 3. creo un elemento sotto la posizione di arrivo nella posizione opposta ed un buco nella stessa posizione
+        *
+        * */
+
+        //1
+        changes.push({
+            type: log.type,
+            action: 'update',
+            isEmptySegment: true,
+            rif_order: log.from
+        });
+
+        let segmentToPosition = tmpJob[log.type].get(toIndex).toJS();
+        let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1).toJS();
+        let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
+        let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1).toJS();
+
+        segmentfromPosition.order = segmentToPosition.order;
+        segmentfromPosition.next = segmentToPosition.next;
+
+        //2
+        changes.push({
+            type: log.type,
+            action: 'update',
+            rif_order: log.to,
+            data: segmentfromPosition
+        });
+
+
+        if (segmentToPosition.content_clean) {
+            //3
+            segmentToPosition.order = avgOrder(segmentToPosition.order, segmentToPosition.next);
+            segmentToPosition.next = segmentNextToPosition.order;
+            changes.push({
+                type: log.type,
+                action: 'create',
+                rif_order: segmentNextToPosition.order,
+                data: segmentToPosition
+            });
+
+            changes.push({
+                type: inverse[log.type],
+                action: 'create',
+                rif_order: inverseSegmentToPosition.order,
+                isEmptySegment: true
+            });
+        }
 
         return changes;
     },
@@ -374,7 +461,50 @@ let ProjectActions = {
         }, error =>{
             console.error(error)
         })
+    },
+
+    /**
+     * on action hover in toolbar dispatch type of action
+     * @param type
+     */
+    onActionHover: function (type) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.ON_ACTION_HOVER,
+            type: type,
+        });
+    },
+
+
+    /**
+     *
+     * @param {Array} changes A List of rows to apply actions
+     * @param {Object} changes[]
+     * @param {String} changes[].action The action to application on local row
+     * @param {String} changes[].rif_order Depending on the received action takes different meanings.
+     * if changes[].action = 'create' we refer to next order row.
+     * if changes[].action = 'delete' we refer to row to delete.
+     * if changes[].action = 'update' we refer to row to update.
+     * if changes[].action = 'push' ignore rif_order.
+     * @param {String} changes[].data The new row
+     * @param {String} changes[].type The type of segments (target or source)
+     * @param {boolean} changes[].isEmptySegment use this for set the mock from order of index
+     */
+    requireDirectChangesToStore: function (changes) {
+        //todo: call backend for propagate;
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+            changes: changes
+        });
+    },
+
+    deleteEmptyRows: function (deletes) {
+        AppDispatcher.dispatch({
+            actionType: ProjectConstants.DELETE_ROWS,
+            deletes: deletes
+        });
     }
+
+
 };
 
 

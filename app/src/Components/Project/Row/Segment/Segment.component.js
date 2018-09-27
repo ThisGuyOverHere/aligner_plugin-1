@@ -99,6 +99,9 @@ class SegmentComponent extends Component {
         }
         if (dropHover) {
             segmentClasses.push('onDropHover')
+            if(this.props.mergeStatus){
+                segmentClasses.push('onDropHoverMerge')
+            }
         }
         if (this.props.selected) {
             segmentClasses.push('selected')

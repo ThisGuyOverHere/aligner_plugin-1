@@ -133,6 +133,7 @@ class JobComponent extends Component {
 
     setRows = (job) => {
         let rows = [];
+        let deletes = [];
         let previousJob = this.state.job;
         let rowsDictionary = {
             source: {},
@@ -141,11 +142,23 @@ class JobComponent extends Component {
         job.source.map((e, index) => {
             rowsDictionary.source[e.order] = job.target[index].order;
             rowsDictionary.target[job.target[index].order] = e.order;
-            rows.push({
-                source: e,
-                target: job.target[index]
-            });
+            //todo: send API for remove empty/empty from DB
+            if(e.content_clean || job.target[index].content_clean){
+                rows.push({
+                    source: e,
+                    target: job.target[index]
+                });
+            }else{
+                deletes.push(index);
+            }
         });
+
+        if(deletes.length>0){
+            setTimeout(()=>{
+                ProjectActions.deleteEmptyRows(deletes);
+            },0);
+
+        }
 
         previousJob.rows = rows;
         previousJob.rowsDictionary = rowsDictionary;
