@@ -128,11 +128,6 @@ class ApiController extends AlignerController {
         $split_segment   = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_order, $id_job, $inverse_type )->toArray();
 
-        $order_start         = $split_segment[ 'order' ];
-        $order_end           = $split_segment[ 'next' ];
-        $inverse_order_start = $inverse_segment[ 'order' ];
-        $inverse_order_end   = $inverse_segment[ 'next' ];
-
         $avg_order   = AlignUtils::_getNewOrderValue( $split_segment[ 'order' ], $split_segment[ 'next' ] );
         $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_segment[ 'order' ], $inverse_segment[ 'next' ] );
 
@@ -263,10 +258,10 @@ class ApiController extends AlignerController {
         $target = [];
 
         //Check which segments to retrieve for source/target
-        $source_start = ( $type == 'source' ) ? $order_start : $inverse_order_start;
-        $source_end   = ( $type == 'source' ) ? $order_end : $inverse_order_end;
-        $target_start = ( $type == 'target' ) ? $order_start : $inverse_order_start;
-        $target_end   = ( $type == 'target' ) ? $order_end : $inverse_order_end;
+        $source_start = ( $type == 'source' ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
+        $source_end   = ( $type == 'source' ) ? $split_segment[ 'next' ] : $inverse_segment[ 'next' ];
+        $target_start = ( $type == 'target' ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
+        $target_end   = ( $type == 'target' ) ? $split_segment[ 'next' ] : $inverse_segment[ 'next' ];
 
         $segments       = array_merge( [ $split_segment ], $new_segments );
         $sourceSegments = ( $type == 'source' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
