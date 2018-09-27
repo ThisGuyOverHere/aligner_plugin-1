@@ -97,7 +97,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             if (change.rif_order) {
                 index = this.job[change.type].findIndex(i => i.get('order') === change.rif_order);
             }
-            console.log(change.action+' '+change.type);
+            //console.log(change.action+' '+change.type);
             switch (change.action) {
                 case 'delete':
                     if(this.job[change.type].getIn([+index + 1, 'order'])){
@@ -200,7 +200,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         }*/
     },
     deleteEmptyRows: function(deletes){
-        console.log(deletes);
+        //console.log(deletes);
 
         deletes.map(index =>{
             this.job.source = this.job.source.delete(index);
