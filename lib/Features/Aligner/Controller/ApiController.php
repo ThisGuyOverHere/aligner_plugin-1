@@ -450,10 +450,6 @@ class ApiController extends AlignerController {
 
         if ( !empty( $previous_match ) ) {
             $previous_match[ 'order' ] = (int)$previous_match[ 'order' ];
-            $gapQuery                  = "UPDATE segments_match as sm
-            SET next = ?
-            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-            $gapParams                 = [ $gap_match[ 'order' ], $previous_order, $job, $type ];
 
             $previous_match[ 'next' ] = (int)$gap_match[ 'order' ];
 
@@ -469,11 +465,6 @@ class ApiController extends AlignerController {
             ];
 
         }
-
-        $balanceQuery  = "UPDATE segments_match as sm
-            SET next = ?
-            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $balanceParams = [ $balance_match[ 'order' ], $last_match[ 'order' ], $job, $other_type ];
 
         $last_match[ 'next' ] = (int)$balance_match[ 'order' ];
 
@@ -504,11 +495,9 @@ class ApiController extends AlignerController {
             $segmentsMatchDao->createList( [ $gap_match, $balance_match ] );
 
             if ( !empty( $previous_match ) ) {
-                $stm = $conn->prepare( $gapQuery );
-                $stm->execute( $gapParams );
+                Segments_SegmentMatchDao::updateNextSegment( $gap_match[ 'order' ], $previous_order, $job, $type );
             }
-            $stm = $conn->prepare( $balanceQuery );
-            $stm->execute( $balanceParams );
+            Segments_SegmentMatchDao::updateNextSegment( $balance_match[ 'order' ], $last_match[ 'order' ], $job, $other_type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
