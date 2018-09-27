@@ -36,6 +36,7 @@ class ApiController extends AlignerController {
         $merge_count   = $first_segment[ 'raw_word_count' ];
 
         $deleted_orders = [];
+        $deleted_ids    = [];
 
         foreach ( $segments as $key => $segment ) {
             $raw_merge                   .= " " . $segment[ 'content_raw' ];
@@ -126,25 +127,23 @@ class ApiController extends AlignerController {
         //Gets from 0 since they are returned as an array
         $split_segment   = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_order, $id_job, $inverse_type )->toArray();
-        $split_match     = Segments_SegmentMatchDao::getSegmentMatch( $order, $id_job, $type )->toArray();
-        $inverse_match   = Segments_SegmentMatchDao::getSegmentMatch( $inverse_order, $id_job, $inverse_type )->toArray();
 
-        $order_start         = $split_match[ 'order' ];
-        $order_end           = $split_match[ 'next' ];
-        $inverse_order_start = $split_match[ 'order' ];
-        $inverse_order_end   = $split_match[ 'next' ];
+        $order_start         = $split_segment[ 'order' ];
+        $order_end           = $split_segment[ 'next' ];
+        $inverse_order_start = $inverse_segment[ 'order' ];
+        $inverse_order_end   = $inverse_segment[ 'next' ];
 
-        $avg_order   = AlignUtils::_getNewOrderValue( $order_start, $order_end );
-        $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_order_start, $inverse_order_end );
+        $avg_order   = AlignUtils::_getNewOrderValue( $split_segment[ 'order' ], $split_segment[ 'next' ] );
+        $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_segment[ 'order' ], $inverse_segment[ 'next' ] );
 
         $split_segment[ 'order' ]   = (int)$split_segment[ 'order' ];
-        $inverse_segment[ 'order' ] = (int)$split_segment[ 'order' ];
+        $inverse_segment[ 'order' ] = (int)$inverse_segment[ 'order' ];
         $split_segment[ 'next' ]    = $avg_order;
         $inverse_segment[ 'next' ]  = $inverse_avg;
 
         $raw_contents = [];
         $full_raw     = AlignUtils::_mark_xliff_tags( $split_segment[ 'content_raw' ] );
-        $positions[]  = strlen( ( $full_raw ) );
+        $positions[]  = strlen( $full_raw );
         foreach ( $positions as $key => $position ) {
             $start          = ( $key == 0 ) ? 0 : $positions[ $key - 1 ] + 1;
             $raw_substring  = substr( $full_raw, $start, ( $position + 1 ) - $start );
@@ -157,8 +156,8 @@ class ApiController extends AlignerController {
         $first_count = AlignUtils::_countWordsInSegment( $first_raw, $split_segment[ 'language_code' ] );
 
         $new_segment = $split_segment;
-        $new_match   = $split_match;
-        $null_match  = $inverse_match;
+        $new_match   = $split_segment;
+        $null_match  = $inverse_segment;
 
         $firstSegmentQuery  = "UPDATE segments
         SET content_raw = ?,
@@ -183,62 +182,61 @@ class ApiController extends AlignerController {
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $inverseMatchParams = [ $inverse_avg, $inverse_order, $id_job, $inverse_type ];
 
+        $new_ids          = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $raw_contents ) );
+        $new_segments     = [];
+        $null_segments    = [];
+        $new_matches      = [];
+        $new_null_matches = [];
+
+        $null_segment                     = $inverse_segment;
+        $null_segment[ 'id' ]             = null;
+        $null_segment[ 'content_raw' ]    = null;
+        $null_segment[ 'content_clean' ]  = null;
+        $null_segment[ 'content_hash' ]   = null;
+        $null_segment[ 'raw_word_count' ] = null;
+
+        foreach ( $new_ids as $key => $id ) {
+
+            //create new segments
+            $new_segment[ 'id' ]             = $id;
+            $new_segment[ 'content_raw' ]    = array_shift( $raw_contents );
+            $new_segment[ 'content_clean' ]  = AlignUtils::_cleanSegment( $new_segment[ 'content_raw' ], $new_segment[ 'language_code' ] );
+            $new_segment[ 'content_hash' ]   = md5( $new_segment[ 'content_raw' ] );
+            $new_segment[ 'raw_word_count' ] = AlignUtils::_countWordsInSegment( $new_segment[ 'content_raw' ], $new_segment[ 'language_code' ] );
+
+            //create new matches
+            $new_match[ 'segment_id' ] = $id;
+            $new_match[ 'order' ]      = $avg_order;
+            $new_segment[ 'order' ]    = (int)$new_match[ 'order' ];
+
+            //If we split the last segment we add new next values for the new segments
+            $avg_order = ( $split_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $new_match[ 'order' ], $split_segment[ 'next' ] ) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+
+            $new_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $avg_order : (int)$split_segment[ 'next' ];
+            $new_segment[ 'next' ] = (int)$new_match[ 'next' ];
+            $new_matches[]         = $new_match;
+
+            //create new null matches
+            $null_match[ 'segment_id' ] = null;
+            $null_match[ 'order' ]      = $inverse_avg;
+            $null_segment[ 'order' ]    = $inverse_avg;
+
+            //If we split the last segment we add new next values for the new segments
+            $inverse_avg = ( $inverse_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $null_match[ 'order' ], $inverse_segment[ 'next' ] ) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+
+            $null_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $inverse_avg : (int)$inverse_segment[ 'next' ];
+            $null_segment[ 'next' ] = $null_match[ 'next' ];
+            $new_null_matches[]     = $null_match;
+
+            $new_segments[]  = $new_segment;
+            $null_segments[] = $null_segment;
+        }
+
 
         //New segment creation
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
-
-            $new_ids          = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $raw_contents ) );
-            $new_segments     = [];
-            $null_segments    = [];
-            $new_matches      = [];
-            $new_null_matches = [];
-
-            $null_segment                     = $inverse_segment;
-            $null_segment[ 'id' ]             = null;
-            $null_segment[ 'content_raw' ]    = null;
-            $null_segment[ 'content_clean' ]  = null;
-            $null_segment[ 'content_hash' ]   = null;
-            $null_segment[ 'raw_word_count' ] = null;
-
-            foreach ( $new_ids as $key => $id ) {
-
-
-                //create new segments
-                $new_segment[ 'id' ]             = $id;
-                $new_segment[ 'content_raw' ]    = array_shift( $raw_contents );
-                $new_segment[ 'content_clean' ]  = AlignUtils::_cleanSegment( $new_segment[ 'content_raw' ], $new_segment[ 'language_code' ] );
-                $new_segment[ 'content_hash' ]   = md5( $new_segment[ 'content_raw' ] );
-                $new_segment[ 'raw_word_count' ] = AlignUtils::_countWordsInSegment( $new_segment[ 'content_raw' ], $new_segment[ 'language_code' ] );
-
-                //create new matches
-                $new_match[ 'segment_id' ] = $id;
-                $new_match[ 'order' ]      = $avg_order;
-                $new_segment[ 'order' ]    = (int)$new_match[ 'order' ];
-
-                //If we split the last segment we add new next values for the new segments
-                $avg_order = ( $split_match[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $new_match[ 'order' ], $split_match[ 'next' ] ) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
-
-                $new_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $avg_order : (int)$split_match[ 'next' ];
-                $new_segment[ 'next' ] = (int)$new_match[ 'next' ];
-                $new_matches[]         = $new_match;
-
-                //create new null matches
-                $null_match[ 'segment_id' ] = null;
-                $null_match[ 'order' ]      = $inverse_avg;
-                $null_segment[ 'order' ]    = $inverse_avg;
-
-                //If we split the last segment we add new next values for the new segments
-                $inverse_avg = ( $inverse_match[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $null_match[ 'order' ], $inverse_match[ 'next' ] ) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
-
-                $null_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $inverse_avg : (int)$inverse_match[ 'next' ];
-                $null_segment[ 'next' ] = $null_match[ 'next' ];
-                $new_null_matches[]     = $null_match;
-
-                $new_segments[]  = $new_segment;
-                $null_segments[] = $null_segment;
-            }
 
             $segmentsDao = new Segments_SegmentDao;
             $segmentsDao->createList( $new_segments );
