@@ -559,13 +559,15 @@ class ApiController extends AlignerController {
             'data' => $last_segment
         );
 
-        $segmentsMatchDao = new Segments_SegmentMatchDao;
-        $segmentsMatchDao->createList( array($gap_match,$balance_match) );
+
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
-
             $conn->beginTransaction();
+            
+            $segmentsMatchDao = new Segments_SegmentMatchDao;
+            $segmentsMatchDao->createList( array($gap_match, $balance_match) );
+
             if(!empty($previous_match)){
                 $stm = $conn->prepare( $gapQuery );
                 $stm->execute( $gapParams );
@@ -580,10 +582,6 @@ class ApiController extends AlignerController {
 
         return $this->response->json($operations);
     }
-
-
-
-
 
     public function delete(){
 
@@ -652,7 +650,7 @@ class ApiController extends AlignerController {
             $updateTargetParams = array_merge($targets, $targets, array($job, $job));
 
             $deleteTargetQuery = "DELETE FROM segments_match 
-            WHERE segments_match.order IN ($qMarksSource)
+            WHERE segments_match.order IN ($qMarksTarget)
             AND segments_match.type = 'target'
             AND segments_match.id_job = ?;";
             $deleteTargetParams = array_merge($targets, array($job));
