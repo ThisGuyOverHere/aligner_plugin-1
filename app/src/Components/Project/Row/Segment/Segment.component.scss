@@ -12,11 +12,11 @@
     background: $white;
     box-shadow: 0 1px 1px #CCCCCC;
     user-select: none;
-    height: 100%;
+    height: auto;
   }
   &:not(.empty):not(.onDropHover):not(.onDrag) {
-    .segmentBox-content:hover{
-      &::before,&::after{
+    .segmentBox-content:hover {
+      &::before, &::after {
         display: block;
         height: 20px;
         width: 10px;
@@ -65,11 +65,19 @@
 
   }
   &.onDropHover:not(.empty) {
-    border: 1px dashed $white;
     .segmentBox-content {
       background: $white;
       box-shadow: none;
       position: relative;
+    }
+    .dropAlignArea {
+      width: 100%;
+      border: 1px dashed $white;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
     }
     &:not(.onDropHoverMerge) {
       .segmentBox-content {
@@ -87,15 +95,17 @@
       outline-offset: -2px;
     }
   }
-
-  .merge {
-    width: 100%;
-    border: 3px dashed $primary;
-    display: block;
-    color: $primary;
-    text-align: center;
-    line-height: 64px;
+  &.onDropHoverMerge {
+    .merge {
+      width: 100%;
+      height: 20px;
+      border: 3px dashed $primary;
+      display: block;
+      color: $primary;
+      text-align: center;
+    }
   }
+
 }
 
 @media screen and (-webkit-min-device-pixel-ratio: 2) {

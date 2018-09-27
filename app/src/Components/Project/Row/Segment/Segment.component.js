@@ -116,7 +116,7 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDropTarget, connectDragPreview, connectDragSource, isDragging, segment, dropHover} = this.props;
+        const {connectDropTarget, connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl} = this.props;
 
         let segmentClasses = ['segmentBox'];
         if (!segment.content_clean) {
@@ -134,16 +134,20 @@ class SegmentComponent extends Component {
         if (this.props.selected) {
             segmentClasses.push('selected')
         }
+
+
+        if(isOver && dragEl.type === this.props.segment.type){
+            segmentClasses.push('onDropHoverMerge')
+        }
         return connectDropTarget(connectDragPreview(connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
                  onDoubleClick={this.openSplitModal}
                  onClick={this.toggleSelectedSegment}
             >
+                {dropHover && <span className="dropAlignArea"> </span>}
                 <div className="segmentBox-content">
                     <p>{segment.content_clean}</p>
-                    {this.props.mergeStatus && <span className="merge">
-                    MERGE
-                </span>}
+                    <span className="merge"> </span>
                 </div>
 
             </div>
@@ -163,7 +167,7 @@ class SegmentComponent extends Component {
 
 
     getStyles = (props) => {
-        const {left, top, isDragging} = props;
+        const {left, top} = props;
         const transform = `translate3d(${left}px, ${top}px, 0)`;
         return {
             transform,
