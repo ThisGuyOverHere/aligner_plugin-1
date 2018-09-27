@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../../Constants/Draggable.constants';
-import {DragSource} from 'react-dnd';
+import {DragSource, DropTarget} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../Actions/Project.actions";
@@ -17,6 +17,34 @@ const ItemSource = {
 
     }
 };
+
+const Target = {
+    canDrop(props, monitor) {
+        const from = monitor.getItem(),
+            types = {
+                'source': 0,
+                'target': 1
+            };
+
+        if (!(from.segment.order === props.segment.order && from.segment.type === props.segment.type)
+            && from.segment.type === props.segment.type && props.segment.content_clean) {
+            return true
+        }
+        return false
+    },
+    drop(props, monitor, component) {
+        return props;
+    }
+};
+
+function collectTarget(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+        dragEl: monitor.getItem()
+    }
+}
 
 function collect(connect, monitor) {
     return {
@@ -88,7 +116,7 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDragSource, isDragging, segment, dropHover} = this.props;
+        const {connectDropTarget, connectDragPreview, connectDragSource, isDragging, segment, dropHover} = this.props;
 
         let segmentClasses = ['segmentBox'];
         if (!segment.content_clean) {
@@ -99,18 +127,18 @@ class SegmentComponent extends Component {
         }
         if (dropHover) {
             segmentClasses.push('onDropHover')
-            if(this.props.mergeStatus){
+            if (this.props.mergeStatus) {
                 segmentClasses.push('onDropHoverMerge')
             }
         }
         if (this.props.selected) {
             segmentClasses.push('selected')
         }
-        return connectDragSource(
+        return connectDropTarget(connectDragPreview(connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
                  onDoubleClick={this.openSplitModal}
                  onClick={this.toggleSelectedSegment}
-                 >
+            >
                 <div className="segmentBox-content">
                     <p>{segment.content_clean}</p>
                     {this.props.mergeStatus && <span className="merge">
@@ -119,11 +147,11 @@ class SegmentComponent extends Component {
                 </div>
 
             </div>
-        );
+        )));
     };
 
     toggleSelectedSegment = () => {
-        if(this.props.segment.content_clean){
+        if (this.props.segment.content_clean) {
             ProjectActions.addSegmentToSelection(this.props.segment.order, this.props.type)
         }
     };
@@ -148,4 +176,4 @@ class SegmentComponent extends Component {
 
 }
 
-export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);
+export default DropTarget(ItemTypes.ITEM, Target, collectTarget)(DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent));
