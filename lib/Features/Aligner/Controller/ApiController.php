@@ -56,7 +56,6 @@ class ApiController extends AlignerController {
         $first_segment[ 'next' ]           = (int)$first_segment[ 'next' ];
 
 
-
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
@@ -341,6 +340,7 @@ class ApiController extends AlignerController {
                 'data'      => $new_gap
         ];
 
+
         $movingSegment[ 'id' ] = null;
 
         $operations[] = [
@@ -363,8 +363,6 @@ class ApiController extends AlignerController {
                     'data'      => $referenceSegment
             ];
         }
-
-
 
         $inverseSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
         $inverseSegment[ 'order' ] = (int)$inverseSegment[ 'order' ];
@@ -509,7 +507,9 @@ class ApiController extends AlignerController {
     public function delete() {
 
         $matches = $this->params[ 'matches' ];
-        $id_job     = $this->params[ 'id_job' ];
+
+        $id_job  = $this->params[ 'id_job' ];
+
 
         $sources = [];
         $targets = [];
