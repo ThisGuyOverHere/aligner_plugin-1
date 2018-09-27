@@ -25,7 +25,7 @@ class ApiController extends AlignerController {
         $job          = $this->params[ 'id_job' ];
         $job_password = $this->params[ 'password' ];
 
-        sort( $segment_orders );
+        sort( $orders );
         foreach ( $orders as $order ) {
             $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $job, $type )->toArray();
         }
@@ -342,13 +342,6 @@ class ApiController extends AlignerController {
                 'data'      => $new_gap
         ];
 
-        //Set original match to empty and edit old next positions
-
-        $moveUpdateQuery = "UPDATE segments_match as sm
-            SET sm.segment_id = NULL
-            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $moveParams      = [ $order, $job, $type ];
-
         $movingSegment[ 'id' ] = null;
 
         $operations[] = [
@@ -359,10 +352,6 @@ class ApiController extends AlignerController {
         ];
 
         if ( $reference_order != 0 ) {
-            $nextUpdateQuery = "UPDATE segments_match as sm
-            SET sm.next = ?
-            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-            $nextParams      = [ $new_order, $referenceMatch[ 'order' ], $job, $type ];
 
             $referenceSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $job, $type )->toArray();
             $referenceSegment[ 'order' ] = (int)$referenceSegment[ 'order' ];
@@ -376,10 +365,7 @@ class ApiController extends AlignerController {
             ];
         }
 
-        $gapUpdateQuery = "UPDATE segments_match as sm
-            SET sm.next = ?
-            WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
-        $gapParams      = [ $new_inverse_order, $inverseReference[ 'order' ], $job, $inverse_type ];
+
 
         $inverseSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $job, $inverse_type )->toArray();
         $inverseSegment[ 'order' ] = (int)$inverseSegment[ 'order' ];
@@ -397,18 +383,16 @@ class ApiController extends AlignerController {
             $conn->beginTransaction();
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->createList( [ $new_match, $new_gap ] );
-            $stm = $conn->prepare( $moveUpdateQuery );
-            $stm->execute( $moveParams );
+            //Set original match to empty and edit old next positions
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( array($order), $job, $type );
             if ( $reference_order != 0 ) {
-                $stm = $conn->prepare( $nextUpdateQuery );
-                $stm->execute( $nextParams );
+                Segments_SegmentMatchDao::updateNextSegment( $new_order, $referenceMatch[ 'order' ], $job, $type );
             }
-            $stm = $conn->prepare( $gapUpdateQuery );
-            $stm->execute( $gapParams );
+            Segments_SegmentMatchDao::updateNextSegment( $new_inverse_order, $inverseReference[ 'order' ], $job, $inverse_type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $moveParams ", -2 );
+            throw new \Exception( "Segment Move - DB Error: " . $e->getMessage() , -2 );
         }
 
         return $this->response->json( $operations );
