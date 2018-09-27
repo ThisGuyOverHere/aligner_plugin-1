@@ -120,4 +120,22 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function nullifySegmentsInMatches($job, $type, Array $orders){
+        $qMarks = str_repeat('?,', count($orders) - 1) . '?';
+
+        $query = "UPDATE segments_match as sm
+                    SET sm.segment_id = null
+                    WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
+        $params = array_merge($orders, array($job, $type));
+
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $stm = $conn->prepare( $query );
+            $stm->execute( $params );
+        } catch ( PDOException $e ) {
+            throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $job, $type, $orders", -2 );
+        }
+    }
+
+
 }

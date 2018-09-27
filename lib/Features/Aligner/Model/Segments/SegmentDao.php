@@ -264,5 +264,22 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         }
     }
 
+    public static function updateSegmentContent($id, Array $contents){
+        $query = "UPDATE segments
+                    SET content_raw = ?,
+                    content_clean = ?,
+                    content_hash = ?,
+                    raw_word_count = ?
+                    WHERE id = ?;";
+        $query_params = array_merge($id, $contents);
+        try {
+            $conn = NewDatabase::obtain()->getConnection();
+            $stm = $conn->prepare( $query );
+            $stm->execute( $query_params );
+        } catch ( PDOException $e ) {
+            throw new Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
+        }
+    }
+
 
 }

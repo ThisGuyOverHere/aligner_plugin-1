@@ -17,6 +17,8 @@ use Features\Aligner\Utils\AlignUtils;
 class ApiController extends AlignerController {
 
     public function merge(){
+        $conn = NewDatabase::obtain()->getConnection();
+        $conn->beginTransaction();
 
         $segments = array();
         $orders = $this->params['order'];
@@ -24,10 +26,12 @@ class ApiController extends AlignerController {
         $job  = $this->params['id_job'];
         $job_password = $this->params['password'];
 
-        sort($segment_orders);
+        sort($orders);
         foreach ($orders as $order){
             $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType($order, $job, $type)->toArray();
         }
+
+        Segments_SegmentDao::mergeSegments($segments);
 
 
         $first_segment = array_shift($segments);
@@ -45,46 +49,23 @@ class ApiController extends AlignerController {
             $segments[$key]['next'] = (int) $segments[$key]['next'];
         }
 
+        Segments_SegmentMatchDao::nullifySegmentsInMatches($job,$type,$deleted_orders);
+        $hash_merge = md5($raw_merge);
+
         $first_segment['content_raw'] = $raw_merge;
         $first_segment['content_clean'] = $clean_merge;
         $first_segment['raw_word_count'] = $merge_count;
+        $first_segment['content_hash'] = $hash_merge;
         $first_segment['order'] = (int) $first_segment['order'];
         $first_segment['next'] = (int) $first_segment['next'];
 
-        $hash_merge = md5($raw_merge);
 
-        $segmentQuery = "UPDATE segments
-                    SET content_raw = ?,
-                    content_clean = ?,
-                    content_hash = ?,
-                    raw_word_count = ?
-                    WHERE id = ?;";
-        $segmentParams = array($raw_merge, $clean_merge, $hash_merge, $merge_count, $first_segment['id']);
-
-
-        $qMarks = str_repeat('?,', count($segments) - 1) . '?';
-
-        $deleteQuery = "DELETE FROM segments WHERE id IN ($qMarks);";
-
-
-        $matchQuery = "UPDATE segments_match as sm
-                    SET sm.segment_id = null
-                    WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
-        $matchParams = array_merge($deleted_orders, array($job, $type));
 
         try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $conn->beginTransaction();
-            $stm = $conn->prepare( $segmentQuery );
-            $stm->execute( $segmentParams );
-            $stm = $conn->prepare( $deleteQuery );
-            $stm->execute( $deleted_ids );
-            $stm = $conn->prepare( $matchQuery );
-            $stm->execute( $matchParams );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $segmentParams", -2 );
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Merging $orders", -2 );
         }
 
         $operations = array();
@@ -172,12 +153,12 @@ class ApiController extends AlignerController {
         $split_segment['raw_word_count'] = $first_count;
 
         $firstMatchQuery = "UPDATE segments_match as sm
-        SET next = ?
+        SET sm.next = ?
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $firstMatchParams = array($avg_order, $order, $job, $type);
 
         $inverseMatchQuery = "UPDATE segments_match as sm
-        SET next = ?
+        SET sm.next = ?
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $inverseMatchParams = array($inverse_avg, $inverse_order, $job, $inverse_type);
 
@@ -518,7 +499,7 @@ class ApiController extends AlignerController {
         if(!empty($previous_match)){
             $previous_match['order'] = (int) $previous_match['order'];
             $gapQuery = "UPDATE segments_match as sm
-            SET next = ?
+            SET sm.next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
             $gapParams = array($gap_match['order'], $previous_order, $job, $type);
 
@@ -538,7 +519,7 @@ class ApiController extends AlignerController {
         }
 
         $balanceQuery = "UPDATE segments_match as sm
-            SET next = ?
+            SET sm.next = ?
             WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $balanceParams = array($balance_match['order'], $last_match['order'], $job, $other_type);
 
