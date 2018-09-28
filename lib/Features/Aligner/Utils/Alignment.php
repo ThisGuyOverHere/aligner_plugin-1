@@ -1530,6 +1530,7 @@ class Alignment {
             return array_keys($map);
         }
 
+        // Levenshtein for strings with +255 chars
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
             $str1Array = str_split($str1, 1);
