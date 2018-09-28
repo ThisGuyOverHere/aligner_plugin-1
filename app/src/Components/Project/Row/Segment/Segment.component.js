@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../../Constants/Draggable.constants';
-import {DragSource} from 'react-dnd';
+import {DragSource, DropTarget} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../Actions/Project.actions";
@@ -17,6 +17,34 @@ const ItemSource = {
 
     }
 };
+
+const Target = {
+    canDrop(props, monitor) {
+        const from = monitor.getItem(),
+            types = {
+                'source': 0,
+                'target': 1
+            };
+
+        if (!(from.segment.order === props.segment.order && from.segment.type === props.segment.type)
+            && from.segment.type === props.segment.type && props.segment.content_clean) {
+            return true
+        }
+        return false
+    },
+    drop(props, monitor, component) {
+        return props;
+    }
+};
+
+function collectTarget(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+        dragEl: monitor.getItem()
+    }
+}
 
 function collect(connect, monitor) {
     return {
@@ -88,7 +116,7 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDragSource, isDragging, segment, dropHover} = this.props;
+        const {connectDropTarget, connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl} = this.props;
 
         let segmentClasses = ['segmentBox'];
         if (!segment.content_clean) {
@@ -99,32 +127,46 @@ class SegmentComponent extends Component {
         }
         if (dropHover) {
             segmentClasses.push('onDropHover')
-            if(this.props.mergeStatus){
+            if (this.props.mergeStatus) {
                 segmentClasses.push('onDropHoverMerge')
             }
         }
         if (this.props.selected) {
             segmentClasses.push('selected')
         }
-        return connectDragSource(
+
+
+        if(isOver && dragEl.type === this.props.segment.type){
+            segmentClasses.push('onDropHoverMerge')
+        }
+        return connectDropTarget(connectDragPreview(connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
                  onDoubleClick={this.openSplitModal}
-                 onClick={this.toggleSelectedSegment}
-                 >
+                 onClick={this.handleClick}
+            >
+                {dropHover && <span className="dropAlignArea"> </span>}
+                <i className="icon check circle outline"></i>
                 <div className="segmentBox-content">
-                    <p>{segment.content_clean}</p>
-                    {this.props.mergeStatus && <span className="merge">
-                    MERGE
-                </span>}
+                    <p>
+                        {segment.content_clean}
+                        <span className="merge"> </span>
+                    </p>
+                    {!segment.content_clean && !dragEl && <i className="trash alternate outline icon"> </i>}
+
                 </div>
 
             </div>
-        );
+        )));
     };
 
-    toggleSelectedSegment = () => {
-        if(this.props.segment.content_clean){
+    handleClick = () =>{
+        if (this.props.segment.content_clean) {
             ProjectActions.addSegmentToSelection(this.props.segment.order, this.props.type)
+        }else{
+            ProjectActions.removeSpaceSegment({
+                order: this.props.segment.order,
+                type: this.props.segment.type
+            });
         }
     };
 
@@ -135,17 +177,16 @@ class SegmentComponent extends Component {
 
 
     getStyles = (props) => {
-        const {left, top, isDragging} = props;
+        const {left, top} = props;
         const transform = `translate3d(${left}px, ${top}px, 0)`;
         return {
             transform,
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
             // because IE will ignore our custom "empty image" drag preview.
-            cursor: 'default'
         }
     };
 
 }
 
-export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);
+export default DropTarget(ItemTypes.ITEM, Target, collectTarget)(DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent));

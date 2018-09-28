@@ -17,24 +17,24 @@ const RowTarget = {
             };
 
         if ((from.segment.order !== props.row[from.type].order)
-            && (!props.mergeStatus || (props.mergeStatus && props.row[from.type].content_clean))) {
+            && (!props.mergeStatus || (props.mergeStatus && props.row[from.type].content_clean))
+        ) {
             return true
         }
         return false
     },
     drop(props, monitor, component) {
-        const from = monitor.getItem(),
-            log = {
-                type: from.type,
-                from: from.segment.order,
-                to: props.row[from.type].order
-            };
-
-        if (!props.mergeStatus) {
-            component.alignSegments(log);
-
+        const from = monitor.getItem();
+        const log = {
+            type: from.type,
+            from: from.segment.order,
+            to: props.row[from.type].order
+        };
+        const hasDroppedOnChild = monitor.didDrop();
+        if (hasDroppedOnChild) {
+            ProjectActions.mergeSegments([props.row[from.type].order, from.segment.order], from.segment.type)
         } else {
-            ProjectActions.mergeSegments([props.row[from.type].order,from.segment.order],from.segment.type)
+            component.alignSegments(log)
         }
     }
 };
@@ -43,6 +43,7 @@ function collect(connect, monitor) {
     return {
         connectDropTarget: connect.dropTarget(),
         isOver: monitor.isOver(),
+        isOverCurrent: monitor.isOver({shallow: true}),
         canDrop: monitor.canDrop(),
         dragEl: monitor.getItem()
     }
@@ -106,7 +107,7 @@ class RowComponent extends Component {
 
     render() {
         let rowClass = ['project-row'];
-        const {connectDropTarget, isOver, canDrop, dragEl, selection, enableDrag} = this.props;
+        const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag} = this.props;
 
         const dragElType = dragEl ? dragEl.type : undefined;
         if (isOver && dragElType && canDrop) {
@@ -181,8 +182,8 @@ class RowComponent extends Component {
      * @param {Number} log.from The row's order of Drag action
      * @param {Number} log.to The row's order of Drop action
      */
-    alignSegments = (log) =>{
-        if(log.to === this.props.row[log.type].order){
+    alignSegments = (log) => {
+        if (log.to === this.props.row[log.type].order) {
             const inverse = {
                 'source': 'target',
                 'target': 'source'
@@ -196,9 +197,9 @@ class RowComponent extends Component {
                 ProjectActions.changeSegmentPosition(log);
                 //send type and order of inverse segment in drop position.
                 setTimeout(() => {
-                    ProjectActions.animateChangeRowPosition(inverse[log.type],inverseOrder, position, rec);
+                    ProjectActions.animateChangeRowPosition(inverse[log.type], inverseOrder, position, rec);
                 }, 0)
-            },0)
+            }, 0)
         }
     };
 

@@ -30,8 +30,8 @@ export default class SegmentDragLayer extends React.PureComponent {
 
     getStyles = () =>{
         const transform = this.state.animate ? {
-            transform: 'rotate(-3deg) scale(1.05)',
-            WebkitTransform: 'rotate(-3deg) scale(1.05)',
+            transform: 'rotate(-3deg) scale(.7)',
+            WebkitTransform: 'rotate(-3deg) scale(.7)',
         }: {};
         return {
             display: 'inline-block',
