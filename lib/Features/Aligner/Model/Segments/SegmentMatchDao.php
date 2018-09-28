@@ -31,6 +31,50 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         return $stmt->execute( array('id_job' => $id_job ) ) ;
     }
 
+    public static function getSegmentMatch($order, $id_job, $type, $ttl = 0){
+        $thisDao = new self();
+        $sql = "SELECT * FROM segments_match as sm WHERE sm.order = :order AND sm.id_job = :id_job AND sm.type = :type";
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'order' => $order, 'id_job' => $id_job, 'type' => $type ] )[0];
+    }
+
+    public static function getPreviousSegmentMatch($order, $id_job, $type, $ttl = 0){
+        $thisDao = new self();
+        $sql = "SELECT * FROM segments_match as sm WHERE sm.next = :order AND sm.id_job = :id_job AND sm.type = :type";
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $segmentMatch = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'order' => $order, 'id_job' => $id_job, 'type' => $type ] );
+        if(!empty($segmentMatch)){
+            return $segmentMatch[0];
+        } else {
+            return $segmentMatch;
+        };
+    }
+
+    public static function getLastSegmentMatch($id_job, $type, $ttl = 0){
+        $thisDao = new self();
+        $sql = "SELECT * FROM segments_match as sm WHERE sm.next IS NULL AND sm.id_job = :id_job AND sm.type = :type";
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id_job, 'type' => $type ] )[0];
+    }
+
+    public static function getMatchesFromOrderArray( Array $orders, $id_job, $type, $ttl = 0 ){
+        $thisDao = new self();
+        $qMarks = str_repeat('?,', count($orders) - 1) . '?';
+        $sql = "SELECT * FROM segments_match as sm WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
+        $params = array_merge($orders, array($id_job, $type) );
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $segmentMatches = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
+        return $segmentMatches;
+    }
+
     public function createList( Array $obj_arr ) {
 
         $obj_arr = array_chunk( $obj_arr, 100 );

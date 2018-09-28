@@ -18,11 +18,23 @@ use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\Alignment;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
+use Features\Aligner\Utils\Constants;
 
 
 class ParserController extends AlignerController {
 
     protected $id_job;
+
+    protected function mergeSegments(Array $segments){
+        $new_segment = array();
+        $new_segment['id'] = $segments[0]['id'];
+        $new_segment['content_clean'] = '';
+        foreach ($segments as $segment){
+            $new_segment['content_clean'].= ' '.$segment['content_clean'];
+        }
+        Segments_SegmentDao::mergeSegments($segments);
+        return $new_segment;
+    }
 
 
     /**
@@ -77,17 +89,32 @@ class ParserController extends AlignerController {
         $target_array = [];
         foreach($alignment as $key => $value){
             $source_element = [];
+
+            if(!empty($value['source'])){
+                //Check if $value['source'] is an array of segments otherwise it wouldn't have any numerical keys
+                if(isset($value['source'][0])){
+                    $value['source'] = $this->mergeSegments($value['source']);
+                }
+            }
             $source_element['segment_id'] = $value['source']['id'];
-            $source_element['order'] = ($key+1)*1000000000;
-            $source_element['next'] = ($key+2)*1000000000;
+            $source_element['order'] = ($key+1)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $source_element['next'] = ($key+2)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
             $source_element['id_job'] = $this->id_job;
             $source_element['score'] = $value['score'];
             $source_element['type'] = "source";
 
             $target_element = [];
+
+            if(!empty($value['target'])){
+                //Check if $value['target'] is an array of segments otherwise it wouldn't have any numerical keys
+                if(isset($value['target'][0])){
+                    $value['target'] = $this->mergeSegments($value['target']);
+                }
+            }
+
             $target_element['segment_id'] = $value['target']['id'];
-            $target_element['order'] = ($key+1)*1000000000;
-            $target_element['next'] = ($key+2)*1000000000;
+            $target_element['order'] = ($key+1)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $target_element['next'] = ($key+2)*Constants::DISTANCE_INT_BETWEEN_MATCHES;
             $target_element['score'] = $value['score'];
             $target_element['id_job'] = $this->id_job;
             $target_element['type'] = "target";
@@ -102,8 +129,6 @@ class ParserController extends AlignerController {
 
         $segmentsMatchDao->createList($source_array);
         $segmentsMatchDao->createList($target_array);
-
-
 
         $this->response->json( ['source' => $source_array, 'target' => $target_array] );
     }

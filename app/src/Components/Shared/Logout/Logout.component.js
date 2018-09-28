@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
+import {getUserInitials} from "../../../Helpers/SystemUtils.helper";
 
 class LogoutComponent extends Component {
     constructor(props) {
@@ -29,7 +30,7 @@ class LogoutComponent extends Component {
                     </div>
                     <div className="content">
                         <div className="user-info-form">
-                            <div className="avatar-user">TU</div>
+                            <div className="avatar-user"> {getUserInitials(this.props.user.first_name, this.props.user.last_name )}</div>
                             <div className="user-name">
                                 <strong>{this.props.user.first_name + ' ' + this.props.user.last_name }</strong>
                                 <span className="grey-txt">{this.props.user.email}</span>

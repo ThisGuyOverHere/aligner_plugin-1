@@ -21,19 +21,22 @@ let SystemStore = assign({}, EventEmitter.prototype, {
 AppDispatcher.register(function (action) {
     switch (action.actionType) {
         case SystemConstants.OPEN_LOGIN:
-            SystemStore.emitChange(SystemConstants.OPEN_LOGIN,action.status);
+            SystemStore.emitChange(SystemConstants.OPEN_LOGIN, action.status);
             break;
         case SystemConstants.OPEN_EXPORT_MODAL:
-            SystemStore.emitChange(SystemConstants.OPEN_EXPORT_MODAL,action.status);
+            SystemStore.emitChange(SystemConstants.OPEN_EXPORT_MODAL, action.status);
             break;
         case SystemConstants.OPEN_RESET_PASSWORD_MODAL:
-            SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL,action.status);
+            SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL, action.status);
             break;
         case SystemConstants.USER_STATUS:
-            SystemStore.emitChange(SystemConstants.USER_STATUS,action.status,action.fromLogin,action.error);
+            SystemStore.emitChange(SystemConstants.USER_STATUS, action.status, action.fromLogin, action.error);
             break;
         case SystemConstants.LOGOUT:
-            SystemStore.emitChange(SystemConstants.LOGOUT,action.status);
+            SystemStore.emitChange(SystemConstants.LOGOUT, action.status);
+            break;
+        case SystemConstants.IN_DRAG:
+            SystemStore.emitChange(SystemConstants.IN_DRAG, action.status);
             break;
     }
 });

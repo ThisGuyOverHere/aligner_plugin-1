@@ -45,3 +45,25 @@ export const httpGetSegments = (jobID) => {
     const url = '/plugins/aligner/segments/'+jobID;
     return get(url);
 };
+
+/**
+ *
+ * @param {Number} jobID
+ * @param {String} jobPassword
+ * @param {Object} data
+ * @param {String} data.type
+ * @param {Number} data.order
+ * @param {Number} data.inverseOrder
+ * @param {Array} data.positions
+ * @return {*}
+ */
+export const httpSplitSegment = (jobID,jobPassword,data) => {
+    const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/segment/split';
+    const values = {
+      type: data.type,
+      order: data.order,
+      inverse_order: data.inverseOrder,
+      positions: data.positions
+    };
+    return post(url,qs.stringify(values));
+};

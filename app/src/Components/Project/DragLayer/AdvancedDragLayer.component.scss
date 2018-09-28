@@ -4,6 +4,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 45px;
   column-gap: 32px;
+  cursor: default!important;
 }
 p.merge-text{
   position: absolute;

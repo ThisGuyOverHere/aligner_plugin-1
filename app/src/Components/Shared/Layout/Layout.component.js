@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {Route} from 'react-router-dom'
 import HeaderComponent from "../Header/Header.component";
-import FooterComponent from "../Footer/Footer.component";
 import LoginComponent from "../Login/Login.component";
 import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
@@ -46,11 +45,11 @@ class Layout extends Component {
             <div className="DefaultLayout">
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
                 {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
-                {this.state.statusExportModal && <ExportModal />}
+                {this.state.statusExportModal && <ExportModal user = {this.state.user} error = {this.state.loginError}/>}
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
                 <HeaderComponent user = {this.state.user} {...matchProps}/>
                 <Component {...matchProps} />
-                <FooterComponent {...matchProps}/>
+
             </div>
         )}/>
     };
@@ -83,7 +82,7 @@ class Layout extends Component {
         if(status && fromLogin && !error){
             setTimeout(()=>{
                 SystemActions.setLoginStatus(false);
-            },0)
+            },0);
             this.setState({
                 loginError: false
             })

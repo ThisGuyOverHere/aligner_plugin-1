@@ -1,17 +1,20 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../../Constants/Draggable.constants';
-import {DragSource, ConnectDragPreview} from 'react-dnd';
+import {DragSource} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../Actions/Project.actions";
 
 const ItemSource = {
     beginDrag(props) {
-
+        ProjectActions.addSegmentToSelection(-1);
         return props;
     },
     canDrag(props, monitor) {
         return props.segment.content_clean;
+    },
+    endDrag(props, monitor, component) {
+
     }
 };
 
@@ -29,6 +32,8 @@ class SegmentComponent extends Component {
         type: PropTypes.string.isRequired,
         dropHover: PropTypes.bool.isRequired,
         mergeStatus: PropTypes.bool,
+        selected: PropTypes.bool,
+        enableDrag: PropTypes.bool,
         segment: PropTypes.shape({
             order: PropTypes.number.isRequired,
             content_clean: PropTypes.oneOfType([() => {
@@ -43,7 +48,6 @@ class SegmentComponent extends Component {
 
     constructor(props) {
         super(props);
-
         this.state = {};
     }
 
@@ -66,53 +70,6 @@ class SegmentComponent extends Component {
 
     }
 
-    getStyles = (props) => {
-        const {left, top, isDragging} = props;
-        const transform = `translate3d(${left}px, ${top}px, 0)`;
-        return {
-            transform,
-            WebkitTransform: transform,
-            // IE fallback: hide the real node using CSS when dragging
-            // because IE will ignore our custom "empty image" drag preview.
-            cursor: isDragging ? 'grabbing' : 'grab'
-        }
-    };
-
-    createSpaceSegment = () => {
-        ProjectActions.createSpaceSegment({
-            order: this.props.segment.order,
-            type: this.props.type
-        });
-    };
-
-
-    render = () => {
-        const {connectDragSource, isDragging, segment, dropHover} = this.props;
-
-        let segmentClasses = ['segmentBox'];
-        if (!segment.content_clean) {
-            segmentClasses.push('empty')
-        }
-        if (isDragging) {
-            segmentClasses.push('onDrag')
-        }
-        if (dropHover) {
-            segmentClasses.push('onDropHover')
-        }
-        return connectDragSource(
-            <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
-                 onDoubleClick={this.createSpaceSegment}>
-                <div className="segmentBox-content">
-                    <p>{segment.content_clean}</p>
-                    {this.props.mergeStatus && <span className="merge">
-                    MERGE
-                </span>}
-                </div>
-
-            </div>
-        );
-    }
-
     componentDidMount() {
         const {connectDragPreview} = this.props;
         if (connectDragPreview) {
@@ -128,6 +85,67 @@ class SegmentComponent extends Component {
 
     componentWillUnmount() {
     }
+
+
+    render = () => {
+        const {connectDragSource, isDragging, segment, dropHover} = this.props;
+
+        let segmentClasses = ['segmentBox'];
+        if (!segment.content_clean) {
+            segmentClasses.push('empty')
+        }
+        if (isDragging) {
+            segmentClasses.push('onDrag')
+        }
+        if (dropHover) {
+            segmentClasses.push('onDropHover')
+            if(this.props.mergeStatus){
+                segmentClasses.push('onDropHoverMerge')
+            }
+        }
+        if (this.props.selected) {
+            segmentClasses.push('selected')
+        }
+        return connectDragSource(
+            <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
+                 onDoubleClick={this.openSplitModal}
+                 onClick={this.toggleSelectedSegment}
+                 >
+                <div className="segmentBox-content">
+                    <p>{segment.content_clean}</p>
+                    {this.props.mergeStatus && <span className="merge">
+                    MERGE
+                </span>}
+                </div>
+
+            </div>
+        );
+    };
+
+    toggleSelectedSegment = () => {
+        if(this.props.segment.content_clean){
+            ProjectActions.addSegmentToSelection(this.props.segment.order, this.props.type)
+        }
+    };
+
+
+    openSplitModal = () => {
+        ProjectActions.openSegmentToSplit(this.props.segment);
+    };
+
+
+    getStyles = (props) => {
+        const {left, top, isDragging} = props;
+        const transform = `translate3d(${left}px, ${top}px, 0)`;
+        return {
+            transform,
+            WebkitTransform: transform,
+            // IE fallback: hide the real node using CSS when dragging
+            // because IE will ignore our custom "empty image" drag preview.
+            cursor: 'default'
+        }
+    };
+
 }
 
 export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);

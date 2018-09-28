@@ -18,6 +18,7 @@ use Features\Aligner\Model\Jobs_JobStruct;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use CatUtils;
+use Features\Aligner\Utils\AlignUtils;
 
 class CreateProjectController extends AlignerController {
 
@@ -224,8 +225,8 @@ class CreateProjectController extends AlignerController {
                 $unit_segments = array_map(function ($item) use ($lang) {
                     return [
                             'content_raw' => $item,
-                            'content_clean' => $this->_cleanSegment($item, $lang),
-                            'raw_word_count' => $this->_countWordsInSegment($item, $lang)
+                            'content_clean' => AlignUtils::_cleanSegment($item, $lang),
+                            'raw_word_count' => AlignUtils::_countWordsInSegment($item, $lang)
                     ];
                 }, $unit_segments);
 
@@ -237,54 +238,6 @@ class CreateProjectController extends AlignerController {
         return $segments;
     }
 
-
-
-    /**
-     *
-     * Code almost cloned from CatUtils::placehold_xliff_tags()
-     *
-     * @param $segment
-     * @param $lang
-     * @return null|string|string[]
-     */
-    protected function _cleanSegment($segment, $lang) {
-
-        $tagsRegex = [
-                '|(</x>)|si',
-                '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si',
-                '|<(/g)>|si',
-                '|<(x .*?/?)>|si',
-                '#<(bx[ ]{0,}/?|bx .*?/?)>#si',
-                '#<(ex[ ]{0,}/?|ex .*?/?)>#si',
-                '|<(bpt\s*.*?)>|si',
-                '|<(/bpt)>|si',
-                '|<(ept\s*.*?)>|si',
-                '|<(/ept)>|si',
-                '|<(ph .*?)>|si',
-                '|<(/ph)>|si',
-                '|<(it .*?)>|si',
-                '|<(/it)>|si',
-                '|<(mrk\s*.*?)>|si',
-                '|<(/mrk)>|si'
-        ];
-
-        foreach ($tagsRegex as $regex) {
-            $segment = preg_replace($regex, '', $segment);
-        }
-
-        return $segment;
-    }
-
-    /**
-     * @param $segment
-     * @param $lang
-     * @return float|int
-     */
-    protected function _countWordsInSegment($segment, $lang) {
-        $wordCount = CatUtils::segment_raw_wordcount( $segment, $lang );
-
-        return $wordCount;
-    }
 
     private function _storeSegments($segments, $type, $lang){
 
@@ -299,7 +252,6 @@ class CreateProjectController extends AlignerController {
 
         $segmentsDao = new Segments_SegmentDao;
         $segmentsDao->createList( $segments );
-
 
     }
 }

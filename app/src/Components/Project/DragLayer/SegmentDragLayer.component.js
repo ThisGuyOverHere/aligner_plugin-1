@@ -1,5 +1,7 @@
 import * as React from 'react'
 import SegmentComponent from '../Row/Segment/Segment.component'
+import SystemActions from "../../../Actions/System.actions";
+import ProjectActions from "../../../Actions/Project.actions";
 
 export default class SegmentDragLayer extends React.PureComponent {
 
@@ -10,7 +12,20 @@ export default class SegmentDragLayer extends React.PureComponent {
         }
     }
 
-    componentWillUnmount() {
+    componentDidMount() {
+        setTimeout(this.animate,10);
+        SystemActions.setInDrag(true);
+    }
+    componentWillUnmount(){
+        SystemActions.setInDrag(false);
+    }
+
+    render() {
+        return (
+            <div className="dragSegmentContainer" style={this.getStyles()}>
+                <SegmentComponent {...this.props.item} />
+            </div>
+        )
     }
 
     getStyles = () =>{
@@ -20,7 +35,6 @@ export default class SegmentDragLayer extends React.PureComponent {
         }: {};
         return {
             display: 'inline-block',
-            cursor: 'grabbing',
             width: '100%',
             ...transform
         }
@@ -31,15 +45,5 @@ export default class SegmentDragLayer extends React.PureComponent {
         })
     };
 
-    render() {
-        return (
-            <div className="dragSegmentContainer" style={this.getStyles()}>
-                <SegmentComponent {...this.props.item} />
-            </div>
-        )
-    }
 
-    componentDidMount() {
-        setTimeout(this.animate,10);
-    }
 }
