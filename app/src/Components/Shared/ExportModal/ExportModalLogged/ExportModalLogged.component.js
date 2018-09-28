@@ -79,7 +79,6 @@ class ExportModalLogged extends Component {
         this.setState({
             cloudCheckBox: !this.state.cloudCheckBox,
         })
-        console.log(this.state.cloudCheckBox);
     };
 
 }
