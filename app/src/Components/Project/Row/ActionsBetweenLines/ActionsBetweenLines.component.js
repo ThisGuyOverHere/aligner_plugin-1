@@ -32,34 +32,32 @@ class ActionsBetweenLines extends Component {
         const {row} = this.props;
         let sourceClasses = ['action'];
         let targetClasses = ['action'];
-        if (!this.props.row.source.content_clean) {
-            sourceClasses.push('up')
-        }
-        if (!this.props.row.target.content_clean) {
-            targetClasses.push('up')
+        if (row.target.content_clean && row.source.content_clean) {
+            return (
+                <div className="actions-between-lines"
+                     style={this.getStyle()}
+                >
+                    <div className={sourceClasses.join(" ")}>
+                        {row.target.content_clean &&
+                        <div className="action-content" onClick={this.sourceClick}><span></span></div>}
+                    </div>
+                    <div className={targetClasses.join(" ")}>
+                        {this.props.row.source.content_clean &&
+                        <div className="action-content" onClick={this.targetClick}><span></span></div>}
+                    </div>
+
+                </div>
+            )
+        }else{
+            return null
         }
 
-        return (
-            <div className="actions-between-lines"
-                 style={this.getStyle()}
-                 onMouseEnter={this.handleMouseHover}
-                 onMouseLeave={this.handleMouseHover}
-            >
-                <div className={sourceClasses.join(" ")}>
-                    {this.props.row.target.content_clean && <div className="action-content" onClick={this.sourceClick}><span><i></i></span></div>}
-                </div>
-                <div className={targetClasses.join(" ")}>
-                    {this.props.row.source.content_clean && <div className="action-content" onClick={this.targetClick}><span><i></i></span></div>}
-                </div>
-
-            </div>
-        );
     }
 
     getStyle = () => {
-        if (this.state.isHover && !this.state.inDrag) {
+        if (this.state.inDrag) {
             return {
-                opacity: 1
+                opacity: 0
             }
         }
 
@@ -73,13 +71,10 @@ class ActionsBetweenLines extends Component {
                 order: this.props.row.source.order,
                 type: 'source'
             });
-        } else {
-            ProjectActions.removeSpaceSegment({
-                order: this.props.row.source.order,
-                type: 'source'
-            })
+            this.setState({
+                isHover: false
+            });
         }
-
     };
     targetClick = () => {
         if (this.props.row.target.content_clean) {
@@ -87,20 +82,23 @@ class ActionsBetweenLines extends Component {
                 order: this.props.row.target.order,
                 type: 'target'
             });
-        } else {
-            ProjectActions.removeSpaceSegment({
-                order: this.props.row.target.order,
-                type: 'target'
-            })
+            this.setState({
+                isHover: false
+            });
         }
-
     };
 
-    handleMouseHover = () => {
+    handleMouseHoverEnter = () => {
         this.setState({
-            isHover: !this.state.isHover
+            isHover: true
         });
     };
+    handleMouseHoverLeave = () => {
+        this.setState({
+            isHover: false
+        });
+    };
+
     dragStatus = (status) => {
         this.setState({
             inDrag: status

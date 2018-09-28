@@ -142,7 +142,7 @@ class SegmentComponent extends Component {
         return connectDropTarget(connectDragPreview(connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
                  onDoubleClick={this.openSplitModal}
-                 onClick={this.toggleSelectedSegment}
+                 onClick={this.handleClick}
             >
                 {dropHover && <span className="dropAlignArea"> </span>}
                 <i className="icon check circle outline"></i>
@@ -151,6 +151,7 @@ class SegmentComponent extends Component {
                         {segment.content_clean}
                         <span className="merge"> </span>
                     </p>
+                    {!segment.content_clean && !dragEl && <i className="trash alternate outline icon"> </i>}
 
                 </div>
 
@@ -158,9 +159,14 @@ class SegmentComponent extends Component {
         )));
     };
 
-    toggleSelectedSegment = () => {
+    handleClick = () =>{
         if (this.props.segment.content_clean) {
             ProjectActions.addSegmentToSelection(this.props.segment.order, this.props.type)
+        }else{
+            ProjectActions.removeSpaceSegment({
+                order: this.props.segment.order,
+                type: this.props.segment.type
+            });
         }
     };
 
