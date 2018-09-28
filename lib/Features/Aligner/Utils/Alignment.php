@@ -9,6 +9,7 @@
 namespace Features\Aligner\Utils;
 
 use Features\Aligner;
+use Log;
 
 class Alignment {
 
@@ -1963,13 +1964,27 @@ class Alignment {
 
         // Variant on Church and Gale algorithm with Levenshtein distance
 
+        Log::doLog('Starting new Job Alignment: source ['.count($source).'], target ['.count($target).']');
+        $time_start = microtime(true);
+
         $source_translated = translateSegments($source, $source_lang, $target_lang);
+
+        $time_end = microtime(true);
+        Log::doLog('Completed pre-translation: source ['.count($source).'] in '.($time_end-$time_start).' seconds');
+        $time_start = microtime(true);
 
         $source_clean = cleanSegments($source_translated);
         $target_clean = cleanSegments($target);
 
+        $time_end = microtime(true);
+        Log::doLog('Completed cleaning: source ['.count($source).'], target ['.count($target).'] in '.($time_end-$time_start).' seconds');
+        $time_start = microtime(true);
+
         $indexes = align($source_clean, $target_clean);
         $alignment = mapAlignment($source, $target, $indexes);
+
+        $time_end = microtime(true);
+        Log::doLog('Completed alignment: source ['.count($source).'], target ['.count($target).'] in '.($time_end-$time_start).' seconds');
 
         return $alignment;
     }
