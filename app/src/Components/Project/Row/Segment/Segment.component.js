@@ -145,9 +145,13 @@ class SegmentComponent extends Component {
                  onClick={this.toggleSelectedSegment}
             >
                 {dropHover && <span className="dropAlignArea"> </span>}
+                <i className="icon check circle outline"></i>
                 <div className="segmentBox-content">
-                    <p>{segment.content_clean}</p>
-                    <span className="merge"> </span>
+                    <p>
+                        {segment.content_clean}
+                        <span className="merge"> </span>
+                    </p>
+
                 </div>
 
             </div>
@@ -174,7 +178,6 @@ class SegmentComponent extends Component {
             WebkitTransform: transform,
             // IE fallback: hide the real node using CSS when dragging
             // because IE will ignore our custom "empty image" drag preview.
-            cursor: 'default'
         }
     };
 
