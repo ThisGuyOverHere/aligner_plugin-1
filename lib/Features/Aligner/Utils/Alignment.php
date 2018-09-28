@@ -1274,11 +1274,11 @@ class Alignment {
             $ss = preg_split($delimiters, $ss, null, PREG_SPLIT_NO_EMPTY);
             $ts = preg_split($delimiters, $ts, null, PREG_SPLIT_NO_EMPTY);
 
-            $commonWords = custom_array_intersect($ss, $ts);
+            $commonWords = array_intersect_opt($ss, $ts);
             //$commonWords = array_intersect($ss,$ts);
 
-            $ss = leo_array_diff($ss, $commonWords);
-            $ts = leo_array_diff($ts, $commonWords);
+            $ss = array_diff_opt($ss, $commonWords);
+            $ts = array_diff_opt($ts, $commonWords);
 
             // Put back to string to allow calculations (without spaces, so we optimize characters)
             $ss = implode('', $ss);
@@ -1397,8 +1397,8 @@ class Alignment {
             }, $target);
 
             // We need to perform it twice to have both indexes
-            $commonST = custom_array_intersect($source, $target);
-            $commonTS = custom_array_intersect($target, $source);
+            $commonST = array_intersect_opt($source, $target);
+            $commonTS = array_intersect_opt($target, $source);
 
             $sourceIndexes = array_keys($commonST);
             $targetIndexes = array_keys($commonTS);
@@ -1541,14 +1541,15 @@ class Alignment {
      */
     public function _alignSegmentsV4($source, $target, $source_lang, $target_lang) {
 
-        function leo_array_diff($a, $b) {
+        // Optimized function to avoid PHP ones
+        function array_diff_opt($a, $b) {
             $map = array();
             foreach($a as $val) $map[$val] = 1;
             foreach($b as $val) unset($map[$val]);
             return array_keys($map);
         }
 
-        function custom_array_intersect($a, $b) {
+        function array_intersect_opt($a, $b) {
             $index = array_flip($a);
             foreach ($b as $value) {
                 if (isset($index[$value])) unset($index[$value]);
@@ -1559,7 +1560,7 @@ class Alignment {
             return $a;
         }
 
-
+        // Levensthein for 255+ chars strings
         function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
 
             $str1Array = str_split($str1, 1);
@@ -1624,10 +1625,10 @@ class Alignment {
             $tl = strlen(implode('', $target));
 
             // Remove common words
-            $commonWords = custom_array_intersect($source, $target);
+            $commonWords = array_intersect_opt($source, $target);
 
-            $ss = leo_array_diff($source, $commonWords);
-            $ts = leo_array_diff($target, $commonWords);
+            $ss = array_diff_opt($source, $commonWords);
+            $ts = array_diff_opt($target, $commonWords);
 
             // Put back to string to allow calculations (without spaces, so we optimize characters)
             $ss = implode('', $ss);
@@ -1721,6 +1722,82 @@ class Alignment {
             return array_reverse($res);
         }
 
+        // Align lot of segments without building the whole score matrix
+        function simplePathFinder($source, $target) {
+
+            // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
+            $beadCosts = ['1-1' => 0, '2-1' => 150, '1-2' => 150, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
+
+            $WINDOW_SIZE = 16;
+            $CURRENT_OFFSET = 0;  // Updated when we found a match that causes an offset between source and target
+
+            $sc = count($source);
+            $tc = count($target);
+
+            $res = [];
+            for ($si = 1; $si <= $sc; $si++) {
+
+                $match = null;
+
+                for ($ti = 1; $ti <= $tc; $ti++) {
+
+                    // Do compare only if in window and target is yet available
+                    if (abs($si - $ti + $CURRENT_OFFSET) < $WINDOW_SIZE) {
+
+                        foreach ($beadCosts as $pair => $beadCost) {
+                            $sd = intval(substr($pair, 0, 1));
+                            $td = intval(substr($pair, -1, 1));
+
+                            if ($si - $sd >= 0 && $ti - $td >= 0) {
+
+                                // Check if $ti-$td, $td is a contiguous interval we can merge
+                                $evaluate = true;
+                                for ($d = 1; $d <= $td; $d++) {
+                                    $evaluate = $evaluate & $target[$ti - $d] != null;
+                                }
+
+                                if (!$evaluate) {
+                                    continue;
+                                }
+
+                                $sources = array_slice($source, $si - $sd, $sd);
+                                $targets = array_slice($target, $ti - $td, $td);
+
+                                list($distance, $score) = eval_sents($sources, $targets);
+                                $cost = $distance + $beadCost;
+
+                                $tuple = [$cost, $sd, $ti, $td, $score];
+
+                                // Emulate min function on tuple
+                                if ($match == null || $tuple[0] < $match[0]) {
+                                    $match = $tuple;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Use same format as Church and Gale
+                list($cost, $sd, $ti, $td, $score) = $match;
+                $res[] = [[$si - $sd, $sd], [$ti - $td, $td], $score];
+
+                // Mark unavailable sentences for target (1 or 2, based on merge)
+                for ($d = 1; $d <= $td; $d++) {
+                    $target[$ti - $d] = null;
+                }
+
+                // Update Offset
+                $CURRENT_OFFSET = $ti - $si;
+
+                // Adjust source index to eventually skip next sentence (for merge) or repeat current one (for target hole)
+                $si--;  // Undo the for increment
+                $si += $sd;  // Increment based on source distance
+
+            }
+
+            return $res;
+        }
+
         function findAbsoluteMatches($source, $target) {
             // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
 
@@ -1750,8 +1827,14 @@ class Alignment {
         }
 
         function alignPart($source, $target, $offset) {
-            $scores = buildScores($source, $target);
-            $alignment = extractPath($source, $target, $scores);
+            $MAX_NUMBER_OF_SEGMENTS = 0;
+
+            if (count($source) < $MAX_NUMBER_OF_SEGMENTS && count($target) < $MAX_NUMBER_OF_SEGMENTS) {
+                $scores = buildScores($source, $target);
+                $alignment = extractPath($source, $target, $scores);
+            } else {
+                $alignment = simplePathFinder($source, $target);
+            }
 
             // Adjust offset
             $alignment = array_map(function ($item) use ($offset) {
