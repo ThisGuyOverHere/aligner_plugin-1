@@ -1796,6 +1796,8 @@ class Alignment {
 
             }
 
+            //TODO: Potrebbero esserci dei target rimasti fuori dall'algoritmo, andrebbero aggiunti come orfani nella "giusta" posizione
+
             return $res;
         }
 
