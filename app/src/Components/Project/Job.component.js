@@ -143,20 +143,20 @@ class JobComponent extends Component {
             rowsDictionary.source[e.order] = job.target[index].order;
             rowsDictionary.target[job.target[index].order] = e.order;
             //todo: send API for remove empty/empty from DB
-            if(e.content_clean || job.target[index].content_clean){
+            if (e.content_clean || job.target[index].content_clean) {
                 rows.push({
                     source: e,
                     target: job.target[index]
                 });
-            }else{
+            } else {
                 deletes.push(index);
             }
         });
 
-        if(deletes.length>0){
-            setTimeout(()=>{
+        if (deletes.length > 0) {
+            setTimeout(() => {
                 ProjectActions.deleteEmptyRows(deletes);
-            },0);
+            }, 0);
 
         }
 
