@@ -54,33 +54,9 @@ class ParserController extends AlignerController {
         $source_segments = Segments_SegmentDao::getDataForAlignment($this->id_job, "source");
         $target_segments = Segments_SegmentDao::getDataForAlignment($this->id_job, "target");
 
-        $version = $this->params['version'];
-
         $alignment_class = new Alignment;
+        $alignment = $alignment_class->alignSegments($source_segments, $target_segments, $source_lang, $target_lang);
 
-        switch ($version) {
-            case 'v0':
-                $alignment = $alignment_class->_alignSegmentsV0($source_segments, $target_segments);
-                break;
-            case 'v1':
-                $alignment = $alignment_class->_alignSegmentsV1($source_segments, $target_segments);
-                break;
-            case 'v2':
-                $alignment = $alignment_class->_alignSegmentsV2($source_segments, $target_segments, $source_lang, $target_lang);
-                break;
-            case 'v3':
-                $alignment = $alignment_class->_alignSegmentsV3($source_segments, $target_segments, $source_lang, $target_lang);
-                break;
-            case 'v3b':
-                $alignment = $alignment_class->_alignSegmentsV3B($source_segments, $target_segments, $source_lang, $target_lang);
-                break;
-            case 'v3c':
-                $alignment = $alignment_class->_alignSegmentsV3C($source_segments, $target_segments, $source_lang, $target_lang);
-                break;
-            case 'v4':
-                $alignment = $alignment_class->_alignSegmentsV4($source_segments, $target_segments, $source_lang, $target_lang);
-                break;
-        }
 
         // DEBUG //
 //        $this->response->json( ['res' => $alignment] );
