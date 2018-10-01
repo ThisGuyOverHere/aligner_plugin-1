@@ -10,7 +10,6 @@ class PreAlignStatus extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            algorithm: env.alignAlgorithmDefaultVersion,
             job: {
                 password: props.props.match.params.password,
                 id: props.props.match.params.jobID
@@ -20,7 +19,7 @@ class PreAlignStatus extends Component {
     };
 
     componentDidMount() {
-      httpAlignJob(this.state.job.id, this.state.algorithm)
+      httpAlignJob(this.state.job.id)
           .then( response => {
               this.setState(
                   {
