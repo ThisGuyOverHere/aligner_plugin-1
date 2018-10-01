@@ -16,20 +16,16 @@ class Alignment {
     public function alignSegments($source, $target, $source_lang, $target_lang) {
         // Variant on Church and Gale algorithm with Levenshtein distance
 
-        Log::doLog('Starting new Job Alignment: source ['.count($source).'], target ['.count($target).']');
         $time_start = microtime(true);
 
         $source_translated = $this->translateSegments($source, $source_lang, $target_lang);
 
         $time_end = microtime(true);
         Log::doLog('Completed pre-translation: source ['.count($source).'] in '.($time_end-$time_start).' seconds');
-        $time_start = microtime(true);
 
         $source_clean = $this->cleanSegments($source_translated);
         $target_clean = $this->cleanSegments($target);
 
-        $time_end = microtime(true);
-        Log::doLog('Completed cleaning: source ['.count($source).'], target ['.count($target).'] in '.($time_end-$time_start).' seconds');
         $time_start = microtime(true);
 
         $indexes = $this->align($source_clean, $target_clean);
