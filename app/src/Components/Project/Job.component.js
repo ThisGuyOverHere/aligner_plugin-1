@@ -11,6 +11,7 @@ import env from "../../Constants/Env.constants";
 import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
 import ToolbarComponent from "./Toolbar/Toolbar.component";
+import HTML5Backend from "react-dnd-html5-backend";
 
 class JobComponent extends Component {
     constructor(props) {
@@ -100,7 +101,7 @@ class JobComponent extends Component {
                     <div id="scroll-area">
                         {this.renderItems(this.state.job.rows)}
                     </div>
-                    <AdvancedDragLayer/>
+                    {/*<AdvancedDragLayer/>*/}
                     {this.state.splitModalStatus &&
                     <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
                                     inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
@@ -198,7 +199,4 @@ class JobComponent extends Component {
     }
 }
 
-export default DragDropContext(TouchBackend({
-    enableMouseEvents: true,
-    touchSlop: 5
-}))(JobComponent);
+export default DragDropContext(HTML5Backend)(JobComponent);
