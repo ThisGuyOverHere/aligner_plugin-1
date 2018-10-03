@@ -128,13 +128,9 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
                     WHERE sm.order IN ($qMarks) AND sm.id_job = ? AND sm.type = ?";
         $params = array_merge($orders, array($id_job, $type));
 
-        try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $stm = $conn->prepare( $query );
-            $stm->execute( $params );
-        } catch ( PDOException $e ) {
-            throw new Exception( "Segment ID nullification in SegmentaMatch- DB Error: " . $e->getMessage() . " - $id_job, $type, $orders", -2 );
-        }
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $params );
     }
 
     public static function updateNextSegmentMatch($new_order, $order, $id_job, $type){

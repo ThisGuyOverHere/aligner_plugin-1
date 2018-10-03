@@ -232,36 +232,29 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $clean_merge = "";
         $merge_count = 0;
 
-        $segment_ids = array();
+        $segments_id = [];
         foreach ($segments as $segment) {
-            $raw_merge .= " ".$segment['content_raw'];
-            $clean_merge .= " ".$segment['content_clean'];
-            $merge_count += $segment['raw_word_count'];
-            $segment_ids[] = $segment['id'];
+            $raw_merge   .= " " . $segment[ 'content_raw' ];
+            $clean_merge .= " " . $segment[ 'content_clean' ];
+            $merge_count += $segment[ 'raw_word_count' ];
+            $segments_id[] = $segment['id'];
         }
 
         $hash_merge = md5($raw_merge);
 
-        $qMarks = str_repeat('?,', count($segments) - 2) . '?';
+        self::updateSegmentContent(array_shift($segments_id),  array($raw_merge, $clean_merge, $hash_merge, $merge_count));
 
-        $query = "UPDATE segments
-                    SET content_raw = ?,
-                    content_clean = ?,
-                    content_hash = ?,
-                    raw_word_count = ?
-                    WHERE id = ?;
-                    DELETE FROM segments WHERE id IN ($qMarks);";
+        self::deleteSegmentsByIds($segments_id);
 
-        $query_params = array_merge(array($raw_merge, $clean_merge, $hash_merge, $merge_count),$segment_ids);
+    }
 
+    public static function deleteSegmentsByIds($segments_id){
+        $qMarks = str_repeat('?,', count($segments_id) - 1) . '?';
+        $query = "DELETE FROM segments WHERE id IN ($qMarks)";
 
-        try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $stm = $conn->prepare( $query );
-            $stm->execute( $query_params );
-        } catch ( PDOException $e ) {
-                throw new Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
-        }
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $segments_id );
     }
 
     public static function updateSegmentContent($id, Array $contents){
@@ -272,13 +265,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     raw_word_count = ?
                     WHERE id = ?;";
         $query_params = array_merge( $contents, array($id) );
-        try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $stm = $conn->prepare( $query );
-            $stm->execute( $query_params );
-        } catch ( PDOException $e ) {
-            throw new Exception( "Segment update - DB Error: " . $e->getMessage() . " - $query_params", -2 );
-        }
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $query_params );
+
     }
 
 
