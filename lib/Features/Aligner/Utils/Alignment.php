@@ -71,6 +71,7 @@ class Alignment {
         return $segments;
     }
 
+    // Clean segments to remove useless characters
     function cleanSegments($segments) {
         $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
 
@@ -88,9 +89,10 @@ class Alignment {
         return $clean;
     }
 
+    // Perform alignment
     function align($source, $target) {
 
-        $matches = $this->findAbsoluteMatches($source, $target);
+        $matches = $this->find100x100Matches($source, $target);
 
         // No exact match has been found, we need to align entire document
         if (empty($matches)) {
@@ -129,6 +131,7 @@ class Alignment {
         }
     }
 
+    // Sub-part alignment
     function alignPart($source, $target, $offset) {
         $MAX_NUMBER_OF_SEGMENTS = 0;
 
@@ -136,7 +139,7 @@ class Alignment {
             $scores = $this->buildScores($source, $target);
             $alignment = $this->extractPath($source, $target, $scores);
         } else {
-            $alignment = $this->simplePathFinder($source, $target);
+            $alignment = $this->alignWindow($source, $target);
         }
 
         // Adjust offset
@@ -149,7 +152,8 @@ class Alignment {
         return $alignment;
     }
 
-    function findAbsoluteMatches($source, $target) {
+    // 100% matches
+    function find100x100Matches($source, $target) {
         // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
 
         $source = array_map(function ($item) {
@@ -177,8 +181,8 @@ class Alignment {
         return $commonSegments;
     }
 
-    // Align lot of segments without building the whole score matrix
-    function simplePathFinder($source, $target) {
+    // Align by Window
+    function alignWindow($source, $target) {
 
         // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
         $beadCosts = ['1-1' => 0, '2-1' => 150, '1-2' => 150, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
@@ -218,7 +222,7 @@ class Alignment {
                             $sources = array_slice($source, $si - $sd, $sd);
                             $targets = array_slice($target, $ti - $td, $td);
 
-                            list($distance, $score) = $this->eval_sents($sources, $targets);
+                            list($distance, $score) = $this->evalSentences($sources, $targets);
                             $cost = $distance + $beadCost;  //TODO: Add penality for offset??
 
                             $tuple = [$cost, $sd, $ti, $td, $score];
@@ -255,6 +259,7 @@ class Alignment {
         return $res;
     }
 
+    // C&G build score matrix
     function buildScores($source, $target) {
 
         // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
@@ -278,7 +283,7 @@ class Alignment {
                             $sources = array_slice($source, $si-$sd, $sd);
                             $targets = array_slice($target, $ti-$td, $td);
 
-                            list($distance, $score) = $this->eval_sents($sources, $targets);
+                            list($distance, $score) = $this->evalSentences($sources, $targets);
                             $cost = $m[$si-$sd][$ti-$td][0] + $distance + $beadCost;
 
                             $tuple = [$cost, $sd, $td, $score];
@@ -298,6 +303,7 @@ class Alignment {
         return $m;
     }
 
+    // C&G extract best path into matrix
     function extractPath($source, $target, $scores) {
         $res = [];
 
@@ -320,11 +326,12 @@ class Alignment {
         return array_reverse($res);
     }
 
-    function eval_sents($sources, $targets) {
+    // Evaluate sentences
+    function evalSentences($sources, $targets) {
         $costIns = 1; $costRep = 1; $costDel = 1;
 
-        $source = $this->mergeSegments($sources);
-        $target = $this->mergeSegments($targets);
+        $source = segments_merge($sources);
+        $target = segments_merge($targets);
 
         $sl = strlen(implode('', $source));
         $tl = strlen(implode('', $target));
@@ -345,7 +352,7 @@ class Alignment {
         } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
             $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
         } else {
-            $distance = long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+            $distance = levenshtein_opt($ss, $ts, $costIns, $costRep, $costDel);
         }
 
         // Score
@@ -362,7 +369,7 @@ class Alignment {
         return [$distance, $score];
     }
 
-
+    // Map Alignment to return
     function mapAlignment($source, $target, $indexes) {
         $alignment = [];
 
@@ -385,27 +392,27 @@ class Alignment {
         return $alignment;
     }
 
-    // Simple merge, for 1-N matches
-    function mergeSegments($segments) {
-        if (count($segments) == 0) {
-            return [];
-        } else if (count($segments) == 1) {
-            return reset($segments);  // Here I'm not sure if array starts with index 0
-        } else {
-            $result = [];
+}
 
-            foreach ($segments as $segment) {
-                $result = array_merge($result, $segment);
-            }
+// Simple merge, for 1-N matches
+function segments_merge($segments) {
+    if (count($segments) == 0) {
+        return [];
+    } else if (count($segments) == 1) {
+        return reset($segments);  // Here I'm not sure if array starts with index 0
+    } else {
+        $result = [];
 
-            return $result;
+        foreach ($segments as $segment) {
+            $result = array_merge($result, $segment);
         }
-    }
 
+        return $result;
+    }
 }
 
 // Levensthein for 255+ chars strings
-function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
+function levenshtein_opt($str1, $str2, $costIns, $costRep, $costDel) {
 
     $str1Array = str_split($str1, 1);
     $str2Array = str_split($str2, 1);
