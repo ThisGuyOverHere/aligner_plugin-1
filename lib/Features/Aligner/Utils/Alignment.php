@@ -184,8 +184,8 @@ class Alignment {
     // Align by Window
     function alignWindow($source, $target) {
 
-        // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
         $beadCosts = ['1-1' => 0, '2-1' => 150, '1-2' => 150, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
+        $offsetCost = 10;  // For each position
 
         $WINDOW_SIZE = 8;  // 8 sentences before, 8 sentences after last matching point
         $CURRENT_OFFSET = 0;  // Updated when we found a match that causes an offset between source and target
@@ -223,7 +223,7 @@ class Alignment {
                             $targets = array_slice($target, $ti - $td, $td);
 
                             list($distance, $score) = $this->evalSentences($sources, $targets);
-                            $cost = $distance + $beadCost;  //TODO: Add penality for offset??
+                            $cost = $distance + $beadCost + abs($si - $ti + $CURRENT_OFFSET) * $offsetCost;
 
                             $tuple = [$cost, $sd, $ti, $td, $score];
 
