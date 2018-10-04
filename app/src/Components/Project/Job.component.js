@@ -94,56 +94,53 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.removeListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
     }
+
     render() {
         const data = this.renderItems(this.state.job.rows);
         return (
             <div className="align-project">
-                <div className="ui container">
-                    <div id="scroll-area">
-                        <VirtualList
-                            ref={(instance) => {
-                                this.virtualList = instance;
-                            }}
-                            width='100%'
-                            height={1000}
-                            overscanCount={10}
-                            itemCount={data.length}
+                <VirtualList
+                    ref={(instance) => {
+                        this.virtualList = instance;
+                    }}
+                    width='100%'
+                    height={1000}
+                    overscanCount={10}
+                    itemCount={data.length}
 
-                            itemSize={(index) => {
+                    itemSize={(index) => {
 
-                                let source = document.createElement('p');
-                                source.style.width = "432px";
-                                source.style.fontSize = "16px";
-                                source.innerHTML = this.state.job.rows[index].source.content_clean;
-                                document.getElementById('hiddenHtml').appendChild(source);
-                                const sourceHeight = source.getBoundingClientRect().height;
+                        let source = document.createElement('p');
+                        source.style.width = "432px";
+                        source.style.fontSize = "16px";
+                        source.innerHTML = this.state.job.rows[index].source.content_clean;
+                        document.getElementById('hiddenHtml').appendChild(source);
+                        const sourceHeight = source.getBoundingClientRect().height;
 
-                                let target = document.createElement('p');
-                                target.style.width = "432px";
-                                target.style.fontSize = "16px";
-                                target.innerHTML = this.state.job.rows[index].target.content_clean;
-                                document.getElementById('hiddenHtml').appendChild(target);
-                                const targetHeight = target.getBoundingClientRect().height;
+                        let target = document.createElement('p');
+                        target.style.width = "432px";
+                        target.style.fontSize = "16px";
+                        target.innerHTML = this.state.job.rows[index].target.content_clean;
+                        document.getElementById('hiddenHtml').appendChild(target);
+                        const targetHeight = target.getBoundingClientRect().height;
 
-                                document.getElementById('hiddenHtml').innerHTML = "";
-                                return Math.max(sourceHeight,targetHeight)+96
-                            }}
-                            renderItem={({index, style}) =>
-                                <div key={index} style={style} ref={(el) => {
-                                    this.elementsRef[index] = el;
-                                }
-                                }>
-                                    {data[index]}
-                                </div>
-                            }
-                        />,
-                    </div>
-                    <AdvancedDragLayer/>
-                    {this.state.splitModalStatus &&
-                    <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
-                                    inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
-                    <ToolbarComponent/>
-                </div>
+                        document.getElementById('hiddenHtml').innerHTML = "";
+                        return Math.max(sourceHeight, targetHeight) + 96
+                    }}
+                    renderItem={({index, style}) =>
+                        <div key={index} style={style} ref={(el) => {
+                            this.elementsRef[index] = el;
+                        }
+                        }>
+                            {data[index]}
+                        </div>
+                    }
+                />,
+                <AdvancedDragLayer/>
+                {this.state.splitModalStatus &&
+                <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
+                                inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
+                <ToolbarComponent/>
             </div>
         );
     }
@@ -202,7 +199,6 @@ class JobComponent extends Component {
 
     renderItems(array) {
         let values = [];
-        //if we can have complex regular for enable drag&drop use this var
         const enableDrag = true;
         if (array.length > 0) {
             array.map((row, index) => {
@@ -235,6 +231,7 @@ class JobComponent extends Component {
         })
     }
 }
+
 export default DragDropContext(TouchBackend({
     enableMouseEvents: true,
     touchSlop: 5
