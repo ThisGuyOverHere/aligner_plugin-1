@@ -94,6 +94,8 @@ class Alignment {
 
         $matches = $this->find100x100Matches($source, $target);
 
+        Log::doLog('Found '.count($matches).' 100% matches');
+
         // No exact match has been found, we need to align entire document
         if (empty($matches)) {
             $alignment = $this->alignPart($source, $target, [0, 0]);
@@ -106,6 +108,8 @@ class Alignment {
 
             foreach ($matches as $match) {
 
+                $time_start = microtime(true);
+
                 $subSource = array_slice($source, $lastMatch[0], $match[0] - $lastMatch[0]);
                 $subTarget = array_slice($target, $lastMatch[1], $match[1] - $lastMatch[1]);
 
@@ -113,6 +117,9 @@ class Alignment {
 
                 $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
                 $alignment[] = [[$match[0], 1], [$match[1], 1], 100];  // Add alignment for exact match
+
+                $time_end = microtime(true);
+                Log::doLog('Aligned sub-part: sub-source ['.count($subSource).'] from '.$lastMatch[0].', sub-target ['.count($subTarget).'] from '.$lastMatch[1].' in '.($time_end-$time_start).' seconds');
 
                 // Update lastMatch to skip current match
                 $lastMatch[0] = $match[0] + 1;
@@ -129,27 +136,6 @@ class Alignment {
 
             return $alignment;
         }
-    }
-
-    // Sub-part alignment
-    function alignPart($source, $target, $offset) {
-        $MAX_NUMBER_OF_SEGMENTS = 0;
-
-        if (count($source) < $MAX_NUMBER_OF_SEGMENTS && count($target) < $MAX_NUMBER_OF_SEGMENTS) {
-            $scores = $this->buildScores($source, $target);
-            $alignment = $this->extractPath($source, $target, $scores);
-        } else {
-            $alignment = $this->alignWindow($source, $target);
-        }
-
-        // Adjust offset
-        $alignment = array_map(function ($item) use ($offset) {
-            $item[0][0] += $offset[0];
-            $item[1][0] += $offset[1];
-            return $item;
-        }, $alignment);
-
-        return $alignment;
     }
 
     // 100% matches
@@ -179,6 +165,27 @@ class Alignment {
         }
 
         return $commonSegments;
+    }
+
+    // Sub-part alignment
+    function alignPart($source, $target, $offset) {
+        $MAX_NUMBER_OF_SEGMENTS = 0;
+
+        if (count($source) < $MAX_NUMBER_OF_SEGMENTS && count($target) < $MAX_NUMBER_OF_SEGMENTS) {
+            $scores = $this->buildScores($source, $target);
+            $alignment = $this->extractPath($source, $target, $scores);
+        } else {
+            $alignment = $this->alignWindow($source, $target);
+        }
+
+        // Adjust offset
+        $alignment = array_map(function ($item) use ($offset) {
+            $item[0][0] += $offset[0];
+            $item[1][0] += $offset[1];
+            return $item;
+        }, $alignment);
+
+        return $alignment;
     }
 
     // Align by Window
@@ -354,7 +361,7 @@ class Alignment {
         } else {
             $distance = levenshtein_opt($ss, $ts, $costIns, $costRep, $costDel);
         }
-
+        
         // Score
         $len = min($sl, $tl);
 
