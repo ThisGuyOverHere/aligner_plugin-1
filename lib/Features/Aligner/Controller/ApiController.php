@@ -83,8 +83,6 @@ class ApiController extends AlignerController {
         //Gets from 0 since they are returned as an array
         $split_segment    = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         $inverse_segment  = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_order, $id_job, $inverse_type )->toArray();
-        $original_segment = $split_segment;
-        $inverse_original = $inverse_segment;
 
         $avg_order   = AlignUtils::_getNewOrderValue( $split_segment[ 'order' ], $split_segment[ 'next' ] );
         $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_segment[ 'order' ], $inverse_segment[ 'next' ] );
@@ -108,9 +106,9 @@ class ApiController extends AlignerController {
         $first_clean = AlignUtils::_cleanSegment( $first_raw, $split_segment[ 'language_code' ] );
         $first_count = AlignUtils::_countWordsInSegment( $first_raw, $split_segment[ 'language_code' ] );
 
-        $new_segment = $original_segment;
-        $new_match   = $original_segment;
-        $null_match  = $inverse_original;
+        $new_segment = $split_segment;
+        $new_match   = $split_segment;
+        $null_match  = $inverse_segment;
 
         $split_segment[ 'content_raw' ]    = $first_raw;
         $split_segment[ 'content_clean' ]  = $first_clean;
@@ -148,7 +146,7 @@ class ApiController extends AlignerController {
             $new_segment[ 'order' ]    = (int)$new_match[ 'order' ];
 
             //If we split the last segment we add new next values for the new segments
-            $avg_order = ( $split_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $new_match[ 'order' ], $original_segment[ 'next' ] ) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $avg_order = ( $split_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $new_match[ 'order' ], $split_segment[ 'next' ] ) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
             $new_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $avg_order : (int)$split_segment[ 'next' ];
             $new_segment[ 'next' ] = (int)$new_match[ 'next' ];
@@ -160,7 +158,7 @@ class ApiController extends AlignerController {
             $null_segment[ 'order' ]    = $inverse_avg;
 
             //If we split the last segment we add new next values for the new segments
-            $inverse_avg = ( $inverse_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $null_match[ 'order' ], $inverse_original[ 'next' ] ) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $inverse_avg = ( $inverse_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $null_match[ 'order' ], $inverse_segment[ 'next' ] ) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
             $null_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $inverse_avg : (int)$inverse_segment[ 'next' ];
             $null_segment[ 'next' ] = $null_match[ 'next' ];
@@ -182,7 +180,7 @@ class ApiController extends AlignerController {
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->createList( array_merge( $new_matches, $new_null_matches ) );
 
-            Segments_SegmentDao::updateSegmentContent( $original_segment [ 'id' ], [ $first_raw, $first_clean, $first_hash, $first_count ] );
+            Segments_SegmentDao::updateSegmentContent( $split_segment [ 'id' ], [ $first_raw, $first_clean, $first_hash, $first_count ] );
             Segments_SegmentMatchDao::updateNextSegmentMatch( $update_order, $order, $id_job, $type );
             Segments_SegmentMatchDao::updateNextSegmentMatch( $inverse_update_order, $inverse_order, $id_job, $inverse_type );
 
