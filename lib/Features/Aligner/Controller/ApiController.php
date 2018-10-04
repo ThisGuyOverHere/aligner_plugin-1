@@ -535,4 +535,29 @@ class ApiController extends AlignerController {
 
     }
 
+    public function reverse() {
+
+        $id_job = $this->params[ 'id_job' ];
+        $type   = $this->params[ 'type' ];
+        $order1 = $this->params[ 'order1' ];
+        $order2 = $this->params[ 'order2' ];
+
+        $segment_1 = Segments_SegmentDao::getFromOrderJobIdAndType( $order1, $id_job, $type );
+        $segment_2 = Segments_SegmentDao::getFromOrderJobIdAndType( $order2, $id_job, $type );
+
+        $conn = NewDatabase::obtain()->getConnection();
+        try {
+            $conn->beginTransaction();
+            Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $segment_2->id ], $order1, $id_job, $type );
+            Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $segment_1->id ], $order2, $id_job, $type );
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
+        }
+
+        return true;
+
+    }
+
 }
