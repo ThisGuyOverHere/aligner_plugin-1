@@ -189,7 +189,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - $firstSegmentParams - $firstMatchParams", -2 );
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
 
         //Format returned segments
@@ -486,9 +486,7 @@ class ApiController extends AlignerController {
     public function delete() {
 
         $matches = $this->params[ 'matches' ];
-
         $id_job = $this->params[ 'id_job' ];
-
 
         $sources = [];
         $targets = [];
@@ -506,7 +504,7 @@ class ApiController extends AlignerController {
         }
 
         $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
-        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
+        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $targets, $id_job, 'target' );
 
         foreach ( $sourceMatches as $sourceMatch ) {
             if ( $sourceMatch[ 'segment_id' ] != null ) {
@@ -522,7 +520,6 @@ class ApiController extends AlignerController {
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
-
             $conn->beginTransaction();
             if ( !empty( $sources ) ) {
                 Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $sources, $id_job, 'source' );

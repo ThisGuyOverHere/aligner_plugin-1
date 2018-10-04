@@ -19,8 +19,6 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( " SELECT `type`, `order` FROM segments_match WHERE segment_id IS NULL AND id_job =  :id_job" );
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id_job ] );
-
-
     }
 
     public function deleteByJobId($id_job) {
@@ -51,7 +49,7 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
             return $segmentMatch[0];
         } else {
             return $segmentMatch;
-        };
+        }
     }
 
     public static function getLastSegmentMatch($id_job, $type, $ttl = 0){
@@ -138,13 +136,11 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         SET sm.next = ?
         WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
         $params = array($new_order, $order, $id_job, $type);
-        try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $stm = $conn->prepare( $query );
-            $stm->execute( $params );
-        } catch ( PDOException $e ) {
-            throw new Exception( "SegmentMatch update - DB Error: " . $e->getMessage() . " - $order, $id_job, $type, $new_order", -2 );
-        }
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $params );
+
     }
 
     public static function updateMatchesBeforeDeletion(Array $orders, $id_job, $type){
@@ -154,32 +150,27 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
             SET sm1.next = sm2.next
             WHERE sm1.next IN ($qMarks) AND sm2.order IN ($qMarks)
             AND sm1.type = ? AND sm2.type = ?
-            AND sm1.id_job = ? AND sm2.id_job = ?;";
+            AND sm1.id_job = ? AND sm2.id_job = ?";
         $params = array_merge( $orders, $orders, [ $type, $type, $id_job, $id_job ] );
-        try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $stm = $conn->prepare( $query );
-            $stm->execute( $params );
-        } catch ( PDOException $e ) {
-            throw new Exception( "SegmentMatch Update - DB Error: " . $e->getMessage() , -2 );
-        }
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $params );
+
     }
 
     public static function deleteMatches(Array $orders, $id_job, $type){
         $qMarks = str_repeat( '?,', count( $orders ) - 1 ) . '?';
         $query  = "DELETE FROM segments_match
-            USING segments_match
-            WHERE segments_match.order IN ($qMarks)
-            AND segments_match.type = ?
-            AND segments_match.id_job = ?;";
+            WHERE `order` IN ($qMarks)
+            AND `type` = ?
+            AND id_job = ?";
         $params = array_merge( $orders, [ $type, $id_job ] );
-        try {
-            $conn = NewDatabase::obtain()->getConnection();
-            $stm = $conn->prepare( $query );
-            $stm->execute( $params );
-        } catch ( PDOException $e ) {
-            throw new Exception( "SegmentMatch Delete - DB Error: " . $e->getMessage() , -2 );
-        }
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $params );
+
     }
     
 }

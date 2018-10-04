@@ -15,18 +15,7 @@ use Features\Aligner\Model\Segments_SegmentMatchDao;
 class JobController extends AlignerController {
 
     public function information() {
-        /*{
-      job_name: String,
-      miss_alignments: [
-          {type: String, order: Number},
-          {type: String, order: Number},
-      ],
-        total_lines: Number,
-      total_segments: Number,
-        source_lang: String,
-        target_lang: String
 
-}*/
         $id_job  = $this->params[ 'id_job' ];
         $job     = Jobs_JobDao::getById( $id_job )[ 0 ];
         $project = $job->getProject();
