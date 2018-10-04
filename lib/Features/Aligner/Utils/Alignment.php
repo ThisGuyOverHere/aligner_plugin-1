@@ -71,6 +71,7 @@ class Alignment {
         return $segments;
     }
 
+    // Clean segments to remove useless characters
     function cleanSegments($segments) {
         $delimiters = '/\s|\?|\"|\“|\”|\.|\,|\;|\:|\!|\(|\)|\{|\}|\`|\’|\\\|\/|\||\'|\+|\-|\_/u';  // Why I need FULL UNICODE here? Why is not full UTF-8??
 
@@ -88,9 +89,12 @@ class Alignment {
         return $clean;
     }
 
+    // Perform alignment
     function align($source, $target) {
 
-        $matches = $this->findAbsoluteMatches($source, $target);
+        $matches = $this->find100x100Matches($source, $target);
+
+        Log::doLog('Found '.count($matches).' 100% matches');
 
         // No exact match has been found, we need to align entire document
         if (empty($matches)) {
@@ -104,6 +108,8 @@ class Alignment {
 
             foreach ($matches as $match) {
 
+                $time_start = microtime(true);
+
                 $subSource = array_slice($source, $lastMatch[0], $match[0] - $lastMatch[0]);
                 $subTarget = array_slice($target, $lastMatch[1], $match[1] - $lastMatch[1]);
 
@@ -111,6 +117,9 @@ class Alignment {
 
                 $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
                 $alignment[] = [[$match[0], 1], [$match[1], 1], 100];  // Add alignment for exact match
+
+                $time_end = microtime(true);
+                Log::doLog('Aligned sub-part: sub-source ['.count($subSource).'] from '.$lastMatch[0].', sub-target ['.count($subTarget).'] from '.$lastMatch[1].' in '.($time_end-$time_start).' seconds');
 
                 // Update lastMatch to skip current match
                 $lastMatch[0] = $match[0] + 1;
@@ -129,27 +138,8 @@ class Alignment {
         }
     }
 
-    function alignPart($source, $target, $offset) {
-        $MAX_NUMBER_OF_SEGMENTS = 0;
-
-        if (count($source) < $MAX_NUMBER_OF_SEGMENTS && count($target) < $MAX_NUMBER_OF_SEGMENTS) {
-            $scores = $this->buildScores($source, $target);
-            $alignment = $this->extractPath($source, $target, $scores);
-        } else {
-            $alignment = $this->simplePathFinder($source, $target);
-        }
-
-        // Adjust offset
-        $alignment = array_map(function ($item) use ($offset) {
-            $item[0][0] += $offset[0];
-            $item[1][0] += $offset[1];
-            return $item;
-        }, $alignment);
-
-        return $alignment;
-    }
-
-    function findAbsoluteMatches($source, $target) {
+    // 100% matches
+    function find100x100Matches($source, $target) {
         // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
 
         $source = array_map(function ($item) {
@@ -177,11 +167,32 @@ class Alignment {
         return $commonSegments;
     }
 
-    // Align lot of segments without building the whole score matrix
-    function simplePathFinder($source, $target) {
+    // Sub-part alignment
+    function alignPart($source, $target, $offset) {
+        $MAX_NUMBER_OF_SEGMENTS = 0;
 
-        // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
+        if (count($source) < $MAX_NUMBER_OF_SEGMENTS && count($target) < $MAX_NUMBER_OF_SEGMENTS) {
+            $scores = $this->buildScores($source, $target);
+            $alignment = $this->extractPath($source, $target, $scores);
+        } else {
+            $alignment = $this->alignWindow($source, $target);
+        }
+
+        // Adjust offset
+        $alignment = array_map(function ($item) use ($offset) {
+            $item[0][0] += $offset[0];
+            $item[1][0] += $offset[1];
+            return $item;
+        }, $alignment);
+
+        return $alignment;
+    }
+
+    // Align by Window
+    function alignWindow($source, $target) {
+
         $beadCosts = ['1-1' => 0, '2-1' => 150, '1-2' => 150, '0-1' => 50, '1-0' => 50];  // Penality for merge and holes
+        $offsetCost = 10;  // For each position
 
         $WINDOW_SIZE = 8;  // 8 sentences before, 8 sentences after last matching point
         $CURRENT_OFFSET = 0;  // Updated when we found a match that causes an offset between source and target
@@ -218,8 +229,8 @@ class Alignment {
                             $sources = array_slice($source, $si - $sd, $sd);
                             $targets = array_slice($target, $ti - $td, $td);
 
-                            list($distance, $score) = $this->eval_sents($sources, $targets);
-                            $cost = $distance + $beadCost;  //TODO: Add penality for offset??
+                            list($distance, $score) = $this->evalSentences($sources, $targets);
+                            $cost = $distance + $beadCost + abs($si - $ti + $CURRENT_OFFSET) * $offsetCost;
 
                             $tuple = [$cost, $sd, $ti, $td, $score];
 
@@ -255,6 +266,7 @@ class Alignment {
         return $res;
     }
 
+    // C&G build score matrix
     function buildScores($source, $target) {
 
         // $beadCosts = ['1-1' => 0, '2-1' => 230, '1-2' => 230, '0-1' => 450, '1-0' => 450, '2-2' => 440];  // Penality for merge and holes
@@ -278,7 +290,7 @@ class Alignment {
                             $sources = array_slice($source, $si-$sd, $sd);
                             $targets = array_slice($target, $ti-$td, $td);
 
-                            list($distance, $score) = $this->eval_sents($sources, $targets);
+                            list($distance, $score) = $this->evalSentences($sources, $targets);
                             $cost = $m[$si-$sd][$ti-$td][0] + $distance + $beadCost;
 
                             $tuple = [$cost, $sd, $td, $score];
@@ -298,6 +310,7 @@ class Alignment {
         return $m;
     }
 
+    // C&G extract best path into matrix
     function extractPath($source, $target, $scores) {
         $res = [];
 
@@ -320,14 +333,12 @@ class Alignment {
         return array_reverse($res);
     }
 
-    function eval_sents($sources, $targets) {
+    // Evaluate sentences
+    function evalSentences($sources, $targets) {
         $costIns = 1; $costRep = 1; $costDel = 1;
 
-        $source = $this->mergeSegments($sources);
-        $target = $this->mergeSegments($targets);
-
-        $sl = strlen(implode('', $source));
-        $tl = strlen(implode('', $target));
+        $source = segments_merge($sources);
+        $target = segments_merge($targets);
 
         // Remove common words
         $commonWords = array_intersect_opt($source, $target);
@@ -340,15 +351,23 @@ class Alignment {
         $ts = implode('', $ts);
 
         // Distance
-        if (strlen($ss) == 0 || strlen($ts) == 0) {  // Check if we can return immediately the upper bound
-            $distance = max(strlen($ss), strlen($ts));
-        } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
+        $sl = strlen($ss);
+        $tl = strlen($ts);
+
+        if ($sl == 0 || $tl == 0) {  // Check if we can return immediately the upper bound
+            $distance = max($sl, $tl);
+        } else if ($sl < 255 && $tl < 255) {  // Check if we can use the efficient standard implementation
             $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+        } else if (abs($sl - $tl) > 100) {  // Check if strings are too different, and return an approximated result
+            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the little string is different
         } else {
-            $distance = long_levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+            $distance = levenshtein_opt($ss, $ts, $costIns, $costRep, $costDel);
         }
 
         // Score
+        $sl = strlen(implode('', $source));
+        $tl = strlen(implode('', $target));
+
         $len = min($sl, $tl);
 
         if ($len > 0) {
@@ -362,7 +381,7 @@ class Alignment {
         return [$distance, $score];
     }
 
-
+    // Map Alignment to return
     function mapAlignment($source, $target, $indexes) {
         $alignment = [];
 
@@ -385,27 +404,27 @@ class Alignment {
         return $alignment;
     }
 
-    // Simple merge, for 1-N matches
-    function mergeSegments($segments) {
-        if (count($segments) == 0) {
-            return [];
-        } else if (count($segments) == 1) {
-            return reset($segments);  // Here I'm not sure if array starts with index 0
-        } else {
-            $result = [];
+}
 
-            foreach ($segments as $segment) {
-                $result = array_merge($result, $segment);
-            }
+// Simple merge, for 1-N matches
+function segments_merge($segments) {
+    if (count($segments) == 0) {
+        return [];
+    } else if (count($segments) == 1) {
+        return reset($segments);  // Here I'm not sure if array starts with index 0
+    } else {
+        $result = [];
 
-            return $result;
+        foreach ($segments as $segment) {
+            $result = array_merge($result, $segment);
         }
-    }
 
+        return $result;
+    }
 }
 
 // Levensthein for 255+ chars strings
-function long_levenshtein($str1, $str2, $costIns, $costRep, $costDel) {
+function levenshtein_opt($str1, $str2, $costIns, $costRep, $costDel) {
 
     $str1Array = str_split($str1, 1);
     $str2Array = str_split($str2, 1);
