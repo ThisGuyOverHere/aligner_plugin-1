@@ -340,9 +340,6 @@ class Alignment {
         $source = segments_merge($sources);
         $target = segments_merge($targets);
 
-        $sl = strlen(implode('', $source));
-        $tl = strlen(implode('', $target));
-
         // Remove common words
         $commonWords = array_intersect_opt($source, $target);
 
@@ -354,15 +351,23 @@ class Alignment {
         $ts = implode('', $ts);
 
         // Distance
-        if (strlen($ss) == 0 || strlen($ts) == 0) {  // Check if we can return immediately the upper bound
-            $distance = max(strlen($ss), strlen($ts));
-        } else if (strlen($ss) < 255 && strlen($ts) < 255) {  // Check if we can use the efficient standard implementation
+        $sl = strlen($ss);
+        $tl = strlen($ts);
+
+        if ($sl == 0 || $tl == 0) {  // Check if we can return immediately the upper bound
+            $distance = max($sl, $tl);
+        } else if ($sl < 255 && $tl < 255) {  // Check if we can use the efficient standard implementation
             $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+        } else if (abs($sl - $tl) > 100) {  // Check if strings are too different, and return an approximated result
+            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the little string is different
         } else {
             $distance = levenshtein_opt($ss, $ts, $costIns, $costRep, $costDel);
         }
-        
+
         // Score
+        $sl = strlen(implode('', $source));
+        $tl = strlen(implode('', $target));
+
         $len = min($sl, $tl);
 
         if ($len > 0) {
