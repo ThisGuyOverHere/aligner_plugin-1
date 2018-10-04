@@ -19,48 +19,27 @@ class ApiController extends AlignerController {
 
     public function merge() {
 
-        $segments     = [];
-        $orders       = $this->params[ 'order' ];
-        $type         = $this->params[ 'type' ];
-        $id_job          = $this->params[ 'id_job' ];
+        $segments = [];
+        $orders   = $this->params[ 'order' ];
+        $type     = $this->params[ 'type' ];
+        $id_job   = $this->params[ 'id_job' ];
 
         sort( $orders );
         foreach ( $orders as $order ) {
             $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
         }
 
-        $full_segments = $segments;
-
-        $first_segment = array_shift( $segments );
-        $raw_merge     = $first_segment[ 'content_raw' ];
-        $clean_merge   = $first_segment[ 'content_clean' ];
-        $merge_count   = $first_segment[ 'raw_word_count' ];
-
         $deleted_orders = [];
-        $deleted_ids    = [];
 
         foreach ( $segments as $key => $segment ) {
-            $raw_merge                   .= " " . $segment[ 'content_raw' ];
-            $clean_merge                 .= " " . $segment[ 'content_clean' ];
-            $merge_count                 += $segment[ 'raw_word_count' ];
-            $deleted_ids[]               = $segment[ 'id' ];
             $deleted_orders[]            = $segment[ 'order' ];
-            $segments[ $key ][ 'order' ] = (int)$segments[ $key ][ 'order' ];
-            $segments[ $key ][ 'next' ]  = (int)$segments[ $key ][ 'next' ];
         }
-
-        $first_segment[ 'content_raw' ]    = $raw_merge;
-        $first_segment[ 'content_clean' ]  = $clean_merge;
-        $first_segment[ 'raw_word_count' ] = $merge_count;
-        $first_segment[ 'order' ]          = (int)$first_segment[ 'order' ];
-        $first_segment[ 'next' ]           = (int)$first_segment[ 'next' ];
-
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
-            Segments_SegmentDao::mergeSegments($full_segments);
-            Segments_SegmentMatchDao::nullifySegmentsInMatches($deleted_orders, $id_job, $type);
+            $first_segment = Segments_SegmentDao::mergeSegments( $segments );
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( $deleted_orders, $id_job, $type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
@@ -203,7 +182,7 @@ class ApiController extends AlignerController {
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->createList( array_merge( $new_matches, $new_null_matches ) );
 
-            Segments_SegmentDao::updateSegmentContent( $original_segment ['id'], [ $first_raw, $first_clean, $first_hash, $first_count ] );
+            Segments_SegmentDao::updateSegmentContent( $original_segment [ 'id' ], [ $first_raw, $first_clean, $first_hash, $first_count ] );
             Segments_SegmentMatchDao::updateNextSegmentMatch( $update_order, $order, $id_job, $type );
             Segments_SegmentMatchDao::updateNextSegmentMatch( $inverse_update_order, $inverse_order, $id_job, $inverse_type );
 
@@ -279,7 +258,7 @@ class ApiController extends AlignerController {
     public function move() {
 
         $order               = $this->params[ 'order' ];
-        $id_job                 = $this->params[ 'id_job' ];
+        $id_job              = $this->params[ 'id_job' ];
         $type                = $this->params[ 'type' ];
         $inverse_type        = ( $type == 'target' ) ? 'source' : 'target';
         $destination         = $this->params[ 'destination' ];
@@ -381,7 +360,7 @@ class ApiController extends AlignerController {
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->createList( [ $new_match, $new_gap ] );
             //Set original match to empty and edit old next positions
-            Segments_SegmentMatchDao::nullifySegmentsInMatches( array($order), $id_job, $type );
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order ], $id_job, $type );
             if ( $reference_order != 0 ) {
                 Segments_SegmentMatchDao::updateNextSegmentMatch( $new_order, $referenceMatch[ 'order' ], $id_job, $type );
             }
@@ -389,7 +368,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment Move - DB Error: " . $e->getMessage() , -2 );
+            throw new \Exception( "Segment Move - DB Error: " . $e->getMessage(), -2 );
         }
 
         return $this->response->json( $operations );
@@ -399,7 +378,7 @@ class ApiController extends AlignerController {
 
     public function addGap() {
         $order      = $this->params[ 'order' ];
-        $id_job        = $this->params[ 'id_job' ];
+        $id_job     = $this->params[ 'id_job' ];
         $type       = $this->params[ 'type' ];
         $other_type = ( $type == 'target' ) ? 'source' : 'target';
 
@@ -508,7 +487,7 @@ class ApiController extends AlignerController {
 
         $matches = $this->params[ 'matches' ];
 
-        $id_job  = $this->params[ 'id_job' ];
+        $id_job = $this->params[ 'id_job' ];
 
 
         $sources = [];
@@ -546,12 +525,12 @@ class ApiController extends AlignerController {
 
             $conn->beginTransaction();
             if ( !empty( $sources ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($sources, $id_job,'source');
-                Segments_SegmentMatchDao::deleteMatches($sources,$id_job,'source');
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $sources, $id_job, 'source' );
+                Segments_SegmentMatchDao::deleteMatches( $sources, $id_job, 'source' );
             }
             if ( !empty( $targets ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion($targets, $id_job,'target');
-                Segments_SegmentMatchDao::deleteMatches($targets,$id_job,'target');
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $targets, $id_job, 'target' );
+                Segments_SegmentMatchDao::deleteMatches( $targets, $id_job, 'target' );
             }
             $conn->commit();
         } catch ( \PDOException $e ) {
