@@ -46,8 +46,8 @@ class RowWrapperComponent extends Component {
 
     render() {
 
-        return <div className="row-wrapper">
-            {this.props.selection.count === 0 && <ActionsBetweenLines row={this.props.row}/>}
+        return <div className="row-wrapper ui container">
+            {false && this.props.selection.count === 0 && <ActionsBetweenLines row={this.props.row}/>}
             <RowComponent {...this.props} />
         </div>
     }

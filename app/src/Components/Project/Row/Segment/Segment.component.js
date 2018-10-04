@@ -18,34 +18,6 @@ const ItemSource = {
     }
 };
 
-const Target = {
-    canDrop(props, monitor) {
-        const from = monitor.getItem(),
-            types = {
-                'source': 0,
-                'target': 1
-            };
-
-        if (!(from.segment.order === props.segment.order && from.segment.type === props.segment.type)
-            && from.segment.type === props.segment.type && props.segment.content_clean) {
-            return true
-        }
-        return false
-    },
-    drop(props, monitor, component) {
-        return props;
-    }
-};
-
-function collectTarget(connect, monitor) {
-    return {
-        connectDropTarget: connect.dropTarget(),
-        isOver: monitor.isOver(),
-        canDrop: monitor.canDrop(),
-        dragEl: monitor.getItem()
-    }
-}
-
 function collect(connect, monitor) {
     return {
         connectDragPreview: connect.dragPreview(),
@@ -116,7 +88,7 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDropTarget, connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl} = this.props;
+        const {connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl} = this.props;
 
         let segmentClasses = ['segmentBox'];
         if (!segment.content_clean) {
@@ -135,11 +107,10 @@ class SegmentComponent extends Component {
             segmentClasses.push('selected')
         }
 
-
         if(isOver && dragEl.type === this.props.segment.type){
             segmentClasses.push('onDropHoverMerge')
         }
-        return connectDropTarget(connectDragPreview(connectDragSource(
+        return connectDragPreview(connectDragSource(
             <div className={segmentClasses.join(' ')} style={this.getStyles(this.props)}
                  onDoubleClick={this.openSplitModal}
                  onClick={this.handleClick}
@@ -149,30 +120,32 @@ class SegmentComponent extends Component {
                 <div className="segmentBox-content">
                     <p>
                         {segment.content_clean}
-                        <span className="merge"> </span>
                     </p>
-                    {!segment.content_clean && !dragEl && <i className="trash alternate outline icon"> </i>}
+                    {false && !segment.content_clean && !dragEl && <i className="trash alternate outline icon"> </i>}
 
                 </div>
 
             </div>
-        )));
+        ));
     };
 
     handleClick = () =>{
         if (this.props.segment.content_clean) {
             ProjectActions.addSegmentToSelection(this.props.segment.order, this.props.type)
         }else{
-            ProjectActions.removeSpaceSegment({
+           /* ProjectActions.removeSpaceSegment({
                 order: this.props.segment.order,
                 type: this.props.segment.type
-            });
+            });*/
         }
     };
 
 
     openSplitModal = () => {
-        ProjectActions.openSegmentToSplit(this.props.segment);
+        if(this.props.segment.content_clean){
+            ProjectActions.openSegmentToSplit(this.props.segment);
+        }
+
     };
 
 
@@ -189,4 +162,4 @@ class SegmentComponent extends Component {
 
 }
 
-export default DropTarget(ItemTypes.ITEM, Target, collectTarget)(DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent));
+export default DragSource(ItemTypes.ITEM, ItemSource, collect)(SegmentComponent);
