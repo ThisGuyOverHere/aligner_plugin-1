@@ -49,7 +49,7 @@ class Layout extends Component {
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
                 <HeaderComponent user = {this.state.user} {...matchProps}/>
                 <Component {...matchProps} />
-
+                <div id="hiddenHtml"></div>
             </div>
         )}/>
     };

@@ -107,7 +107,6 @@ class SegmentComponent extends Component {
             segmentClasses.push('selected')
         }
 
-
         if(isOver && dragEl.type === this.props.segment.type){
             segmentClasses.push('onDropHoverMerge')
         }
