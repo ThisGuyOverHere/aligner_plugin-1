@@ -118,6 +118,23 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function updateFields($attributes, $order, $id_job, $type){
+        $qMark = [];
+        $qValues = [];
+        foreach($attributes as $attribute_k => $attribute_v){
+            $qMark[] = "sm.".$attribute_k." = ?";
+            $qValues[] = $attribute_v;
+        }
+        $query = "UPDATE segments_match as sm
+        SET ".implode(", ", $qMark)."
+        WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $params = array_merge($qValues, array($order, $id_job, $type));
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $params );
+    }
+
     public static function nullifySegmentsInMatches(Array $orders, $id_job, $type ){
         $qMarks = str_repeat('?,', count($orders) - 1) . '?';
 
