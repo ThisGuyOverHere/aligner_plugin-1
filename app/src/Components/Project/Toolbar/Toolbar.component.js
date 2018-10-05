@@ -4,9 +4,15 @@ import ProjectConstants from "../../../Constants/Project.constants";
 import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.component";
 import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
 import ToolbarContextualNavigationComponent from "./ToolbarContextualNavigation/ToolbarContextualNavigation.component";
+import PropTypes from "prop-types";
 
 class ToolbarComponent extends Component {
-
+    static propTypes = {
+        jobConf: PropTypes.shape({
+            password: PropTypes.string,
+            id: PropTypes.any
+        })
+    };
     constructor(props) {
         super(props);
         this.state = {
@@ -42,7 +48,7 @@ class ToolbarComponent extends Component {
                     {!!this.state.selection.count && <ToolbarSelectionComponent selection={this.state.selection}/>}
                 </div>
                 <div>
-                    <ToolbarActionsComponent selection={this.state.selection}/>
+                    <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.jobConf}/>
                 </div>
                 <div>
                     {/*<ToolbarContextualNavigationComponent/>*/}

@@ -65,3 +65,21 @@ export const httpSplitSegment = (jobID,jobPassword,data) => {
     };
     return post(url,qs.stringify(values));
 };
+
+
+
+
+/**
+ *
+ * @param {Number} jobID
+ * @param {String} jobPassword
+ * @param {Object} data
+ * @param {String} data.type
+ * @param {Array} data.orders
+ * @param {Number} data.orders[]
+ * @return {*}
+ */
+export const httpMergeSegments = (jobID,jobPassword,data) => {
+    const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/segment/merge';
+    return post(url,qs.stringify(data));
+};

@@ -2,3 +2,11 @@
   background: #F2F4F7;
   padding-top: 48px;
 }
+
+.align-project.inSync{
+  cursor: progress;
+  position: relative;
+}
+.align-project.inSync *{
+  pointer-events : none;
+}
