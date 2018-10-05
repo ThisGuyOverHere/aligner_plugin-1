@@ -557,6 +557,141 @@ class ApiController extends AlignerController {
 
     }
 
+    public function align(){
+        $order_source        = (int)$this->params[ 'order_source' ];
+        $order_target        = (int)$this->params[ 'order_target' ];
+        $destination         = (int)$this->params[ 'destination' ];
+        $id_job              = $this->params[ 'id_job' ];
+
+        //Find previous matches of the row to set 'next' value to point at the newly generated segment matches
+
+        $previous_match   = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order_source, $id_job, 'source' );
+        $previous_order   = ( empty( $previous_match ) ) ? 0 : $previous_match[ 'order' ];
+
+        $destination_previous_match   = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $id_job, 'target' );
+        $destination_previous_order   = ( empty( $destination_previous_match ) ) ? 0 : $destination_previous_match[ 'order' ];
+
+        $avg_order       = AlignUtils::_getNewOrderValue( $previous_order, $order_source );
+        $avg_destination = AlignUtils::_getNewOrderValue( $destination_previous_order, $destination );
+
+        if( !empty( $previous_match ) ){
+            $previous_segment           = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $id_job, 'source' )->toArray();
+            $previous_segment[ 'next' ] = $avg_order;
+            
+            AlignUtils::_parseArrayIntegers($previous_segment);
+        }
+
+        if( !empty( $destination_previous_match ) ){
+            $destination_previous_segment           = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_previous_order, $id_job, 'source' )->toArray();
+            $destination_previous_segment[ 'next' ] = $avg_destination;
+
+            AlignUtils::_parseArrayIntegers($destination_previous_segment);
+        }
+
+        $sourceSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order_source, $id_job, 'source' )->toArray();
+        $targetSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order_target, $id_job, 'target' )->toArray();
+        
+        AlignUtils::_parseArrayIntegers( $sourceSegment );
+        AlignUtils::_parseArrayIntegers( $targetSegment );
+        
+        $sourceSegmentId = $sourceSegment[ 'id' ];
+        $targetSegmentId = $targetSegment[ 'id' ];
+
+        $newSource = $sourceSegment;
+        $newTarget = $targetSegment;
+
+        $sourceSegment[ 'content_raw' ]    = null;
+        $sourceSegment[ 'content_clean' ]  = null;
+        $sourceSegment[ 'raw_word_count' ] = null;
+
+        $targetSegment[ 'content_raw' ]    = null;
+        $targetSegment[ 'content_clean' ]  = null;
+        $targetSegment[ 'raw_word_count' ] = null;
+
+        $newSource[ 'order' ]      = $avg_order;
+        $newSource[ 'next' ]       = $order_source;
+        $newSource[ 'segment_id' ] = $sourceSegmentId;
+        $newSource[ 'score' ]      = 100;
+
+        $newTarget[ 'order' ]      = $avg_destination;
+        $newTarget[ 'next' ]       = $order_source;
+        $newTarget[ 'segment_id' ] = $targetSegmentId;
+        $newTarget[ 'score' ]      = 100;
+
+        $conn = NewDatabase::obtain()->getConnection();
+        try {
+
+            $conn->beginTransaction();
+
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order_source ], $id_job, 'source' );
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order_target ], $id_job, 'target' );
+
+            if( !empty( $previous_match ) ){
+                Segments_SegmentMatchDao::updateNextSegmentMatch( $newSource[ 'order' ], $previous_order, $id_job, 'source');
+            }
+
+            if ( !empty( $destination_previous_match ) ){
+                Segments_SegmentMatchDao::updateNextSegmentMatch( $newTarget[ 'order' ], $destination_previous_order, $id_job, 'target');
+            }
+
+            $segmentsMatchDao = new Segments_SegmentMatchDao;
+            $segmentsMatchDao->createList( [ $newSource, $newTarget ] );
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
+        }
+
+        $this->pushOperation([
+            'type'      => 'source',
+            'action'    => 'update',
+            'rif_order' => (int)$order_source,
+            'data'      => $sourceSegment
+        ]);
+
+        $this->pushOperation([
+            'type'      => 'target',
+            'action'    => 'update',
+            'rif_order' => (int)$order_target,
+            'data'      => $targetSegment
+        ]);
+
+
+        $this->pushOperation([
+            'type'      => 'source',
+            'action'    => 'create',
+            'rif_order' => (int)$order_source,
+            'data'      => $newSource
+        ]);
+
+        $this->pushOperation([
+            'type'      => 'target',
+            'action'    => 'create',
+            'rif_order' => (int)$destination,
+            'data'      => $newTarget
+        ]);
+
+        if( !empty( $previous_match ) ){
+            $this->pushOperation([
+                'type'      => 'source',
+                'action'    => 'update',
+                'rif_order' => (int)$previous_order,
+                'data'      => $previous_segment
+            ]);
+        }
+
+        if( !empty( $destination_previous_match ) ){
+            $this->pushOperation([
+                'type'      => 'target',
+                'action'    => 'update',
+                'rif_order' => (int)$destination_previous_order,
+                'data'      => $destination_previous_segment
+            ]);
+        }
+
+        return $this->getOperations();
+    }
+
     private function pushOperation($operation){
         $this->operations[] = $operation;
     }
