@@ -49,10 +49,10 @@ export const syncWithBackend = (method, callback) => {
                 order: method.data.order,
                 type: method.data.type
             }).then((response) => {
-                setTimeout(()=>{callback()},3000)
+                callback()
             },(error)=>{
                 console.log(error);
             });
-            break
+            break;
     }
 };

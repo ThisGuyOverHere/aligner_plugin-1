@@ -23,9 +23,44 @@ class SplitComponent extends Component {
             splits: {},
             charDictionary: this.fillDictionaries().charDictionary,
             wordDictionary: this.fillDictionaries().wordDictionary,
+            tagPosition: this.getTagsPosition(),
             temporarySplitPosition: -1,
         };
     }
+
+    getTagsPosition = () =>{
+        const   less = /##LESSTHAN##/g;
+        const   greater = /##GREATERTHAN##/g;
+        let     match;
+        let     lessArray = [];
+        let     greaterArray = [];
+        let tags = [];
+        let result = [];
+        while (match = less.exec(this.props.segment.content_raw)) {
+            lessArray.push(match.index);
+            console.log('less',match.index);
+        }
+        while (match = greater.exec(this.props.segment.content_raw)) {
+            greaterArray.push(match.index);
+            console.log('greater',match.index);
+        }
+
+        lessArray.map((e,index)=>{
+            tags.push({
+                less: e,
+                greater: greaterArray[index]+14
+            })
+        });
+        tags.map((e)=>{
+           for(let x = e.less; x <= e.greater; x++){
+               result.push(x);
+           }
+        });
+        console.log(result);
+
+        return result
+
+    };
 
     componentDidMount() {
 
@@ -78,14 +113,14 @@ class SplitComponent extends Component {
 
         this.state.chars.map((element, index) => {
             countSplittedItems++;
-            items.push(<SplitCharComponent
+            {this.state.tagPosition.indexOf(index) < 0 && items.push(<SplitCharComponent
                 word={element}
                 key={countSplittedItems}
                 signed={this.state.charDictionary[index] >= range[0] && this.state.charDictionary[index] <= range[1]}
                 position={index}
                 onClick={this.onCharClick}
                 onHover={this.onCharHover}
-            />);
+            />);}
             if (this.state.splits[index]) {
                 countSplittedItems++;
                 items.push(<SplitDivisor
