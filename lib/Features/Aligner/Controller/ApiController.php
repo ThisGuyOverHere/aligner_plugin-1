@@ -91,10 +91,7 @@ class ApiController extends AlignerController {
 
         $avg_order   = AlignUtils::_getNewOrderValue( $split_segment[ 'order' ], $split_segment[ 'next' ] );
         $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_segment[ 'order' ], $inverse_segment[ 'next' ] );
-
-        AlignUtils::_parseArrayIntegers( $split_segment );
-        AlignUtils::_parseArrayIntegers( $inverse_segment );
-
+      
         $original_next         = $split_segment[ 'next' ];
         $original_inverse_next = $inverse_segment[ 'next' ];
 
