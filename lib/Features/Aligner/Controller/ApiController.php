@@ -566,21 +566,45 @@ class ApiController extends AlignerController {
         $order1 = $this->params[ 'order1' ];
         $order2 = $this->params[ 'order2' ];
 
-        $segment_1 = Segments_SegmentDao::getFromOrderJobIdAndType( $order1, $id_job, $type );
-        $segment_2 = Segments_SegmentDao::getFromOrderJobIdAndType( $order2, $id_job, $type );
+        $segment_1 = Segments_SegmentDao::getFromOrderJobIdAndType( $order1, $id_job, $type )->toArray();
+        $segment_2 = Segments_SegmentDao::getFromOrderJobIdAndType( $order2, $id_job, $type )->toArray();
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
-            Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $segment_2->id ], $order1, $id_job, $type );
-            Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $segment_1->id ], $order2, $id_job, $type );
+            Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $segment_2[ 'id' ], 'score' => 100 ], $order1, $id_job, $type );
+            Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $segment_1[ 'id' ], 'score' => 100 ], $order2, $id_job, $type );
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
 
-        return true;
+        $segment_1_copy = $segment_1;
+
+        $segment_1[ 'order' ] = $segment_2[ 'order' ];
+        $segment_1[ 'next' ]  = $segment_2[ 'next' ];
+        $segment_1[ 'score' ] = 100;
+
+        $segment_2[ 'order' ] = $segment_1_copy[ 'order' ];
+        $segment_2[ 'next' ]  = $segment_1_copy[ 'next' ];
+        $segment_2[ 'score' ] = 100;
+
+        $this->pushOperation( [
+                'type'      => $type,
+                'action'    => "update",
+                'rif_order' => (int)$segment_2[ 'order' ],
+                'data'      => $segment_2
+        ] );
+
+        $this->pushOperation( [
+                'type'      => $type,
+                'action'    => "update",
+                'rif_order' => (int)$segment_1[ 'order' ],
+                'data'      => $segment_1
+        ] );
+
+        return $this->getOperations();
 
     }
 
