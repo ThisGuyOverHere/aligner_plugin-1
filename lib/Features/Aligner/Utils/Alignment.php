@@ -205,39 +205,38 @@ class Alignment {
 
             $match = null;
 
-            for ($ti = 1; $ti <= $tc; $ti++) {
+            $start = max($si + $CURRENT_OFFSET - $WINDOW_SIZE, 1);  // Limit to array start
+            $end = min($si + $CURRENT_OFFSET + $WINDOW_SIZE, $tc);  // Limit to array end
 
-                // Do compare only if in window and target is yet available
-                if (abs($si - $ti + $CURRENT_OFFSET) < $WINDOW_SIZE) {
+            for ($ti = $start; $ti <= $end; $ti++) {
 
-                    foreach ($beadCosts as $pair => $beadCost) {
-                        $sd = intval(substr($pair, 0, 1));
-                        $td = intval(substr($pair, -1, 1));
+                foreach ($beadCosts as $pair => $beadCost) {
+                    $sd = intval(substr($pair, 0, 1));
+                    $td = intval(substr($pair, -1, 1));
 
-                        if ($si - $sd >= 0 && $ti - $td >= 0) {
+                    if ($si - $sd >= 0 && $ti - $td >= 0) {
 
-                            // Check if $ti-$td, $td is a contiguous interval we can merge
-                            $evaluate = true;
-                            for ($d = 1; $d <= $td; $d++) {
-                                $evaluate = $evaluate & $target[$ti - $d] != null;
-                            }
+                        // Check if [$ti-$td, $td] is a contiguous interval we can merge, valid also for single segment
+                        $evaluate = true;
+                        for ($d = 1; $d <= $td; $d++) {
+                            $evaluate = $evaluate & $target[$ti - $d] != null;
+                        }
 
-                            if (!$evaluate) {
-                                continue;
-                            }
+                        if (!$evaluate) {
+                            continue;
+                        }
 
-                            $sources = array_slice($source, $si - $sd, $sd);
-                            $targets = array_slice($target, $ti - $td, $td);
+                        $sources = array_slice($source, $si - $sd, $sd);
+                        $targets = array_slice($target, $ti - $td, $td);
 
-                            list($distance, $score) = $this->evalSentences($sources, $targets);
-                            $cost = $distance + $beadCost + abs($si - $ti + $CURRENT_OFFSET) * $offsetCost;
+                        list($distance, $score) = $this->evalSentences($sources, $targets);
+                        $cost = $distance + $beadCost + abs($si - $ti + $CURRENT_OFFSET) * $offsetCost;
 
-                            $tuple = [$cost, $sd, $ti, $td, $score];
+                        $tuple = [$cost, $sd, $ti, $td, $score];
 
-                            // Emulate min function on tuple
-                            if ($match == null || $tuple[0] < $match[0]) {
-                                $match = $tuple;
-                            }
+                        // Emulate min function on tuple
+                        if ($match == null || $tuple[0] < $match[0]) {
+                            $match = $tuple;
                         }
                     }
                 }
@@ -245,6 +244,13 @@ class Alignment {
 
             // Use same format as Church and Gale
             list($cost, $sd, $ti, $td, $score) = $match;
+
+            // If score is too low, choose a hole instead (only if it's not a hole on source)
+            if ($score < 30 && $sd > 0) {
+                $td = 0;
+                $score = 0;
+            }
+
             $res[] = [[$si - $sd, $sd], [$ti - $td, $td], $score];
 
             // Mark unavailable sentences for target (1 or 2, based on merge)
@@ -258,10 +264,24 @@ class Alignment {
             // Adjust source index to eventually skip next sentence (for merge) or repeat current one (for target hole)
             $si--;  // Undo the for increment
             $si += $sd;  // Increment based on source distance
-
         }
 
-        //TODO: Potrebbero esserci dei target rimasti fuori dall'algoritmo, andrebbero aggiunti come orfani nella "giusta" posizione
+        // Potrebbero esserci dei target rimasti fuori dall'algoritmo, andrebbero aggiunti come orfani nella "giusta" posizione
+        foreach ($res as $key=>$value) {
+            $next = $value[1][0] + $value[1][1];  // Current target + 0, 1, 2 based on merge strategy
+
+            if ($target[$next] != null) {
+                // Add target in place
+                $item = [[$value[0][0], 0], [$next, 1], 0];
+
+                $before = array_slice($res, 0, $key + 1);
+                $after = array_slice($res, $key + 1);
+
+                $res = array_merge($before, [$item], $after);
+
+                $target[$next] = null;
+            }
+        }
 
         return $res;
     }
