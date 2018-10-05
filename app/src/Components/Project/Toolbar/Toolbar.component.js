@@ -42,10 +42,10 @@ class ToolbarComponent extends Component {
                     {!!this.state.selection.count && <ToolbarSelectionComponent selection={this.state.selection}/>}
                 </div>
                 <div>
-                    {!!this.state.selection.count && <ToolbarActionsComponent selection={this.state.selection}/>}
+                    <ToolbarActionsComponent selection={this.state.selection}/>
                 </div>
                 <div>
-                    <ToolbarContextualNavigationComponent/>
+                    {/*<ToolbarContextualNavigationComponent/>*/}
                 </div>
             </div>
         );

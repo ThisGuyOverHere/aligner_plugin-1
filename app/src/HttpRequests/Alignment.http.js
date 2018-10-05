@@ -31,12 +31,10 @@ export const httpCreateProject = (data) => {
 /**
  *
  * @param {Number} jobID The job to align
- * @param {Number} algorithmVersion The version of algorithm to use, if isn't defined it use env.alignAlgorithmDefaultVersion
  * @return {Promise}
  */
-export const httpAlignJob = (jobID, algorithmVersion=null) => {
-    const algorithm = algorithmVersion ? algorithmVersion : env.alignAlgorithmDefaultVersion;
-    const url = '/plugins/aligner/parse/v'+algorithm+'/'+jobID;
+export const httpAlignJob = (jobID) => {
+    const url = '/plugins/aligner/parse/'+jobID;
     return get(url);
 };
 

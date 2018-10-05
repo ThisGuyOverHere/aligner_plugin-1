@@ -28,7 +28,7 @@ class ToolbarActionsSplitComponent extends Component {
         //check status of split action
         let disabled = false;
         let splitClasses = ['icon', 'arrows', 'alternate', 'horizontal'];
-        if (this.props.selection.count > 1) {
+        if (this.props.selection.count !== 1 ) {
             disabled = true;
         }
         return (<button

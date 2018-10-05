@@ -30,12 +30,7 @@ const RowTarget = {
             from: from.segment.order,
             to: props.row[from.type].order
         };
-        const hasDroppedOnChild = monitor.didDrop();
-        if (hasDroppedOnChild) {
-            ProjectActions.mergeSegments([props.row[from.type].order, from.segment.order], from.segment.type)
-        } else {
-            component.alignSegments(log)
-        }
+        component.alignSegments(log)
     }
 };
 

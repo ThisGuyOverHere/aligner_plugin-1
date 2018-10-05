@@ -39,6 +39,7 @@ class UploadComponent extends Component {
                 name: null,
                 size: 0
             },
+            inAlign: false,
             sourceLang: 'en-US',
             targetLang: 'it-IT',
             formatsModalOpen: false
@@ -50,7 +51,7 @@ class UploadComponent extends Component {
         this.setState({
             sourceLang: value.value
         });
-        if(this.state.uploadSource.name){
+        if (this.state.uploadSource.name) {
             httpConversion({
                 file_name: this.state.uploadSource.name,
                 source_lang: this.state.targetLang,
@@ -63,7 +64,7 @@ class UploadComponent extends Component {
         this.setState({
             targetLang: value.value
         });
-        if(this.state.uploadTarget.name){
+        if (this.state.uploadTarget.name) {
             httpConversion({
                 file_name: this.state.uploadTarget.name,
                 source_lang: this.state.targetLang,
@@ -173,14 +174,17 @@ class UploadComponent extends Component {
                     password: response.data.job.password
                 }
             });
+        },(error)=>{
+            //todo: implement error UI
+            console.log(error);
+            this.setState({
+                inAlign: false
+            });
+        });
 
-            /* httpAlignJob(response.data.job.id).then(response => {
-                 if(response.data){
-
-                 }
-                 console.log(response)
-             })*/
-        })
+        this.setState({
+           inAlign: true
+        });
     };
 
     onFormatsModalClick = () => {
@@ -235,6 +239,11 @@ class UploadComponent extends Component {
             source: ['dropzone'],
             target: ['dropzone']
         };
+        let startButton = ['ui', 'primary', 'button'];
+        if(this.state.inAlign){
+            startButton.push('loading');
+        }
+
 
         classes.source.push(this.state.uploadSource.status);
         classes.target.push(this.state.uploadTarget.status);
@@ -253,7 +262,8 @@ class UploadComponent extends Component {
                     <div className="row" id="projectNameInput">
                         <div className="five wide column">
                             <div className="ui input">
-                                <input id="project-name" className="form-control" name="pname" type="text" value={this.state.pName}
+                                <input id="project-name" className="form-control" name="pname" type="text"
+                                       value={this.state.pName}
                                        onChange={this.ProjectNameChange}/>
                             </div>
                         </div>
@@ -321,8 +331,8 @@ class UploadComponent extends Component {
 
 
                         <div className="four wide column">
-                            <button className="ui primary button" onClick={this.startAlignment}
-                                    disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name}
+                            <button className={startButton.join(" ")} onClick={this.startAlignment}
+                                    disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name || this.state.inAlign}
                             >Start alignment
                             </button>
                         </div>

@@ -3,21 +3,19 @@ import ProjectStore from "../../Stores/Project.store";
 import ProjectConstants from "../../Constants/Project.constants"
 import ProjectActions from '../../Actions/Project.actions';
 import {DragDropContext} from 'react-dnd';
-import {default as TouchBackend} from 'react-dnd-touch-backend';
-
-
-import AdvancedDragLayer from './DragLayer/AdvancedDragLayer.component'
-import env from "../../Constants/Env.constants";
 import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
+import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
 import ToolbarComponent from "./Toolbar/Toolbar.component";
+import VirtualList from 'react-tiny-virtual-list';
+import TouchBackend from "react-dnd-touch-backend";
+
 
 class JobComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
             segmentToSplit: {},
-            algorithm: env.alignAlgorithmDefaultVersion,
             job: {
                 config: {
                     password: this.props.match.params.password,
@@ -51,6 +49,9 @@ class JobComponent extends Component {
             }
         };
 
+        this.elementsRef = {};
+        this.virtualList = null;
+        this.elementsHeight = {};
         ProjectActions.setJobID(this.props.match.params.jobID)
 
     }
@@ -95,22 +96,51 @@ class JobComponent extends Component {
     }
 
     render() {
-        let algorithmElements = [];
-        env.alignAlgorithmAllVersions.map(e => {
-            algorithmElements.push(<option key={e} value={e}>Algorithm v{e}</option>);
-        });
+        const data = this.renderItems(this.state.job.rows);
         return (
             <div className="align-project">
-                <div className="ui container">
-                    <div id="scroll-area">
-                        {this.renderItems(this.state.job.rows)}
-                    </div>
-                    <AdvancedDragLayer/>
-                    {this.state.splitModalStatus &&
-                    <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
-                                    inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
-                    <ToolbarComponent/>
-                </div>
+                <VirtualList
+                    ref={(instance) => {
+                        this.virtualList = instance;
+                    }}
+                    width='100%'
+                    height={1000}
+                    overscanCount={10}
+                    itemCount={data.length}
+
+                    itemSize={(index) => {
+
+                        let source = document.createElement('p');
+                        source.style.width = "432px";
+                        source.style.fontSize = "16px";
+                        source.innerHTML = this.state.job.rows[index].source.content_clean;
+                        document.getElementById('hiddenHtml').appendChild(source);
+                        const sourceHeight = source.getBoundingClientRect().height;
+
+                        let target = document.createElement('p');
+                        target.style.width = "432px";
+                        target.style.fontSize = "16px";
+                        target.innerHTML = this.state.job.rows[index].target.content_clean;
+                        document.getElementById('hiddenHtml').appendChild(target);
+                        const targetHeight = target.getBoundingClientRect().height;
+
+                        document.getElementById('hiddenHtml').innerHTML = "";
+                        return Math.max(sourceHeight, targetHeight) + 96
+                    }}
+                    renderItem={({index, style}) =>
+                        <div key={index} style={style} ref={(el) => {
+                            this.elementsRef[index] = el;
+                        }
+                        }>
+                            {data[index]}
+                        </div>
+                    }
+                />,
+                <AdvancedDragLayer/>
+                {this.state.splitModalStatus &&
+                <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
+                                inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
+                <ToolbarComponent/>
             </div>
         );
     }
@@ -143,20 +173,20 @@ class JobComponent extends Component {
             rowsDictionary.source[e.order] = job.target[index].order;
             rowsDictionary.target[job.target[index].order] = e.order;
             //todo: send API for remove empty/empty from DB
-            if(e.content_clean || job.target[index].content_clean){
+            if (e.content_clean || job.target[index].content_clean) {
                 rows.push({
                     source: e,
                     target: job.target[index]
                 });
-            }else{
+            } else {
                 deletes.push(index);
             }
         });
 
-        if(deletes.length>0){
-            setTimeout(()=>{
+        if (deletes.length > 0) {
+            setTimeout(() => {
                 ProjectActions.deleteEmptyRows(deletes);
-            },0);
+            }, 0);
 
         }
 
@@ -169,7 +199,6 @@ class JobComponent extends Component {
 
     renderItems(array) {
         let values = [];
-        //if we can have complex regular for enable drag&drop use this var
         const enableDrag = true;
         if (array.length > 0) {
             array.map((row, index) => {
@@ -207,3 +236,4 @@ export default DragDropContext(TouchBackend({
     enableMouseEvents: true,
     touchSlop: 5
 }))(JobComponent);
+

@@ -34,6 +34,7 @@ class CreateProjectController extends AlignerController {
     public $result;
 
     public function __construct( $request, $response, $service, $app ) {
+        ini_set('max_execution_time', 2000);
         $filterArgs = [
                 'project_name'     => [
                         'filter' => FILTER_SANITIZE_STRING,
