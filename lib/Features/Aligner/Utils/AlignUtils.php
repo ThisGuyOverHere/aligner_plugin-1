@@ -104,4 +104,11 @@ class AlignUtils
 
     }
 
+    public static function _parseArrayIntegers(array &$array){
+        foreach ($array as $key => $value){
+            if(is_numeric($array[$key])){
+                $array[$key] = (int) $value;
+            }
+        }
+    }
 }
