@@ -2,156 +2,158 @@
 
 .uploadComponent {
   .uploadCard {
-	margin: 0 auto;
-	width: 90%;
-	z-index: 11;
-	padding-bottom: 24px;
-	position: relative;
-	top: -138px;
-	background: $white;
-	box-shadow: $cardShadow;
-	#projectNameHeader {
-	  background: $lightGrey;
-	  padding: 24px 0px 8px 16px;
-	  h3 {
-		padding-left: 16px;
-		span {
-		  color: $secondaryText;
-		  font-size: 12px;
-		  font-weight: 300;
-		}
-	  }
-	}
-	#projectNameInput {
-	  padding: 0px 0px 12px;
-	  background: $lightGrey;
-	  #project-name {
-		height: 32px;
-	  }
-	  p {
-		color: $darkBlue;
-		padding: .67857143em 0 .67857143em 1em;
-		text-align: right;
-		cursor: pointer;
-		span {
-		  text-decoration: underline;
-		}
-	  }
-	}
-	#buttonRow {
-	  padding-bottom: 0px;
-	  h4 {
-		padding: 8px 24px 8px 16px;
-		font-weight: 300;
-		span {
-		  color: $darkBlue;
-		  text-decoration: underline;
-		  font-weight: 600;
-		  cursor: pointer;
-		}
-	  }
-	}
+    margin: 0 auto;
+    width: 90%;
+    z-index: 11;
+    padding-bottom: 24px;
+    position: relative;
+    top: -138px;
+    background: $white;
+    box-shadow: $cardShadow;
+    #projectNameHeader {
+      background: $lightGrey;
+      padding: 24px 0px 8px 16px;
+      h3 {
+        padding-left: 16px;
+        span {
+          color: $secondaryText;
+          font-size: 12px;
+          font-weight: 300;
+        }
+      }
+    }
+    #projectNameInput {
+      padding: 0px 0px 12px;
+      background: $lightGrey;
+      #project-name {
+        height: 32px;
+      }
+      p {
+        color: $darkBlue;
+        padding: .67857143em 0 .67857143em 1em;
+        text-align: right;
+        cursor: pointer;
+        span {
+          text-decoration: underline;
+        }
+      }
+    }
+    #buttonRow {
+      padding-bottom: 0px;
+      h4 {
+        padding: 8px 24px 8px 16px;
+        font-weight: 300;
+        span {
+          color: $darkBlue;
+          text-decoration: underline;
+          font-weight: 600;
+          cursor: pointer;
+        }
+      }
+    }
   }
   .dropzone {
-	border: 2px dashed $dropzoneBorder;
-	border-radius: 2px;
-	background: $lightGrey;
-	cursor: pointer;
-	padding: 32px 16px;
-	background: #F2F4F7;
-	p {
-	  margin: 0;
-	  font-size: 14px;
-	  text-align: center;
-	  color: $secondaryText;
-	  font-weight: 300;
-	  span {
-		color: $lightBlue;
-		font-weight: bold;
-	  }
-	}
+    border: 2px dashed $dropzoneBorder;
+    border-radius: 2px;
+    background: $lightGrey;
+    cursor: pointer;
+    background: #F2F4F7;
+    p {
+      margin: 0;
+      font-size: 14px;
+      text-align: center;
+      color: $secondaryText;
+      font-weight: 300;
+      span {
+        color: $lightBlue;
+        font-weight: bold;
+      }
+    }
+    > div {
+      padding: 32px 16px;
+    }
   }
 
   .error {
-	border: 2px solid $white;
-	border-radius: 2px;
-	padding: 8px;
-	background: $lightRose;
-	p {
-	  text-align: left;
-	  color: $red;
-	  span {
-		color: $red;
-	  }
-	}
-	#error-icon {
-	  margin-right: 8px;
-	}
-	#delete-icon {
-	  display: none;
-	  float: right;
-	}
-	&:hover #delete-icon {
-	  display: inline-block;
-	}
-	#triangle {
-	  color: $rose;
-	  font-size: 2rem;
-	  transform: rotate(-45deg);
-	  position: absolute;
-	  top: -16px;
-	  right: -28px;
-	}
+    border: 2px solid $white;
+    border-radius: 2px;
+    padding: 8px;
+    background: $lightRose;
+    p {
+      text-align: left;
+      color: $red;
+      span {
+        color: $red;
+      }
+    }
+    #error-icon {
+      margin-right: 8px;
+    }
+    #delete-icon {
+      display: none;
+      float: right;
+    }
+    &:hover #delete-icon {
+      display: inline-block;
+    }
+    #triangle {
+      color: $rose;
+      font-size: 2rem;
+      transform: rotate(-45deg);
+      position: absolute;
+      top: -16px;
+      right: -28px;
+    }
   }
 
   .finish {
-	background: $white;
-	border: 2px dashed $dropzoneBorder;
-	p {
-	  text-align: left;
-	  color: $black;
-	  #file-icon {
-		color: $lightBlue;
-	  }
-	  .fileInfo {
-		display: inline-block;
-		text-align: left;
-		color: $black;
-	  }
-	  #delete-icon {
-		display: none;
-		float: right;
-		color: $secondaryText;
-	  }
-	  #fileSize {
-		font-size: 10px;
-		margin: 2px;
-		float: right;
-		color: $secondaryText;
-	  }
-	  &:hover #delete-icon {
-		display: inline-block;
-	  }
-	  &:hover #fileSize {
-		display: none;
-	  }
-	}
+    background: $white;
+    border: 2px dashed $dropzoneBorder;
+    p {
+      text-align: left;
+      color: $black;
+      #file-icon {
+        color: $lightBlue;
+      }
+      .fileInfo {
+        display: inline-block;
+        text-align: left;
+        color: $black;
+      }
+      #delete-icon {
+        display: none;
+        float: right;
+        color: $secondaryText;
+      }
+      #fileSize {
+        font-size: 10px;
+        margin: 2px;
+        float: right;
+        color: $secondaryText;
+      }
+      &:hover #delete-icon {
+        display: inline-block;
+      }
+      &:hover #fileSize {
+        display: none;
+      }
+    }
   }
 
   .progress {
-	#fileSize {
-	  font-size: 10px;
-	  margin: 2px 2px 2px 8px;
-	  float: right;
-	}
-	#actionInfo {
-	  float: right;
-	  font-size: 10px;
-	  margin: 2px 2px 2px 8px;
-	}
+    #fileSize {
+      font-size: 10px;
+      margin: 2px 2px 2px 8px;
+      float: right;
+    }
+    #actionInfo {
+      float: right;
+      font-size: 10px;
+      margin: 2px 2px 2px 8px;
+    }
   }
 
   .fileInfo {
-	display: inline-block;
+    display: inline-block;
   }
 }
