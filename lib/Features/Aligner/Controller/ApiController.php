@@ -263,7 +263,6 @@ class ApiController extends AlignerController {
 
     public function move() {
 
-        AlignUtils::_parseArrayIntegers($this->params);
 
         $order               = $this->params[ 'order' ];
         $id_job              = $this->params[ 'id_job' ];
@@ -274,7 +273,6 @@ class ApiController extends AlignerController {
 
         $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
 
-        AlignUtils::_parseArrayIntegers( $movingSegment );
 
         //$destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination, $id_job, $type);
         //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $id_job, $type);
@@ -283,7 +281,6 @@ class ApiController extends AlignerController {
         $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $id_job, $type );
         if ( !empty( $referenceMatch ) ) {
             $referenceMatch = $referenceMatch->toArray();
-            AlignUtils::_parseArrayIntegers($referenceMatch);
         }
         $reference_order               = ( !empty( $referenceMatch ) ) ? $referenceMatch[ 'order' ] : 0;
         $new_order                     = AlignUtils::_getNewOrderValue( $reference_order, $destination );
@@ -308,7 +305,6 @@ class ApiController extends AlignerController {
         //Create a new empty match on the opposite side of the row
         $inverseReference = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $id_job, $inverse_type )->toArray();
 
-        AlignUtils::_parseArrayIntegers($inverseReference);
 
         $new_inverse_order           = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
         $new_gap                     = $inverseReference;
@@ -343,7 +339,6 @@ class ApiController extends AlignerController {
 
             $referenceSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $id_job, $type )->toArray();
 
-            AlignUtils::_parseArrayIntegers( $referenceSegment );
 
             $referenceSegment[ 'next' ]  = $new_order;
 
@@ -357,7 +352,6 @@ class ApiController extends AlignerController {
 
         $inverseSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
 
-        AlignUtils::_parseArrayIntegers( $inverseSegment );
 
         $inverseSegment[ 'next' ] = $inverseSegment[ 'next' ];
 
@@ -392,7 +386,6 @@ class ApiController extends AlignerController {
 
     public function addGap() {
 
-        AlignUtils::_parseArrayIntegers($this->params);
 
         $order      = $this->params[ 'order' ];
         $id_job     = $this->params[ 'id_job' ];
@@ -405,7 +398,6 @@ class ApiController extends AlignerController {
         $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order, $id_job, $type )->toArray();
         $previous_order = ( empty( $previous_match ) ) ? 0 : $previous_match[ 'order' ];
 
-        AlignUtils::_parseArrayIntegers($previous_match);
 
         $gap_match[ 'order' ]          = AlignUtils::_getNewOrderValue( $previous_order, $order );
         $gap_match[ 'next' ]           = $order;
@@ -426,7 +418,6 @@ class ApiController extends AlignerController {
 
         $last_match = Segments_SegmentMatchDao::getLastSegmentMatch( $id_job, $other_type )->toArray();
 
-        AlignUtils::_parseArrayIntegers($last_match);
 
         $last_match[ 'order' ]             = $last_match[ 'order' ];
         $balance_match[ 'order' ]          = $last_match[ 'order' ] + Constants::DISTANCE_INT_BETWEEN_MATCHES;
@@ -451,7 +442,6 @@ class ApiController extends AlignerController {
 
             $previous_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $id_job, $type )->toArray();
 
-            AlignUtils::_parseArrayIntegers($previous_segment);
 
             $previous_segment[ 'next' ] = $gap_match[ 'order' ];
 
@@ -475,7 +465,6 @@ class ApiController extends AlignerController {
         $last_segment[ 'content_clean' ]  = ( !empty( $last_segment[ 'content_clean' ] ) ) ? $last_segment[ 'content_clean' ] : null;
         $last_segment[ 'raw_word_count' ] = ( !empty( $last_segment[ 'raw_word_count' ] ) ) ? $last_segment[ 'raw_word_count' ] : null;
 
-        AlignUtils::_parseArrayIntegers($last_segment);
 
         $this->pushOperation( [
             'type'      => $other_type,
@@ -629,22 +618,17 @@ class ApiController extends AlignerController {
             $previous_segment           = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $id_job, 'source' )->toArray();
             $previous_segment[ 'next' ] = $avg_order;
             
-            AlignUtils::_parseArrayIntegers($previous_segment);
         }
 
         if( !empty( $destination_previous_match ) ){
             $destination_previous_segment           = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_previous_order, $id_job, 'source' )->toArray();
             $destination_previous_segment[ 'next' ] = $avg_destination;
 
-            AlignUtils::_parseArrayIntegers($destination_previous_segment);
         }
 
         $sourceSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order_source, $id_job, 'source' )->toArray();
         $targetSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order_target, $id_job, 'target' )->toArray();
-        
-        AlignUtils::_parseArrayIntegers( $sourceSegment );
-        AlignUtils::_parseArrayIntegers( $targetSegment );
-        
+
         $sourceSegmentId = $sourceSegment[ 'id' ];
         $targetSegmentId = $targetSegment[ 'id' ];
 
@@ -744,6 +728,8 @@ class ApiController extends AlignerController {
     }
     
     private function pushOperation( $operation ) {
+        AlignUtils::_parseArrayIntegers( $operation );
+        AlignUtils::_parseArrayIntegers( $operation['data'] );
         $this->operations[] = $operation;
     }
 
