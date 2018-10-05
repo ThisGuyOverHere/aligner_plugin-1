@@ -34,7 +34,9 @@ class ApiController extends AlignerController {
         $deleted_orders = [];
 
         foreach ( $segments as $key => $segment ) {
-            $deleted_orders[]            = $segment[ 'order' ];
+            if ( $key != 0 ) {
+                $deleted_orders[] = $segment[ 'order' ];
+            }
         }
 
         $conn = NewDatabase::obtain()->getConnection();
@@ -48,19 +50,19 @@ class ApiController extends AlignerController {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Merging $orders", -2 );
         }
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'update',
                 'rif_order' => $first_segment[ 'order' ],
                 'data'      => $first_segment
-        ]);
+        ] );
 
         foreach ( $deleted_orders as $order ) {
-            $this->pushOperation([
+            $this->pushOperation( [
                     'type'      => $type,
                     'action'    => 'delete',
                     'rif_order' => (int)$order
-            ]);
+            ] );
         }
 
         return $this->getOperations();
@@ -82,8 +84,8 @@ class ApiController extends AlignerController {
         }
 
         //Gets from 0 since they are returned as an array
-        $split_segment    = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
-        $inverse_segment  = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_order, $id_job, $inverse_type )->toArray();
+        $split_segment   = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
+        $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_order, $id_job, $inverse_type )->toArray();
 
         $avg_order   = AlignUtils::_getNewOrderValue( $split_segment[ 'order' ], $split_segment[ 'next' ] );
         $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_segment[ 'order' ], $inverse_segment[ 'next' ] );
@@ -214,39 +216,39 @@ class ApiController extends AlignerController {
             $targetSegments[ $key ][ 'content_raw' ] = AlignUtils::_mark_xliff_tags( $segment[ 'content_raw' ] );
         }
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => 'source',
                 'action'    => 'update',
                 'rif_order' => (int)$source_start,
                 'data'      => array_shift( $sourceSegments )
-        ]);
+        ] );
 
         foreach ( $sourceSegments as $sourceSegment ) {
 
-            $this->pushOperation([
+            $this->pushOperation( [
                     'type'      => 'source',
                     'action'    => 'create',
                     'rif_order' => (int)$source_end,
                     'data'      => $sourceSegment
-            ]);
+            ] );
 
         }
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => 'target',
                 'action'    => 'update',
                 'rif_order' => (int)$target_start,
                 'data'      => array_shift( $targetSegments )
-        ]);
+        ] );
 
         foreach ( $targetSegments as $targetSegment ) {
 
-            $this->pushOperation([
+            $this->pushOperation( [
                     'type'      => 'target',
                     'action'    => 'create',
                     'rif_order' => (int)$target_end,
                     'data'      => $targetSegment
-            ]);
+            ] );
 
         }
 
@@ -287,12 +289,12 @@ class ApiController extends AlignerController {
         $new_match[ 'content_clean' ]  = null;
         $new_match[ 'raw_word_count' ] = null;
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
                 'rif_order' => (int)$destination,
                 'data'      => $new_match
-        ]);
+        ] );
 
         //Create a new empty match on the opposite side of the row
         $inverseReference            = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $id_job, $inverse_type )->toArray();
@@ -308,22 +310,22 @@ class ApiController extends AlignerController {
         $new_gap[ 'content_clean' ]  = null;
         $new_gap[ 'raw_word_count' ] = null;
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
                 'rif_order' => (int)$inverseReference[ 'next' ],
                 'data'      => $new_gap
-        ]);
+        ] );
 
 
         $movingSegment[ 'id' ] = null;
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'update',
                 'rif_order' => (int)$order,
                 'data'      => $movingSegment
-        ]);
+        ] );
 
         if ( $reference_order != 0 ) {
 
@@ -331,24 +333,24 @@ class ApiController extends AlignerController {
             $referenceSegment[ 'order' ] = (int)$referenceSegment[ 'order' ];
             $referenceSegment[ 'next' ]  = $new_order;
 
-            $this->pushOperation([
+            $this->pushOperation( [
                     'type'      => $type,
                     'action'    => 'update',
                     'rif_order' => (int)$referenceMatch[ 'order' ],
                     'data'      => $referenceSegment
-            ]);
+            ] );
         }
 
         $inverseSegment            = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
         $inverseSegment[ 'order' ] = (int)$inverseSegment[ 'order' ];
         $inverseSegment[ 'next' ]  = (int)$inverseSegment[ 'next' ];
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'update',
                 'rif_order' => (int)$inverseSegment[ 'order' ],
                 'data'      => $inverseSegment
-        ]);
+        ] );
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
@@ -394,12 +396,12 @@ class ApiController extends AlignerController {
         $gap_match[ 'content_clean' ]  = null;
         $gap_match[ 'raw_word_count' ] = null;
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
                 'rif_order' => (int)$order,
                 'data'      => $gap_match
-        ]);
+        ] );
 
         $last_match                        = Segments_SegmentMatchDao::getLastSegmentMatch( $id_job, $other_type );
         $last_match[ 'order' ]             = (int)$last_match[ 'order' ];
@@ -413,11 +415,11 @@ class ApiController extends AlignerController {
         $balance_match[ 'content_clean' ]  = null;
         $balance_match[ 'raw_word_count' ] = null;
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'   => $other_type,
                 'action' => 'push',
                 'data'   => $balance_match
-        ]);
+        ] );
 
         if ( !empty( $previous_match ) ) {
             $previous_match[ 'order' ] = (int)$previous_match[ 'order' ];
@@ -428,12 +430,12 @@ class ApiController extends AlignerController {
             $previous_segment[ 'order' ] = (int)$previous_segment[ 'order' ];
             $previous_segment[ 'next' ]  = (int)$gap_match[ 'order' ];
 
-            $this->pushOperation([
+            $this->pushOperation( [
                     'type'      => $type,
                     'action'    => 'update',
                     'rif_order' => (int)$previous_match[ 'order' ],
                     'data'      => $previous_segment
-            ]);
+            ] );
 
         }
 
@@ -450,12 +452,12 @@ class ApiController extends AlignerController {
         $last_segment[ 'order' ]          = (int)$last_segment[ 'order' ];
         $last_segment[ 'next' ]           = (int)$last_match[ 'next' ];
 
-        $this->pushOperation([
+        $this->pushOperation( [
                 'type'      => $other_type,
                 'action'    => 'update',
                 'rif_order' => (int)$last_match[ 'order' ],
                 'data'      => $last_segment
-        ]);
+        ] );
 
 
         $conn = NewDatabase::obtain()->getConnection();
@@ -481,7 +483,7 @@ class ApiController extends AlignerController {
     public function delete() {
 
         $matches = $this->params[ 'matches' ];
-        $id_job = $this->params[ 'id_job' ];
+        $id_job  = $this->params[ 'id_job' ];
 
         $sources = [];
         $targets = [];
@@ -557,12 +559,12 @@ class ApiController extends AlignerController {
 
     }
 
-    private function pushOperation($operation){
+    private function pushOperation( $operation ) {
         $this->operations[] = $operation;
     }
 
-    private function getOperations(){
-        return $this->response->json($this->operations);
+    private function getOperations() {
+        return $this->response->json( $this->operations );
     }
 
 }
