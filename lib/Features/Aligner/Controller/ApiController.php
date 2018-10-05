@@ -90,6 +90,9 @@ class ApiController extends AlignerController {
         $avg_order   = AlignUtils::_getNewOrderValue( $split_segment[ 'order' ], $split_segment[ 'next' ] );
         $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_segment[ 'order' ], $inverse_segment[ 'next' ] );
 
+        $original_next         = $split_segment[ 'next' ];
+        $original_inverse_next = $inverse_segment[ 'next' ];
+
         $split_segment[ 'order' ]   = (int)$split_segment[ 'order' ];
         $inverse_segment[ 'order' ] = (int)$inverse_segment[ 'order' ];
         $split_segment[ 'next' ]    = $avg_order;
@@ -149,7 +152,7 @@ class ApiController extends AlignerController {
             $new_segment[ 'order' ]    = (int)$new_match[ 'order' ];
 
             //If we split the last segment we add new next values for the new segments
-            $avg_order = ( $split_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $new_match[ 'order' ], $split_segment[ 'next' ] ) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $avg_order = ( $split_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $new_match[ 'order' ], $original_next ) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
             $new_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $avg_order : (int)$split_segment[ 'next' ];
             $new_segment[ 'next' ] = (int)$new_match[ 'next' ];
@@ -161,7 +164,7 @@ class ApiController extends AlignerController {
             $null_segment[ 'order' ]    = $inverse_avg;
 
             //If we split the last segment we add new next values for the new segments
-            $inverse_avg = ( $inverse_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $null_match[ 'order' ], $inverse_segment[ 'next' ] ) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $inverse_avg = ( $inverse_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $null_match[ 'order' ], $original_inverse_next ) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
             $null_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $inverse_avg : (int)$inverse_segment[ 'next' ];
             $null_segment[ 'next' ] = $null_match[ 'next' ];
