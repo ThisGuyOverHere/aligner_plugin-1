@@ -566,15 +566,17 @@ class ApiController extends AlignerController {
         $segment_2[ 'score' ] = 100;
 
         $this->pushOperation( [
-                'type'   => $type,
-                'action' => "update",
-                'data'   => $segment_2
+                'type'      => $type,
+                'action'    => "update",
+                'rif_order' => (int)$segment_2[ 'order' ],
+                'data'      => $segment_2
         ] );
 
         $this->pushOperation( [
-                'type'   => $type,
-                'action' => "update",
-                'data'   => $segment_1
+                'type'      => $type,
+                'action'    => "update",
+                'rif_order' => (int)$segment_1[ 'order' ],
+                'data'      => $segment_1
         ] );
 
         return $this->getOperations();
