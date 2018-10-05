@@ -703,7 +703,7 @@ class ApiController extends AlignerController {
             'data'      => $newTarget
         ]);
 
-        if( !empty( $previous_match ) ){
+        if( isset($previous_segment) && !empty( $previous_match ) ){
             $this->pushOperation([
                 'type'      => 'source',
                 'action'    => 'update',
@@ -712,7 +712,7 @@ class ApiController extends AlignerController {
             ]);
         }
 
-        if( !empty( $destination_previous_match ) ){
+        if( isset($destination_previous_segment) && !empty( $destination_previous_match ) ){
             $this->pushOperation([
                 'type'      => 'target',
                 'action'    => 'update',

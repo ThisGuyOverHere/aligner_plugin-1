@@ -111,4 +111,11 @@ class AlignUtils
             }
         }
     }
+
+    public static function _getObjectVariables($object){
+        if(!is_object($object)){
+            return new \Exception("This function accepts Object-type variables only");
+        }
+        return array_keys(get_object_vars($object));
+    }
 }

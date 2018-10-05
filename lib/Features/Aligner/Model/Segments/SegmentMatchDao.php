@@ -8,6 +8,7 @@
 namespace Features\Aligner\Model;
 
 use DataAccess\ShapelessConcreteStruct;
+use Features\Aligner\Utils\AlignUtils;
 
 class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
     const TABLE = "segments_match";
@@ -121,7 +122,13 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
     public static function updateFields($attributes, $order, $id_job, $type){
         $qMark = [];
         $qValues = [];
+
+        $valid_fields= AlignUtils::_getObjectVariables(new Segments_SegmentMatchStruct());
+
         foreach($attributes as $attribute_k => $attribute_v){
+            if( !in_array( $attribute_k, $valid_fields ) ){
+                throw new \Exception("You tried to update an invalid field, the update has been canceled");
+            }
             $qMark[] = "sm.".$attribute_k." = ?";
             $qValues[] = $attribute_v;
         }
