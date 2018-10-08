@@ -1,3 +1,5 @@
+import {httpMergeSegments, httpMoveSegments} from "../HttpRequests/Alignment.http";
+
 /**
  *
  * @param text
@@ -31,5 +33,38 @@ export const emailValidator = (email) => {
         return true;
     }else{
         return false;
+    }
+};
+
+
+/**
+ *
+ * @param {Object} method
+ * @param {Function} callback
+ */
+export const syncWithBackend = (method, callback) => {
+    switch (method.action) {
+        case 'merge':
+            httpMergeSegments(method.data.jobID, method.data.jobPassword, {
+                order: method.data.order,
+                type: method.data.type
+            }).then((response) => {
+                callback()
+            },(error)=>{
+                console.log(error);
+            });
+            break;
+        case 'align':
+            httpMoveSegments(method.data.jobID, method.data.jobPassword, {
+                order: method.data.order,
+                type: method.data.type,
+                destination: method.data.destination,
+                inverse_destination: method.data.inverse_destination
+            }).then((response) => {
+                callback()
+            },(error)=>{
+                console.log(error);
+            });
+            break;
     }
 };

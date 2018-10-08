@@ -5,6 +5,7 @@ import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
 import User from "./User/User.component";
 import Mismatch from "./Mismatch/Mismatch.component";
 import Export from "./Export/Export.component";
+import ToolbarComponent from "../../Project/Toolbar/Toolbar.component";
 
 class HeaderComponent extends Component {
 
@@ -19,17 +20,20 @@ class HeaderComponent extends Component {
 
     constructor(props) {
         super(props);
-        const jobID = (this.props.match
+/*        const jobID = (this.props.match
             && this.props.match.params
-            && this.props.match.params.jobID) ? this.props.match.params.jobID : null;
+            && this.props.match.params.jobID) ? this.props.match.params.jobID : null;*/
         this.state = {
             pName: '',
             projectTitle: 'Sample title for test header ellipsis at center',
             sourceLang: 'en-US',
             targetLang: 'it-IT',
             job: {
+                config: {
+                    password: this.props.match.params.password,
+                    id: this.props.match.params.jobID
+                },
                 name: null,
-                id: jobID,
                 segments: null
             },
             loggedIn: false,
@@ -38,39 +42,42 @@ class HeaderComponent extends Component {
 
      static getDerivedStateFromProps(nextProps, prevState) {
          if(nextProps.match.params && nextProps.match.params.jobID){
-             prevState.job.id = nextProps.match.params.jobID;
+             prevState.job.config.id = nextProps.match.params.jobID;
          }else{
-             prevState.job.id = null;
+             prevState.job.config.id = null;
          }
         return prevState;
     };
 
     renderHtmlNavigation = () => {
-        if(this.state.job.id){
-            return <ul className="aligner-nav-log" role="navigation">
-                <li>
-                    <Link to="/">
-                        <div id="logo"></div>
-                    </Link>
-                    <div id="final_title">
-                        {textEllipsisCenter(this.state.projectTitle)}
-                    </div>
-                </li>
-                <li>
-                    <div id="source_to_target">
-                        <span id="source">{this.state.sourceLang}</span>
-                        >
-                        <span id="source">{this.state.targetLang}</span>
-                    </div>
-                </li>
-                <li>
-                    {/*<Mismatch />*/}
-                    <Export/>
-                </li>
-                <li>
-                    <User user={this.props.user}/>
-                </li>
-            </ul>;
+        if(this.state.job.config.id){
+            return <div>
+                <ul className="aligner-nav-log" role="navigation">
+                    <li>
+                        <Link to="/">
+                            <div id="logo"></div>
+                        </Link>
+                        <div id="final_title">
+                            {textEllipsisCenter(this.state.projectTitle)}
+                        </div>
+                    </li>
+                    <li>
+                        <div id="source_to_target">
+                            <span id="source">{this.state.sourceLang}</span>
+                            >
+                            <span id="source">{this.state.targetLang}</span>
+                        </div>
+                    </li>
+                    <li>
+                        {/*<Mismatch />*/}
+                        <Export/>
+                    </li>
+                    <li>
+                        <User user={this.props.user}/>
+                    </li>
+                </ul>
+                <ToolbarComponent jobConf={this.state.job.config}/>
+            </div>;
         } else {
             return <ul className="aligner-nav-nolog" role="navigation">
                 <Link to="/">

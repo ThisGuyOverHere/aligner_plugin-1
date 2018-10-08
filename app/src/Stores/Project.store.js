@@ -14,6 +14,7 @@ EventEmitter.prototype.setMaxListeners(0);
 
 let ProjectStore = assign({}, EventEmitter.prototype, {
     jobID: null,
+    jobPassword: null,
     job: {
         source: List(),
         target: List(),
@@ -51,7 +52,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
     storeSegments: function (segments) {
         segments.source.map(item => {
             item.order = parseInt(item.order);
-            if(item.next){
+            if (item.next) {
                 item.next = parseInt(item.next);
             }
 
@@ -59,7 +60,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         });
         segments.target.map(item => {
             item.order = parseInt(item.order);
-            if(item.next){
+            if (item.next) {
                 item.next = parseInt(item.next);
             }
             return item;
@@ -100,25 +101,25 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             //console.log(change.action+' '+change.type);
             switch (change.action) {
                 case 'delete':
-                    if(this.job[change.type].getIn([+index + 1, 'order'])){
+                    if (this.job[change.type].getIn([+index + 1, 'order'])) {
                         this.job[change.type] = this.job[change.type].setIn([+index - 1, 'next'], this.job[change.type].getIn([+index + 1, 'order']));
-                    }else{
+                    } else {
                         this.job[change.type] = this.job[change.type].setIn([+index - 1, 'next'], null);
                     }
 
                     this.job[change.type] = this.job[change.type].delete(index);
 
                     //add empty space to the end for consistency of two list
-                    if( this.job[inverse[change.type]].last().get('content_clean')){
+                    if (this.job[inverse[change.type]].last().get('content_clean')) {
                         this.storeMovements([{
                             type: change.type,
                             action: 'push'
                         }]);
-                    }else{
+                    } else {
                         //delete the last empty space inverse segment
                         this.job[inverse[change.type]] = this.job[inverse[change.type]].delete(this.job[inverse[change.type]].size - 1);
                         // change next of previous inverse segment
-                        this.job[inverse[change.type]] = this.job[inverse[change.type]].setIn([this.job[inverse[change.type]].size-1,'next'], null);
+                        this.job[inverse[change.type]] = this.job[inverse[change.type]].setIn([this.job[inverse[change.type]].size - 1, 'next'], null);
                     }
                     break;
                 case 'create':
@@ -151,7 +152,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                         mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
                         mock.type = change.type;
                         //edit previous last element segment next param.
-                        this.job[change.type] = this.job[change.type].setIn([this.job[change.type].size-1,'next'], mock.order);
+                        this.job[change.type] = this.job[change.type].setIn([this.job[change.type].size - 1, 'next'], mock.order);
                         //add empty space at the end of list
                         this.job[change.type] = this.job[change.type].push(fromJS(mock));
 
@@ -168,7 +169,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                         change.data.order = el.order;
                         change.data.next = el.next;
                         this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
-                    }else{
+                    } else {
                         this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
                     }
                     break;
@@ -199,18 +200,18 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             console.log('['+x+']   '+arrayT[x].order+'       '+arrayT[x].next);
         }*/
     },
-    deleteEmptyRows: function(deletes){
+    deleteEmptyRows: function (deletes) {
         //console.log(deletes);
 
-        deletes.map(index =>{
+        deletes.map(index => {
             this.job.source = this.job.source.delete(index);
             this.job.target = this.job.target.delete(index);
-            
+
             // change next of previous inverse segment
-            const nextTarget = this.job.target.getIn([index,'order']) || null ;
-            const nextSource = this.job.source.getIn([index,'order']) || null;
-            this.job.target = this.job.target.setIn([+index-1,'next'], nextTarget);
-            this.job.source = this.job.source.setIn([+index-1, 'next'], nextSource);
+            const nextTarget = this.job.target.getIn([index, 'order']) || null;
+            const nextSource = this.job.source.getIn([index, 'order']) || null;
+            this.job.target = this.job.target.setIn([+index - 1, 'next'], nextTarget);
+            this.job.source = this.job.source.setIn([+index - 1, 'next'], nextSource);
         });
     },
     addSegmentToSelection: function (order, type) {
@@ -251,20 +252,23 @@ AppDispatcher.register(function (action) {
     switch (action.actionType) {
         case ProjectConstants.SET_JOB_ID:
             ProjectStore.jobID = action.jobID;
+            ProjectStore.jobPassword = action.jobPassword;
             break;
         case ProjectConstants.STORE_SEGMENTS:
             ProjectStore.storeSegments(action.segments);
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
+
             });
             break;
         case ProjectConstants.CHANGE_SEGMENT_POSITION:
             ProjectStore.storeMovements(action.changes, action.type);
+            const syncAPI = action.syncAPI ? action.syncAPI : null;
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
-            });
+            }, syncAPI);
             break;
         case ProjectConstants.DELETE_ROWS:
             ProjectStore.deleteEmptyRows(action.deletes);

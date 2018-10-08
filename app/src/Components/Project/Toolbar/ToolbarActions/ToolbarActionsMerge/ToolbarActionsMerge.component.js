@@ -6,7 +6,11 @@ import {Popup} from "semantic-ui-react";
 class ToolbarActionsMergeComponent extends Component {
 
     static propTypes = {
-        selection: PropTypes.object.isRequired
+        selection: PropTypes.object.isRequired,
+        jobConf: PropTypes.shape({
+            password: PropTypes.string,
+            id: PropTypes.any
+        })
     };
 
     constructor(props) {
@@ -38,8 +42,7 @@ class ToolbarActionsMergeComponent extends Component {
             onMouseOut={this.onMouseLeave}
             onMouseOver={this.onHover}
             onClick={this.onMergeClick}>
-            <i className={mergeClasses.join(" ")}></i>
-            merge
+            Merge
         </button></span>;
         /*
          return (
@@ -51,8 +54,8 @@ class ToolbarActionsMergeComponent extends Component {
 
     onMergeClick = () => {
         const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-        const segments = this.props.selection[type].list.sort();
-        ProjectActions.mergeSegments(segments, type);
+        const orders = this.props.selection[type].list.sort();
+        ProjectActions.mergeSegments(this.props.jobConf.id,this.props.jobConf.password,orders, type);
         ProjectActions.addSegmentToSelection(-1);
         ProjectActions.onActionHover(null);
     };

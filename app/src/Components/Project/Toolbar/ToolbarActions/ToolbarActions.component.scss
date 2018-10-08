@@ -2,46 +2,48 @@
 
 #toolbar {
   .segment-actions {
-    ul {
-      list-style: none;
-      text-align: center;
-      padding: 0;
-      margin: 0;
-      li {
-        display: inline-block;
-        padding: 4px 8px;
-        button {
-          -webkit-appearance: none;
-          text-align: center;
-          border: none;
-          box-shadow: none;
-          font-size: 13px;
-          font-weight: 100;
+	ul {
+	  list-style: none;
+	  text-align: left;
+	  padding: 0;
+	  margin: 0;
+	  li {
+		display: inline-block;
+		padding: 4px 8px;
+		button {
+		  text-align: center;
+		  font-size: 13px;
+		  font-weight: 500;
+		  background: transparent;
+		  padding: 8px 24px;
+		  border-radius: 2px;
+		  border: 1px solid $gray;
+		  color: $gray;
+		  cursor: pointer $gray;
+		  &:active, &:focus {
+			border: 1px solid $primary;
+			background-color: $primary;
+			color: $white;
+			box-shadow: none;
+			outline: none;
+		  }
+		  &:hover {
+			border: 1px solid $primary;
+			background-color: $primary;
+			color: $white;
+		  }
+		  &.active {
+			border: 1px solid $primary;
+			background-color: $primary;
+			color: $white;
+		  }
+		  &:disabled {
+			cursor: not-allowed;
+			opacity: .45 !important;
+		  }
+		}
 
-          &:active, &:focus {
-            box-shadow: none;
-            outline: none;
-          }
-          i {
-            display: block;
-            margin: 0 auto;
-            cursor: pointer;
-            &:hover {
-              color: $primary;
-            }
-            &.active {
-              color: $primary;
-            }
-          }
-          &:disabled {
-            i {
-              cursor: not-allowed;
-              opacity: .45 !important;
-            }
-          }
-        }
-
-      }
-    }
+	  }
+	}
   }
 }
