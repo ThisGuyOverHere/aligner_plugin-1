@@ -4,7 +4,7 @@
   padding: 0 32px;
   z-index: 20;
   position: fixed;
-  height: 54px;
+  height: 56px;
   background-color: $white;
   color: $midGregy;
   width: 100%;
@@ -13,7 +13,7 @@
   display: grid;
   grid-template-columns: 45px 1fr 2fr 1fr;
   align-items: center;
-  box-shadow: 0 -5px 10px 0 rgba(198, 198, 198, 0.50);
+  box-shadow: 0 5px 10px 0 rgba(198, 198, 198, 0.50);
   >:first-child{
     grid-column-end: span 2;
   }

@@ -1,6 +1,10 @@
 .align-project{
   background: #F2F4F7;
-  padding-top: 48px;
+  max-height: 100vh;
+  overflow: hidden;
+  & > div{
+    padding-top: 108px;
+  }
 }
 
 .align-project.inSync{

@@ -110,7 +110,7 @@ class JobComponent extends Component {
                         this.virtualList = instance;
                     }}
                     width='100%'
-                    height={1000}
+                    height='100vh'
                     overscanCount={10}
                     itemCount={data.length}
 
@@ -146,7 +146,6 @@ class JobComponent extends Component {
                 {this.state.splitModalStatus &&
                 <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
                                 inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
-                <ToolbarComponent jobConf={this.state.job.config}/>
             </div>
         );
     }

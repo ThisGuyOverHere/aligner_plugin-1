@@ -1,9 +1,8 @@
 @import "../../../../assets/theme/variables";
 
 #header{
-  height: 48px;
+  height: 108px;
   z-index: 999;
-  background: $headerBlack;
   position: fixed;
   top: 0;
   left: 0;
@@ -18,7 +17,8 @@
     }
   }
   .aligner-nav-log , .aligner-nav-nolog{
-    padding: 6px 11px 0 13px;
+    background: $headerBlack;
+    padding: 8px 12px;
     display: -ms-flexbox;
     display: flex;
     list-style: none;
