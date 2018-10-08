@@ -42,8 +42,7 @@ class ToolbarActionsMergeComponent extends Component {
             onMouseOut={this.onMouseLeave}
             onMouseOver={this.onHover}
             onClick={this.onMergeClick}>
-            <i className={mergeClasses.join(" ")}></i>
-            merge
+            Merge
         </button></span>;
         /*
          return (

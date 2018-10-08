@@ -2,9 +2,14 @@
 
 #toolbar {
   .cmd-shortcut {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
     p {
       font-size: 12px;
+      margin: 0;
+      &:hover{
+        color: $primary;
+      }
       span {
         color: $black;
         font-weight: 600;
@@ -12,6 +17,11 @@
           color: $primary;
         }
       }
+    }
+    i{
+      cursor: pointer;
+      font-size: 16px;
+      margin-left: 16px;
     }
   }
   .navigation{

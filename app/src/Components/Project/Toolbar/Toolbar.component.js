@@ -51,7 +51,7 @@ class ToolbarComponent extends Component {
                     <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.jobConf}/>
                 </div>
                 <div>
-                    {/*<ToolbarContextualNavigationComponent/>*/}
+                    {<ToolbarContextualNavigationComponent/>}
                 </div>
             </div>
         );
