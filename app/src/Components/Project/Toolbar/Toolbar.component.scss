@@ -11,10 +11,17 @@
   top: 48px;
   left: 0;
   display: grid;
-  grid-template-columns: 45px 1fr 2fr 1fr;
+  grid-template-columns: 45px 0.6fr 1.5fr 1.4fr;
   align-items: center;
   box-shadow: 0 -5px 10px 0 rgba(198, 198, 198, 0.50);
   >:first-child{
     grid-column-end: span 2;
+  }
+  .hint{
+    font-size: 24px;
+    cursor: pointer;
+    float: right;
+    line-height: 1;
+    margin: 0px;
   }
 }

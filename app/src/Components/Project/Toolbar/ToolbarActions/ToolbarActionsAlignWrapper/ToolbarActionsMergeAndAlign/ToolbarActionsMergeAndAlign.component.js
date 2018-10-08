@@ -37,7 +37,6 @@ class ToolbarActionsMergeAndAlignComponent extends Component {
             onMouseOut={this.onMouseLeave}
             onMouseOver={this.onHover}
             onClick={this.onClick}>
-            <i className={classes.join(" ")}></i>
             Merge and Align
         </button>;
         /* return (
