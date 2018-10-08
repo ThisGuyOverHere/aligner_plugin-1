@@ -7,6 +7,8 @@
   height: 100%;
   background-color: $white;
   right: 0;
+  transform: translateX(560px);
+  transition: transform 0.3s ease-in;
   padding: 24px;
   .close-btn {
 	text-align: right;
@@ -58,12 +60,15 @@
 		  background-color: $lightGrey;
 		  color: $primary;
 		  border-radius: 2px;
-		  &:nth-child(1){
+		  &:nth-child(1) {
 			margin-right: 2px;
 		  }
 		}
 	  }
 	}
   }
+}
 
+.open {
+  transform: translateX(0px);
 }

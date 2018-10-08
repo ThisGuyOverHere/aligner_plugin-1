@@ -9,26 +9,33 @@ class ToolbarRightHintComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            hintClasses: ''
+        };
     }
 
     componentDidMount() {
+        setTimeout(() => {
+            this.setState({
+                hintClasses: ' open '
+            });
+        }, 100)
     }
 
     componentWillUnmount() {
-    }
 
+    }
 
     render() {
         return (
-            <div className="hintModal">
+            <div className={this.state.hintClasses + 'hintModal'}>
                 <div className="close-btn">
-                    <i className="icon close" onClick={this.props.close}></i>
+                    <i className="icon close" onClick={this.closeModal}> </i>
                 </div>
                 <h1>Functions & Keyboard shortcut</h1>
 
                 <div className="shortCutRow">
-                    <h4 >Align two segments</h4>
+                    <h4>Align two segments</h4>
                     <ul>
                         <li> - Drag a segment over another</li>
                         <li> - Select a Source and Target segment and press Align in the top bar</li>
@@ -40,7 +47,7 @@ class ToolbarRightHintComponent extends Component {
                 </div>
 
                 <div className="shortCutRow">
-                    <h4 >  Merge two segments </h4>
+                    <h4> Merge two segments </h4>
                     <ul>
                         <li> - Drag a segment over another of the same type while holding down ALT</li>
                         <li> - Select two segments of the same type and press Merge in the top bar</li>
@@ -52,7 +59,7 @@ class ToolbarRightHintComponent extends Component {
                 </div>
 
                 <div className="shortCutRow">
-                    <h4 > Merge more two segments </h4>
+                    <h4> Merge more two segments </h4>
                     <ul>
                         <li> - Select segments of the same type and press Merge in the top bar</li>
                         <li className="last"> - Select segments of the same type and press ALT+M
@@ -63,7 +70,7 @@ class ToolbarRightHintComponent extends Component {
                 </div>
 
                 <div className="shortCutRow">
-                    <h4 >  Split Segment </h4>
+                    <h4> Split Segment </h4>
                     <ul>
                         <li> - Doublick on segment</li>
                         <li> - Select segment and press Align in the top bar</li>
@@ -75,7 +82,7 @@ class ToolbarRightHintComponent extends Component {
                 </div>
 
                 <div className="shortCutRow">
-                    <h4 > Reverse position of two segments </h4>
+                    <h4> Reverse position of two segments </h4>
                     <ul>
                         <li> - Select two segments of the same type and press Reverse in the top bar</li>
                         <li className="last"> - Select two segments of the same type and press ALT+R
@@ -87,6 +94,15 @@ class ToolbarRightHintComponent extends Component {
 
             </div>
         );
+    }
+
+    closeModal = () => {
+        this.setState({
+            hintClasses: ''
+        });
+        setTimeout(() => {
+            this.props.close();
+        },350);
     }
 }
 

@@ -69,7 +69,6 @@ class ToolbarComponent extends Component {
     };
 
     hintModalOpened = () => {
-        console.log('here');
         this.setState({
             hintOpened: !this.state.hintOpened,
         })
