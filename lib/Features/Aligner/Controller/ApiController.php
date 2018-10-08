@@ -12,6 +12,8 @@ namespace Features\Aligner\Controller;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
+use Features\Aligner\Model\Segments_SegmentMatchStruct;
+use Features\Aligner\Model\Segments_SegmentStruct;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
 
@@ -50,19 +52,25 @@ class ApiController extends AlignerController {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Merging $orders", -2 );
         }
 
-        $this->pushOperation( [
+        try{
+
+            $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'update',
                 'rif_order' => $first_segment[ 'order' ],
                 'data'      => $first_segment
-        ] );
+            ] );
 
-        foreach ( $deleted_orders as $order ) {
-            $this->pushOperation( [
+            foreach ( $deleted_orders as $order ) {
+                $this->pushOperation( [
                     'type'      => $type,
                     'action'    => 'delete',
                     'rif_order' => (int)$order
-            ] );
+                ] );
+            }
+
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
@@ -72,8 +80,6 @@ class ApiController extends AlignerController {
 
     public function split() {
 
-        AlignUtils::_parseArrayIntegers( $this->params );
-        
         $order         = $this->params[ 'order' ];
         $id_job        = $this->params[ 'id_job' ];
         $type          = $this->params[ 'type' ];
@@ -219,47 +225,52 @@ class ApiController extends AlignerController {
             $targetSegments[ $key ][ 'content_raw' ] = AlignUtils::_mark_xliff_tags( $segment[ 'content_raw' ] );
         }
 
-        $this->pushOperation( [
+        try{
+
+            $this->pushOperation( [
                 'type'      => 'source',
                 'action'    => 'update',
                 'rif_order' => $source_start,
                 'data'      => array_shift( $sourceSegments )
-        ] );
+            ] );
 
-        foreach ( $sourceSegments as $sourceSegment ) {
+            foreach ( $sourceSegments as $sourceSegment ) {
 
-            $this->pushOperation( [
+                $this->pushOperation( [
                     'type'      => 'source',
                     'action'    => 'create',
                     'rif_order' => $source_end,
                     'data'      => $sourceSegment
-            ] );
+                ] );
 
-        }
+            }
 
-        $this->pushOperation( [
+            $this->pushOperation( [
                 'type'      => 'target',
                 'action'    => 'update',
                 'rif_order' => $target_start,
                 'data'      => array_shift( $targetSegments )
-        ] );
+            ] );
 
-        foreach ( $targetSegments as $targetSegment ) {
+            foreach ( $targetSegments as $targetSegment ) {
 
-            $this->pushOperation( [
+                $this->pushOperation( [
                     'type'      => 'target',
                     'action'    => 'create',
                     'rif_order' => $target_end,
                     'data'      => $targetSegment
-            ] );
+                ] );
 
+            }
+
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
     }
 
     public function move() {
-
 
         $order               = $this->params[ 'order' ];
         $id_job              = $this->params[ 'id_job' ];
@@ -274,90 +285,96 @@ class ApiController extends AlignerController {
         //$destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination, $id_job, $type);
         //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $id_job, $type);
 
-        //Create new match between destination and destination->prev with starting segment
-        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $id_job, $type );
-        if ( !empty( $referenceMatch ) ) {
-            $referenceMatch = $referenceMatch->toArray();
-        }
-        $reference_order               = ( !empty( $referenceMatch ) ) ? $referenceMatch[ 'order' ] : 0;
-        $new_order                     = AlignUtils::_getNewOrderValue( $reference_order, $destination );
-        $new_match                     = $referenceMatch;
-        $new_match[ 'order' ]          = $new_order;
-        $new_match[ 'next' ]           = $destination;
-        $new_match[ 'score' ]          = 100;
-        $new_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
-        $new_match[ 'type' ]           = $type;
-        $new_match[ 'id_job' ]         = $id_job;
-        $new_match[ 'content_raw' ]    = null;
-        $new_match[ 'content_clean' ]  = null;
-        $new_match[ 'raw_word_count' ] = null;
+        try {
 
-        $this->pushOperation( [
+            //Create new match between destination and destination->prev with starting segment
+            $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $id_job, $type );
+            if ( !empty( $referenceMatch ) ) {
+                $referenceMatch = $referenceMatch->toArray();
+            }
+            $reference_order               = ( !empty( $referenceMatch ) ) ? $referenceMatch[ 'order' ] : 0;
+            $new_order                     = AlignUtils::_getNewOrderValue( $reference_order, $destination );
+            $new_match                     = $referenceMatch;
+            $new_match[ 'order' ]          = $new_order;
+            $new_match[ 'next' ]           = $destination;
+            $new_match[ 'score' ]          = 100;
+            $new_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
+            $new_match[ 'type' ]           = $type;
+            $new_match[ 'id_job' ]         = $id_job;
+            $new_match[ 'content_raw' ]    = null;
+            $new_match[ 'content_clean' ]  = null;
+            $new_match[ 'raw_word_count' ] = null;
+
+            $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
                 'rif_order' => $destination,
                 'data'      => $new_match
-        ] );
+            ] );
 
-        //Create a new empty match on the opposite side of the row
-        $inverseReference = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $id_job, $inverse_type )->toArray();
+            //Create a new empty match on the opposite side of the row
+            $inverseReference = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $id_job, $inverse_type )->toArray();
 
 
-        $new_inverse_order           = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
-        $new_gap                     = $inverseReference;
-        $new_gap[ 'order' ]          = $new_inverse_order;
-        $new_gap[ 'next' ]           = $inverseReference[ 'next' ];
-        $new_gap[ 'score' ]          = 100;
-        $new_gap[ 'segment_id' ]     = null;
-        $new_gap[ 'type' ]           = $inverse_type;
-        $new_gap[ 'id_job' ]         = $id_job;
-        $new_gap[ 'content_raw' ]    = null;
-        $new_gap[ 'content_clean' ]  = null;
-        $new_gap[ 'raw_word_count' ] = null;
+            $new_inverse_order           = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
+            $new_gap                     = $inverseReference;
+            $new_gap[ 'order' ]          = $new_inverse_order;
+            $new_gap[ 'next' ]           = $inverseReference[ 'next' ];
+            $new_gap[ 'score' ]          = 100;
+            $new_gap[ 'segment_id' ]     = null;
+            $new_gap[ 'type' ]           = $inverse_type;
+            $new_gap[ 'id_job' ]         = $id_job;
+            $new_gap[ 'content_raw' ]    = null;
+            $new_gap[ 'content_clean' ]  = null;
+            $new_gap[ 'raw_word_count' ] = null;
 
-        $this->pushOperation( [
+            $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
                 'rif_order' => $inverseReference[ 'next' ],
                 'data'      => $new_gap
-        ] );
+            ] );
 
 
-        $movingSegment[ 'id' ] = null;
+            $movingSegment[ 'id' ] = null;
 
-        $this->pushOperation( [
+            $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'update',
                 'rif_order' => $order,
                 'data'      => $movingSegment
-        ] );
+            ] );
 
-        if ( $reference_order != 0 ) {
+            if ( $reference_order != 0 ) {
 
-            $referenceSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $id_job, $type )->toArray();
+                $referenceSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $referenceMatch[ 'order' ], $id_job, $type )->toArray();
 
 
-            $referenceSegment[ 'next' ]  = $new_order;
+                $referenceSegment[ 'next' ]  = $new_order;
 
-            $this->pushOperation( [
+                $this->pushOperation( [
                     'type'      => $type,
                     'action'    => 'update',
                     'rif_order' => $referenceMatch[ 'order' ],
                     'data'      => $referenceSegment
-            ] );
-        }
+                ] );
+            }
 
-        $inverseSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
+            $inverseSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
 
 
-        $inverseSegment[ 'next' ] = $inverseSegment[ 'next' ];
+            $inverseSegment[ 'next' ] = $inverseSegment[ 'next' ];
 
-        $this->pushOperation( [
+            $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'update',
                 'rif_order' => $inverseSegment[ 'order' ],
                 'data'      => $inverseSegment
-        ] );
+            ] );
+
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage(), -2 );
+        }
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
@@ -396,80 +413,84 @@ class ApiController extends AlignerController {
         $previous_order = ( empty( $previous_match ) ) ? 0 : $previous_match[ 'order' ];
 
 
-        $gap_match[ 'order' ]          = AlignUtils::_getNewOrderValue( $previous_order, $order );
-        $gap_match[ 'next' ]           = $order;
-        $gap_match[ 'segment_id' ]     = null;
-        $gap_match[ 'score' ]          = 100;
-        $gap_match[ 'id_job' ]         = $id_job;
-        $gap_match[ 'type' ]           = $type;
-        $gap_match[ 'content_raw' ]    = null;
-        $gap_match[ 'content_clean' ]  = null;
-        $gap_match[ 'raw_word_count' ] = null;
+        try{
 
-        $this->pushOperation( [
-            'type'      => $type,
-            'action'    => 'create',
-            'rif_order' => $order,
-            'data'      => $gap_match
-        ] );
-
-        $last_match = Segments_SegmentMatchDao::getLastSegmentMatch( $id_job, $other_type )->toArray();
-
-
-        $last_match[ 'order' ]             = $last_match[ 'order' ];
-        $balance_match[ 'order' ]          = $last_match[ 'order' ] + Constants::DISTANCE_INT_BETWEEN_MATCHES;
-        $balance_match[ 'next' ]           = null;
-        $balance_match[ 'segment_id' ]     = null;
-        $balance_match[ 'score' ]          = 100;
-        $balance_match[ 'id_job' ]         = $id_job;
-        $balance_match[ 'type' ]           = $other_type;
-        $balance_match[ 'content_raw' ]    = null;
-        $balance_match[ 'content_clean' ]  = null;
-        $balance_match[ 'raw_word_count' ] = null;
-
-        $this->pushOperation( [
-            'type'   => $other_type,
-            'action' => 'push',
-            'data'   => $balance_match
-        ] );
-
-        if ( !empty( $previous_match ) ) {
-
-            $previous_match[ 'next' ] = $gap_match[ 'order' ];
-
-            $previous_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $id_job, $type )->toArray();
-
-
-            $previous_segment[ 'next' ] = $gap_match[ 'order' ];
+            $gap_match[ 'order' ]          = AlignUtils::_getNewOrderValue( $previous_order, $order );
+            $gap_match[ 'next' ]           = $order;
+            $gap_match[ 'segment_id' ]     = null;
+            $gap_match[ 'score' ]          = 100;
+            $gap_match[ 'id_job' ]         = $id_job;
+            $gap_match[ 'type' ]           = $type;
+            $gap_match[ 'content_raw' ]    = null;
+            $gap_match[ 'content_clean' ]  = null;
+            $gap_match[ 'raw_word_count' ] = null;
 
             $this->pushOperation( [
                 'type'      => $type,
-                'action'    => 'update',
-                'rif_order' => $previous_match[ 'order' ],
-                'data'      => $previous_segment
+                'action'    => 'create',
+                'rif_order' => $order,
+                'data'      => $gap_match
             ] );
 
+            $last_match = Segments_SegmentMatchDao::getLastSegmentMatch( $id_job, $other_type )->toArray();
+
+            $last_match[ 'order' ]             = $last_match[ 'order' ];
+            $balance_match[ 'order' ]          = $last_match[ 'order' ] + Constants::DISTANCE_INT_BETWEEN_MATCHES;
+            $balance_match[ 'next' ]           = null;
+            $balance_match[ 'segment_id' ]     = null;
+            $balance_match[ 'score' ]          = 100;
+            $balance_match[ 'id_job' ]         = $id_job;
+            $balance_match[ 'type' ]           = $other_type;
+            $balance_match[ 'content_raw' ]    = null;
+            $balance_match[ 'content_clean' ]  = null;
+            $balance_match[ 'raw_word_count' ] = null;
+
+            $this->pushOperation( [
+                'type'   => $other_type,
+                'action' => 'push',
+                'data'   => $balance_match
+            ] );
+
+            if ( !empty( $previous_match ) ) {
+
+                $previous_match[ 'next' ] = $gap_match[ 'order' ];
+
+                $previous_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $previous_order, $id_job, $type )->toArray();
+
+
+                $previous_segment[ 'next' ] = $gap_match[ 'order' ];
+
+                $this->pushOperation( [
+                    'type'      => $type,
+                    'action'    => 'update',
+                    'rif_order' => $previous_match[ 'order' ],
+                    'data'      => $previous_segment
+                ] );
+
+            }
+
+            $last_match[ 'next' ] = $balance_match[ 'order' ];
+
+            $last_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $last_match[ 'order' ], $id_job, $type );
+            if ( !empty( $last_segment ) ) {
+                $last_segment = $last_segment->toArray();
+            }
+            $last_segment[ 'type' ]           = $other_type;
+            $last_segment[ 'content_raw' ]    = ( !empty( $last_segment[ 'content_raw' ] ) ) ? $last_segment[ 'content_raw' ] : null;
+            $last_segment[ 'content_clean' ]  = ( !empty( $last_segment[ 'content_clean' ] ) ) ? $last_segment[ 'content_clean' ] : null;
+            $last_segment[ 'raw_word_count' ] = ( !empty( $last_segment[ 'raw_word_count' ] ) ) ? $last_segment[ 'raw_word_count' ] : null;
+
+
+            $this->pushOperation( [
+                'type'      => $other_type,
+                'action'    => 'update',
+                'rif_order' => $last_match[ 'order' ],
+                'data'      => $last_segment
+            ] );
+
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage(), -2 );
         }
-
-        $last_match[ 'next' ] = $balance_match[ 'order' ];
-
-        $last_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $last_match[ 'order' ], $id_job, $type );
-        if ( !empty( $last_segment ) ) {
-            $last_segment = $last_segment->toArray();
-        }
-        $last_segment[ 'type' ]           = $other_type;
-        $last_segment[ 'content_raw' ]    = ( !empty( $last_segment[ 'content_raw' ] ) ) ? $last_segment[ 'content_raw' ] : null;
-        $last_segment[ 'content_clean' ]  = ( !empty( $last_segment[ 'content_clean' ] ) ) ? $last_segment[ 'content_clean' ] : null;
-        $last_segment[ 'raw_word_count' ] = ( !empty( $last_segment[ 'raw_word_count' ] ) ) ? $last_segment[ 'raw_word_count' ] : null;
-
-
-        $this->pushOperation( [
-            'type'      => $other_type,
-            'action'    => 'update',
-            'rif_order' => $last_match[ 'order' ],
-            'data'      => $last_segment
-        ] );
-
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
@@ -576,19 +597,23 @@ class ApiController extends AlignerController {
         $segment_2[ 'next' ]  = $segment_1_copy[ 'next' ];
         $segment_2[ 'score' ] = 100;
 
-        $this->pushOperation( [
+        try{
+            $this->pushOperation( [
                 'type'      => $type,
                 'action'    => "update",
                 'rif_order' => (int)$segment_2[ 'order' ],
                 'data'      => $segment_2
-        ] );
+            ] );
 
-        $this->pushOperation( [
+            $this->pushOperation( [
                 'type'      => $type,
                 'action'    => "update",
                 'rif_order' => (int)$segment_1[ 'order' ],
                 'data'      => $segment_1
-        ] );
+            ] );
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage(), -2 );
+        }
 
         return $this->getOperations();
 
@@ -674,59 +699,80 @@ class ApiController extends AlignerController {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
 
-        $this->pushOperation([
-            'type'      => 'source',
-            'action'    => 'update',
-            'rif_order' => (int)$order_source,
-            'data'      => $sourceSegment
-        ]);
-
-        $this->pushOperation([
-            'type'      => 'target',
-            'action'    => 'update',
-            'rif_order' => (int)$order_target,
-            'data'      => $targetSegment
-        ]);
-
-
-        $this->pushOperation([
-            'type'      => 'source',
-            'action'    => 'create',
-            'rif_order' => (int)$order_source,
-            'data'      => $newSource
-        ]);
-
-        $this->pushOperation([
-            'type'      => 'target',
-            'action'    => 'create',
-            'rif_order' => (int)$destination,
-            'data'      => $newTarget
-        ]);
-
-        if( isset($previous_segment) && !empty( $previous_match ) ){
+        try{
             $this->pushOperation([
                 'type'      => 'source',
                 'action'    => 'update',
-                'rif_order' => (int)$previous_order,
-                'data'      => $previous_segment
+                'rif_order' => (int)$order_source,
+                'data'      => $sourceSegment
             ]);
-        }
 
-        if( isset($destination_previous_segment) && !empty( $destination_previous_match ) ){
             $this->pushOperation([
                 'type'      => 'target',
                 'action'    => 'update',
-                'rif_order' => (int)$destination_previous_order,
-                'data'      => $destination_previous_segment
+                'rif_order' => (int)$order_target,
+                'data'      => $targetSegment
             ]);
+
+
+            $this->pushOperation([
+                'type'      => 'source',
+                'action'    => 'create',
+                'rif_order' => (int)$order_source,
+                'data'      => $newSource
+            ]);
+
+            $this->pushOperation([
+                'type'      => 'target',
+                'action'    => 'create',
+                'rif_order' => (int)$destination,
+                'data'      => $newTarget
+            ]);
+
+            if( isset($previous_segment) && !empty( $previous_match ) ){
+                $this->pushOperation([
+                    'type'      => 'source',
+                    'action'    => 'update',
+                    'rif_order' => (int)$previous_order,
+                    'data'      => $previous_segment
+                ]);
+            }
+
+            if( isset($destination_previous_segment) && !empty( $destination_previous_match ) ){
+                $this->pushOperation([
+                    'type'      => 'target',
+                    'action'    => 'update',
+                    'rif_order' => (int)$destination_previous_order,
+                    'data'      => $destination_previous_segment
+                ]);
+            }
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
     }
     
     private function pushOperation( $operation ) {
+        $operation_fields = [ 'type', 'action', 'rif_order', 'data' ];
+        foreach ( array_keys( $operation ) as $field ){
+            if( !in_array( $field, $operation_fields ) ){
+                throw new \Exception( "Operation format is not valid" );
+            }
+        }
         AlignUtils::_parseArrayIntegers( $operation );
-        AlignUtils::_parseArrayIntegers( $operation['data'] );
+        if( !empty( $operation[ 'data' ] ) ){
+            $segment_fields = AlignUtils::_getObjectVariables(new Segments_SegmentStruct());
+            $match_fields   = AlignUtils::_getObjectVariables(new Segments_SegmentMatchStruct());
+
+            $data_fields    = AlignUtils::_array_union($segment_fields, $match_fields);
+            foreach ( array_keys( $operation[ 'data' ] ) as $field ){
+                if( !in_array( $field, $data_fields ) ){
+                    throw new \Exception( "Operation data format is not valid" );
+                }
+            }
+            AlignUtils::_parseArrayIntegers( $operation['data'] );
+        }
         $this->operations[] = $operation;
     }
 

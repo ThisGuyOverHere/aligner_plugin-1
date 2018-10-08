@@ -118,4 +118,13 @@ class AlignUtils
         }
         return array_keys(get_object_vars($object));
     }
+
+    public static function _array_union($x, $y){
+        $aunion=  array_merge(
+            array_intersect($x, $y),
+            array_diff($x, $y),
+            array_diff($y, $x)
+        );
+        return $aunion;
+    }
 }

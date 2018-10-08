@@ -32,7 +32,9 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     public static function getSegmentMatch($order, $id_job, $type, $ttl = 0){
         $thisDao = new self();
-        $sql = "SELECT * FROM segments_match as sm WHERE sm.order = :order AND sm.id_job = :id_job AND sm.type = :type";
+        $sql = "SELECT `id_job`, `order`, `type`, `segment_id`, `next`, `score` 
+        FROM segments_match as sm
+        WHERE sm.order = :order AND sm.id_job = :id_job AND sm.type = :type";
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         //There's a [0] at the end because it's supposed to return a single element instead of an array
@@ -41,7 +43,9 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     public static function getPreviousSegmentMatch($order, $id_job, $type, $ttl = 0){
         $thisDao = new self();
-        $sql = "SELECT * FROM segments_match as sm WHERE sm.next = :order AND sm.id_job = :id_job AND sm.type = :type";
+        $sql = "SELECT `id_job`, `order`, `type`, `segment_id`, `next`, `score`
+        FROM segments_match as sm 
+        WHERE sm.next = :order AND sm.id_job = :id_job AND sm.type = :type";
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
