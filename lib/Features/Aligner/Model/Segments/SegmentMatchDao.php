@@ -8,6 +8,7 @@
 namespace Features\Aligner\Model;
 
 use DataAccess\ShapelessConcreteStruct;
+use Features\Aligner\Utils\AlignUtils;
 
 class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
     const TABLE = "segments_match";
@@ -31,7 +32,9 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     public static function getSegmentMatch($order, $id_job, $type, $ttl = 0){
         $thisDao = new self();
-        $sql = "SELECT * FROM segments_match as sm WHERE sm.order = :order AND sm.id_job = :id_job AND sm.type = :type";
+        $sql = "SELECT `id_job`, `order`, `type`, `segment_id`, `next`, `score` 
+        FROM segments_match as sm
+        WHERE sm.order = :order AND sm.id_job = :id_job AND sm.type = :type";
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         //There's a [0] at the end because it's supposed to return a single element instead of an array
@@ -40,7 +43,9 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     public static function getPreviousSegmentMatch($order, $id_job, $type, $ttl = 0){
         $thisDao = new self();
-        $sql = "SELECT * FROM segments_match as sm WHERE sm.next = :order AND sm.id_job = :id_job AND sm.type = :type";
+        $sql = "SELECT `id_job`, `order`, `type`, `segment_id`, `next`, `score`
+        FROM segments_match as sm 
+        WHERE sm.next = :order AND sm.id_job = :id_job AND sm.type = :type";
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
@@ -121,7 +126,13 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
     public static function updateFields($attributes, $order, $id_job, $type){
         $qMark = [];
         $qValues = [];
+
+        $valid_fields= AlignUtils::_getObjectVariables(new Segments_SegmentMatchStruct());
+
         foreach($attributes as $attribute_k => $attribute_v){
+            if( !in_array( $attribute_k, $valid_fields ) ){
+                throw new \Exception("You tried to update an invalid field, the update has been canceled");
+            }
             $qMark[] = "sm.".$attribute_k." = ?";
             $qValues[] = $attribute_v;
         }
