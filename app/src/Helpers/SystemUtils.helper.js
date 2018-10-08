@@ -1,4 +1,4 @@
-import {httpMergeSegments} from "../HttpRequests/Alignment.http";
+import {httpMergeSegments, httpMoveSegments} from "../HttpRequests/Alignment.http";
 
 /**
  *
@@ -48,6 +48,18 @@ export const syncWithBackend = (method, callback) => {
             httpMergeSegments(method.data.jobID, method.data.jobPassword, {
                 order: method.data.order,
                 type: method.data.type
+            }).then((response) => {
+                callback()
+            },(error)=>{
+                console.log(error);
+            });
+            break;
+        case 'align':
+            httpMoveSegments(method.data.jobID, method.data.jobPassword, {
+                order: method.data.order,
+                type: method.data.type,
+                destination: method.data.destination,
+                inverse_destination: method.data.inverse_destination
             }).then((response) => {
                 callback()
             },(error)=>{

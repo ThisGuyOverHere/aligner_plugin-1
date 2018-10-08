@@ -54,7 +54,7 @@ class JobComponent extends Component {
         this.elementsRef = {};
         this.virtualList = null;
         this.elementsHeight = {};
-        ProjectActions.setJobID(this.props.match.params.jobID)
+        ProjectActions.setJobID(this.props.match.params.jobID,this.props.match.params.password)
 
     }
 

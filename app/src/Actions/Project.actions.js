@@ -11,10 +11,11 @@ let ProjectActions = {
          *
          * @param {Number} jobID The Job ID of current project
          */
-        setJobID: function (jobID) {
+        setJobID: function (jobID,jobPassword) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.SET_JOB_ID,
-                jobID: jobID
+                jobID: jobID,
+                jobPassword: jobPassword
             });
         },
         /**
@@ -109,7 +110,18 @@ let ProjectActions = {
 
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-                changes: changes
+                changes: changes,
+                syncAPI: {
+                    action: 'align',
+                    data: {
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        order: log.from,
+                        destination: log.to,
+                        inverse_destination: inverseSegmentToPosition.order,
+                        type: log.type
+                    }
+                }
             });
         },
 

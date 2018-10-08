@@ -14,6 +14,7 @@ EventEmitter.prototype.setMaxListeners(0);
 
 let ProjectStore = assign({}, EventEmitter.prototype, {
     jobID: null,
+    jobPassword: null,
     job: {
         source: List(),
         target: List(),
@@ -251,6 +252,7 @@ AppDispatcher.register(function (action) {
     switch (action.actionType) {
         case ProjectConstants.SET_JOB_ID:
             ProjectStore.jobID = action.jobID;
+            ProjectStore.jobPassword = action.jobPassword;
             break;
         case ProjectConstants.STORE_SEGMENTS:
             ProjectStore.storeSegments(action.segments);

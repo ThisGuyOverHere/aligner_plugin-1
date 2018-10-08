@@ -83,3 +83,8 @@ export const httpMergeSegments = (jobID,jobPassword,data) => {
     const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/segment/merge';
     return post(url,qs.stringify(data));
 };
+
+export const httpMoveSegments = (jobID,jobPassword,data) => {
+    const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/segment/move';
+    return post(url,qs.stringify(data));
+};
