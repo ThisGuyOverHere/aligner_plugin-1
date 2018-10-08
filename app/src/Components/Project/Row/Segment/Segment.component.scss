@@ -7,7 +7,9 @@
   width: 100%;
   position: relative;
   &:not(.empty){
-    cursor: pointer;
+    &:not(.onDropHover){
+      cursor: pointer;
+    }
     .segmentBox-content {
       transition: box-shadow 600ms ease-in, transform 200ms ease-in;
       background: $white;
