@@ -196,11 +196,6 @@ class ApiController extends AlignerController {
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
 
-        //Format returned segments
-
-        $source = [];
-        $target = [];
-
         //Check which segments to retrieve for source/target
         $source_start = ( $type == 'source' ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
         $source_end   = ( $type == 'source' ) ? $split_segment[ 'next' ] : $inverse_segment[ 'next' ];
@@ -260,30 +255,25 @@ class ApiController extends AlignerController {
 
     public function move() {
 
-
-        $order               = $this->params[ 'order' ];
-        $id_job              = $this->params[ 'id_job' ];
-        $type                = $this->params[ 'type' ];
-        $inverse_type        = ( $type == 'target' ) ? 'source' : 'target';
-        $destination         = $this->params[ 'destination' ];
-        $inverse_destination = $this->params[ 'inverse_destination' ];
+        $order                     = $this->params[ 'order' ];
+        $id_job                    = $this->params[ 'id_job' ];
+        $type                      = $this->params[ 'type' ];
+        $inverse_type              = ( $type == 'target' ) ? 'source' : 'target';
+        $destination_order         = $this->params[ 'destination_order' ];
+        $inverse_destination_order = $this->params[ 'inverse_destination_order' ];
 
         $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
 
-
-        //$destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination, $id_job, $type);
-        //$oppositeSegment = Segments_SegmentDao::getFromOrderJobIdAndType($opposite_row, $id_job, $type);
-
         //Create new match between destination and destination->prev with starting segment
-        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination, $id_job, $type );
+        $referenceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch( $destination_order, $id_job, $type );
         if ( !empty( $referenceMatch ) ) {
             $referenceMatch = $referenceMatch->toArray();
         }
         $reference_order               = ( !empty( $referenceMatch ) ) ? $referenceMatch[ 'order' ] : 0;
-        $new_order                     = AlignUtils::_getNewOrderValue( $reference_order, $destination );
+        $new_order                     = AlignUtils::_getNewOrderValue( $reference_order, $destination_order );
         $new_match                     = $referenceMatch;
         $new_match[ 'order' ]          = $new_order;
-        $new_match[ 'next' ]           = $destination;
+        $new_match[ 'next' ]           = $destination_order;
         $new_match[ 'score' ]          = 100;
         $new_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
         $new_match[ 'type' ]           = $type;
@@ -295,13 +285,12 @@ class ApiController extends AlignerController {
         $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
-                'rif_order' => $destination,
+                'rif_order' => $destination_order,
                 'data'      => $new_match
         ] );
 
         //Create a new empty match on the opposite side of the row
-        $inverseReference = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination, $id_job, $inverse_type )->toArray();
-
+        $inverseReference = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination_order, $id_job, $inverse_type )->toArray();
 
         $new_inverse_order           = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
         $new_gap                     = $inverseReference;
@@ -347,7 +336,7 @@ class ApiController extends AlignerController {
             ] );
         }
 
-        $inverseSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination, $id_job, $inverse_type )->toArray();
+        $inverseSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_destination_order, $id_job, $inverse_type )->toArray();
 
 
         $inverseSegment[ 'next' ] = $inverseSegment[ 'next' ];
