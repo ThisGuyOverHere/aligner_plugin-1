@@ -17,4 +17,11 @@
   >:first-child{
     grid-column-end: span 2;
   }
+  .hint{
+    font-size: 24px;
+    cursor: pointer;
+    float: right;
+    line-height: 1;
+    margin: 0px;
+  }
 }

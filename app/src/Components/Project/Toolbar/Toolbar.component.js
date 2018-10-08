@@ -5,6 +5,7 @@ import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.compo
 import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
 import ToolbarContextualNavigationComponent from "./ToolbarContextualNavigation/ToolbarContextualNavigation.component";
 import PropTypes from "prop-types";
+import ToolbarRightHintComponent from "./ToolbarRightHint/ToolbarRightHint.component";
 
 class ToolbarComponent extends Component {
     static propTypes = {
@@ -16,6 +17,7 @@ class ToolbarComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            hintOpened: false,
             selection: {
                 source: {
                     count: 0,
@@ -51,8 +53,10 @@ class ToolbarComponent extends Component {
                     <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.jobConf}/>
                 </div>
                 <div>
-                    {<ToolbarContextualNavigationComponent/>}
+                    {/* <ToolbarContextualNavigationComponent/> */ }
+                    <i className=" hint icon question circle outline" onClick={ this.hintModalOpened }></i>
                 </div>
+                { this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}
             </div>
         );
     }
@@ -61,6 +65,13 @@ class ToolbarComponent extends Component {
     storeSelection = (selection) => {
         this.setState({
             selection: selection
+        })
+    };
+
+    hintModalOpened = () => {
+        console.log('here');
+        this.setState({
+            hintOpened: !this.state.hintOpened,
         })
     };
 }

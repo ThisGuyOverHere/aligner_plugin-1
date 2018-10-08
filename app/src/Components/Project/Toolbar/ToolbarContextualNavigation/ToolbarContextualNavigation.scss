@@ -7,9 +7,6 @@
     p {
       font-size: 12px;
       margin: 0;
-      &:hover{
-        color: $primary;
-      }
       span {
         color: $black;
         font-weight: 600;
@@ -22,6 +19,9 @@
       cursor: pointer;
       font-size: 16px;
       margin-left: 16px;
+    }
+    &:hover{
+      color: $primary;
     }
   }
   .navigation{

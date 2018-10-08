@@ -40,7 +40,6 @@ class ToolbarContextualNavigationComponent extends Component {
                     <div>
                         <div className="cmd-shortcut">
                             <p><span className={mergeClasses.join(" ")}>alt+S</span> to split</p>
-                            <i className="icon question circle outline"></i>
                         </div>
                     </div>
                 );
@@ -49,7 +48,6 @@ class ToolbarContextualNavigationComponent extends Component {
                     <div>
                         <div className="cmd-shortcut">
                             <p><span className={mergeClasses.join(" ")}>alt+R</span> to reverse</p>
-                            <i className="icon question circle outline"></i>
                         </div>
                     </div>
                 );
@@ -58,7 +56,6 @@ class ToolbarContextualNavigationComponent extends Component {
                     <div>
                         <div className="cmd-shortcut">
                             <p><span className={mergeClasses.join(" ")}>alt+M</span> to merge</p>
-                            <i className="icon question circle outline"></i>
                         </div>
                     </div>
                 );
@@ -67,7 +64,6 @@ class ToolbarContextualNavigationComponent extends Component {
                     <div>
                         <div className="cmd-shortcut">
                             <p><span className={mergeClasses.join(" ")}>alt+A</span> to align</p>
-                            <i className="icon question circle outline"></i>
                         </div>
                     </div>
                 );
@@ -76,7 +72,6 @@ class ToolbarContextualNavigationComponent extends Component {
                     <div>
                         <div className="cmd-shortcut">
                             <p><span className={mergeClasses.join(" ")}>alt+W</span> to Merge & Align</p>
-                            <i className="icon question circle outline"></i>
                         </div>
                     </div>
                 );
@@ -88,7 +83,6 @@ class ToolbarContextualNavigationComponent extends Component {
                             </div>
                             : <div className="cmd-shortcut">
                                 <p><span>select </span> or <span>drag and drop </span> to align</p>
-                                <i className="icon question circle outline"></i>
                             </div>}
                     </div>
                 );

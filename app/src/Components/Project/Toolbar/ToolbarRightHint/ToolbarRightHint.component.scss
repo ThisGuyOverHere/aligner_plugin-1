@@ -1,0 +1,69 @@
+@import "../../../../../assets/theme/variables";
+
+.hintModal {
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.50);
+  position: fixed;
+  width: 560px;
+  height: 100%;
+  background-color: $white;
+  right: 0;
+  padding: 24px;
+  .close-btn {
+	text-align: right;
+	margin-bottom: 24px;
+	i {
+	  font-size: 16px;
+	  color: $gray;
+	  cursor: pointer;
+	  &:hover {
+		color: $primary;
+	  }
+	}
+  }
+
+  h1 {
+	font-size: 24px;
+	color: $headerBlack;
+	margin: 0px;
+  }
+
+  .shortCutRow {
+	padding: 24px 0 16px;
+	border-bottom: 1px solid $headerBlack;
+	&:nth-last-child(1) {
+	  border-bottom: none;
+	}
+
+	h4 {
+	  color: $gray;
+	  margin-bottom: 8px;
+	  font-size: 16px;
+	}
+
+	ul {
+	  padding: 0;
+	  list-style-type: none;
+	  margin: 0px;
+	  li {
+		font-size: 12px;
+		margin-bottom: 4px;
+	  }
+	  .last {
+		display: grid;
+		grid-template-columns: 4.2fr 0.5fr 0.3fr;
+		margin-bottom: 8px;
+		span {
+		  text-align: center;
+		  padding: 4px;
+		  background-color: $lightGrey;
+		  color: $primary;
+		  border-radius: 2px;
+		  &:nth-child(1){
+			margin-right: 2px;
+		  }
+		}
+	  }
+	}
+  }
+
+}
