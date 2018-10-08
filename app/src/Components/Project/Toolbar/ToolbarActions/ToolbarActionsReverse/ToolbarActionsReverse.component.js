@@ -38,8 +38,7 @@ class ToolbarActionsReverseComponent extends Component {
                     onMouseOut={this.onMouseLeave}
                     onMouseOver={this.onHover}
                     onClick={this.onReverseClick}>
-                    <i className="icon sync"></i>
-                    reverse
+                    Reverse
                 </button>
             </span>;
         /*

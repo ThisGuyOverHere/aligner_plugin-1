@@ -37,7 +37,6 @@ class ToolbarActionsAlignComponent extends Component {
             onMouseOut={this.onMouseLeave}
             onMouseOver={this.onHover}
             onClick={this.onClick}>
-            <i className={classes.join(" ")}></i>
             Align
         </button>;
         /*return (
