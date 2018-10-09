@@ -75,6 +75,7 @@ let ProjectActions = {
             let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1).toJS();
             let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
             let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1).toJS();
+            let inverseSegmentToPositionBE = tmpJob[inverse[log.type]].get(toIndex).toJS().order;
 
             segmentfromPosition.order = segmentToPosition.order;
             segmentfromPosition.next = segmentToPosition.next;
@@ -118,7 +119,7 @@ let ProjectActions = {
                         jobPassword: ProjectStore.jobPassword,
                         order: log.from,
                         destination: log.to,
-                        inverse_destination: inverseSegmentToPosition.order,
+                        inverse_destination: inverseSegmentToPositionBE,
                         type: log.type
                     }
                 }
