@@ -19,7 +19,7 @@ class PreAlignStatus extends Component {
     };
 
     componentDidMount() {
-      /*httpAlignJob(this.state.job.id)
+      httpAlignJob(this.state.job.id)
           .then( response => {
               this.setState(
                   {
@@ -30,7 +30,6 @@ class PreAlignStatus extends Component {
           .catch( error => {
               console.log(error);
           })
-          */
     };
 
     render() {
