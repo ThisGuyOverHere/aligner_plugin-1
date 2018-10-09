@@ -19,7 +19,7 @@ class PreAlignStatus extends Component {
     };
 
     componentDidMount() {
-      httpAlignJob(this.state.job.id)
+      /*httpAlignJob(this.state.job.id)
           .then( response => {
               this.setState(
                   {
@@ -30,17 +30,22 @@ class PreAlignStatus extends Component {
           .catch( error => {
               console.log(error);
           })
+          */
     };
 
     render() {
         if (this.state.progress === 100) {
             return <Redirect to={'/job/' +  this.state.job.id  + '/' + this.state.job.password + '/align'}/>;
         }else{
-            return <div className="bar-container">
-                <div className='ui progress' data-percent={this.state.progress}>
-                    <div className='bar' style={{width: this.state.progress + '%' }}>
-                        <div className='progress'>{this.state.progress + '%'}</div>
+            return<div>
+                <h3>Volume analysis... </h3>
+                <div className="bar-container">
+                    <div className='ui progress' data-percent={this.state.progress}>
+                        <div className='bar' style={{width: this.state.progress + '%' }}>
+                            { /* <div className='progress'>{this.state.progress + '%'}</div> */}
+                        </div>
                     </div>
+                    <div className="percentage">{this.state.progress + '%'}</div>
                 </div>
             </div>
         }

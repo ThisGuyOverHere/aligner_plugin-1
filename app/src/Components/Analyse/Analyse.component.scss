@@ -1,6 +1,70 @@
 @import "../../../assets/theme/variables";
 
-#title{
+#title {
   text-align: center;
   margin: 16px 0px;
+}
+
+.container {
+  width: 800px;
+  margin: 10% auto;
+  .files-info, .process-info {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 24px 24px;
+	.info {
+	  padding: 16px;
+	  border-radius: 4px;
+	}
+  }
+
+  .files-info {
+	margin-bottom: 24px;
+	.info {
+	  background-color: $lightGrey;
+      color: $gray;
+	  label{
+		font-size: 16px;
+		margin-bottom: 16px;
+		display: block;
+	  }
+	  h4{
+		margin: 0;
+		padding: 0 0 4px;
+	  }
+	  h2{
+		margin: 24px 0 0;
+		font-size: 26px;
+		color: $secondaryText;
+	  }
+	}
+  }
+
+  .score{
+	border: 1px solid $primary;
+	border-radius: 4px;
+	margin-bottom: 16px;
+	margin-top: 48px;
+	padding: 16px;
+  }
+
+  .process-info {
+	.info {
+	  background-color: $white;
+	  color: $gray;
+	  border: 1px solid $gray;
+	  h3{
+		font-size: 25px;
+		margin-bottom: 8px;
+	  }
+	  label{
+		font-size: 18px;
+		margin-bottom: 4px;
+		display: block;
+	  }
+	  p{
+		font-size: 14px;
+	  }
+	}
+  }
 }
