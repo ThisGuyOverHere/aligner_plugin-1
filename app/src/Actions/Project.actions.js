@@ -72,9 +72,11 @@ let ProjectActions = {
             });
 
             let segmentToPosition = tmpJob[log.type].get(toIndex).toJS();
-            let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1).toJS();
+            let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1);
+            segmentNextToPosition = segmentNextToPosition ? segmentNextToPosition.toJS() : null;
             let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
-            let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1).toJS();
+            let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1)
+            inverseSegmentToPosition =  inverseSegmentToPosition ?inverseSegmentToPosition.toJS() : null;
             let inverseSegmentToPositionBE = tmpJob[inverse[log.type]].get(toIndex).toJS().order;
 
             segmentfromPosition.order = segmentToPosition.order;
@@ -91,19 +93,19 @@ let ProjectActions = {
 
             if (segmentToPosition.content_clean) {
                 //3
-                segmentToPosition.order = avgOrder(segmentToPosition.order, segmentToPosition.next);
-                segmentToPosition.next = segmentNextToPosition.order;
+                segmentToPosition.order = segmentNextToPosition ?  avgOrder(segmentToPosition.order, segmentToPosition.next) : null;
+                segmentToPosition.next = segmentNextToPosition ? segmentNextToPosition.order: null;
                 changes.push({
                     type: log.type,
-                    action: 'create',
-                    rif_order: segmentNextToPosition.order,
+                    action: segmentNextToPosition ? 'create' : 'push',
+                    rif_order: segmentNextToPosition ? segmentNextToPosition.order : null,
                     data: segmentToPosition
                 });
 
                 changes.push({
                     type: inverse[log.type],
-                    action: 'create',
-                    rif_order: inverseSegmentToPosition.order,
+                    action: inverseSegmentToPosition ? 'create' : 'push',
+                    rif_order: inverseSegmentToPosition ? inverseSegmentToPosition.order : null,
                     isEmptySegment: true
                 });
             }
