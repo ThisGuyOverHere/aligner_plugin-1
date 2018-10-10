@@ -159,6 +159,18 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         $stm->execute( $params );
     }
 
+    public static function setSegmentInMatch($segment_id, $order, $id_job, $type ){
+
+        $query = "UPDATE segments_match as sm
+                    SET sm.segment_id = ?
+                    WHERE sm.order = ? AND sm.id_job = ? AND sm.type = ?";
+        $params = [$segment_id, $order, $id_job, $type];
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $params );
+    }
+
     public static function updateNextSegmentMatch($new_order, $order, $id_job, $type){
         $query = "UPDATE segments_match as sm
         SET sm.next = ?
