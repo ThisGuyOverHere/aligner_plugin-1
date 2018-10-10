@@ -354,8 +354,8 @@ let ProjectActions = {
                     syncAPI: {
                         action: 'merge',
                         data: {
-                            jobID: jobID,
-                            jobPassword: jobPassword,
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
                             order: orders,
                             type: type
                         }
@@ -536,10 +536,18 @@ let ProjectActions = {
         }
         ,
 
-        deleteEmptyRows: function (deletes) {
+        deleteEmptyRows: function (deletes,matches) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.DELETE_ROWS,
-                deletes: deletes
+                deletes: deletes,
+                syncAPI: {
+                    action: 'delete',
+                    data:{
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        matches: matches
+                    }
+                }
             });
         }
 

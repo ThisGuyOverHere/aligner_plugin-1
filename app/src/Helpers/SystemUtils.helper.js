@@ -1,4 +1,4 @@
-import {httpMergeSegments, httpMoveSegments} from "../HttpRequests/Alignment.http";
+import {httpDeleteSegments, httpMergeSegments, httpMoveSegments} from "../HttpRequests/Alignment.http";
 
 /**
  *
@@ -6,8 +6,8 @@ import {httpMergeSegments, httpMoveSegments} from "../HttpRequests/Alignment.htt
  * @returns {string} with a centerd ellipsis
  */
 export const textEllipsisCenter = (text) => {
-    if(text.length > 30){
-        return text.substr(0, 12) + '[...]' + text.substr(text.length-12, text.length);
+    if (text.length > 30) {
+        return text.substr(0, 12) + '[...]' + text.substr(text.length - 12, text.length);
     }
     return text;
 };
@@ -19,7 +19,7 @@ export const textEllipsisCenter = (text) => {
  * @returns {string} the initials of user name
  */
 export const getUserInitials = (name, surname) => {
-    return name.split(" ").map((n)=>n[0]).join("") + surname.split(" ").map((n)=>n[0]).join("") ;
+    return name.split(" ").map((n) => n[0]).join("") + surname.split(" ").map((n) => n[0]).join("");
 };
 
 /**
@@ -29,9 +29,9 @@ export const getUserInitials = (name, surname) => {
  */
 export const emailValidator = (email) => {
     let re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-    if( re.test(email.toLowerCase()) ) {
+    if (re.test(email.toLowerCase())) {
         return true;
-    }else{
+    } else {
         return false;
     }
 };
@@ -50,7 +50,7 @@ export const syncWithBackend = (method, callback) => {
                 type: method.data.type
             }).then((response) => {
                 callback()
-            },(error)=>{
+            }, (error) => {
                 console.log(error);
             });
             break;
@@ -62,7 +62,14 @@ export const syncWithBackend = (method, callback) => {
                 inverse_destination: method.data.inverse_destination
             }).then((response) => {
                 callback()
-            },(error)=>{
+            }, (error) => {
+                console.log(error);
+            });
+            break;
+        case 'delete':
+            httpDeleteSegments(method.data.jobID, method.data.jobPassword, method.data.matches).then((response) => {
+                callback()
+            }, (error) => {
                 console.log(error);
             });
             break;

@@ -38,11 +38,9 @@ class SplitComponent extends Component {
         let result = [];
         while (match = less.exec(this.props.segment.content_raw)) {
             lessArray.push(match.index);
-            console.log('less',match.index);
         }
         while (match = greater.exec(this.props.segment.content_raw)) {
             greaterArray.push(match.index);
-            console.log('greater',match.index);
         }
 
         lessArray.map((e,index)=>{

@@ -192,17 +192,17 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
             console.log(arrayT[x].order+'       '+arrayT[x].next);
         }*/
 
-        /*//Todo: remove this test
+        //Todo: remove this test
         const arrayS = this.job.source.toJS();
         console.log('#### SOURCE #####');
-        for(let x= 0; x< arrayS.length; x++){
-            console.log('['+x+']   '+arrayS[x].order+'       '+arrayS[x].next);
+        for (let x = 0; x < arrayS.length; x++) {
+            console.log('[' + x + ']   ' + arrayS[x].order + '       ' + arrayS[x].next);
         }
         const arrayT = this.job.target.toJS();
         console.log('#### TARGET #####');
-        for(let x= 0; x < arrayT.length; x++){
-            console.log('['+x+']   '+arrayT[x].order+'       '+arrayT[x].next);
-        }*/
+        for (let x = 0; x < arrayT.length; x++) {
+            console.log('[' + x + ']   ' + arrayT[x].order + '       ' + arrayT[x].next);
+        }
     },
     deleteEmptyRows: function (deletes) {
         deletes.map((index, i) => {
@@ -251,6 +251,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
+    const syncAPI = action.syncAPI ? action.syncAPI : null;
     switch (action.actionType) {
         case ProjectConstants.SET_JOB_ID:
             ProjectStore.jobID = action.jobID;
@@ -266,7 +267,6 @@ AppDispatcher.register(function (action) {
             break;
         case ProjectConstants.CHANGE_SEGMENT_POSITION:
             ProjectStore.storeMovements(action.changes, action.type);
-            const syncAPI = action.syncAPI ? action.syncAPI : null;
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
@@ -277,7 +277,7 @@ AppDispatcher.register(function (action) {
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
-            });
+            }, syncAPI);
             break;
         case ProjectConstants.MERGE_STATUS:
             ProjectStore.mergeStatus = action.status;

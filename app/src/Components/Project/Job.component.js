@@ -169,6 +169,7 @@ class JobComponent extends Component {
     setRows = (job, syncAPI) => {
         let rows = [];
         let deletes = [];
+        let matches = [];
         let previousJob = this.state.job;
         let rowsDictionary = {
             source: {},
@@ -185,12 +186,21 @@ class JobComponent extends Component {
                 });
             } else {
                 deletes.push(index);
+                matches.push({
+                    type: 'source',
+                    order: e.order
+                });
+                matches.push({
+                    type: 'target',
+                    order: job.target[index].order
+                });
             }
         });
 
         if (deletes.length > 0) {
             setTimeout(() => {
-                ProjectActions.deleteEmptyRows(deletes);
+                console.log(matches)
+                ProjectActions.deleteEmptyRows(deletes,matches);
             }, 0);
 
         }
@@ -200,6 +210,7 @@ class JobComponent extends Component {
 
 
         let inSync = false;
+        console.log(syncAPI)
         if (syncAPI) {
             inSync = true;
             syncWithBackend(syncAPI,()=>{
