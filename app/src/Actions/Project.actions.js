@@ -484,10 +484,9 @@ let ProjectActions = {
 
             httpSplitSegment(jobID, jobPassword, data).then(response => {
                 if (!response.errors) {
-                    const logs = [...response.data.source, ...response.data.target];
                     AppDispatcher.dispatch({
                         actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-                        changes: logs
+                        changes: response.data
                     });
                 } else {
                     response.errors.map(e => {
