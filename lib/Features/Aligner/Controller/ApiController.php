@@ -372,7 +372,7 @@ class ApiController extends AlignerController {
         $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
-                'rif_order' => $new_match_order,
+                'rif_order' => $destination_order,
                 'data'      => $new_match_destination
         ] );
 
@@ -392,7 +392,7 @@ class ApiController extends AlignerController {
         $this->pushOperation( [
                 'type'      => $inverse_type,
                 'action'    => 'create',
-                'rif_order' => $new_inverse_order,
+                'rif_order' => $inverseReference[ 'order' ],
                 'data'      => $new_match_null
         ] );
 
