@@ -149,6 +149,10 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                         //check if is a empty segment
                         //prepare mock for push
                         mock.next = null;
+                        if (change.data) {
+                            mock.content_clean = change.data.content_clean ? change.data.content_clean : null;
+                            mock.content_raw = change.data.content_raw ? change.data.content_raw : null;
+                        }
                         mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
                         mock.type = change.type;
                         //edit previous last element segment next param.
@@ -201,17 +205,15 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         }*/
     },
     deleteEmptyRows: function (deletes) {
-        //console.log(deletes);
-
-        deletes.map(index => {
-            this.job.source = this.job.source.delete(index);
-            this.job.target = this.job.target.delete(index);
+        deletes.map((index, i) => {
+            this.job.source = this.job.source.delete(index - i);
+            this.job.target = this.job.target.delete(index - i);
 
             // change next of previous inverse segment
-            const nextTarget = this.job.target.getIn([index, 'order']) || null;
-            const nextSource = this.job.source.getIn([index, 'order']) || null;
-            this.job.target = this.job.target.setIn([+index - 1, 'next'], nextTarget);
-            this.job.source = this.job.source.setIn([+index - 1, 'next'], nextSource);
+            const nextTarget = this.job.target.getIn([index - i, 'order']) || null;
+            const nextSource = this.job.source.getIn([index - i, 'order']) || null;
+            this.job.target = this.job.target.setIn([+index - i - 1, 'next'], nextTarget);
+            this.job.source = this.job.source.setIn([+index - i - 1, 'next'], nextSource);
         });
     },
     addSegmentToSelection: function (order, type) {
@@ -249,6 +251,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
+    const syncAPI = action.syncAPI ? action.syncAPI : null;
     switch (action.actionType) {
         case ProjectConstants.SET_JOB_ID:
             ProjectStore.jobID = action.jobID;
@@ -264,7 +267,6 @@ AppDispatcher.register(function (action) {
             break;
         case ProjectConstants.CHANGE_SEGMENT_POSITION:
             ProjectStore.storeMovements(action.changes, action.type);
-            const syncAPI = action.syncAPI ? action.syncAPI : null;
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
@@ -275,7 +277,7 @@ AppDispatcher.register(function (action) {
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
-            });
+            }, syncAPI);
             break;
         case ProjectConstants.MERGE_STATUS:
             ProjectStore.mergeStatus = action.status;

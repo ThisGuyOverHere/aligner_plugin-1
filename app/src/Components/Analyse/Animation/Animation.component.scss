@@ -1,10 +1,21 @@
 @import "../../../../assets/theme/variables";
 
 .animation-container {
+  /*
+
+  position: absolute;
+  width: 400px;
+  height: 24px;
+  margin: 24px auto;
+  left: 0;
+  right: 0;
+  z-index: 2;
+
+  */
   position: relative;
   margin: 0 auto;
   width: 800px;
-  height: 100vh;
+  height: 50vh;
   overflow: hidden;
   .row {
 	display: flex;
@@ -72,17 +83,17 @@
 	top: 100%
   }
   40% {
-	top: 240px;
+	top: 40px;
 	background-color: $headerText;
 	transform: scale(1);
   }
   50% {
-	top: 240px;
+	top: 40px;
 	background-color: $primary;
 	transform: scale(1.01);
   }
   65% {
-	top: 240px;
+	top: 40px;
 	transform: scale(1);
 	opacity: 1;
   }
@@ -102,17 +113,17 @@
 	top: 120%
   }
   40% {
-	top: 240px;
+	top: 40px;
 	background-color: $headerText;
 	transform: scale(1);
   }
   50% {
-	top: 240px;
+	top: 40px;
 	background-color: $primary;
 	transform: scale(1.01);
   }
   65% {
-	top: 240px;
+	top: 40px;
 	transform: scale(1);
 	opacity: 1;
   }
@@ -120,7 +131,7 @@
 	opacity: 0;
   }
   100% {
-	top: -50px;
+	top: -60px;
 	opacity: 0;
 	background-color: $white;
 	transform: scale(1);
