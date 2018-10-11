@@ -354,8 +354,8 @@ let ProjectActions = {
                     syncAPI: {
                         action: 'merge',
                         data: {
-                            jobID: jobID,
-                            jobPassword: jobPassword,
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
                             order: orders,
                             type: type
                         }
@@ -541,7 +541,10 @@ let ProjectActions = {
                 actionType: ProjectConstants.DELETE_ROWS,
                 deletes: deletes,
                 syncAPI: {
+                    action: 'delete',
                     data:{
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
                         matches: matches
                     }
                 }
