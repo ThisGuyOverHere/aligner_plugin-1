@@ -204,9 +204,9 @@ class ApiController extends AlignerController {
 
         //Check which segments to retrieve for source/target
         $source_start = ( $type == 'source' ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
-        $source_end   = ( $type == 'source' ) ? $split_segment[ 'next' ] : $inverse_segment[ 'next' ];
+        $source_end   = ( $type == 'source' ) ? $original_next : $original_inverse_next;
         $target_start = ( $type == 'target' ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
-        $target_end   = ( $type == 'target' ) ? $split_segment[ 'next' ] : $inverse_segment[ 'next' ];
+        $target_end   = ( $type == 'target' ) ? $original_next : $original_inverse_next;
 
         $segments       = array_merge( [ $split_segment ], $new_segments );
         $sourceSegments = ( $type == 'source' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
