@@ -265,7 +265,7 @@ class ApiController extends AlignerController {
         return $this->getOperations();
     }
 
-    public function moveInEmpty(){
+    public function moveInEmpty($referenceMatch){
 
 
         $order                     = $this->params[ 'order' ];
@@ -275,7 +275,6 @@ class ApiController extends AlignerController {
 
         $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
 
-        $referenceMatch                        = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
         $new_match_order                       = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch[ 'next' ] );
         $destination_match                     = $referenceMatch;
         $destination_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
@@ -320,7 +319,7 @@ class ApiController extends AlignerController {
 
     }
 
-    public function moveInFill(){
+    public function moveInFill($referenceMatch){
 
         $order               = $this->params[ 'order' ];
         $id_job              = $this->params[ 'id_job' ];
@@ -331,7 +330,6 @@ class ApiController extends AlignerController {
 
         $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
 
-        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
         $new_match_order = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch['next'] );
         $destination_match = $referenceMatch;
         $destination_match['segment_id'] = $movingSegment['id'];
@@ -430,12 +428,12 @@ class ApiController extends AlignerController {
         $type                = $this->params[ 'type' ];
         $destination_order         = $this->params[ 'destination' ];
 
-        $this->referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
-        if(!empty($this->referenceMatch['segment_id'])){
-            return $this->moveInFill();
+        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
+        if(!empty($referenceMatch['id'])){
+            return $this->moveInFill($referenceMatch);
         }
         else {
-            return $this->moveInEmpty();
+            return $this->moveInEmpty($referenceMatch);
         }
 
     }
