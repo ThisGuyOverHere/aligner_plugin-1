@@ -199,7 +199,6 @@ class JobComponent extends Component {
 
         if (deletes.length > 0) {
             setTimeout(() => {
-                console.log(matches)
                 ProjectActions.deleteEmptyRows(deletes,matches);
             }, 0);
 
@@ -210,7 +209,6 @@ class JobComponent extends Component {
 
 
         let inSync = false;
-        console.log(syncAPI)
         if (syncAPI) {
             inSync = true;
             syncWithBackend(syncAPI,()=>{
