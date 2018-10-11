@@ -90,7 +90,7 @@ class SplitComponent extends Component {
                             <p id="toSplit" onMouseLeave={() => this.onCharHover(-1)}>
                                 {this.renderItems()}
                             </p>
-                            <button className="ui button primary" onClick={this.onSave}>Save</button>
+                            <button className="ui button primary" onClick={this.onSave}>Split</button>
                         </div>
                     </div>
                 </div>
