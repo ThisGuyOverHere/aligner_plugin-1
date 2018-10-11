@@ -536,10 +536,15 @@ let ProjectActions = {
         }
         ,
 
-        deleteEmptyRows: function (deletes) {
+        deleteEmptyRows: function (deletes,matches) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.DELETE_ROWS,
-                deletes: deletes
+                deletes: deletes,
+                syncAPI: {
+                    data:{
+                        matches: matches
+                    }
+                }
             });
         }
 
