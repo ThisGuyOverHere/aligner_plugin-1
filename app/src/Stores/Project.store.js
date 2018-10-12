@@ -8,6 +8,7 @@ import assign from 'object-assign';
 import {List, Set, fromJS} from 'immutable';
 import env from "../Constants/Env.constants";
 import {avgOrder, getSegmentByIndex} from "../Helpers/SegmentUtils.helper";
+import {checkResultStore} from "../Helpers/SystemUtils.helper";
 
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -72,6 +73,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         this.job.target = List();
         this.job.source = this.job.source.push(...source);
         this.job.target = this.job.target.push(...target);
+        checkResultStore(segments.source,segments.target);
     },
     /**
      *
@@ -179,6 +181,9 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                     break;
             }
         });
+
+
+        checkResultStore(this.job.source.toJS(),this.job.target.toJS());
 
         /*//Todo: remove this test
         const arrayS = this.job.source.toJS();
