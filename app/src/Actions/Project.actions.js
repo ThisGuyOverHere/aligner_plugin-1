@@ -11,7 +11,7 @@ let ProjectActions = {
          *
          * @param {Number} jobID The Job ID of current project
          */
-        setJobID: function (jobID,jobPassword) {
+        setJobID: function (jobID, jobPassword) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.SET_JOB_ID,
                 jobID: jobID,
@@ -76,7 +76,7 @@ let ProjectActions = {
             segmentNextToPosition = segmentNextToPosition ? segmentNextToPosition.toJS() : null;
             let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
             let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1)
-            inverseSegmentToPosition =  inverseSegmentToPosition ?inverseSegmentToPosition.toJS() : null;
+            inverseSegmentToPosition = inverseSegmentToPosition ? inverseSegmentToPosition.toJS() : null;
             let inverseSegmentToPositionBE = tmpJob[inverse[log.type]].get(toIndex).toJS().order;
 
             segmentfromPosition.order = segmentToPosition.order;
@@ -93,8 +93,8 @@ let ProjectActions = {
 
             if (segmentToPosition.content_clean) {
                 //3
-                segmentToPosition.order = segmentNextToPosition ?  avgOrder(segmentToPosition.order, segmentToPosition.next) : null;
-                segmentToPosition.next = segmentNextToPosition ? segmentNextToPosition.order: null;
+                segmentToPosition.order = segmentNextToPosition ? avgOrder(segmentToPosition.order, segmentToPosition.next) : null;
+                segmentToPosition.next = segmentNextToPosition ? segmentNextToPosition.order : null;
                 changes.push({
                     type: log.type,
                     action: segmentNextToPosition ? 'create' : 'push',
@@ -407,8 +407,7 @@ let ProjectActions = {
                         data: tmpSegment2
                     }]
             });
-        }
-        ,
+        },
 
         /**
          *
@@ -427,8 +426,7 @@ let ProjectActions = {
                     rec: rec
                 }
             });
-        }
-        ,
+        },
         /**
          *
          * @param {Number} order Send -1 for remove all selection
@@ -440,8 +438,7 @@ let ProjectActions = {
                 order: order,
                 type: type
             });
-        }
-        ,
+        },
 
         /**
          *
@@ -452,8 +449,7 @@ let ProjectActions = {
                 actionType: ProjectConstants.SEGMENT_TO_SPLIT,
                 segment: segment,
             });
-        }
-        ,
+        },
 
         /**
          *
@@ -467,8 +463,7 @@ let ProjectActions = {
                 actionType: ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION,
                 data: log,
             });
-        }
-        ,
+        },
 
         /**
          * @param {Number} jobID
@@ -497,8 +492,7 @@ let ProjectActions = {
             }, error => {
                 console.error(error)
             })
-        }
-        ,
+        },
 
         /**
          * on action hover in toolbar dispatch type of action
@@ -509,8 +503,7 @@ let ProjectActions = {
                 actionType: ProjectConstants.ON_ACTION_HOVER,
                 type: type,
             });
-        }
-        ,
+        },
 
 
         /**
@@ -533,16 +526,15 @@ let ProjectActions = {
                 actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
                 changes: changes
             });
-        }
-        ,
+        },
 
-        deleteEmptyRows: function (deletes,matches) {
+        deleteEmptyRows: function (deletes, matches) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.DELETE_ROWS,
                 deletes: deletes,
                 syncAPI: {
                     action: 'delete',
-                    data:{
+                    data: {
                         jobID: ProjectStore.jobID,
                         jobPassword: ProjectStore.jobPassword,
                         matches: matches
@@ -550,8 +542,6 @@ let ProjectActions = {
                 }
             });
         }
-
-
     }
 ;
 

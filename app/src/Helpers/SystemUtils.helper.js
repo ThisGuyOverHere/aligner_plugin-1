@@ -101,5 +101,5 @@ export const checkResultStore = (source, target) => {
         }
         //console.log('['+x+']   '+target[x].order+'       '+target[x].next);
     }
-
+    console.log('\n\n')
 }

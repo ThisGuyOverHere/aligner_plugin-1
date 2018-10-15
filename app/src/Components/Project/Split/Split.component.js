@@ -137,9 +137,7 @@ class SplitComponent extends Component {
                 />)
             }
         });
-
         return items;
-
     };
 
     onCloseSplitModal = () => {
