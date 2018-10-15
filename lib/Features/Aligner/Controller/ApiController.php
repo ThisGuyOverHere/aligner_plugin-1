@@ -265,7 +265,61 @@ class ApiController extends AlignerController {
         return $this->getOperations();
     }
 
-    public function move() {
+    public function moveInEmpty($referenceMatch){
+
+
+        $order                     = $this->params[ 'order' ];
+        $id_job                    = $this->params[ 'id_job' ];
+        $type                      = $this->params[ 'type' ];
+        $destination_order         = $this->params[ 'destination' ];
+
+        $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
+
+        $new_match_order                       = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch[ 'next' ] );
+        $destination_match                     = $referenceMatch;
+        $destination_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
+        $destination_match[ 'content_raw' ]    = $movingSegment[ 'content_raw' ];
+        $destination_match[ 'content_clean' ]  = $movingSegment[ 'content_clean' ];
+        $destination_match[ 'raw_word_count' ] = $movingSegment[ 'raw_word_count' ];
+        $destination_match[ 'next' ]           = $new_match_order;
+
+        $this->pushOperation( [
+                'type'      => $type,
+                'action'    => 'update',
+                'rif_order' => $destination_order,
+                'data'      => $destination_match
+        ] );
+
+        $starting_match                     = $movingSegment;
+        $starting_match[ 'segment_id' ]     = null;
+        $starting_match[ 'content_raw' ]    = null;
+        $starting_match[ 'content_clean' ]  = null;
+        $starting_match[ 'raw_word_count' ] = null;
+
+        $this->pushOperation( [
+                'type'      => $type,
+                'action'    => 'update',
+                'rif_order' => $order,
+                'data'      => $starting_match
+        ] );
+
+        $conn = NewDatabase::obtain()->getConnection();
+        try {
+            $conn->beginTransaction();
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order ], $id_job, $type );
+            Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $movingSegment[ 'id' ] ], $destination_order, $id_job, $type );
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment Move - DB Error: " . $e->getMessage(), -2 );
+        }
+
+        return $this->getOperations();
+
+
+    }
+
+    public function moveInFill($referenceMatch){
 
         $order               = $this->params[ 'order' ];
         $id_job              = $this->params[ 'id_job' ];
@@ -276,7 +330,6 @@ class ApiController extends AlignerController {
 
         $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
 
-        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
         $new_match_order = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch['next'] );
         $destination_match = $referenceMatch;
         $destination_match['segment_id'] = $movingSegment['id'];
@@ -319,7 +372,7 @@ class ApiController extends AlignerController {
         $this->pushOperation( [
                 'type'      => $type,
                 'action'    => 'create',
-                'rif_order' => $new_match_order,
+                'rif_order' => $destination_order,
                 'data'      => $new_match_destination
         ] );
 
@@ -337,10 +390,10 @@ class ApiController extends AlignerController {
         $new_match_null[ 'raw_word_count' ] = null;
 
         $this->pushOperation( [
-            'type'      => $inverse_type,
-            'action'    => 'create',
-            'rif_order' => $new_inverse_order,
-            'data'      => $new_match_null
+                'type'      => $inverse_type,
+                'action'    => 'create',
+                'rif_order' => $inverseReference[ 'order' ],
+                'data'      => $new_match_null
         ] );
 
         $inverseReference['next'] = $new_inverse_order;
@@ -366,6 +419,23 @@ class ApiController extends AlignerController {
         }
 
         return $this->getOperations();
+
+    }
+
+    public function move() {
+
+        $id_job              = $this->params[ 'id_job' ];
+        $type                = $this->params[ 'type' ];
+        $destination_order         = $this->params[ 'destination' ];
+
+        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
+        if(!empty($referenceMatch['id'])){
+            return $this->moveInFill($referenceMatch);
+        }
+        else {
+            return $this->moveInEmpty($referenceMatch);
+        }
+
     }
 
 
