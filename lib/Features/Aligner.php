@@ -35,6 +35,8 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/segment/move', 'POST', 'Features\Aligner\Controller\ApiController', 'move' );
         route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\ApiController', 'delete' );
         route( '/job/[:id_job]/[:password]/segment/reverse', 'POST', 'Features\Aligner\Controller\ApiController', 'reverse' );
+
+        route( '/getmytm', 'GET', 'Features\Aligner\Controller\TMXController', 'getUserTM' );
         
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }
