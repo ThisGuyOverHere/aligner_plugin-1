@@ -93,3 +93,8 @@ export const httpDeleteSegments = (jobID,jobPassword,data) => {
     const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/segment/delete';
     return post(url,qs.stringify({matches: data}));
 };
+
+export const httpReverseSegments = (jobID,jobPassword,data) => {
+    const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/segment/reverse';
+    return post(url,qs.stringify(data));
+};
