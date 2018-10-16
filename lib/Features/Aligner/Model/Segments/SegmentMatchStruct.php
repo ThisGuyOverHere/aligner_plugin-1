@@ -14,6 +14,7 @@ class Segments_SegmentMatchStruct extends \DataAccess_AbstractDaoSilentStruct im
     public $type ;
     public $segment_id ;
     public $next ;
+    public $score ;
 
     /**
      * @param int $ttl
@@ -29,5 +30,6 @@ class Segments_SegmentMatchStruct extends \DataAccess_AbstractDaoSilentStruct im
     public function getSegment( ) {
         return Segments_SegmentDao::findById( $this->segment_id );
     }
+
 
 }

@@ -104,4 +104,27 @@ class AlignUtils
 
     }
 
+    public static function _parseArrayIntegers(array &$array){
+        foreach ($array as $key => $value){
+            if(is_numeric($array[$key])){
+                $array[$key] = (int) $value;
+            }
+        }
+    }
+
+    public static function _getObjectVariables($object){
+        if(!is_object($object)){
+            return new \Exception("This function accepts Object-type variables only");
+        }
+        return array_keys(get_object_vars($object));
+    }
+
+    public static function _array_union($x, $y){
+        $aunion=  array_merge(
+            array_intersect($x, $y),
+            array_diff($x, $y),
+            array_diff($y, $x)
+        );
+        return $aunion;
+    }
 }

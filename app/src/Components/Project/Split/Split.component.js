@@ -23,9 +23,42 @@ class SplitComponent extends Component {
             splits: {},
             charDictionary: this.fillDictionaries().charDictionary,
             wordDictionary: this.fillDictionaries().wordDictionary,
+            tagPosition: this.getTagsPosition(),
             temporarySplitPosition: -1,
         };
     }
+
+    getTagsPosition = () =>{
+        const   less = /##LESSTHAN##/g;
+        const   greater = /##GREATERTHAN##/g;
+        let     match;
+        let     lessArray = [];
+        let     greaterArray = [];
+        let tags = [];
+        let result = [];
+        while (match = less.exec(this.props.segment.content_raw)) {
+            lessArray.push(match.index);
+        }
+        while (match = greater.exec(this.props.segment.content_raw)) {
+            greaterArray.push(match.index);
+        }
+
+        lessArray.map((e,index)=>{
+            tags.push({
+                less: e,
+                greater: greaterArray[index]+14
+            })
+        });
+        tags.map((e)=>{
+           for(let x = e.less; x <= e.greater; x++){
+               result.push(x);
+           }
+        });
+        console.log(result);
+
+        return result
+
+    };
 
     componentDidMount() {
 
@@ -57,7 +90,7 @@ class SplitComponent extends Component {
                             <p id="toSplit" onMouseLeave={() => this.onCharHover(-1)}>
                                 {this.renderItems()}
                             </p>
-                            <button className="ui button primary" onClick={this.onSave}>Save</button>
+                            <button className="ui button primary" onClick={this.onSave}>Split</button>
                         </div>
                     </div>
                 </div>
@@ -78,14 +111,14 @@ class SplitComponent extends Component {
 
         this.state.chars.map((element, index) => {
             countSplittedItems++;
-            items.push(<SplitCharComponent
+            {this.state.tagPosition.indexOf(index) < 0 && items.push(<SplitCharComponent
                 word={element}
                 key={countSplittedItems}
                 signed={this.state.charDictionary[index] >= range[0] && this.state.charDictionary[index] <= range[1]}
                 position={index}
                 onClick={this.onCharClick}
                 onHover={this.onCharHover}
-            />);
+            />);}
             if (this.state.splits[index]) {
                 countSplittedItems++;
                 items.push(<SplitDivisor
@@ -104,9 +137,7 @@ class SplitComponent extends Component {
                 />)
             }
         });
-
         return items;
-
     };
 
     onCloseSplitModal = () => {

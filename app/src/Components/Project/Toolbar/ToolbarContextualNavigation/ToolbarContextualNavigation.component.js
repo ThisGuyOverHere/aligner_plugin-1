@@ -84,7 +84,6 @@ class ToolbarContextualNavigationComponent extends Component {
                             : <div className="cmd-shortcut">
                                 <p><span>select </span> or <span>drag and drop </span> to align</p>
                             </div>}
-
                     </div>
                 );
         }

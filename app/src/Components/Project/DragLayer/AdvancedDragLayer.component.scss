@@ -1,6 +1,7 @@
 @import "../../../../assets/theme/variables";
 
 .grid-dropLayer{
+  margin-top: -108px;
   display: grid;
   grid-template-columns: 1fr 1fr 45px;
   column-gap: 32px;

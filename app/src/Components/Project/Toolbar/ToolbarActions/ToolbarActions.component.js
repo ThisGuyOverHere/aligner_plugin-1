@@ -8,7 +8,11 @@ import ToolbarActionsAlignWrapperComponent from "./ToolbarActionsAlignWrapper/To
 class ToolbarActionsComponent extends Component {
 
     static propTypes = {
-        selection: PropTypes.object.isRequired
+        selection: PropTypes.object.isRequired,
+        jobConf: PropTypes.shape({
+            password: PropTypes.string,
+            id: PropTypes.any
+        })
     };
 
     constructor(props) {
@@ -32,7 +36,7 @@ class ToolbarActionsComponent extends Component {
                         <ToolbarActionsReverseComponent selection={this.props.selection}/>
                     </li>
                     <li>
-                        <ToolbarActionsMergeComponent selection={this.props.selection}/>
+                        <ToolbarActionsMergeComponent selection={this.props.selection} jobConf={this.props.jobConf}/>
 
                     </li>
                     <li>

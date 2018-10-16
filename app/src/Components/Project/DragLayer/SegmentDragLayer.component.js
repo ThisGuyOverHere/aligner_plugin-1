@@ -23,7 +23,7 @@ export default class SegmentDragLayer extends React.PureComponent {
     render() {
         return (
             <div className="dragSegmentContainer" style={this.getStyles()}>
-                <SegmentComponent {...this.props.item} />
+               {/* <SegmentComponent {...this.props.item} />*/}
             </div>
         )
     }

@@ -36,8 +36,7 @@ class ToolbarActionsSplitComponent extends Component {
                 onMouseOver={this.onHover}
                 onMouseOut={this.onMouseLeave}
                 onClick={this.onSplitClick}>
-                <i className={splitClasses.join(" ")}></i>
-                split
+                Split
             </button>
         );
     }

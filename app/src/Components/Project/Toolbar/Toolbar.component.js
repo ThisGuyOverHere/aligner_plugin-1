@@ -4,12 +4,20 @@ import ProjectConstants from "../../../Constants/Project.constants";
 import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.component";
 import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
 import ToolbarContextualNavigationComponent from "./ToolbarContextualNavigation/ToolbarContextualNavigation.component";
+import PropTypes from "prop-types";
+import ToolbarRightHintComponent from "./ToolbarRightHint/ToolbarRightHint.component";
 
 class ToolbarComponent extends Component {
-
+    static propTypes = {
+        jobConf: PropTypes.shape({
+            password: PropTypes.string,
+            id: PropTypes.any
+        })
+    };
     constructor(props) {
         super(props);
         this.state = {
+            hintOpened: false,
             selection: {
                 source: {
                     count: 0,
@@ -42,11 +50,13 @@ class ToolbarComponent extends Component {
                     {!!this.state.selection.count && <ToolbarSelectionComponent selection={this.state.selection}/>}
                 </div>
                 <div>
-                    <ToolbarActionsComponent selection={this.state.selection}/>
+                    <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.jobConf}/>
                 </div>
                 <div>
-                    {/*<ToolbarContextualNavigationComponent/>*/}
+                    {/* <ToolbarContextualNavigationComponent/> */ }
+                    <i className=" hint icon question circle outline" onClick={ this.hintModalOpened }></i>
                 </div>
+                { this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}
             </div>
         );
     }
@@ -55,6 +65,12 @@ class ToolbarComponent extends Component {
     storeSelection = (selection) => {
         this.setState({
             selection: selection
+        })
+    };
+
+    hintModalOpened = () => {
+        this.setState({
+            hintOpened: !this.state.hintOpened,
         })
     };
 }

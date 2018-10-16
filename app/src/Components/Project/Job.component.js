@@ -6,9 +6,11 @@ import {DragDropContext} from 'react-dnd';
 import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
 import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
+import HTML5Backend from 'react-dnd-html5-backend';
 import ToolbarComponent from "./Toolbar/Toolbar.component";
 import VirtualList from 'react-tiny-virtual-list';
 import TouchBackend from "react-dnd-touch-backend";
+import {syncWithBackend} from "../../Helpers/SystemUtils.helper";
 
 
 class JobComponent extends Component {
@@ -34,6 +36,7 @@ class JobComponent extends Component {
             },
             mergeStatus: false,
             splitModalStatus: false,
+            inSync: false,
             selection: {
                 source: {
                     count: 0,
@@ -52,7 +55,7 @@ class JobComponent extends Component {
         this.elementsRef = {};
         this.virtualList = null;
         this.elementsHeight = {};
-        ProjectActions.setJobID(this.props.match.params.jobID)
+        ProjectActions.setJobID(this.props.match.params.jobID,this.props.match.params.password)
 
     }
 
@@ -97,14 +100,18 @@ class JobComponent extends Component {
 
     render() {
         const data = this.renderItems(this.state.job.rows);
+        let classes = ['align-project'];
+        if (this.state.inSync) {
+            classes.push('inSync');
+        }
         return (
-            <div className="align-project">
+            <div className={classes.join(" ")}>
                 <VirtualList
                     ref={(instance) => {
                         this.virtualList = instance;
                     }}
                     width='100%'
-                    height={1000}
+                    height='calc(100vh - 108px)'
                     overscanCount={10}
                     itemCount={data.length}
 
@@ -140,7 +147,6 @@ class JobComponent extends Component {
                 {this.state.splitModalStatus &&
                 <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
                                 inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
-                <ToolbarComponent/>
             </div>
         );
     }
@@ -161,9 +167,10 @@ class JobComponent extends Component {
 
     };
 
-    setRows = (job) => {
+    setRows = (job, syncAPI) => {
         let rows = [];
         let deletes = [];
+        let matches = [];
         let previousJob = this.state.job;
         let rowsDictionary = {
             source: {},
@@ -180,22 +187,51 @@ class JobComponent extends Component {
                 });
             } else {
                 deletes.push(index);
+                matches.push({
+                    type: 'source',
+                    order: e.order
+                });
+                matches.push({
+                    type: 'target',
+                    order: job.target[index].order
+                });
             }
         });
 
-        if (deletes.length > 0) {
-            setTimeout(() => {
-                ProjectActions.deleteEmptyRows(deletes);
-            }, 0);
-
-        }
-
         previousJob.rows = rows;
         previousJob.rowsDictionary = rowsDictionary;
+
+
+        let inSync = false;
+        if (syncAPI) {
+            inSync = true;
+            syncWithBackend(syncAPI,()=>{
+                if (deletes.length > 0) {
+                    setTimeout(() => {
+                        ProjectActions.deleteEmptyRows(deletes,matches);
+                    }, 0);
+
+                }
+                this.setState({
+                    inSync: false
+                })
+            });
+        }else{
+            if (deletes.length > 0) {
+                setTimeout(() => {
+                    ProjectActions.deleteEmptyRows(deletes,matches);
+                }, 0);
+
+            }
+        }
+
+
         this.setState({
-            job: previousJob
+            job: previousJob,
+            inSync: inSync
         })
     };
+
 
     renderItems(array) {
         let values = [];
@@ -232,8 +268,5 @@ class JobComponent extends Component {
     }
 }
 
-export default DragDropContext(TouchBackend({
-    enableMouseEvents: true,
-    touchSlop: 5
-}))(JobComponent);
+export default DragDropContext(HTML5Backend)(JobComponent);
 
