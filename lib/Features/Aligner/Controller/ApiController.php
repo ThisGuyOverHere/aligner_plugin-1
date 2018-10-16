@@ -160,7 +160,7 @@ class ApiController extends AlignerController {
             //If we split the last segment we add new next values for the new segments
             $avg_order = ( $split_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $new_match[ 'order' ], $original_next ) : $avg_order + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
-            $new_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $avg_order : $split_segment[ 'next' ];
+            $new_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $avg_order : $original_next;
             $new_segment[ 'next' ] = $new_match[ 'next' ];
             $new_matches[]         = $new_match;
 
@@ -172,7 +172,7 @@ class ApiController extends AlignerController {
             //If we split the last segment we add new next values for the new segments
             $inverse_avg = ( $inverse_segment[ 'next' ] != null ) ? AlignUtils::_getNewOrderValue( $null_match[ 'order' ], $original_inverse_next ) : $inverse_avg + Constants::DISTANCE_INT_BETWEEN_MATCHES;
 
-            $null_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $inverse_avg : $inverse_segment[ 'next' ];
+            $null_match[ 'next' ]   = ( $key != count( $new_ids ) - 1 ) ? $inverse_avg : $original_inverse_next;
             $null_segment[ 'next' ] = $null_match[ 'next' ];
             $new_null_matches[]     = $null_match;
 
