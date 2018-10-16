@@ -6,6 +6,7 @@ import {DragDropContext} from 'react-dnd';
 import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
 import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
+import HTML5Backend from 'react-dnd-html5-backend';
 import ToolbarComponent from "./Toolbar/Toolbar.component";
 import VirtualList from 'react-tiny-virtual-list';
 import TouchBackend from "react-dnd-touch-backend";
@@ -110,7 +111,7 @@ class JobComponent extends Component {
                         this.virtualList = instance;
                     }}
                     width='100%'
-                    height='100vh'
+                    height='calc(100vh - 108px)'
                     overscanCount={10}
                     itemCount={data.length}
 
@@ -197,13 +198,6 @@ class JobComponent extends Component {
             }
         });
 
-        if (deletes.length > 0) {
-            setTimeout(() => {
-                ProjectActions.deleteEmptyRows(deletes,matches);
-            }, 0);
-
-        }
-
         previousJob.rows = rows;
         previousJob.rowsDictionary = rowsDictionary;
 
@@ -212,10 +206,23 @@ class JobComponent extends Component {
         if (syncAPI) {
             inSync = true;
             syncWithBackend(syncAPI,()=>{
+                if (deletes.length > 0) {
+                    setTimeout(() => {
+                        ProjectActions.deleteEmptyRows(deletes,matches);
+                    }, 0);
+
+                }
                 this.setState({
                     inSync: false
                 })
             });
+        }else{
+            if (deletes.length > 0) {
+                setTimeout(() => {
+                    ProjectActions.deleteEmptyRows(deletes,matches);
+                }, 0);
+
+            }
         }
 
 
@@ -261,8 +268,5 @@ class JobComponent extends Component {
     }
 }
 
-export default DragDropContext(TouchBackend({
-    enableMouseEvents: true,
-    touchSlop: 5
-}))(JobComponent);
+export default DragDropContext(HTML5Backend)(JobComponent);
 
