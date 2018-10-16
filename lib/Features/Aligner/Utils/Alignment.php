@@ -16,6 +16,7 @@ class Alignment {
     public $zero = 0;
     public $native = 0;
     public $approximated = 0;
+    public $lessCommon = 0;
     public $long = 0;
 
     public function alignSegments($source, $target, $source_lang, $target_lang) {
@@ -38,7 +39,7 @@ class Alignment {
 
         $time_end = microtime(true);
         Log::doLog('Completed alignment: source ['.count($source).'], target ['.count($target).'] in '.($time_end-$time_start).' seconds');
-        Log::doLog('Used: ZERO-LENGTH ['.$this->zero.'], NATIVE ['.$this->native.'], APPROX ['.$this->approximated.'], LONG ['.$this->long.'],');
+        Log::doLog('Used: ZERO-LENGTH ['.$this->zero.'], NATIVE ['.$this->native.'], APPROX ['.$this->approximated.'], COMMON ['.$this->lessCommon.'], LONG ['.$this->long.']');
 
         return $alignment;
     }
@@ -366,8 +367,21 @@ class Alignment {
         $source = segments_merge($sources);
         $target = segments_merge($targets);
 
+        // Early check for empty segments
+        if (count($source) == 0 || count($target) == 0) {
+            $ss = implode('', $source);  // One of the two will be empty
+            $ts = implode('', $target);
+
+            $distance = strlen($ss) + strlen($ts);
+
+            $this->zero += 1;
+
+            return [$distance, 0];
+        }
+
         // Remove common words
         $commonWords = array_intersect_opt($source, $target);
+        $commonChars = strlen(implode('', $commonWords));
 
         $ss = array_diff_opt($source, $commonWords);
         $ts = array_diff_opt($target, $commonWords);
@@ -387,8 +401,11 @@ class Alignment {
             $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
             $this->native += 1;
         } else if (abs($sl - $tl) > 100) {  // Check if strings are too different, and return an approximated result
-            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the little string is different
+            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the smaller string is different
             $this->approximated += 1;
+        } else if ($commonChars / ($commonChars + max($sl, $tl)) < 0.15) {  // Common chars are less then 15% of the length of the original longest string
+            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the smaller string is different
+            $this->lessCommon += 1;
         } else {
             $distance = levenshtein_opt($ss, $ts, $costIns, $costRep, $costDel);
             $this->long += 1;
@@ -491,20 +508,27 @@ function levenshtein_opt($str1, $str2, $costIns, $costRep, $costDel) {
 }
 
 // Optimized function to avoid PHP ones
-function array_diff_opt($a, $b) {
+function array_diff_opt($words, $commonWords) {
+    // Hash map of initial words
     $map = array();
-    foreach($a as $val) $map[$val] = 1;
-    foreach($b as $val) unset($map[$val]);
+    foreach($words as $word) $map[$word] = 1;
+
+    // Unset commont words
+    foreach($commonWords as $word) unset($map[$word]);
+
+    // Return keys from map
     return array_keys($map);
 }
 
 function array_intersect_opt($a, $b) {
-    $index = array_flip($a);
-    foreach ($b as $value) {
-        if (isset($index[$value])) unset($index[$value]);
-    }
-    foreach ($index as $key => $value) {
-        if (isset($a[$value])) unset($a[$value]);
-    }
-    return $a;
+    // Hash map of $a words
+    $map = array();
+    foreach($a as $word) $map[$word] = 1;
+
+    // Get words of $b found in $map
+    $out = array();
+    foreach($b as $word) if(isset($map[$word])) $out[$word] = 1;  // To avoid duplicates
+
+    // Returm common words
+    return array_keys($out);
 }
