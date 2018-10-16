@@ -81,6 +81,31 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getTranslationsForTMXExport( $id_job ) {
+
+        $conn        = NewDatabase::obtain()->getConnection();
+
+        $stmt = $conn->prepare("SELECT s.content_raw as source FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ?
+        ORDER by sm.order");
+
+        $stmt->execute( [$id_job, 'source'] );
+
+        $source = $stmt->fetchAll();
+
+        $stmt = $conn->prepare("SELECT s.content_raw as target FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ?
+        ORDER by sm.order");
+
+        $stmt->execute( [$id_job, 'target'] );
+
+        $target = $stmt->fetchAll();
+
+        return ['source' => $source, 'target' => $target];
+    }
+
     public static function getFromOrderInterval($order_start, $order_end, $id_job, $type, $ttl = 0){
 
         $thisDao = new self();
