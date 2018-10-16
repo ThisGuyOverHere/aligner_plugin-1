@@ -13,6 +13,11 @@ use Log;
 
 class Alignment {
 
+    public $zero = 0;
+    public $native = 0;
+    public $approximated = 0;
+    public $long = 0;
+
     public function alignSegments($source, $target, $source_lang, $target_lang) {
         // Variant on Church and Gale algorithm with Levenshtein distance
 
@@ -33,6 +38,7 @@ class Alignment {
 
         $time_end = microtime(true);
         Log::doLog('Completed alignment: source ['.count($source).'], target ['.count($target).'] in '.($time_end-$time_start).' seconds');
+        Log::doLog('Used: ZERO-LENGTH ['.$this->zero.'], NATIVE ['.$this->native.'], APPROX ['.$this->approximated.'], LONG ['.$this->long.'],');
 
         return $alignment;
     }
@@ -376,12 +382,16 @@ class Alignment {
 
         if ($sl == 0 || $tl == 0) {  // Check if we can return immediately the upper bound
             $distance = max($sl, $tl);
+            $this->zero += 1;
         } else if ($sl < 255 && $tl < 255) {  // Check if we can use the efficient standard implementation
             $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+            $this->native += 1;
         } else if (abs($sl - $tl) > 100) {  // Check if strings are too different, and return an approximated result
             $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the little string is different
+            $this->approximated += 1;
         } else {
             $distance = levenshtein_opt($ss, $ts, $costIns, $costRep, $costDel);
+            $this->long += 1;
         }
 
         // Score
