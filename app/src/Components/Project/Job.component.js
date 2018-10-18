@@ -132,7 +132,7 @@ class JobComponent extends Component {
                         const targetHeight = target.getBoundingClientRect().height;
 
                         document.getElementById('hiddenHtml').innerHTML = "";
-                        return Math.max(sourceHeight, targetHeight) + 96
+                        return Math.max(sourceHeight, targetHeight) + 64
                     }}
                     renderItem={({index, style}) =>
                         <div key={index} style={style} ref={(el) => {
