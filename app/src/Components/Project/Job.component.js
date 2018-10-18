@@ -7,9 +7,7 @@ import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
 import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
 import HTML5Backend from 'react-dnd-html5-backend';
-import ToolbarComponent from "./Toolbar/Toolbar.component";
 import VirtualList from 'react-tiny-virtual-list';
-import TouchBackend from "react-dnd-touch-backend";
 import {syncWithBackend} from "../../Helpers/SystemUtils.helper";
 
 
@@ -34,7 +32,6 @@ class JobComponent extends Component {
                 order: null,
                 yCoord: null
             },
-            mergeStatus: false,
             splitModalStatus: false,
             inSync: false,
             selection: {
@@ -54,39 +51,13 @@ class JobComponent extends Component {
 
         this.elementsRef = {};
         this.virtualList = null;
-        this.elementsHeight = {};
         ProjectActions.setJobID(this.props.match.params.jobID,this.props.match.params.password)
-
-    }
-
-    static getDerivedStateFromProps(props, state) {
-
-        return null;
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-
-        return true;
-    }
-
-    getSnapshotBeforeUpdate(prevProps, prevState) {
-
-        return null;
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-
-    }
-
-
-    componentDidCatch() {
 
     }
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
-        ProjectStore.addListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
     }
@@ -95,7 +66,6 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
-        ProjectStore.removeListener(ProjectConstants.MERGE_STATUS, this.setMergeStatus);
     }
 
     render() {
@@ -247,20 +217,12 @@ class JobComponent extends Component {
                                                  index={index}
                                                  enableDrag={enableDrag}
                                                  selection={selection}
-                                                 mergeStatus={this.state.mergeStatus}
                                                  row={row}/>);
                 return row;
             });
         }
         return values;
     }
-
-    setMergeStatus = (status) => {
-        this.setState({
-            mergeStatus: status
-        })
-    };
-
     storeSelection = (selection) => {
         this.setState({
             selection: selection
