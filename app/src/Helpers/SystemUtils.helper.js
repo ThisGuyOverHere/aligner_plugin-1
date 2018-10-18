@@ -1,4 +1,9 @@
-import {httpDeleteSegments, httpMergeSegments, httpMoveSegments} from "../HttpRequests/Alignment.http";
+import {
+    httpDeleteSegments,
+    httpMergeSegments,
+    httpMoveSegments,
+    httpReverseSegments
+} from "../HttpRequests/Alignment.http";
 
 /**
  *
@@ -61,6 +66,13 @@ export const syncWithBackend = (method, callback) => {
                 destination: method.data.destination,
                 inverse_destination: method.data.inverse_destination
             }).then((response) => {
+                callback()
+            }, (error) => {
+                console.log(error);
+            });
+            break;
+        case 'reverse':
+            httpReverseSegments(method.data.jobID, method.data.jobPassword, method.data).then((response) => {
                 callback()
             }, (error) => {
                 console.log(error);
