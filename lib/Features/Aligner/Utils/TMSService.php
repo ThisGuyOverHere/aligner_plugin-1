@@ -83,9 +83,9 @@ class TMSService extends \TMSService {
 <tmx version="1.4">
     <header
             creationtool="Matecat-Cattool"
-            creationtoolversion="' . INIT::$BUILD_NUMBER . '"
+            creationtoolversion="' . \INIT::$BUILD_NUMBER . '"
 	    o-tmf="Matecat"
-            creationid="Matecat"
+            creationid="Matecat-Aligner"
             datatype="plaintext"
             segtype="sentence"
             adminlang="en-US"
@@ -108,14 +108,8 @@ class TMSService extends \TMSService {
 
         foreach ( $matches as $k => $row ) {
 
-            $dateCreate = new DateTime( $row[ 'translation_date' ], new DateTimeZone( 'UTC' ) );
-
             $tmx = '
-    <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
-        <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
-        <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
-        <prop type="x-MateCAT-filename">' . CatUtils::rawxliff2rawview( $row[ 'filename' ] ) . '</prop>
-        <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
+    <tu datatype="plaintext" srclang="' . $sourceLang . '">
         <tuv xml:lang="' . $sourceLang . '">
             <seg>' . CatUtils::rawxliff2rawview( $row[ 'segment' ] ) . '</seg>
         </tuv>';
