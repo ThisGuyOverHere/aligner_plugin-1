@@ -82,28 +82,29 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     public static function getTranslationsForTMXExport( $id_job ) {
+        $conn = NewDatabase::obtain()->getConnection();
 
-        $conn        = NewDatabase::obtain()->getConnection();
+        $conn->query("set @RN1=0");
+        $conn->query("set @RN2=0");
 
-        $stmt = $conn->prepare("SELECT s.content_raw as source FROM segments as s
+        $stmt = $conn->prepare( "
+SELECT source, target FROM (
+SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order
+        ) s LEFT JOIN (
+        SELECT s.content_raw as target, @RN2 := @RN2 + 1 as RN2 FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ?
-        ORDER by sm.order");
+        ORDER by sm.order
+        ) t 
+        ON s.RN1 = t.RN2" );
 
-        $stmt->execute( [$id_job, 'source'] );
+        $stmt->execute( [ $id_job, 'source', $id_job, 'target' ] );
 
-        $source = $stmt->fetchAll();
+        $data = $stmt->fetchAll();
 
-        $stmt = $conn->prepare("SELECT s.content_raw as target FROM segments as s
-        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
-        WHERE sm.id_job = ? AND sm.type = ?
-        ORDER by sm.order");
-
-        $stmt->execute( [$id_job, 'target'] );
-
-        $target = $stmt->fetchAll();
-
-        return ['source' => $source, 'target' => $target];
+        return $data;
     }
 
 

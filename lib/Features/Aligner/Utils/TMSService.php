@@ -16,54 +16,6 @@ class TMSService extends \TMSService {
     /**
      * Export Job as Tmx File
      *
-     * @param $jid
-     * @param $sourceLang
-     * @param $targetLang
-     *
-     * @return SplTempFileObject $tmpFile
-     *
-     */
-    public function exportJobAsCSV( $jid, $sourceLang, $targetLang ) {
-
-        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 15MB */ );
-
-        $csv_fields = [
-                "Source: $sourceLang", "Target: $targetLang"
-        ];
-
-        $tmpFile->fputcsv( $csv_fields );
-
-        $segmentDao = new Segments_SegmentDao();
-        $result     = $segmentDao->getTranslationsForTMXExport($jid);
-
-        $matches = [];
-        foreach ( $result[ 'target' ] as $key => $target ) {
-            $matches[ $key ][ 'translation' ] = $target[ 'content_raw' ];
-        }
-
-        foreach ( $result[ 'source' ] as $key => $source ) {
-            $matches[ $key ][ 'segment' ] = $source[ 'content_raw' ];
-        }
-
-        foreach ( $matches as $k => $row ) {
-
-            $row_array = [
-                    $row[ 'segment' ], $row[ 'translation' ]
-            ];
-
-            $tmpFile->fputcsv( $row_array );
-
-        }
-
-        $tmpFile->rewind();
-
-        return $tmpFile;
-
-    }
-
-    /**
-     * Export Job as Tmx File
-     *
      * @param          $jid
      * @param          $jPassword
      * @param          $sourceLang
@@ -71,13 +23,13 @@ class TMSService extends \TMSService {
      *
      * @param int|null $uid
      *
-     * @return SplTempFileObject $tmpFile
+     * @return \SplTempFileObject $tmpFile
      *
-     * @throws Exception
+     * @throws \Exception
      */
-    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
+    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ) {
 
-        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
+        $tmpFile = new \SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
 <tmx version="1.4">
@@ -94,29 +46,23 @@ class TMSService extends \TMSService {
 
 
         $segmentDao = new Segments_SegmentDao();
-        $result     = $segmentDao->getTranslationsForTMXExport($jid);
-
-        $matches = [];
-        foreach ( $result[ 'target' ] as $key => $target ) {
-            $matches[ $key ][ 'translation' ] = $target[ 'content_raw' ];
-        }
-
-        foreach ( $result[ 'source' ] as $key => $source ) {
-            $matches[ $key ][ 'segment' ] = $source[ 'content_raw' ];
-        }
-
+        $matches    = $segmentDao->getTranslationsForTMXExport( $jid );
 
         foreach ( $matches as $k => $row ) {
+
+            if ( empty( $row[ 'source' ] ) || empty( $row[ 'target' ] ) ) {
+                continue;
+            }
 
             $tmx = '
     <tu datatype="plaintext" srclang="' . $sourceLang . '">
         <tuv xml:lang="' . $sourceLang . '">
-            <seg>' . CatUtils::rawxliff2rawview( $row[ 'segment' ] ) . '</seg>
+            <seg>' . \CatUtils::rawxliff2rawview( $row[ 'source' ] ) . '</seg>
         </tuv>';
 
-                $tmx .= '
+            $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
-            <seg>' . CatUtils::rawxliff2rawview( $row[ 'translation' ] ) . '</seg>
+            <seg>' . \CatUtils::rawxliff2rawview( $row[ 'target' ] ) . '</seg>
         </tuv>';
 
 

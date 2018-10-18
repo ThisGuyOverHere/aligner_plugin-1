@@ -30,6 +30,7 @@ class Aligner extends BaseFeature
         route( '/parse/[:id_job]', 'GET', 'Features\Aligner\Controller\ParserController', 'jobParser' );
 
         route( '/job/[:id_job]/[:password]/information', 'GET', 'Features\Aligner\Controller\JobController', 'information' );
+        route( '/job/[:id_job]/[:password]/tmx_download', 'GET', 'Features\Aligner\Controller\TMXController', 'downloadTMX' );
         route( '/segments/[:id_job]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
 
         route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\ApiController', 'split' );

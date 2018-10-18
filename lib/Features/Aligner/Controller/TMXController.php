@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Controller;
 
+use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Utils\TMSService;
 
 class TMXController extends AlignerController {
@@ -142,6 +143,38 @@ class TMXController extends AlignerController {
 
         $this->response->json( $status );
 
+    }
+
+    public function downloadTMX(){
+
+        $id_job = $this->params['id_job'];
+        $password = $this->params['password'];
+
+        $job = Jobs_JobDao::getByIdAndPassword($id_job, $password);
+
+        $tmsService = new TMSService();
+
+        $tmx = $tmsService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
+
+        $buffer = ob_get_contents();
+        ob_get_clean();
+        ob_start( "ob_gzhandler" );  // compress page before sending
+        header( "Content-Type: application/force-download" );
+        header( "Content-Type: application/octet-stream" );
+        header( "Content-Type: application/download" );
+
+        // Enclose file name in double quotes in order to avoid duplicate header error.
+        // Reference https://github.com/prior/prawnto/pull/16
+        header( "Content-Disposition: attachment; filename=\"file.tmx\"" );
+        header( "Expires: 0" );
+        header( "Connection: close" );
+
+        //read file and output it
+        foreach ( $tmx as $line ) {
+            echo $line;
+        }
+
+        exit;
     }
 
 
