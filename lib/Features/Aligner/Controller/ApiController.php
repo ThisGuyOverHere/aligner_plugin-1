@@ -426,7 +426,7 @@ class ApiController extends AlignerController {
 
         $id_job              = $this->params[ 'id_job' ];
         $type                = $this->params[ 'type' ];
-        $destination_order         = $this->params[ 'destination' ];
+        $destination_order    = $this->params[ 'destination' ];
 
         $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
         if(!empty($referenceMatch['id'])){
@@ -658,6 +658,180 @@ class ApiController extends AlignerController {
 
         return $this->getOperations();
 
+    }
+
+    public function mergeAndAlign() {
+        $matches           = $this->params[ 'matches' ];
+        $id_job            = $this->params[ 'id_job' ];
+        $destination_order = $this->params[ 'destination' ];
+
+        $sources        = [];
+        $targets        = [];
+        $sourceOrders   = [];
+        $targetOrders   = [];
+
+        foreach ( $matches as $match ) {
+            if ( $match[ 'type' ] == 'target' ){
+                $targetOrders[] = $match['order'];
+            } else {
+                $sourceOrders[] = $match['order'];
+            }
+        }
+
+        sort($sourceOrders);
+        sort($targetOrders);
+
+        foreach ( $sourceOrders as $order ) {
+            $sources[] = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, 'source')->toArray();
+        }
+        foreach ( $targetOrders as $order ) {
+            $targets[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, 'target' )->toArray();
+        }
+
+        $first_source = $sources[0];
+        $first_target = $targets[0];
+
+        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, 'target' )->toArray();
+        
+        $new_match_order = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch['next'] );
+
+        $starting_match = $first_target;
+        $starting_match['segment_id'] = null;
+        $starting_match['content_raw'] = null;
+        $starting_match['content_clean'] = null;
+        $starting_match['raw_word_count'] = null;
+
+        $destination_match = $referenceMatch;
+        $destination_match['segment_id'] = $first_target['id'];
+        $destination_match['next'] = $new_match_order;
+
+        $new_match_destination = [];
+        $new_match_destination[ 'order' ]          = $new_match_order;
+        $new_match_destination[ 'next' ]           = $referenceMatch['next'];
+        $new_match_destination[ 'score' ]          = 100;
+        $new_match_destination[ 'segment_id' ]     = $referenceMatch[ 'id' ];
+        $new_match_destination[ 'type' ]           = 'target';
+        $new_match_destination[ 'id_job' ]         = $id_job;
+        $new_match_destination[ 'content_raw' ]    = $referenceMatch['content_raw'];
+        $new_match_destination[ 'content_clean' ]  = $referenceMatch['content_clean'];
+        $new_match_destination[ 'raw_word_count' ] = $referenceMatch['raw_word_count'];
+
+        $inverseReference  = Segments_SegmentMatchDao::getSegmentMatch( $first_source['order'], $id_job, 'source' )->toArray();
+
+        $new_match_null    = [];
+        $new_inverse_order = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
+
+        $new_match_null[ 'order' ]          = $new_inverse_order;
+        $new_match_null[ 'next' ]           = $inverseReference[ 'next' ];
+        $new_match_null[ 'score' ]          = 100;
+        $new_match_null[ 'segment_id' ]     = null;
+        $new_match_null[ 'type' ]           = 'source';
+        $new_match_null[ 'id_job' ]         = $id_job;
+        $new_match_null[ 'content_raw' ]    = null;
+        $new_match_null[ 'content_clean' ]  = null;
+        $new_match_null[ 'raw_word_count' ] = null;
+
+        array_shift( $sourceOrders );
+        array_shift( $targetOrders );
+
+        $inverseReference['next'] = $new_inverse_order;
+        $conn = NewDatabase::obtain()->getConnection();
+        try {
+            $conn->beginTransaction();
+            $first_source_segment = ( count($sources) > 1 ) ? Segments_SegmentDao::mergeSegments( $sources ) : $first_source;
+            $first_target_segment = ( count($targets) > 1 ) ? Segments_SegmentDao::mergeSegments( $targets ) : $first_target;
+            if( !empty($sourceOrders) ){ Segments_SegmentMatchDao::nullifySegmentsInMatches( $sourceOrders, $id_job, 'source' ); }
+            if( !empty($targetOrders) ){ Segments_SegmentMatchDao::nullifySegmentsInMatches( $targetOrders, $id_job, 'target' ); }
+
+            $segmentsMatchDao = new Segments_SegmentMatchDao;
+            $segmentsMatchDao->createList( [ $new_match_destination, $new_match_null ] );
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $first_target['order'] ], $id_job, 'target' );
+            Segments_SegmentMatchDao::updateFields( ['segment_id' => $first_target_segment['id'], 'next' => $new_match_order], $destination_order, $id_job, 'target' );
+            Segments_SegmentMatchDao::updateFields( ['next' => $new_inverse_order], $first_source_segment['order'], $id_job, 'source' );
+
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Merge-align  ", -2 );
+        }
+        
+        //TODO replace stuff in match
+        $destination_match['content_raw']    = $first_target_segment['content_raw'];
+        $destination_match['content_clean']  = $first_target_segment['content_clean'];
+        $destination_match['raw_word_count'] = $first_target_segment['raw_word_count'];
+
+        try{
+
+            $this->pushOperation( [
+                'type'      => 'source',
+                'action'    => 'update',
+                'rif_order' => $first_source_segment['order'],
+                'data'      => $first_source_segment
+            ] );
+
+            foreach ( $sourceOrders as $order ) {
+                $this->pushOperation( [
+                    'type'      => 'source',
+                    'action'    => 'delete',
+                    'rif_order' => $order
+                ] );
+            }
+
+            $this->pushOperation( [
+                'type'      => 'target',
+                'action'    => 'update',
+                'rif_order' => $first_target_segment['order'],
+                'data'      => $first_target_segment
+            ] );
+
+            foreach ( $targetOrders as $order ) {
+                $this->pushOperation( [
+                    'type'      => 'target',
+                    'action'    => 'delete',
+                    'rif_order' => $order
+                ] );
+            }
+
+            $this->pushOperation( [
+                'type'      => 'target',
+                'action'    => 'update',
+                'rif_order' => $destination_order,
+                'data'      => $destination_match
+            ] );
+
+            $this->pushOperation( [
+                'type'      => 'target',
+                'action'    => 'update',
+                'rif_order' => $first_target['order'],
+                'data'      => $starting_match
+            ] );
+
+            $this->pushOperation( [
+                'type'      => 'target',
+                'action'    => 'create',
+                'rif_order' => $referenceMatch['next'],
+                'data'      => $new_match_destination
+            ] );
+
+            //TODO fix rif_order for front-end
+            $this->pushOperation( [
+                'type'      => 'source',
+                'action'    => 'create',
+                'rif_order' => $first_source[ 'next' ],
+                'data'      => $new_match_null
+            ] );
+
+            $this->pushOperation( [
+                'type'      => 'source',
+                'action'    => 'update',
+                'rif_order' => $inverseReference['order'],
+                'data'      => $inverseReference
+            ] );
+
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage(), -2 );
+        }
+        return $this->getOperations();
     }
     
     private function pushOperation( $operation ) {
