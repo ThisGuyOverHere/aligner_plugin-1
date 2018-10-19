@@ -165,12 +165,6 @@ let ProjectActions = {
             });
 
         },
-        setMergeStatus: function (status) {
-            AppDispatcher.dispatch({
-                actionType: ProjectConstants.MERGE_STATUS,
-                status: status
-            });
-        },
 
         scrollToSegment: function (ref, y = false) {
             AppDispatcher.dispatch({

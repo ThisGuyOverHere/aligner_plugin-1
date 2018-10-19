@@ -2,10 +2,7 @@ import * as React from 'react'
 import {DragLayer, XYCoord} from 'react-dnd'
 import {ItemTypes} from '../../../Constants/Draggable.constants';
 import SegmentDragLayer from './SegmentDragLayer.component';
-import keydown from 'react-keydown';
 import {Component} from "react";
-import ProjectActions from "../../../Actions/Project.actions";
-import SystemActions from "../../../Actions/System.actions";
 
 
 const layerStyles = {
@@ -55,14 +52,9 @@ class AdvancedDragLayer extends Component {
     };
 
     componentDidMount(){
-        document.addEventListener("keydown", this.setMergeStatus, false);
-        document.addEventListener("keyup", this.unsetMergeStatus, false);
 
     }
     componentWillUnmount(){
-        document.removeEventListener("keydown", this.setMergeStatus, false);
-        document.removeEventListener("keyup", this.unsetMergeStatus, false);
-        ProjectActions.setMergeStatus(false);
     }
 
     render = () => {
@@ -84,28 +76,9 @@ class AdvancedDragLayer extends Component {
                 }}>
                     <div className="grid-dropLayer" style={getItemStyles(this.props)}>{this.renderItem()}</div>
                 </div>
-                {/*<p className={mergeClass.join(" ")}>CMD for Merge</p>*/}
             </div>
         )
     };
-
-    setMergeStatus = (event) =>{
-        if(event.key === 'Alt'){
-            ProjectActions.setMergeStatus(true);
-            this.setState({
-                merge: true
-            });
-        }
-
-    };
-    unsetMergeStatus = (event) =>{
-        if(event.key === 'Alt'){
-            ProjectActions.setMergeStatus(false);
-            this.setState({
-                merge: false
-            });
-        }
-    }
 }
 
 export default DragLayer(monitor => ({

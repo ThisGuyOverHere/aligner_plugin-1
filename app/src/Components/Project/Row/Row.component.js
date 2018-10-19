@@ -10,18 +10,8 @@ import ReactDOM, {findDOMNode} from "react-dom";
 
 const RowTarget = {
     canDrop(props, monitor) {
-        const from = monitor.getItem(),
-            types = {
-                'source': 0,
-                'target': 1
-            };
-
-        if ((from.segment.order !== props.row[from.type].order)
-            && (!props.mergeStatus || (props.mergeStatus && props.row[from.type].content_clean))
-        ) {
-            return true
-        }
-        return false
+        const from = monitor.getItem();
+        return from.segment.order !== props.row[from.type].order;
     },
     drop(props, monitor, component) {
         const from = monitor.getItem();
@@ -49,7 +39,6 @@ class RowComponent extends Component {
     static propTypes = {
         index: PropTypes.number.isRequired,
         animate: PropTypes.bool,
-        mergeStatus: PropTypes.bool.isRequired,
         setAnimatedRow: PropTypes.func,
         scrollY: PropTypes.any,
         enableDrag: PropTypes.bool,
@@ -119,7 +108,6 @@ class RowComponent extends Component {
                 <div>{this.props.index}</div>
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
-                                  mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'source'}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.source}
                                   segment={this.props.row.source}/>
@@ -127,7 +115,6 @@ class RowComponent extends Component {
                                   dropHover={isOver && canDrop && dragElType === 'target'}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.target}
-                                  mergeStatus={canDrop && isOver && this.props.mergeStatus && dragEl.type === 'target'}
                                   segment={this.props.row.target}/>
             </div>
         );
