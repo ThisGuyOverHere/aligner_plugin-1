@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { Redirect } from 'react-router';
-import {httpAlignJob} from "../../../HttpRequests/Alignment.http";
+import {Redirect} from 'react-router';
+import {httpAlignJob, httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
 import env from "../../../Constants/Env.constants";
 import PropTypes from "prop-types";
 
@@ -15,33 +15,62 @@ class PreAlignStatus extends Component {
                 id: props.props.match.params.jobID
             },
             progress: 30,
+            sourceLang: '',
+            sourceLangFileName: '',
+            totalSourceSegments: '',
+            targetLang: '',
+            targetLangFileName: '',
+            totalTargetSegments: ''
         }
     };
 
     componentDidMount() {
-      httpAlignJob(this.state.job.id)
-          .then( response => {
-              this.setState(
-                  {
-                      progress: 100,
-                  }
-              );
-          })
-          .catch( error => {
-              console.log(error);
-          })
+        // get job info
+        httpGetAlignmentInfo(this.state.job.id, this.state.job.password)
+            .then(
+                response => {
+                    console.log(response);
+                    const info = response.data;
+                    this.state.sourceLang = info.source_lang;
+                    this.state.sourceLangFileName =  '';
+                    this.state.totalSourceSegments = info.total_source_segments;
+                    this.state.targetLang = info.target_lang;
+                    this.state.targetLangFileName = '';
+                    this.state.totalTargetSegments = info.total_target_segments;
+                }
+            ).catch(
+            error => {
+                console.log(error);
+            }
+        );
+
+        // check for the end of alignment process
+        httpAlignJob(this.state.job.id)
+            .then(
+                response => {
+                    this.setState(
+                        {
+                            progress: 100,
+                        }
+                    );
+                }
+            )
+            .catch(error => {
+                    console.log(error);
+                }
+            );
     };
 
     render() {
         if (this.state.progress === 100) {
-            return <Redirect to={'/job/' +  this.state.job.id  + '/' + this.state.job.password + '/align'}/>;
-        }else{
-            return<div>
+            return <Redirect to={'/job/' + this.state.job.id + '/' + this.state.job.password + '/align'}/>;
+        } else {
+            return <div>
                 <h3>Volume analysis... </h3>
                 <div className="bar-container">
                     <div className='ui progress' data-percent={this.state.progress}>
-                        <div className='bar' style={{width: this.state.progress + '%' }}>
-                            { /* <div className='progress'>{this.state.progress + '%'}</div> */}
+                        <div className='bar' style={{width: this.state.progress + '%'}}>
+                            {/* <div className='progress'>{this.state.progress + '%'}</div> */}
                         </div>
                     </div>
                     <div className="percentage">{this.state.progress + '%'}</div>
