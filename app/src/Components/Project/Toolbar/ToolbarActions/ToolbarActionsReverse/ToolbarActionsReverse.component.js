@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
 import {getSegmentByOrder} from "../../../../../Helpers/SegmentUtils.helper";
-import {Popup} from "semantic-ui-react";
+import Hotkeys from "react-hot-keys";
 
 class ToolbarActionsReverseComponent extends Component {
     static propTypes = {
@@ -11,9 +11,6 @@ class ToolbarActionsReverseComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            type: 'reverse'
-        };
     }
 
 
@@ -32,39 +29,29 @@ class ToolbarActionsReverseComponent extends Component {
         ) {
             disabled = true;
         }
-        return <span>
-                <button
-                    disabled={disabled}
-                    onMouseOut={this.onMouseLeave}
-                    onMouseOver={this.onHover}
-                    onClick={this.onReverseClick}>
-                    Reverse
-                </button>
-            </span>;
-        /*
-         return (
-             <Popup trigger={comp} content='shortcut alt+R' on='hover' inverted />
-
-         );
-
-         */
+        return <Hotkeys
+            keyName="alt+r"
+            onKeyDown={this.onReverseClick}>
+            <button
+                disabled={disabled}
+                onClick={this.onReverseClick}>
+                Reverse
+            </button>
+        </Hotkeys>;
     }
 
     onReverseClick = () => {
-        const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-        const segment1 = getSegmentByOrder(this.props.selection[type].list[0], type);
-        const segment2 = getSegmentByOrder(this.props.selection[type].list[1], type);
-        ProjectActions.reverseTwoSegments(segment1, segment2);
-        ProjectActions.addSegmentToSelection(-1);
-        ProjectActions.onActionHover(null);
-    };
-
-    onHover = () => {
-        ProjectActions.onActionHover(this.state.type);
-    };
-
-    onMouseLeave = () => {
-        ProjectActions.onActionHover(null);
+        if (
+            ((this.props.selection.source.count === 0 && this.props.selection.target.count === 2)
+                || (this.props.selection.target.count === 0 && this.props.selection.source.count === 2))
+        ) {
+            const type = this.props.selection.source.count > 0 ? 'source' : 'target';
+            const segment1 = getSegmentByOrder(this.props.selection[type].list[0], type);
+            const segment2 = getSegmentByOrder(this.props.selection[type].list[1], type);
+            ProjectActions.reverseTwoSegments(segment1, segment2);
+            ProjectActions.addSegmentToSelection(-1);
+            ProjectActions.onActionHover(null);
+        }
     };
 
 }

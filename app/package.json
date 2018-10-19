@@ -24,6 +24,7 @@
     "react-dnd-touch-backend": "0.5.1",
     "react-dom": "^16.0.0",
     "react-dropzone": "^4.2.13",
+    "react-hot-keys": "^1.2.2",
     "react-keydown": "^1.9.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
