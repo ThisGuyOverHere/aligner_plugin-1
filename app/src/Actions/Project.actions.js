@@ -165,12 +165,6 @@ let ProjectActions = {
             });
 
         },
-        setMergeStatus: function (status) {
-            AppDispatcher.dispatch({
-                actionType: ProjectConstants.MERGE_STATUS,
-                status: status
-            });
-        },
 
         scrollToSegment: function (ref, y = false) {
             AppDispatcher.dispatch({
@@ -405,7 +399,17 @@ let ProjectActions = {
                         action: 'update',
                         rif_order: tmpSegment2.order,
                         data: tmpSegment2
-                    }]
+                    }],
+                syncAPI: {
+                    action: 'reverse',
+                    data: {
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        order1: segment1.order,
+                        order2: segment2.order,
+                        type: segment2.type
+                    }
+                }
             });
         },
 

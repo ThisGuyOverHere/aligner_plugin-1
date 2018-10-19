@@ -31,7 +31,6 @@ class SegmentComponent extends Component {
     static propTypes = {
         type: PropTypes.string.isRequired,
         dropHover: PropTypes.bool.isRequired,
-        mergeStatus: PropTypes.bool,
         selected: PropTypes.bool,
         enableDrag: PropTypes.bool,
         segment: PropTypes.shape({
@@ -99,9 +98,6 @@ class SegmentComponent extends Component {
         }
         if (dropHover) {
             segmentClasses.push('onDropHover')
-            if (this.props.mergeStatus) {
-                segmentClasses.push('onDropHoverMerge')
-            }
         }
         if (this.props.selected) {
             segmentClasses.push('selected')

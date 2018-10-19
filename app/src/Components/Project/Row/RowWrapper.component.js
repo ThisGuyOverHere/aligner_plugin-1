@@ -8,7 +8,6 @@ class RowWrapperComponent extends Component {
     static propTypes = {
         index: PropTypes.number.isRequired,
         animate: PropTypes.bool,
-        mergeStatus: PropTypes.bool.isRequired,
         setAnimatedRow: PropTypes.func,
         scrollY: PropTypes.any,
         enableDrag: PropTypes.bool,
