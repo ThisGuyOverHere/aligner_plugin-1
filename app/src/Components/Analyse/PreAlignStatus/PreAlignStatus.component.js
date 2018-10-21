@@ -15,37 +15,12 @@ class PreAlignStatus extends Component {
                 id: props.props.match.params.jobID
             },
             progress: 30,
-            sourceLang: '',
-            sourceLangFileName: '',
-            totalSourceSegments: '',
-            targetLang: '',
-            targetLangFileName: '',
-            totalTargetSegments: ''
         }
     };
 
     componentDidMount() {
-        // get job info
-        httpGetAlignmentInfo(this.state.job.id, this.state.job.password)
-            .then(
-                response => {
-                    console.log(response);
-                    const info = response.data;
-                    this.state.sourceLang = info.source_lang;
-                    this.state.sourceLangFileName =  '';
-                    this.state.totalSourceSegments = info.total_source_segments;
-                    this.state.targetLang = info.target_lang;
-                    this.state.targetLangFileName = '';
-                    this.state.totalTargetSegments = info.total_target_segments;
-                }
-            ).catch(
-            error => {
-                console.log(error);
-            }
-        );
-
         // check for the end of alignment process
-        httpAlignJob(this.state.job.id)
+       httpAlignJob(this.state.job.id)
             .then(
                 response => {
                     this.setState(
