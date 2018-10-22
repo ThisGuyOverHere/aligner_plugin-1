@@ -66,6 +66,16 @@ export const httpSplitSegment = (jobID, jobPassword, data) => {
     return post(url, qs.stringify(values));
 };
 
+/**
+ *
+ * @param jobID
+ * @param jobPassword
+ * @returns {*}
+ */
+ export const httpGetAlignmentInfo = (jobID,jobPassword) => {
+    const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/information';
+    return get(url);
+};
 
 /**
  *
