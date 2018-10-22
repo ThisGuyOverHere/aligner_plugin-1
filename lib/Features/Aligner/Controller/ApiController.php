@@ -761,12 +761,19 @@ class ApiController extends AlignerController {
             $conn->rollBack();
             throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Merge-align  ", -2 );
         }
+
+        array_shift( $sources );
+        array_shift( $targets );
         
         //TODO replace stuff in match
         $destination_match['content_raw']    = $first_target_segment['content_raw'];
         $destination_match['content_clean']  = $first_target_segment['content_clean'];
         $destination_match['raw_word_count'] = $first_target_segment['raw_word_count'];
 
+        $inverseReference['content_raw']    = $first_source_segment['content_raw'];
+        $inverseReference['content_clean']  = $first_source_segment['content_clean'];
+        $inverseReference['raw_word_count'] = $first_source_segment['raw_word_count'];
+        
         try{
 
             $this->pushOperation( [
@@ -776,11 +783,15 @@ class ApiController extends AlignerController {
                 'data'      => $first_source_segment
             ] );
 
-            foreach ( $sourceOrders as $order ) {
+            foreach ( $sources as $source ) {
+                $source['content_raw'] = null;
+                $source['content_clean'] = null;
+                $source['raw_word_count'] = null;
                 $this->pushOperation( [
                     'type'      => 'source',
-                    'action'    => 'delete',
-                    'rif_order' => $order
+                    'action'    => 'update',
+                    'rif_order' => $source['order'],
+                    'data' => $source
                 ] );
             }
 
@@ -791,11 +802,15 @@ class ApiController extends AlignerController {
                 'data'      => $first_target_segment
             ] );
 
-            foreach ( $targetOrders as $order ) {
+            foreach ( $targets as $target ) {
+                $target['content_raw'] = null;
+                $target['content_clean'] = null;
+                $target['raw_word_count'] = null;
                 $this->pushOperation( [
                     'type'      => 'target',
-                    'action'    => 'delete',
-                    'rif_order' => $order
+                    'action'    => 'update',
+                    'rif_order' => $target['order'],
+                    'data' => $target
                 ] );
             }
 
