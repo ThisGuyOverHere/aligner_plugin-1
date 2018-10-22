@@ -12,7 +12,7 @@ class ExportModalLogged extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            cloudCheckBox: false,
+            cloudCheckBox: true,
             tmxList: [],
             selected: null,
             newTmx: null,
@@ -83,8 +83,7 @@ class ExportModalLogged extends Component {
                             tabIndex="5"
                             checked={this.state.cloudCheckBox}
                             value={this.state.cloudCheckBox}
-                            onChange={this.cloudHandler}
-                        ></input>
+                            onChange={this.cloudHandler} />
                         <label className={this.state.cloudCheckBox ? 'active' : 'inactive'}>Help to improve the public
                             cloud</label>
                     </div>

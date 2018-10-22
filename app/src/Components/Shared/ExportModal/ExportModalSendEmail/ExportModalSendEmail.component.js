@@ -10,7 +10,8 @@ class ExportModalSendEmail extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            sendToCloud: false,
+            cloudCheckBox: true,
+            email: ''
         };
     }
 
@@ -21,17 +22,21 @@ class ExportModalSendEmail extends Component {
                 <h3> A copy we’ll be shared in public cloud </h3>
 
                 <div className="sender-content">
-                    <input className="" type="text" tabIndex="0" placeholder="insert an email"/>
+                    <input type="text" tabIndex="0" placeholder="insert an email"
+                           value={this.state.email}
+                           onChange={this.inputHandler}/>
                     <p> We’ll send you an email when the file is ready </p>
                 </div>
 
                 <div className="selection">
                     <div className="ui toggle checkbox">
                         <input
-                            type="checkbox" className="myActive" name="cloud"
-                            readOnly=""  tabIndex="2" value={this.state.sendToCloud}
-                            onChange={this.sendToCloudHandler} />
-                        <label className={ this.state.sendToCloud ? 'active' : 'inactive'}>Help to improve the public cloud</label>
+                            type="checkbox" name="cloud"
+                            tabIndex="5"
+                            checked={this.state.cloudCheckBox}
+                            value={this.state.cloudCheckBox}
+                            onChange={this.cloudHandler} />
+                        <label className={ this.state.cloudCheckBox ? 'active' : 'inactive'}>Help to improve the public cloud</label>
                     </div>
                 </div>
                 <div className="actions">
@@ -46,9 +51,14 @@ class ExportModalSendEmail extends Component {
         );
     }
 
-    sendToCloudHandler = () => {
+    inputHandler = (e) =>{
         this.setState({
-            sendToCloud: !this.state.sendToCloud,
+            email: e.target.value
+        })
+    }
+    cloudHandler = () => {
+        this.setState({
+            cloudCheckBox: !this.state.cloudCheckBox,
         });
     };
 
