@@ -181,26 +181,37 @@ let ProjectActions = {
          * @param {Number} selection.target.list[] the order of segment
          */
         mergeAndAlignSegments: function (selection) {
-            let changes = [];
-            if (selection.source.count > 1) {
-                changes.push(...this.getLogsForMergeSegments(selection.source.list.sort(), 'source'));
+            let matches = [];
+            if (selection.source.count > 0) {
+                selection.source.list.map((e)=>{
+                   matches.push({
+                       type: 'source',
+                       order: e
+                   })
+                });
             }
-            if (selection.target.count > 1) {
-                changes.push(...this.getLogsForMergeSegments(selection.target.list.sort(), 'target'));
+            if (selection.target.count > 0) {
+                selection.target.list.map((e)=>{
+                    matches.push({
+                        type: 'target',
+                        order: e
+                    })
+                });
             }
-
-            const sourceIndex = getSegmentIndexByOrder(selection.source.list[0], 'source');
-            const targetToOrder = getSegmentByIndex(sourceIndex, 'target').order;
-            const log = {
-                type: 'target',
-                from: selection.target.list[0],
-                to: targetToOrder
-            };
-            changes.push(...this.getChangeSegmentPosition(log));
-
+            const sourceOrderList = selection.source.list.sort();
+            const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0],'source');
+            const destination = getSegmentByIndex(firstSourceIndex,'target').order;
             AppDispatcher.dispatch({
-                actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-                changes: changes
+                actionType: ProjectConstants.MERGE_ALIGN,
+                syncAPI: {
+                    action: 'merge_align',
+                    data: {
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        matches: matches,
+                        destination: destination
+                    }
+                }
             });
 
         },
@@ -526,6 +537,7 @@ let ProjectActions = {
          */
         requireDirectChangesToStore: function (changes) {
             //todo: call backend for propagate;
+            console.log(changes);
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
                 changes: changes
