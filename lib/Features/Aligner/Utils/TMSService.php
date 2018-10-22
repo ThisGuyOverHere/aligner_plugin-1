@@ -93,6 +93,25 @@ class TMSService extends \TMSService {
         );
     }
 
+    public function downloadTMX($project_name){
+        $buffer = ob_get_contents();
+        ob_get_clean();
+        ob_start( "ob_gzhandler" );  // compress page before sending
+        header( "Content-Type: application/force-download" );
+        header( "Content-Type: application/octet-stream" );
+        header( "Content-Type: application/download" );
+
+        // Enclose file name in double quotes in order to avoid duplicate header error.
+        // Reference https://github.com/prior/prawnto/pull/16
+        header( "Content-Disposition: attachment; filename=\"$project_name\".tmx" );
+        header( "Expires: 0" );
+        header( "Connection: close" );
+
+        print file_get_contents($this->tmxFilePath);
+
+        exit;
+    }
+
 
 
 
