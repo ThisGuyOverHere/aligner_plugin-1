@@ -12,6 +12,8 @@ use Features\Aligner\Model\Segments_SegmentDao;
 
 class TMSService extends \TMSService {
 
+    private $tmxFilePath;
+
 
     /**
      * Export Job as Tmx File
@@ -29,9 +31,10 @@ class TMSService extends \TMSService {
      */
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ) {
 
-        $tmpFile = new \SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
+        $this->tmxFilePath = tempnam("/tmp", "TMX_");
+        $tmxHandler = new \SplFileObject($this->tmxFilePath, "w");
 
-        $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
+        $tmxHandler->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
 <tmx version="1.4">
     <header
             creationtool="Matecat-Cattool"
@@ -70,17 +73,27 @@ class TMSService extends \TMSService {
     </tu>
 ';
 
-            $tmpFile->fwrite( $tmx );
+            $tmxHandler->fwrite( $tmx );
 
         }
 
-        $tmpFile->fwrite( "
+        $tmxHandler->fwrite( "
     </body>
 </tmx>" );
 
-        $tmpFile->rewind();
-
-        return $tmpFile;
+        return $this->tmxFilePath;
 
     }
+
+    public function importTMXInTM($tm_key){
+
+        $this->mymemory_engine->import(
+                $this->tmxFilePath,
+                $tm_key
+        );
+    }
+
+
+
+
 }

@@ -48,7 +48,7 @@ class ExportModal extends Component {
                             <ExportModalNotLogged/>
                         }
                         {(this.state.sendEmail) &&
-                            <ExportModalSendMail/>
+                            <ExportModalSendMail sendEmailHandler={this.sendEmailHandler}/>
                         }
 
                         {(!this.state.sendEmail) &&
