@@ -30,7 +30,7 @@ class Aligner extends BaseFeature
         route( '/parse/[:id_job]', 'GET', 'Features\Aligner\Controller\ParserController', 'jobParser' );
 
         route( '/job/[:id_job]/[:password]/information', 'GET', 'Features\Aligner\Controller\JobController', 'information' );
-        route( '/job/[:id_job]/[:password]/tmx_download', 'GET', 'Features\Aligner\Controller\TMXController', 'downloadTMX' );
+
         route( '/segments/[:id_job]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
 
         route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\ApiController', 'split' );
@@ -39,15 +39,17 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/segment/move', 'POST', 'Features\Aligner\Controller\ApiController', 'move' );
         route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\ApiController', 'delete' );
         route( '/job/[:id_job]/[:password]/segment/reverse', 'POST', 'Features\Aligner\Controller\ApiController', 'reverse' );
+        route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\ApiController', 'mergeAndAlign' );
 
         route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TMXController', 'getUserTM' );
         route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TMXController', 'createTmKey' );
         route( '/tm/[:key]/save', 'POST', 'Features\Aligner\Controller\TMXController', 'saveTm' );
         route( '/tm/[:key]/update', 'POST', 'Features\Aligner\Controller\TMXController', 'updateTm' );
+        route( '/tm/[:key]/check_upload', 'POST', 'Features\Aligner\Controller\TMXController', 'checkStatusUploadTMX' );
 
-        route( '/tmx/[:tm_key]/upload', 'POST', 'Features\Aligner\Controller\TMXController', 'uploadTMX' );
-        route( '/tmx/[:tm_key]/check_upload', 'POST', 'Features\Aligner\Controller\TMXController', 'checkStatusUploadTMX' );
-        
+        route( '/job/[:id_job]/[:password]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
+        route( '/job/[:id_job]/[:password]/tm/[:key]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
+
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }
 

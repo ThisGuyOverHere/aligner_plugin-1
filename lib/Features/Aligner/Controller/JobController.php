@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Controller;
 
+use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
@@ -24,6 +25,9 @@ class JobController extends AlignerController {
         $count_source_segments = $segmentDao->countByJobId( $id_job, "source" );
         $count_target_segments = $segmentDao->countByJobId( $id_job, "target" );
 
+        $source_file = Files_FileDao::getByJobId($id_job, "source");
+        $target_file = Files_FileDao::getByJobId($id_job, "target");
+
         $segmentMatchDao = new Segments_SegmentMatchDao;
         $miss_alignments = $segmentMatchDao->missAlignments($id_job);
 
@@ -33,7 +37,9 @@ class JobController extends AlignerController {
                 'target_lang'           => $job->target,
                 'total_source_segments' => $count_source_segments,
                 'total_target_segments' => $count_target_segments,
-                'miss_alignments' => $miss_alignments
+                'miss_alignments' => $miss_alignments,
+                'source_filename' => $source_file->filename,
+                'target_filename' => $target_file->filename
         ];
 
 
