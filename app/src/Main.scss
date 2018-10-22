@@ -16,10 +16,10 @@
 @import "Components/Shared/NotFound/NotFound.component";
 @import "Components/Shared/Header/Header.component";
 @import "Components/Shared/Header/Export/Export.component";
+@import "Components/Shared/ExportModal/ExportModal.component";
 @import "Components/Shared/ExportModal/ExportModalLogged/ExportModalLogged.component";
 @import "Components/Shared/ExportModal/ExportModalNotLogged/ExportModalNotLogged.component";
 @import "Components/Shared/ExportModal/ExportModalSendEmail/ExportModalSendEmail.component";
-@import "Components/Shared/ExportModal/ExportModalLogged/ExportModalLogged.component";
 @import "Components/Shared/Header/User/User.component.scss";
 @import "Components/Shared/Header/User/UserLogged/UserLogged.component";
 @import "Components/Shared/Header/User/UserNotLogged/UserNotLogged.component";
@@ -27,7 +27,6 @@
 @import "Components/Shared/Footer/Footer.component";
 @import "Components/Shared/Login/Login.component";
 @import "Components/Shared/Logout/Logout.component";
-@import "Components/Shared/ExportModal/ExportModal.component";
 @import "Components/Shared/ResetPasswordModal/ResetPasswordModal.component";
 @import "Components/Project/Toolbar/Toolbar.component";
 @import "Components/Project/Toolbar/ToolbarActions/ToolbarActions.component";
