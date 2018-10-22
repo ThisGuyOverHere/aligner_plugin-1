@@ -3,7 +3,6 @@ import ProjectStore from "../../../Stores/Project.store";
 import ProjectConstants from "../../../Constants/Project.constants";
 import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.component";
 import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
-import ToolbarContextualNavigationComponent from "./ToolbarContextualNavigation/ToolbarContextualNavigation.component";
 import PropTypes from "prop-types";
 import ToolbarRightHintComponent from "./ToolbarRightHint/ToolbarRightHint.component";
 
@@ -53,7 +52,6 @@ class ToolbarComponent extends Component {
                     <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.jobConf}/>
                 </div>
                 <div>
-                    {/* <ToolbarContextualNavigationComponent/> */ }
                     <i className=" hint icon question circle outline" onClick={ this.hintModalOpened }></i>
                 </div>
                 { this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}

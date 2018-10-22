@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
-import {Popup} from "semantic-ui-react";
 import ProjectActions from "../../../../../../Actions/Project.actions";
+import Hotkeys from "react-hot-keys";
 
 class ToolbarActionsMergeAndAlignComponent extends Component {
 
@@ -11,9 +11,6 @@ class ToolbarActionsMergeAndAlignComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            type: 'merge&align'
-        };
     }
 
 
@@ -26,40 +23,32 @@ class ToolbarActionsMergeAndAlignComponent extends Component {
     render() {
         //check status of split action
         let disabled = true;
-        let classes = ['icon', 'check'];
         if (this.props.selection.count > 2
             && this.props.selection.source.count > 0
             && this.props.selection.target.count > 0) {
             disabled = false;
         }
-        return <button
-            disabled={disabled}
-            onMouseOut={this.onMouseLeave}
-            onMouseOver={this.onHover}
-            onClick={this.onClick}>
-            Merge and Align
-        </button>;
-        /* return (
-             <Popup trigger={comp} content='shortcut alt+A' on='hover' inverted/>
-         );
-         */
+        return <Hotkeys
+            keyName="alt+a"
+            onKeyDown={this.onClick}>
+            <button
+                disabled={disabled}
+                onClick={this.onClick}>
+                Merge and Align
+            </button>
+        </Hotkeys>;
     }
 
     onClick = () => {
-        ProjectActions.mergeAndAlignSegments(this.props.selection);
-        ProjectActions.addSegmentToSelection(-1);
-        ProjectActions.onActionHover(null);
-        ProjectActions.onActionHover(null);
+        if (this.props.selection.count > 2
+            && this.props.selection.source.count > 0
+            && this.props.selection.target.count > 0) {
+            ProjectActions.mergeAndAlignSegments(this.props.selection);
+            ProjectActions.addSegmentToSelection(-1);
+            ProjectActions.onActionHover(null);
+            ProjectActions.onActionHover(null);
+        }
     };
-
-    onHover = () => {
-        ProjectActions.onActionHover(this.state.type);
-    };
-
-    onMouseLeave = () => {
-        ProjectActions.onActionHover(null);
-    };
-
 }
 
 export default ToolbarActionsMergeAndAlignComponent;
