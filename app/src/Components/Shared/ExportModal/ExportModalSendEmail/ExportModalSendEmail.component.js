@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 
 class ExportModalSendEmail extends Component {
 
     static propTypes = {
-
+        sendEmailHandler: PropTypes.func.isRequired
     };
 
     constructor(props) {
@@ -29,15 +30,17 @@ class ExportModalSendEmail extends Component {
                         <input
                             type="checkbox" className="myActive" name="cloud"
                             readOnly=""  tabIndex="2" value={this.state.sendToCloud}
-                            onChange={this.sendToCloudHandler}
-                        ></input>
+                            onChange={this.sendToCloudHandler} />
                         <label className={ this.state.sendToCloud ? 'active' : 'inactive'}>Help to improve the public cloud</label>
                     </div>
                 </div>
+                <div className="actions">
+                    <button className="send-btn ui button" tabIndex="3" type="button">
+                        Send
+                    </button>
+                    <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Go to cloud import</a>
+                </div>
 
-                <button className="send-btn ui button" tabIndex="3" type="">
-                   Send
-                </button>
 
             </div>
         );
