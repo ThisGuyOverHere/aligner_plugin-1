@@ -12,7 +12,7 @@ class ExportModalLogged extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            cloudCheckBox: true,
+            cloudCheckBox: false,
             tmxList: [],
             selected: null,
             newTmx: null,
@@ -79,11 +79,13 @@ class ExportModalLogged extends Component {
                 <div className="selection">
                     <div className="ui checked toggle checkbox">
                         <input
-                            type="checkbox" className="" name="cloud"
-                            readOnly="" tabIndex="5" value={this.state.cloudCheckBox}
+                            type="checkbox" name="cloud"
+                            tabIndex="5"
+                            checked={this.state.cloudCheckBox}
+                            value={this.state.cloudCheckBox}
                             onChange={this.cloudHandler}
                         ></input>
-                        <label className={this.state.sendToCloud ? 'active' : 'inactive'}>Help to improve the public
+                        <label className={this.state.cloudCheckBox ? 'active' : 'inactive'}>Help to improve the public
                             cloud</label>
                     </div>
                 </div>
