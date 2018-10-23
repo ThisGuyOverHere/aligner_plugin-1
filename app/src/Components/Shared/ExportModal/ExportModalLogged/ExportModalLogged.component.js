@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {getUserInitials} from "../../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
-import {httpGetTmxList, httpCreateTmx, httpSaveTmx, httpExportTmxCloud} from "../../../../HttpRequests/Tmx.http";
+import {httpGetTmxList, httpCreateTmx, httpSaveTmx} from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalLogged extends Component {
 
@@ -16,6 +16,7 @@ class ExportModalLogged extends Component {
             tmxList: [],
             selected: null,
             newTmx: null,
+            txmInLoad: false,
         };
     }
 
@@ -24,17 +25,22 @@ class ExportModalLogged extends Component {
     };
 
     fetchTmx = async () => {
+        this.setState({
+            txmInLoad: true,
+        });
         try {
             const res = await fetch('/plugins/aligner/tm/mine');
             const list = await res.json();
             this.setState({
                 tmxList: list,
-                selected: list[0]
+                selected: list[0] ? list[0] : null,
+                txmInLoad: false,
             });
         } catch (e) {
             console.error(e)
         }
         return true;
+
     };
 
     componentWillUnmount = () => {
@@ -60,15 +66,17 @@ class ExportModalLogged extends Component {
                 <div>
                     <div className="memories">
                         {(this.state.tmxList.length > 0 && !this.state.txmInLoad) && this.renderMemories()}
-                        {this.state.txmInLoad && this.renderMemoriesLoader()}
+                        {this.state.txmInLoad && this.renderMemoriesLoader() }
                     </div>
-                    {(this.state.tmxList.length > 0 && !this.state.txmInLoad) && <div className="line"></div>}
+                        {(this.state.tmxList.length > 0 && !this.state.txmInLoad) &&  <div className="line"></div>}
                 </div>
+
 
                 {this.state.newTmx ?
                     <div className="new-memory">
                         <form onSubmit={this.saveMemory}>
-                            <input type="text" tabIndex="4" onChange={this.handleInput} placeholder="Description of tmx"/>
+                            <input type="text" tabIndex="4" onChange={this.handleInput}
+                                   placeholder="Description of tmx"/>
                             <button type="submit" className="ui button">Save</button>
                         </form>
                         <p>{this.state.newTmx.key}</p>
@@ -83,18 +91,31 @@ class ExportModalLogged extends Component {
                             tabIndex="5"
                             checked={this.state.cloudCheckBox}
                             value={this.state.cloudCheckBox}
-                            onChange={this.cloudHandler} />
+                            onChange={this.cloudHandler}/>
                         <label className={this.state.cloudCheckBox ? 'active' : 'inactive'}>Help to improve the public
                             cloud</label>
                     </div>
                 </div>
 
-                <button className="export-btn ui button" tabIndex="6" type="" onClick={this.exportTmx}>
+                <button className="export-btn ui button" tabIndex="6" type="">
                     Export
                 </button>
             </div>
         );
     }
+
+    renderMemoriesLoader = () => {
+        const n = 3;
+        return [...Array(n)].map((e, i) => <div className="memory memory-in-loading" key={i}>
+            <div className="radio-container">
+                <div className="radio-loader"></div>
+            </div>
+            <div className="memory-info">
+                <p className="info-sx-text-loader"></p>
+                <p className="info-dx-text-loader"></p>
+            </div>
+        </div>);
+    };
 
     renderMemories = () => {
         let memories = [];
@@ -107,19 +128,18 @@ class ExportModalLogged extends Component {
                            value={index} tabIndex={index}/>
                 </div>
                 <div className="memory-info">
-                    <p>{element.name? element.name : 'Private TM and Glossary'}</p>
+                    <p>{element.name ? element.name : 'Private TM and Glossary'}</p>
                     <p>{element.key}</p>
                 </div>
             </div>;
             memories.push(memory);
             return element;
         });
-
         return memories;
     };
-    handleCheckRadio = (e) =>{
+    handleCheckRadio = (e) => {
         this.setState({
-           selected: this.state.tmxList[e.target.value]
+            selected: this.state.tmxList[e.target.value]
         });
     };
     createMemory = () => {
@@ -139,21 +159,22 @@ class ExportModalLogged extends Component {
     };
     saveMemory = (e) => {
         e.preventDefault();
-        httpSaveTmx(this.state.newTmx.key,this.state.newTmx.name).then((response)=>{
-            if(response.data){
+        httpSaveTmx(this.state.newTmx.key, this.state.newTmx.name).then((response) => {
+            if (response.data) {
                 let list = this.state.tmxList;
                 list.unshift(this.state.newTmx);
                 this.setState({
                     tmxList: list,
-                    newTmx: null
+                    newTmx: null,
+                    selected: this.state.newTmx,
                 });
             }
-        }, (error)=>{
-           console.error(error)
+        }, (error) => {
+            console.error(error)
         });
 
     };
-    handleInput = (e) =>{
+    handleInput = (e) => {
         let newTmx = this.state.newTmx;
         newTmx.name = e.target.value;
         this.setState({
@@ -166,14 +187,6 @@ class ExportModalLogged extends Component {
             cloudCheckBox: !this.state.cloudCheckBox,
         })
     };
-
-    exportTmx = () => {
-        httpExportTmxCloud(this.state.selected.key, !this.state.cloudCheckBox).then(response => {
-            console.log(response)
-        }, error => {
-
-        })
-    }
 
 }
 

@@ -11,6 +11,7 @@ namespace Features\Aligner\Controller;
 use Features\Aligner;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Utils\TMSService;
+use Features\Aligner\Utils\Email\SendTMXEmail;
 
 class TMXController extends AlignerController {
 
@@ -155,19 +156,40 @@ class TMXController extends AlignerController {
         $TMService->setTmKey( $tm_key );
 
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+        $project = $job->getProject();
 
         $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
 
         if ( $this->getUser() ) {
             $TMService->importTMXInTM( $tm_key );
+            $sendTMXEmail = new SendTMXEmail($job, $project, $this->user->email, $this->user);
         } else {
+            $email = $this->params['email'];
             $config = Aligner::getConfig();
             $TMService->importTMXInTM( $config[ 'GLOBAL_PRIVATE_TM' ] );
-            //$TMService->downloadFileTMX();
+
+            $sendTMXEmail = new SendTMXEmail($job, $project, $email);
         }
+
+        $sendTMXEmail->send();
+
         return $this->response->json(true);
 
     }
 
+    public function downloadTMX() {
+        $id_job   = $this->params[ 'id_job' ];
+        $password = $this->params[ 'password' ];
+
+        $TMService = new TMSService();
+        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+
+        $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
+
+        $project = $job->getProject();
+
+        $TMService->downloadTMX($project->name);
+
+    }
 
 }

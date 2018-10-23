@@ -50,6 +50,8 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
         route( '/job/[:id_job]/[:password]/tm/[:key]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
 
+        route( '/job/[:id_job]/[:password]/download_tmx', 'GET', 'Features\Aligner\Controller\TMXController', 'downloadTMX' );
+
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }
 

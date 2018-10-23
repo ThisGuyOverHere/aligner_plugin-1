@@ -33,17 +33,17 @@ class ToolbarActionsComponent extends Component {
             <div className="segment-actions">
                 <ul>
                     <li>
-                        <ToolbarActionsReverseComponent selection={this.props.selection}/>
+                        <ToolbarActionsAlignWrapperComponent selection={this.props.selection}/>
                     </li>
                     <li>
                         <ToolbarActionsMergeComponent selection={this.props.selection} jobConf={this.props.jobConf}/>
 
                     </li>
                     <li>
-                        <ToolbarActionsAlignWrapperComponent selection={this.props.selection}/>
+                        <ToolbarActionsSplitComponent selection={this.props.selection}/>
                     </li>
                     <li>
-                        <ToolbarActionsSplitComponent selection={this.props.selection}/>
+                        <ToolbarActionsReverseComponent selection={this.props.selection}/>
                     </li>
                     {/*<li>
                         <i
