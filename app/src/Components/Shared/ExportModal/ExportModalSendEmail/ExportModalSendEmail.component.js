@@ -5,7 +5,9 @@ import {httpExportTmxCloud, httpExportTmxFile} from "../../../../HttpRequests/Tm
 class ExportModalSendEmail extends Component {
 
     static propTypes = {
-        sendEmailHandler: PropTypes.func.isRequired
+        sendEmailHandler: PropTypes.func.isRequired,
+        user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+        setCompletedExport: PropTypes.func.isRequired
     };
 
     constructor(props) {
@@ -65,6 +67,7 @@ class ExportModalSendEmail extends Component {
     };
     exportTmx = () => {
         httpExportTmxFile(this.state.email, !this.state.cloudCheckBox).then(response => {
+            this.props.setCompletedExport();
             console.log(response)
         }, error => {
 
