@@ -21,7 +21,7 @@ const App = () => (
             <Switch>
                 <Layout exact path="/" component={HomeComponent}/>
                 <Layout path="/job/:jobID/:password/align" component={JobComponent}/>
-                <Layout path="/job/:jobID/:password/pre-align" component={AnalyseComponent}/>
+                <Layout path="/job/:jobID/:password/pre-align" hideToolbar={true} component={AnalyseComponent}/>
                 <Layout component={NotFoundComponent}/>
             </Switch>
         </div>
