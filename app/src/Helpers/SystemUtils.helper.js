@@ -1,4 +1,10 @@
-import {httpDeleteSegments, httpMergeSegments, httpMoveSegments} from "../HttpRequests/Alignment.http";
+import {
+    httpDeleteSegments, httpMergeAlignSegments,
+    httpMergeSegments,
+    httpMoveSegments,
+    httpReverseSegments
+} from "../HttpRequests/Alignment.http";
+import ProjectActions from "../Actions/Project.actions";
 
 /**
  *
@@ -54,6 +60,14 @@ export const syncWithBackend = (method, callback) => {
                 console.log(error);
             });
             break;
+        case 'merge_align':
+            httpMergeAlignSegments(method.data.jobID, method.data.jobPassword, method.data.matches,method.data.destination).then((response) => {
+                ProjectActions.requireDirectChangesToStore(response.data);
+                callback()
+            }, (error) => {
+                console.log(error);
+            });
+            break;
         case 'align':
             httpMoveSegments(method.data.jobID, method.data.jobPassword, {
                 order: method.data.order,
@@ -61,6 +75,13 @@ export const syncWithBackend = (method, callback) => {
                 destination: method.data.destination,
                 inverse_destination: method.data.inverse_destination
             }).then((response) => {
+                callback()
+            }, (error) => {
+                console.log(error);
+            });
+            break;
+        case 'reverse':
+            httpReverseSegments(method.data.jobID, method.data.jobPassword, method.data).then((response) => {
                 callback()
             }, (error) => {
                 console.log(error);
@@ -81,10 +102,10 @@ export const checkResultStore = (source, target) => {
     for (let x = 0; x < source.length - 1; x++) {
         if (source[x].next !== source[x + 1].order) {
             if (source[x - 1]) {
-                console.log('[SOURCE: ' + parseInt(x-1) + ']   ' + source[x - 1].order + '       ' + source[x - 1].next);
+                console.log('[SOURCE: ' + parseInt(x - 1) + ']   ' + source[x - 1].order + '       ' + source[x - 1].next);
             }
             console.log('[SOURCE: ' + +x + ']   ' + source[x].order + '       ' + source[x].next);
-            console.log('[SOURCE: ' + parseInt(x+1) + ']   ' + source[x + 1].order + '       ' + source[x + 1].next);
+            console.log('[SOURCE: ' + parseInt(x + 1) + ']   ' + source[x + 1].order + '       ' + source[x + 1].next);
             //console.log('Source index: ',x);
         }
         //console.log('['+x+']   '+source[x].order+'       '+source[x].next);
@@ -93,10 +114,10 @@ export const checkResultStore = (source, target) => {
     for (let x = 0; x < target.length - 1; x++) {
         if (target[x].next !== target[x + 1].order) {
             if (target[x - 1]) {
-                console.log('[TARGET: ' +parseInt(x-1) + ']   ' + target[x - 1].order + '       ' + target[x - 1].next);
+                console.log('[TARGET: ' + parseInt(x - 1) + ']   ' + target[x - 1].order + '       ' + target[x - 1].next);
             }
             console.log('[TARGET: ' + +x + ']   ' + target[x].order + '       ' + target[x].next);
-            console.log('[TARGET: ' + parseInt(x+1) + ']   ' + target[x + 1].order + '       ' + target[x + 1].next);
+            console.log('[TARGET: ' + parseInt(x + 1) + ']   ' + target[x + 1].order + '       ' + target[x + 1].next);
             /*console.log('Target index: ',x);*/
         }
         //console.log('['+x+']   '+target[x].order+'       '+target[x].next);

@@ -30,7 +30,7 @@ class Files_FileDao extends DataAccess_AbstractDao {
                 "SELECT * FROM files WHERE id_job = :id_job AND `type` = :type "
         );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job, 'type' => $type ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job, 'type' => $type ] )[0];
 
     }
 

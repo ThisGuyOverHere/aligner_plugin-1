@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 
-const TargetComponent = props => {
+const TargetComponent = (props) => {
     return (
         <div className="info">
             <label>Target file:</label>
-            <h4>Filename.ext</h4>
-            <label>Italian</label>
-            <h2>1300 segments</h2>
+            <h4>{props.targetLangFileName}</h4>
+            <label>{props.targetLang}</label>
+            <h2>{props.totalTargetSegments} segments</h2>
         </div>
     );
 };

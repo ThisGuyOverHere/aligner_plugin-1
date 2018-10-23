@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
 import {getSegmentByOrder} from "../../../../../Helpers/SegmentUtils.helper";
-import {Popup} from "semantic-ui-react";
+import Hotkeys from 'react-hot-keys';
 
 class ToolbarActionsSplitComponent extends Component {
 
@@ -12,9 +12,6 @@ class ToolbarActionsSplitComponent extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            type: 'split'
-        };
     }
 
 
@@ -27,33 +24,28 @@ class ToolbarActionsSplitComponent extends Component {
     render() {
         //check status of split action
         let disabled = false;
-        let splitClasses = ['icon', 'arrows', 'alternate', 'horizontal'];
-        if (this.props.selection.count !== 1 ) {
+        if (this.props.selection.count !== 1) {
             disabled = true;
         }
-        return (<button
-                disabled={disabled}
-                onMouseOver={this.onHover}
-                onMouseOut={this.onMouseLeave}
-                onClick={this.onSplitClick}>
-                Split
-            </button>
+        return (<Hotkeys
+                keyName="alt+s"
+                onKeyDown={this.onSplitClick}>
+                <button
+                    disabled={disabled}
+                    onClick={this.onSplitClick}>
+                    Split
+                </button>
+            </Hotkeys>
         );
     }
 
     onSplitClick = () => {
-        const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-        ProjectActions.openSegmentToSplit(getSegmentByOrder(this.props.selection[type].list[0], type));
-        ProjectActions.addSegmentToSelection(-1);
-        ProjectActions.onActionHover(null);
-    };
-
-    onHover = () => {
-        ProjectActions.onActionHover(this.state.type);
-    };
-
-    onMouseLeave = () => {
-        ProjectActions.onActionHover(null);
+        if(this.props.selection.count === 1){
+            const type = this.props.selection.source.count > 0 ? 'source' : 'target';
+            ProjectActions.openSegmentToSplit(getSegmentByOrder(this.props.selection[type].list[0], type));
+            ProjectActions.addSegmentToSelection(-1);
+            ProjectActions.onActionHover(null);
+        }
     };
 
 }

@@ -35,8 +35,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         },
         count: 0
     },
-    mergeStatus: false,
-
     updateAll: function (volumeAnalysis, project) {
 
     },
@@ -284,9 +282,11 @@ AppDispatcher.register(function (action) {
                 target: ProjectStore.job.target.toJS()
             }, syncAPI);
             break;
-        case ProjectConstants.MERGE_STATUS:
-            ProjectStore.mergeStatus = action.status;
-            ProjectStore.emitChange(ProjectConstants.MERGE_STATUS, action.status);
+        case ProjectConstants.MERGE_ALIGN:
+            ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
+                source: ProjectStore.job.source.toJS(),
+                target: ProjectStore.job.target.toJS()
+            }, syncAPI);
             break;
         case ProjectConstants.ADD_SEGMENT_TO_SELECTION:
             ProjectStore.addSegmentToSelection(action.order, action.type);

@@ -12,54 +12,8 @@ use Features\Aligner\Model\Segments_SegmentDao;
 
 class TMSService extends \TMSService {
 
+    private $tmxFilePath;
 
-    /**
-     * Export Job as Tmx File
-     *
-     * @param $jid
-     * @param $sourceLang
-     * @param $targetLang
-     *
-     * @return SplTempFileObject $tmpFile
-     *
-     */
-    public function exportJobAsCSV( $jid, $sourceLang, $targetLang ) {
-
-        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 15MB */ );
-
-        $csv_fields = [
-                "Source: $sourceLang", "Target: $targetLang"
-        ];
-
-        $tmpFile->fputcsv( $csv_fields );
-
-        $segmentDao = new Segments_SegmentDao();
-        $result     = $segmentDao->getTranslationsForTMXExport($jid);
-
-        $matches = [];
-        foreach ( $result[ 'target' ] as $key => $target ) {
-            $matches[ $key ][ 'translation' ] = $target[ 'content_raw' ];
-        }
-
-        foreach ( $result[ 'source' ] as $key => $source ) {
-            $matches[ $key ][ 'segment' ] = $source[ 'content_raw' ];
-        }
-
-        foreach ( $matches as $k => $row ) {
-
-            $row_array = [
-                    $row[ 'segment' ], $row[ 'translation' ]
-            ];
-
-            $tmpFile->fputcsv( $row_array );
-
-        }
-
-        $tmpFile->rewind();
-
-        return $tmpFile;
-
-    }
 
     /**
      * Export Job as Tmx File
@@ -71,21 +25,22 @@ class TMSService extends \TMSService {
      *
      * @param int|null $uid
      *
-     * @return SplTempFileObject $tmpFile
+     * @return \SplTempFileObject $tmpFile
      *
-     * @throws Exception
+     * @throws \Exception
      */
-    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
+    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ) {
 
-        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
+        $this->tmxFilePath = tempnam("/tmp", "TMX_");
+        $tmxHandler = new \SplFileObject($this->tmxFilePath, "w");
 
-        $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
+        $tmxHandler->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
 <tmx version="1.4">
     <header
             creationtool="Matecat-Cattool"
-            creationtoolversion="' . INIT::$BUILD_NUMBER . '"
+            creationtoolversion="' . \INIT::$BUILD_NUMBER . '"
 	    o-tmf="Matecat"
-            creationid="Matecat"
+            creationid="Matecat-Aligner"
             datatype="plaintext"
             segtype="sentence"
             adminlang="en-US"
@@ -94,35 +49,23 @@ class TMSService extends \TMSService {
 
 
         $segmentDao = new Segments_SegmentDao();
-        $result     = $segmentDao->getTranslationsForTMXExport($jid);
-
-        $matches = [];
-        foreach ( $result[ 'target' ] as $key => $target ) {
-            $matches[ $key ][ 'translation' ] = $target[ 'content_raw' ];
-        }
-
-        foreach ( $result[ 'source' ] as $key => $source ) {
-            $matches[ $key ][ 'segment' ] = $source[ 'content_raw' ];
-        }
-
+        $matches    = $segmentDao->getTranslationsForTMXExport( $jid );
 
         foreach ( $matches as $k => $row ) {
 
-            $dateCreate = new DateTime( $row[ 'translation_date' ], new DateTimeZone( 'UTC' ) );
+            if ( empty( $row[ 'source' ] ) || empty( $row[ 'target' ] ) ) {
+                continue;
+            }
 
             $tmx = '
-    <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
-        <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
-        <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
-        <prop type="x-MateCAT-filename">' . CatUtils::rawxliff2rawview( $row[ 'filename' ] ) . '</prop>
-        <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
+    <tu datatype="plaintext" srclang="' . $sourceLang . '">
         <tuv xml:lang="' . $sourceLang . '">
-            <seg>' . CatUtils::rawxliff2rawview( $row[ 'segment' ] ) . '</seg>
+            <seg>' . \CatUtils::rawxliff2rawview( $row[ 'source' ] ) . '</seg>
         </tuv>';
 
-                $tmx .= '
+            $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
-            <seg>' . CatUtils::rawxliff2rawview( $row[ 'translation' ] ) . '</seg>
+            <seg>' . \CatUtils::rawxliff2rawview( $row[ 'target' ] ) . '</seg>
         </tuv>';
 
 
@@ -130,17 +73,46 @@ class TMSService extends \TMSService {
     </tu>
 ';
 
-            $tmpFile->fwrite( $tmx );
+            $tmxHandler->fwrite( $tmx );
 
         }
 
-        $tmpFile->fwrite( "
+        $tmxHandler->fwrite( "
     </body>
 </tmx>" );
 
-        $tmpFile->rewind();
-
-        return $tmpFile;
+        return $this->tmxFilePath;
 
     }
+
+    public function importTMXInTM($tm_key){
+
+        $this->mymemory_engine->import(
+                $this->tmxFilePath,
+                $tm_key
+        );
+    }
+
+    public function downloadTMX($project_name){
+        $buffer = ob_get_contents();
+        ob_get_clean();
+        ob_start( "ob_gzhandler" );  // compress page before sending
+        header( "Content-Type: application/force-download" );
+        header( "Content-Type: application/octet-stream" );
+        header( "Content-Type: application/download" );
+
+        // Enclose file name in double quotes in order to avoid duplicate header error.
+        // Reference https://github.com/prior/prawnto/pull/16
+        header( "Content-Disposition: attachment; filename=\"$project_name\".tmx" );
+        header( "Expires: 0" );
+        header( "Connection: close" );
+
+        print file_get_contents($this->tmxFilePath);
+
+        exit;
+    }
+
+
+
+
 }
