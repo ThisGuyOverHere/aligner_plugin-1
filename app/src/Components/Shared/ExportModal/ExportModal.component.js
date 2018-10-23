@@ -16,6 +16,7 @@ class ExportModal extends Component {
         super(props);
         this.state = {
             sendEmail: false,
+            completed: false
         }
     }
 
@@ -41,22 +42,15 @@ class ExportModal extends Component {
                         </div>
                     </div>
                     <div className="content">
-                        {(this.props.user && !this.state.sendEmail) &&
-                            <ExportModalLogged user={this.props.user}/>
-                        }
-                        {(!this.props.user && !this.state.sendEmail) &&
-                            <ExportModalNotLogged/>
-                        }
-                        {(this.state.sendEmail) &&
-                            <ExportModalSendMail sendEmailHandler={this.sendEmailHandler}/>
-                        }
 
-                        {(!this.state.sendEmail) &&
-                            <button
-                                onClick={this.sendEmailHandler}
-                                className="sendEmail">
-                                Send me an email
-                            </button>
+                        {this.renderComponent()}
+
+                        {(!this.state.sendEmail || !this.state.completed) &&
+                        <button
+                            onClick={this.sendEmailHandler}
+                            className="sendEmail">
+                            Send me an email
+                        </button>
                         }
                     </div>
                 </div>
@@ -64,6 +58,19 @@ class ExportModal extends Component {
         );
     }
 
+    renderComponent = () => {
+        let component;
+        if (this.state.completed) {
+
+        } else if (this.state.sendEmail) {
+            component = <ExportModalSendMail sendEmailHandler={this.sendEmailHandler}/>;
+        } else if (this.props.user) {
+            component = <ExportModalLogged user={this.props.user}/>;
+        } else {
+            component = <ExportModalNotLogged/>;
+        }
+        return component;
+    };
     sendEmailHandler = () => {
         this.setState({
             sendEmail: !this.state.sendEmail

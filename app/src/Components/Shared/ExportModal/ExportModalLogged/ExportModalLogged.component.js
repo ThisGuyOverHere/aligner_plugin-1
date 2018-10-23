@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {getUserInitials} from "../../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
-import {httpGetTmxList, httpCreateTmx, httpSaveTmx} from "../../../../HttpRequests/Tmx.http";
+import {httpGetTmxList, httpCreateTmx, httpSaveTmx, httpExportTmxCloud} from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalLogged extends Component {
 
@@ -56,14 +56,14 @@ class ExportModalLogged extends Component {
                     </div>
                 </div>
 
-                {this.state.tmxList.length > 0 ?
-                    <div>
-                        <div className="memories">
-                            {this.renderMemories()}
-                        </div>
-                        <div className="line"></div>
+
+                <div>
+                    <div className="memories">
+                        {(this.state.tmxList.length > 0 && !this.state.txmInLoad) && this.renderMemories()}
+                        {this.state.txmInLoad && this.renderMemoriesLoader()}
                     </div>
-                    : null}
+                    {(this.state.tmxList.length > 0 && !this.state.txmInLoad) && <div className="line"></div>}
+                </div>
 
                 {this.state.newTmx ?
                     <div className="new-memory">
@@ -89,7 +89,7 @@ class ExportModalLogged extends Component {
                     </div>
                 </div>
 
-                <button className="export-btn ui button" tabIndex="6" type="">
+                <button className="export-btn ui button" tabIndex="6" type="" onClick={this.exportTmx}>
                     Export
                 </button>
             </div>
@@ -166,6 +166,14 @@ class ExportModalLogged extends Component {
             cloudCheckBox: !this.state.cloudCheckBox,
         })
     };
+
+    exportTmx = () => {
+        httpExportTmxCloud(this.state.selected.key, !this.state.cloudCheckBox).then(response => {
+            console.log(response)
+        }, error => {
+
+        })
+    }
 
 }
 

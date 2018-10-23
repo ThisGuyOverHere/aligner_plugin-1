@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {httpExportTmxCloud, httpExportTmxFile} from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalSendEmail extends Component {
 
@@ -16,6 +17,7 @@ class ExportModalSendEmail extends Component {
     }
 
     render() {
+        const validEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(this.state.email);
         return (
             <div id="sender">
                 <h1> Download your TMX </h1>
@@ -40,7 +42,7 @@ class ExportModalSendEmail extends Component {
                     </div>
                 </div>
                 <div className="actions">
-                    <button className="send-btn ui button" tabIndex="3" type="button">
+                    <button className="send-btn ui button" disabled={!validEmail} tabIndex="3" type="button" onClick={this.exportTmx}>
                         Send
                     </button>
                     <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Go to cloud import</a>
@@ -55,12 +57,19 @@ class ExportModalSendEmail extends Component {
         this.setState({
             email: e.target.value
         })
-    }
+    };
     cloudHandler = () => {
         this.setState({
             cloudCheckBox: !this.state.cloudCheckBox,
         });
     };
+    exportTmx = () => {
+        httpExportTmxFile(this.state.email, !this.state.cloudCheckBox).then(response => {
+            console.log(response)
+        }, error => {
+
+        })
+    }
 
 }
 export default ExportModalSendEmail;
