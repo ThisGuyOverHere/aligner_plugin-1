@@ -1,6 +1,7 @@
 @import "../../../../../assets/theme/variables";
 
 .hintModal {
+  overflow-y: auto;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.50);
   position: fixed;
   width: 560px;
@@ -35,6 +36,7 @@
     border-bottom: 1px solid $headerBlack;
     &:nth-last-child(1) {
       border-bottom: none;
+      margin-bottom: 24px;
     }
 
     h4 {
