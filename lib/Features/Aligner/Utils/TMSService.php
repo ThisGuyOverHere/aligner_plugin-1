@@ -85,14 +85,55 @@ class TMSService extends \TMSService {
 
     }
 
-    public function importTMXInTM($tm_key){
+    public function importTMXInTM(){
+
 
         return $this->mymemory_engine->import(
                 $this->tmxFilePath,
-                $tm_key,
+                $this->getTMKey(),
                 $this->name
 
         );
+    }
+
+    /**
+     * Send a mail with link for direct prepared download
+     *
+     * @param $userMail
+     * @param $userName
+     * @param $userSurname
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
+     */
+    public function requestChunkTMXEmailDownload( $id_tmx, $userMail, $userName, $userSurname ){
+
+
+
+        $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
+        $engineStruct     = \EnginesModel_EngineStruct::getStruct();
+        $engineStruct->id = 1;
+
+        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $engineRecord = @$eng[0];
+
+        $mymemory_engine = new Engines_MyMemory($engineRecord);
+
+        $response = $mymemory_engine->emailExport(
+                $this->getTMKey(),
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname,
+                $id_tmx
+        );
+
+        return $response;
+
     }
 
 

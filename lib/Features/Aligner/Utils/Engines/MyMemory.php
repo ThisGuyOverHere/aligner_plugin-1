@@ -41,10 +41,10 @@ class Engines_MyMemory extends \Engines_MyMemory {
          * $result Engines_Results_MyMemory_ExportResponse
          */
         if ( $this->result->responseStatus >= 400 ) {
-            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+            throw new \Exception( $this->result->error->message, $this->result->responseStatus );
         }
 
-        Log::doLog('TMX exported to E-mail.');
+        \Log::doLog('TMX exported to E-mail.');
         return $this->result;
     }
 }

@@ -148,10 +148,10 @@ class TMXController extends AlignerController {
     }
 
     public function pushTMXInTM() {
-        $config = Aligner::getConfig();
-        $id_job   = $this->params[ 'id_job' ];
-        $password = $this->params[ 'password' ];
-        $is_public = $this->params['is_public'];
+        $config    = Aligner::getConfig();
+        $id_job    = $this->params[ 'id_job' ];
+        $password  = $this->params[ 'password' ];
+        $is_public = $this->params[ 'is_public' ];
 
 
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
@@ -183,22 +183,23 @@ class TMXController extends AlignerController {
 
         $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
 
-        $TMService->setName("Aligner-".$id_job.".tmx");
+        $TMService->setName( "Aligner-" . $id_job . ".tmx" );
 
-        $response = $TMService->importTMXInTM( $tm_key );
+        $response = $TMService->importTMXInTM();
 
-        $tmx_id = $response['id'];
+        $tmx_id = $response->id;
 
         while ( 1 ) {
+            sleep( 1 );
             $upload_status = $TMService->tmxUploadStatus();
             if ( $upload_status[ 'completed' ] == true ) {
                 break;
             }
         }
 
-        $TMService->requestTMXEmailDownload($email, $userName, $userSurname);
+        $TMService->requestChunkTMXEmailDownload( $tmx_id, $email, $userName, $userSurname );
 
-        return $this->response->json(true);
+        return $this->response->json( true );
 
     }
 
