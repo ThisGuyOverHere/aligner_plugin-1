@@ -211,15 +211,7 @@ class ApiController extends AlignerController {
         $segments       = array_merge( [ $split_segment ], $new_segments );
         $sourceSegments = ( $type == 'source' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
         $targetSegments = ( $type == 'target' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
-
-        foreach ( $sourceSegments as $key => $segment ) {
-            $sourceSegments[ $key ][ 'content_raw' ] = AlignUtils::_mark_xliff_tags( $segment[ 'content_raw' ] );
-        }
-
-        foreach ( $targetSegments as $key => $segment ) {
-            $targetSegments[ $key ][ 'content_raw' ] = AlignUtils::_mark_xliff_tags( $segment[ 'content_raw' ] );
-        }
-
+        
         try{
 
             $this->pushOperation( [
@@ -877,6 +869,8 @@ class ApiController extends AlignerController {
                     throw new \Exception( "Operation data format is not valid" );
                 }
             }
+            $operation['data']['content_raw']   = AlignUtils::_mark_xliff_tags($operation['data']['content_raw']);
+            $operation['data']['content_clean'] = htmlspecialchars_decode($operation['data']['content_clean']);
             AlignUtils::_parseArrayIntegers( $operation['data'] );
         }
         $this->operations[] = $operation;

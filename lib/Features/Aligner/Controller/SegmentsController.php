@@ -30,12 +30,14 @@ class SegmentsController extends AlignerController {
 
         $target = Segments_SegmentDao::getTargetOrdered($id_job, $where, $order_target, $amount);
         foreach ($target as $key => $segment){
-            $target[$key]->content_raw = Aligner\Utils\AlignUtils::_mark_xliff_tags($segment->content_raw);
+            $target[$key]->content_raw   = Aligner\Utils\AlignUtils::_mark_xliff_tags($segment->content_raw);
+            $target[$key]->content_clean = htmlspecialchars_decode($segment->content_clean);
         }
 
         $source = Segments_SegmentDao::getSourceOrdered($id_job, $where, $order_source, $amount);
         foreach ($source as $key => $segment){
-            $source[$key]->content_raw = Aligner\Utils\AlignUtils::_mark_xliff_tags($segment->content_raw);
+            $source[$key]->content_raw   = Aligner\Utils\AlignUtils::_mark_xliff_tags($segment->content_raw);
+            $source[$key]->content_clean = htmlspecialchars_decode($segment->content_clean);
         }
         $this->response->json(['target' => $target, 'source' => $source]);
 
