@@ -50,11 +50,28 @@ class Alignment {
 
         $config = Aligner::getConfig();
 
-        $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
-        $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
-        $engineRecord->type = 'MT';
+        if( $config['TRANSLATION_ENGINE'] == "GoogleTranslate" ){
+            $engineRecord = \EnginesModel_GoogleTranslateStruct::getStruct();
+            $engineRecord->extra_parameters['client_secret'] = $config['GOOGLE_API_KEY'];
+            $engineRecord->type = 'MT';
 
-        $engine = new Engines_GoogleTranslate($engineRecord);
+            $engine = new Engines_GoogleTranslate($engineRecord);
+        } else {
+            $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
+            $engineStruct     = \EnginesModel_EngineStruct::getStruct();
+            $engineStruct->id = 1;
+
+            $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+
+            /**
+             * @var $engineRecord EnginesModel_EngineStruct
+             */
+            $engineRecord = @$eng[0];
+
+            $engine = new Engines_MyMemory($engineRecord);
+        }
+
+
 
         $input_segments = array();
 
