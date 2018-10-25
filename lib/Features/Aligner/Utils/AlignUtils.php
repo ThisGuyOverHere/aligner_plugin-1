@@ -68,6 +68,7 @@ class AlignUtils
         }
     }
 
+
     public static function _mark_xliff_tags($segment) {
 
         //remove not existent </x> tags
@@ -92,16 +93,47 @@ class AlignUtils
         $segment = preg_replace('|<(mrk\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(/mrk)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
 
-        return $segment;
+        $segment = self::__encode_tag_attributes( $segment );
+
+        return htmlspecialchars_decode( $segment );
+    }
+
+    public static function __encode_tag_attributes( $segment ){
+
+        return preg_replace_callback( '/' . Constants::LTPLACEHOLDER . '(.*?)' . Constants::GTPLACEHOLDER . '/u'
+            , function ( $matches ) {
+                return Constants::LTPLACEHOLDER . base64_encode( $matches[1] ) . Constants::GTPLACEHOLDER;
+            }
+            , $segment
+        ); //base64 of the tag content to avoid unwanted manipulation
+
+    }
+
+    private static function __decode_tag_attributes( $segment ){
+
+        return preg_replace_callback( '/' . Constants::LTPLACEHOLDER . '(.*?)' . Constants::GTPLACEHOLDER . '/u'
+            , function ( $matches ) {
+                return Constants::LTPLACEHOLDER . base64_decode( $matches[1] ) . Constants::GTPLACEHOLDER;
+            }
+            , $segment
+        ); //base64 decode of the tag content to avoid unwanted manipulation
 
     }
 
     public static function _restore_xliff_tags($segment) {
 
+        $segment = htmlspecialchars($segment);
+        
+        $segment = self::__decode_tag_attributes( $segment );
+
+        preg_match_all( '/[\'"]base64:(.+)[\'"]/U', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        foreach( $html as $tag_attribute ){
+            $segment = preg_replace( '/[\'"]base64:(.+)[\'"]/U', '"' . base64_decode( $tag_attribute[ 1 ] ) . '"', $segment, 1 );
+        }
+
         $segment = str_replace(Constants::LTPLACEHOLDER, "<", $segment);
         $segment = str_replace(Constants::GTPLACEHOLDER, ">", $segment);
         return $segment;
-
     }
 
     public static function _parseArrayIntegers(array &$array){

@@ -4,6 +4,7 @@ import ExportModalNotLogged from "./ExportModalNotLogged/ExportModalNotLogged.co
 import PropTypes from "prop-types";
 import ExportModalLogged from "./ExportModalLogged/ExportModalLogged.component";
 import ExportModalSendMail from "./ExportModalSendEmail/ExportModalSendEmail.component";
+import ExportModalCompleted from "./ExportModalCompleted/ExportModalCompleted.component";
 
 
 class ExportModal extends Component {
@@ -16,6 +17,7 @@ class ExportModal extends Component {
         super(props);
         this.state = {
             sendEmail: false,
+            completed: false
         }
     }
 
@@ -41,22 +43,14 @@ class ExportModal extends Component {
                         </div>
                     </div>
                     <div className="content">
-                        {(this.props.user && !this.state.sendEmail) &&
-                            <ExportModalLogged user={this.props.user}/>
-                        }
-                        {(!this.props.user && !this.state.sendEmail) &&
-                            <ExportModalNotLogged/>
-                        }
-                        {(this.state.sendEmail) &&
-                            <ExportModalSendMail sendEmailHandler={this.sendEmailHandler}/>
-                        }
 
-                        {(!this.state.sendEmail) &&
-                            <button
-                                onClick={this.sendEmailHandler}
-                                className="sendEmail">
-                                Send me an email
-                            </button>
+                        {this.renderComponent()}
+
+                        {(!this.state.sendEmail && !this.state.completed) && <button
+                            onClick={this.sendEmailHandler}
+                            className="sendEmail">
+                            Send me an email
+                        </button>
                         }
                     </div>
                 </div>
@@ -64,6 +58,26 @@ class ExportModal extends Component {
         );
     }
 
+    renderComponent = () => {
+        let component;
+        if (this.state.completed) {
+            component = <ExportModalCompleted/>
+        } else if (this.state.sendEmail) {
+            component = <ExportModalSendMail setCompletedExport={this.setCompletedExport} user={this.props.user}
+                                             sendEmailHandler={this.sendEmailHandler}/>;
+        } else if (this.props.user) {
+            component = <ExportModalLogged setCompletedExport={this.setCompletedExport} user={this.props.user}/>;
+        } else {
+            component = <ExportModalNotLogged/>;
+        }
+        return component;
+    };
+
+    setCompletedExport = () => {
+        this.setState({
+            completed: true
+        });
+    };
     sendEmailHandler = () => {
         this.setState({
             sendEmail: !this.state.sendEmail

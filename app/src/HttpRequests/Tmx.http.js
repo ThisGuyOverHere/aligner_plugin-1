@@ -1,5 +1,7 @@
 import axios, {post, get} from 'axios';
+
 import qs from "qs";
+import ProjectStore from "../Stores/Project.store";
 
 /**
  *
@@ -21,3 +23,12 @@ export const httpSaveTmx = (key, name) => {
 };
 
 
+export const httpExportTmxCloud = (key, isPrivate) => {
+    const url = '/plugins/aligner/job/' + ProjectStore.jobID + '/' + ProjectStore.jobPassword + '/tm/' + key + '/push_tmx';
+    return post(url, qs.stringify({isPrivate: isPrivate}))
+};
+
+export const httpExportTmxFile = (email, isPrivate) => {
+    const url = '/plugins/aligner/job/' + ProjectStore.jobID + '/' + ProjectStore.jobPassword + '/push_tmx';
+    return post(url, qs.stringify({email: email, isPrivate: isPrivate}))
+};

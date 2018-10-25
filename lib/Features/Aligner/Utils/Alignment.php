@@ -13,6 +13,12 @@ use Log;
 
 class Alignment {
 
+    public $zero = 0;
+    public $native = 0;
+    public $approximated = 0;
+    public $lessCommon = 0;
+    public $long = 0;
+
     public function alignSegments($source, $target, $source_lang, $target_lang) {
         // Variant on Church and Gale algorithm with Levenshtein distance
 
@@ -33,6 +39,7 @@ class Alignment {
 
         $time_end = microtime(true);
         Log::doLog('Completed alignment: source ['.count($source).'], target ['.count($target).'] in '.($time_end-$time_start).' seconds');
+        Log::doLog('Used: ZERO-LENGTH ['.$this->zero.'], NATIVE ['.$this->native.'], APPROX ['.$this->approximated.'], COMMON ['.$this->lessCommon.'], LONG ['.$this->long.']');
 
         return $alignment;
     }
@@ -205,39 +212,38 @@ class Alignment {
 
             $match = null;
 
-            for ($ti = 1; $ti <= $tc; $ti++) {
+            $start = max($si + $CURRENT_OFFSET - $WINDOW_SIZE, 1);  // Limit to array start
+            $end = min($si + $CURRENT_OFFSET + $WINDOW_SIZE, $tc);  // Limit to array end
 
-                // Do compare only if in window and target is yet available
-                if (abs($si - $ti + $CURRENT_OFFSET) < $WINDOW_SIZE) {
+            for ($ti = $start; $ti <= $end; $ti++) {
 
-                    foreach ($beadCosts as $pair => $beadCost) {
-                        $sd = intval(substr($pair, 0, 1));
-                        $td = intval(substr($pair, -1, 1));
+                foreach ($beadCosts as $pair => $beadCost) {
+                    $sd = intval(substr($pair, 0, 1));
+                    $td = intval(substr($pair, -1, 1));
 
-                        if ($si - $sd >= 0 && $ti - $td >= 0) {
+                    if ($si - $sd >= 0 && $ti - $td >= 0) {
 
-                            // Check if $ti-$td, $td is a contiguous interval we can merge
-                            $evaluate = true;
-                            for ($d = 1; $d <= $td; $d++) {
-                                $evaluate = $evaluate & $target[$ti - $d] != null;
-                            }
+                        // Check if [$ti-$td, $td] is a contiguous interval we can merge, valid also for single segment
+                        $evaluate = true;
+                        for ($d = 1; $d <= $td; $d++) {
+                            $evaluate = $evaluate & $target[$ti - $d] != null;
+                        }
 
-                            if (!$evaluate) {
-                                continue;
-                            }
+                        if (!$evaluate) {
+                            continue;
+                        }
 
-                            $sources = array_slice($source, $si - $sd, $sd);
-                            $targets = array_slice($target, $ti - $td, $td);
+                        $sources = array_slice($source, $si - $sd, $sd);
+                        $targets = array_slice($target, $ti - $td, $td);
 
-                            list($distance, $score) = $this->evalSentences($sources, $targets);
-                            $cost = $distance + $beadCost + abs($si - $ti + $CURRENT_OFFSET) * $offsetCost;
+                        list($distance, $score) = $this->evalSentences($sources, $targets);
+                        $cost = $distance + $beadCost + abs($si - $ti + $CURRENT_OFFSET) * $offsetCost;
 
-                            $tuple = [$cost, $sd, $ti, $td, $score];
+                        $tuple = [$cost, $sd, $ti, $td, $score];
 
-                            // Emulate min function on tuple
-                            if ($match == null || $tuple[0] < $match[0]) {
-                                $match = $tuple;
-                            }
+                        // Emulate min function on tuple
+                        if ($match == null || $tuple[0] < $match[0]) {
+                            $match = $tuple;
                         }
                     }
                 }
@@ -245,6 +251,13 @@ class Alignment {
 
             // Use same format as Church and Gale
             list($cost, $sd, $ti, $td, $score) = $match;
+
+            // If score is too low, choose a hole instead (only if it's not a hole on source)
+            if ($score < 30 && $sd > 0) {
+                $td = 0;
+                $score = 0;
+            }
+
             $res[] = [[$si - $sd, $sd], [$ti - $td, $td], $score];
 
             // Mark unavailable sentences for target (1 or 2, based on merge)
@@ -258,10 +271,24 @@ class Alignment {
             // Adjust source index to eventually skip next sentence (for merge) or repeat current one (for target hole)
             $si--;  // Undo the for increment
             $si += $sd;  // Increment based on source distance
-
         }
 
-        //TODO: Potrebbero esserci dei target rimasti fuori dall'algoritmo, andrebbero aggiunti come orfani nella "giusta" posizione
+        // Potrebbero esserci dei target rimasti fuori dall'algoritmo, andrebbero aggiunti come orfani nella "giusta" posizione
+        foreach ($res as $key=>$value) {
+            $next = $value[1][0] + $value[1][1];  // Current target + 0, 1, 2 based on merge strategy
+
+            if ($target[$next] != null) {
+                // Add target in place
+                $item = [[$value[0][0], 0], [$next, 1], 0];
+
+                $before = array_slice($res, 0, $key + 1);
+                $after = array_slice($res, $key + 1);
+
+                $res = array_merge($before, [$item], $after);
+
+                $target[$next] = null;
+            }
+        }
 
         return $res;
     }
@@ -340,8 +367,21 @@ class Alignment {
         $source = segments_merge($sources);
         $target = segments_merge($targets);
 
+        // Early check for empty segments
+        if (count($source) == 0 || count($target) == 0) {
+            $ss = implode('', $source);  // One of the two will be empty
+            $ts = implode('', $target);
+
+            $distance = strlen($ss) + strlen($ts);
+
+            $this->zero += 1;
+
+            return [$distance, 0];
+        }
+
         // Remove common words
         $commonWords = array_intersect_opt($source, $target);
+        $commonChars = strlen(implode('', $commonWords));
 
         $ss = array_diff_opt($source, $commonWords);
         $ts = array_diff_opt($target, $commonWords);
@@ -356,12 +396,19 @@ class Alignment {
 
         if ($sl == 0 || $tl == 0) {  // Check if we can return immediately the upper bound
             $distance = max($sl, $tl);
+            $this->zero += 1;
         } else if ($sl < 255 && $tl < 255) {  // Check if we can use the efficient standard implementation
             $distance = levenshtein($ss, $ts, $costIns, $costRep, $costDel);
+            $this->native += 1;
         } else if (abs($sl - $tl) > 100) {  // Check if strings are too different, and return an approximated result
-            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the little string is different
+            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the smaller string is different
+            $this->approximated += 1;
+        } else if ($commonChars / ($commonChars + max($sl, $tl)) < 0.15) {  // Common chars are less then 15% of the length of the original longest string
+            $distance = abs($sl - $tl) + min($sl, $tl) / 2;  // Assuming 50% of the smaller string is different
+            $this->lessCommon += 1;
         } else {
             $distance = levenshtein_opt($ss, $ts, $costIns, $costRep, $costDel);
+            $this->long += 1;
         }
 
         // Score
@@ -461,20 +508,27 @@ function levenshtein_opt($str1, $str2, $costIns, $costRep, $costDel) {
 }
 
 // Optimized function to avoid PHP ones
-function array_diff_opt($a, $b) {
+function array_diff_opt($words, $commonWords) {
+    // Hash map of initial words
     $map = array();
-    foreach($a as $val) $map[$val] = 1;
-    foreach($b as $val) unset($map[$val]);
+    foreach($words as $word) $map[$word] = 1;
+
+    // Unset commont words
+    foreach($commonWords as $word) unset($map[$word]);
+
+    // Return keys from map
     return array_keys($map);
 }
 
 function array_intersect_opt($a, $b) {
-    $index = array_flip($a);
-    foreach ($b as $value) {
-        if (isset($index[$value])) unset($index[$value]);
-    }
-    foreach ($index as $key => $value) {
-        if (isset($a[$value])) unset($a[$value]);
-    }
-    return $a;
+    // Hash map of $a words
+    $map = array();
+    foreach($a as $word) $map[$word] = 1;
+
+    // Get words of $b found in $map
+    $out = array();
+    foreach($b as $word) if(isset($map[$word])) $out[$word] = 1;  // To avoid duplicates
+
+    // Returm common words
+    return array_keys($out);
 }

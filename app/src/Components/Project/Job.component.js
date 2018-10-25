@@ -88,14 +88,14 @@ class JobComponent extends Component {
                     itemSize={(index) => {
 
                         let source = document.createElement('p');
-                        source.style.width = "432px";
+                        source.style.width = "437px";
                         source.style.fontSize = "16px";
                         source.innerHTML = this.state.job.rows[index].source.content_clean;
                         document.getElementById('hiddenHtml').appendChild(source);
                         const sourceHeight = source.getBoundingClientRect().height;
 
                         let target = document.createElement('p');
-                        target.style.width = "432px";
+                        target.style.width = "437px";
                         target.style.fontSize = "16px";
                         target.innerHTML = this.state.job.rows[index].target.content_clean;
                         document.getElementById('hiddenHtml').appendChild(target);

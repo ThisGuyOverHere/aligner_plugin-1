@@ -10,6 +10,7 @@ import ToolbarComponent from "../../Project/Toolbar/Toolbar.component";
 class HeaderComponent extends Component {
 
     static propTypes = {
+        hideToolbar: PropTypes.bool,
         match: PropTypes.shape({
             params: PropTypes.shape({
                 jobID: PropTypes.string
@@ -76,7 +77,7 @@ class HeaderComponent extends Component {
                         <User user={this.props.user}/>
                     </li>
                 </ul>
-                <ToolbarComponent jobConf={this.state.job.config}/>
+                {!this.props.hideToolbar && <ToolbarComponent jobConf={this.state.job.config}/>}
             </div>;
         } else {
             return <ul className="aligner-nav-nolog" role="navigation">

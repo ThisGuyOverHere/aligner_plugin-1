@@ -1,12 +1,19 @@
 import React, {Component} from 'react';
 import {getUserInitials} from "../../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
-import {httpGetTmxList, httpCreateTmx, httpSaveTmx} from "../../../../HttpRequests/Tmx.http";
+import {
+    httpGetTmxList,
+    httpCreateTmx,
+    httpSaveTmx,
+    httpExportTmxFile,
+    httpExportTmxCloud
+} from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalLogged extends Component {
 
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+        setCompletedExport: PropTypes.func.isRequired
     };
 
     constructor(props) {
@@ -97,7 +104,7 @@ class ExportModalLogged extends Component {
                     </div>
                 </div>
 
-                <button className="export-btn ui button" tabIndex="6" type="">
+                <button className="export-btn ui button" tabIndex="6" type="" onClick={this.exportTmx}>
                     Export
                 </button>
             </div>
@@ -187,6 +194,15 @@ class ExportModalLogged extends Component {
             cloudCheckBox: !this.state.cloudCheckBox,
         })
     };
+
+    exportTmx = () => {
+        httpExportTmxCloud(this.state.selected.key, !this.state.cloudCheckBox).then(response => {
+            this.props.setCompletedExport();
+            console.log(response)
+        }, error => {
+
+        })
+    }
 
 }
 

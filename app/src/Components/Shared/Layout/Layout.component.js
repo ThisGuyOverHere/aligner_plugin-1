@@ -47,7 +47,7 @@ class Layout extends Component {
                 {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
                 {this.state.statusExportModal && <ExportModal user = {this.state.user} error = {this.state.loginError}/>}
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
-                <HeaderComponent user = {this.state.user} {...matchProps}/>
+                <HeaderComponent user = {this.state.user} {...rest} {...matchProps}/>
                 <Component {...matchProps} />
                 <div id="hiddenHtml"></div>
             </div>
