@@ -148,32 +148,58 @@ class TMXController extends AlignerController {
     }
 
     public function pushTMXInTM() {
-        $id_job   = $this->params[ 'id_job' ];
-        $password = $this->params[ 'password' ];
-        $tm_key   = $this->params[ 'key' ];
+        $config    = Aligner::getConfig();
+        $id_job    = $this->params[ 'id_job' ];
+        $password  = $this->params[ 'password' ];
+        $is_public = $this->params[ 'is_public' ];
+
+
+        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+
+        if ( $this->getUser() ) {
+            $email       = $this->user->email;
+            $userName    = $this->user->first_name;
+            $userSurname = $this->user->last_name;
+            if ( $is_public == 1 ) {
+                $tm_key = $config[ 'GLOBAL_PRIVATE_TM' ];
+            } else {
+                $tm_key = $this->params[ 'key' ];
+            }
+        } else {
+            $email       = $this->params[ 'email' ];
+            $userName    = null;
+            $userSurname = null;
+            if ( $is_public == 1 ) {
+                $tm_key = $config[ 'GLOBAL_PRIVATE_TM' ];
+            } else {
+                $tms          = \Engine::getInstance( 1 );
+                $mymemory_key = $tms->createMyMemoryKey();
+                $tm_key       = $mymemory_key[ 'key' ];
+            }
+        }
 
         $TMService = new TMSService();
         $TMService->setTmKey( $tm_key );
 
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
-        $project = $job->getProject();
-
         $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
 
-        if ( $this->getUser() ) {
-            $TMService->importTMXInTM( $tm_key );
-            $sendTMXEmail = new SendTMXEmail($job, $project, $this->user->email, $this->user);
-        } else {
-            $email = $this->params['email'];
-            $config = Aligner::getConfig();
-            $TMService->importTMXInTM( $config[ 'GLOBAL_PRIVATE_TM' ] );
+        $TMService->setName( "Aligner-" . $id_job . ".tmx" );
 
-            $sendTMXEmail = new SendTMXEmail($job, $project, $email);
+        $response = $TMService->importTMXInTM();
+
+        $tmx_id = $response->id;
+
+        while ( 1 ) {
+            sleep( 1 );
+            $upload_status = $TMService->tmxUploadStatus();
+            if ( $upload_status[ 'completed' ] == true ) {
+                break;
+            }
         }
 
-        $sendTMXEmail->send();
+        $TMService->requestChunkTMXEmailDownload( $tmx_id, $email, $userName, $userSurname );
 
-        return $this->response->json(true);
+        return $this->response->json( true );
 
     }
 

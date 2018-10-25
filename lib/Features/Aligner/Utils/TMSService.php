@@ -37,7 +37,7 @@ class TMSService extends \TMSService {
         $tmxHandler->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
 <tmx version="1.4">
     <header
-            creationtool="Matecat-Cattool"
+            creationtool="Aligner-Matecat-Cattool"
             creationtoolversion="' . \INIT::$BUILD_NUMBER . '"
 	    o-tmf="Matecat"
             creationid="Matecat-Aligner"
@@ -85,31 +85,55 @@ class TMSService extends \TMSService {
 
     }
 
-    public function importTMXInTM($tm_key){
+    public function importTMXInTM(){
 
-        $this->mymemory_engine->import(
+
+        return $this->mymemory_engine->import(
                 $this->tmxFilePath,
-                $tm_key
+                $this->getTMKey(),
+                $this->name
+
         );
     }
 
-    public function downloadTMX($project_name){
-        $buffer = ob_get_contents();
-        ob_get_clean();
-        ob_start( "ob_gzhandler" );  // compress page before sending
-        header( "Content-Type: application/force-download" );
-        header( "Content-Type: application/octet-stream" );
-        header( "Content-Type: application/download" );
+    /**
+     * Send a mail with link for direct prepared download
+     *
+     * @param $userMail
+     * @param $userName
+     * @param $userSurname
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
+     */
+    public function requestChunkTMXEmailDownload( $id_tmx, $userMail, $userName, $userSurname ){
 
-        // Enclose file name in double quotes in order to avoid duplicate header error.
-        // Reference https://github.com/prior/prawnto/pull/16
-        header( "Content-Disposition: attachment; filename=\"$project_name\".tmx" );
-        header( "Expires: 0" );
-        header( "Connection: close" );
 
-        print file_get_contents($this->tmxFilePath);
 
-        exit;
+        $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
+        $engineStruct     = \EnginesModel_EngineStruct::getStruct();
+        $engineStruct->id = 1;
+
+        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $engineRecord = @$eng[0];
+
+        $mymemory_engine = new Engines_MyMemory($engineRecord);
+
+        $response = $mymemory_engine->emailExport(
+                $this->getTMKey(),
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname,
+                $id_tmx
+        );
+
+        return $response;
+
     }
 
 
