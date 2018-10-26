@@ -46,6 +46,29 @@ class AlignUtils
         return $segment;
     }
 
+    public static function _mb_str_replace($search, $replace, $subject) {
+        if(is_array($subject)) {
+            $ret = array();
+            foreach($subject as $key => $val) {
+                $ret[$key] = mb_str_replace($search, $replace, $val);
+            }
+            return $ret;
+        }
+
+        foreach((array) $search as $key => $s) {
+            if($s == '' && $s !== 0) {
+                continue;
+            }
+            $r = !is_array($replace) ? $replace : (array_key_exists($key, $replace) ? $replace[$key] : '');
+            $pos = mb_strpos($subject, $s, 0, 'UTF-8');
+            while($pos !== false) {
+                $subject = mb_substr($subject, 0, $pos, 'UTF-8') . $r . mb_substr($subject, $pos + mb_strlen($s, 'UTF-8'), 65535, 'UTF-8');
+                $pos = mb_strpos($subject, $s, $pos + mb_strlen($r, 'UTF-8'), 'UTF-8');
+            }
+        }
+        return $subject;
+    }
+
     /**
      * @param $segment
      * @param $lang
@@ -57,6 +80,7 @@ class AlignUtils
         return $wordCount;
     }
 
+
     public static function _getNewOrderValue($first_order, $next_order){
         if($first_order && $next_order){
             return $first_order + ( $next_order - $first_order )/2;
@@ -67,7 +91,6 @@ class AlignUtils
             return $order;
         }
     }
-
 
     public static function _mark_xliff_tags($segment) {
 
@@ -123,7 +146,7 @@ class AlignUtils
     public static function _restore_xliff_tags($segment) {
 
         $segment = htmlspecialchars($segment);
-        
+
         $segment = self::__decode_tag_attributes( $segment );
 
         preg_match_all( '/[\'"]base64:(.+)[\'"]/U', $segment, $html, PREG_SET_ORDER ); // Ungreedy
@@ -131,8 +154,8 @@ class AlignUtils
             $segment = preg_replace( '/[\'"]base64:(.+)[\'"]/U', '"' . base64_decode( $tag_attribute[ 1 ] ) . '"', $segment, 1 );
         }
 
-        $segment = str_replace(Constants::LTPLACEHOLDER, "<", $segment);
-        $segment = str_replace(Constants::GTPLACEHOLDER, ">", $segment);
+        $segment = AlignUtils::_mb_str_replace(Constants::LTPLACEHOLDER, "<", $segment);
+        $segment = AlignUtils::_mb_str_replace(Constants::GTPLACEHOLDER, ">", $segment);
         return $segment;
     }
 
@@ -159,4 +182,5 @@ class AlignUtils
         );
         return $aunion;
     }
+
 }

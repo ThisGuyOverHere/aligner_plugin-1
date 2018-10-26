@@ -106,10 +106,10 @@ class ApiController extends AlignerController {
 
         $raw_contents = [];
         $full_raw     = AlignUtils::_mark_xliff_tags( $split_segment[ 'content_raw' ] );
-        $positions[]  = strlen( $full_raw );
+        $positions[]  = mb_strlen( $full_raw, 'UTF-8' );
         foreach ( $positions as $key => $position ) {
             $start          = ( $key == 0 ) ? 0 : $positions[ $key - 1 ] + 1;
-            $raw_substring  = substr( $full_raw, $start, ( $position + 1 ) - $start );
+            $raw_substring  = mb_substr( $full_raw, $start, ( $position + 1 ) - $start, 'UTF-8' );
             $raw_contents[] = AlignUtils::_restore_xliff_tags( $raw_substring );
         }
 
