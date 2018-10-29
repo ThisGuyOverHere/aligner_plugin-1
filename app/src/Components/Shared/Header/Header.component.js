@@ -14,7 +14,8 @@ class HeaderComponent extends Component {
         hideToolbar: PropTypes.bool,
         match: PropTypes.shape({
             params: PropTypes.shape({
-                jobID: PropTypes.string
+                jobID: PropTypes.string,
+                jobPassword: PropTypes.string
             })
         }).isRequired,
         user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
@@ -45,8 +46,10 @@ class HeaderComponent extends Component {
     static getDerivedStateFromProps(nextProps, prevState) {
          if(nextProps.match.params && nextProps.match.params.jobID){
              prevState.job.config.id = nextProps.match.params.jobID;
+             prevState.job.config.password = nextProps.match.params.jobPassword;
          }else{
              prevState.job.config.id = null;
+             prevState.job.config.password = null;
          }
         return prevState;
     };
