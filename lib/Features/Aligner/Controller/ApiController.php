@@ -9,6 +9,7 @@
 namespace Features\Aligner\Controller;
 
 
+use Exceptions\ValidationError;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
@@ -29,8 +30,13 @@ class ApiController extends AlignerController {
         $id_job   = $this->params[ 'id_job' ];
 
         sort( $orders );
-        foreach ( $orders as $order ) {
-            $segments[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
+
+        foreach ($orders as $order) {
+            $segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $type);
+            if(!is_object($segment)){
+                throw new ValidationError("There's no segment with the parameters specified in the input");
+            }
+            $segments[] =  $segment->toArray();
         }
 
         $deleted_orders = [];
@@ -49,7 +55,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Merging $orders", -2 );
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Merging $orders", -2 );
         }
 
         try{
@@ -69,8 +75,8 @@ class ApiController extends AlignerController {
                 ] );
             }
 
-        } catch ( \Exception $e ) {
-            throw new \Exception( $e->getMessage(), -2 );
+        } catch ( ValidationError $e ) {
+            throw new ValidationError( $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
@@ -92,8 +98,17 @@ class ApiController extends AlignerController {
         }
 
         //Gets from 0 since they are returned as an array
-        $split_segment   = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
-        $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_order, $id_job, $inverse_type )->toArray();
+        $split_segment   = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type );
+        if(!is_object($split_segment)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $split_segment   = $split_segment->toArray();
+
+        $inverse_segment = Segments_SegmentDao::getFromOrderJobIdAndType( $inverse_order, $id_job, $inverse_type );
+        if(!is_object($inverse_segment)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $inverse_segment = $inverse_segment->toArray();
 
         $avg_order   = AlignUtils::_getNewOrderValue( $split_segment[ 'order' ], $split_segment[ 'next' ] );
         $inverse_avg = AlignUtils::_getNewOrderValue( $inverse_segment[ 'order' ], $inverse_segment[ 'next' ] );
@@ -199,7 +214,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
 
         //Check which segments to retrieve for source/target
@@ -250,8 +265,8 @@ class ApiController extends AlignerController {
 
             }
 
-        } catch ( \Exception $e ) {
-            throw new \Exception( $e->getMessage(), -2 );
+        } catch ( ValidationError $e ) {
+            throw new ValidationError( $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
@@ -267,7 +282,11 @@ class ApiController extends AlignerController {
 
         if($order == $destination_order){ return $this->getOperations();}
 
-        $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
+        $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type );
+        if(!is_object($movingSegment)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $movingSegment = $movingSegment->toArray();
 
         $new_match_order                       = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch[ 'next' ] );
         $destination_match                     = $referenceMatch;
@@ -305,7 +324,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment Move - DB Error: " . $e->getMessage(), -2 );
+            throw new \PDOException( "Segment Move - DB Error: " . $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
@@ -324,7 +343,11 @@ class ApiController extends AlignerController {
 
         if($order == $destination_order){ return $this->getOperations();}
 
-        $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type )->toArray();
+        $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type );
+        if(!is_object($movingSegment)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $movingSegment = $movingSegment->toArray();
 
         $new_match_order = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch['next'] );
         $destination_match = $referenceMatch;
@@ -372,7 +395,12 @@ class ApiController extends AlignerController {
                 'data'      => $new_match_destination
         ] );
 
-        $inverseReference = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination_order, $id_job, $inverse_type )->toArray();
+        $inverseReference = Segments_SegmentMatchDao::getSegmentMatch( $inverse_destination_order, $id_job, $inverse_type );
+        if(!is_object($inverseReference)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $inverseReference = $inverseReference->toArray();
+
         $new_match_null = [];
         $new_inverse_order           = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
         $new_match_null[ 'order' ]          = $new_inverse_order;
@@ -411,7 +439,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment Move - DB Error: " . $e->getMessage(), -2 );
+            throw new \PDOException( "Segment Move - DB Error: " . $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
@@ -422,9 +450,14 @@ class ApiController extends AlignerController {
 
         $id_job              = $this->params[ 'id_job' ];
         $type                = $this->params[ 'type' ];
-        $destination_order    = $this->params[ 'destination' ];
+        $destination_order   = $this->params[ 'destination' ];
 
-        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type )->toArray();
+        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type );
+        if(!is_object($referenceMatch)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $referenceMatch = $referenceMatch->toArray();
+
         if(!empty($referenceMatch['id'])){
             return $this->moveInFill($referenceMatch);
         }
@@ -446,7 +479,11 @@ class ApiController extends AlignerController {
         $gap_match     = [];
         $balance_match = [];
 
-        $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order, $id_job, $type )->toArray();
+        $previous_match = Segments_SegmentMatchDao::getPreviousSegmentMatch( $order, $id_job, $type );
+        if(!is_object($previous_match)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $previous_match = $previous_match->toArray();
         $previous_order = ( empty( $previous_match ) ) ? 0 : $previous_match[ 'order' ];
 
 
@@ -525,8 +562,8 @@ class ApiController extends AlignerController {
                 'data'      => $last_segment
             ] );
 
-        } catch ( \Exception $e ) {
-            throw new \Exception( $e->getMessage(), -2 );
+        } catch ( ValidationError $e ) {
+            throw new ValidationError( $e->getMessage(), -2 );
         }
 
         $conn = NewDatabase::obtain()->getConnection();
@@ -543,7 +580,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Order no. $order ", -2 );
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Order no. $order ", -2 );
         }
 
         return $this->getOperations();
@@ -566,7 +603,7 @@ class ApiController extends AlignerController {
         }
 
         if ( count( $targets ) != count( $sources ) ) {
-            throw new \Exception( "There is a different amount of source matches and target matches, Deletion cancelled", -2 );
+            throw new ValidationError( "There is a different amount of source matches and target matches, Deletion cancelled", -2 );
         }
 
         $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
@@ -574,13 +611,13 @@ class ApiController extends AlignerController {
 
         foreach ( $sourceMatches as $sourceMatch ) {
             if ( $sourceMatch[ 'segment_id' ] != null ) {
-                throw new \Exception( "Segment Matches contain reference to existing segments, Deletion cancelled", -2 );
+                throw new ValidationError( "Segment Matches contain reference to existing segments, Deletion cancelled", -2 );
             }
         }
 
         foreach ( $targetMatches as $targetMatch ) {
             if ( $targetMatch[ 'segment_id' ] != null ) {
-                throw new \Exception( "Segment Matches contain reference to existing segments, Deletion cancelled", -2 );
+                throw new ValidationError( "Segment Matches contain reference to existing segments, Deletion cancelled", -2 );
             }
         }
 
@@ -598,7 +635,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
 
     }
@@ -610,8 +647,17 @@ class ApiController extends AlignerController {
         $order1 = $this->params[ 'order1' ];
         $order2 = $this->params[ 'order2' ];
 
-        $segment_1 = Segments_SegmentDao::getFromOrderJobIdAndType( $order1, $id_job, $type )->toArray();
-        $segment_2 = Segments_SegmentDao::getFromOrderJobIdAndType( $order2, $id_job, $type )->toArray();
+        $segment_1 = Segments_SegmentDao::getFromOrderJobIdAndType( $order1, $id_job, $type );
+        if(!is_object($segment_1)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $segment_1 = $segment_1->toArray();
+
+        $segment_2 = Segments_SegmentDao::getFromOrderJobIdAndType( $order2, $id_job, $type );
+        if(!is_object($segment_2)){
+            throw new ValidationError("There's no segment with the parameters specified in the input");
+        }
+        $segment_2 = $segment_2->toArray();
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
@@ -621,7 +667,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage(), -2 );
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
 
         $segment_1_copy = $segment_1;
@@ -648,8 +694,8 @@ class ApiController extends AlignerController {
                 'rif_order' => $segment_1[ 'order' ],
                 'data'      => $segment_1
             ] );
-        } catch ( \Exception $e ) {
-            throw new \Exception( $e->getMessage(), -2 );
+        } catch ( ValidationError $e ) {
+            throw new ValidationError( $e->getMessage(), -2 );
         }
 
         return $this->getOperations();
@@ -678,17 +724,29 @@ class ApiController extends AlignerController {
         sort($targetOrders);
 
         foreach ( $sourceOrders as $order ) {
-            $sources[] = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, 'source')->toArray();
+            $source = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, 'source');
+            if(!is_object($source)){
+                throw new ValidationError("There's no segment with the parameters specified in the input");
+            }
+            $sources[] = $source->toArray();
         }
         foreach ( $targetOrders as $order ) {
-            $targets[] = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, 'target' )->toArray();
+            $target = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, 'target' );
+            if(!is_object($target)){
+                throw new ValidationError("There's no segment with the parameters specified in the input");
+            }
+            $targets[] = $target->toArray();
         }
 
         $first_source = $sources[0];
         $first_target = $targets[0];
 
         if($first_target['order'] != $destination_order){
-            $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, 'target' )->toArray();
+            $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, 'target' );
+            if(!is_object($referenceMatch)){
+                throw new ValidationError("There's no segment with the parameters specified in the input");
+            }
+            $referenceMatch = $referenceMatch->toArray();
 
             $new_match_order = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch['next'] );
 
@@ -713,7 +771,11 @@ class ApiController extends AlignerController {
             $new_match_destination[ 'content_clean' ]  = $referenceMatch['content_clean'];
             $new_match_destination[ 'raw_word_count' ] = $referenceMatch['raw_word_count'];
 
-            $inverseReference  = Segments_SegmentMatchDao::getSegmentMatch( $first_source['order'], $id_job, 'source' )->toArray();
+            $inverseReference  = Segments_SegmentMatchDao::getSegmentMatch( $first_source['order'], $id_job, 'source' );
+            if(!is_object($inverseReference)){
+                throw new ValidationError("There's no segment with the parameters specified in the input");
+            }
+            $inverseReference  = $inverseReference->toArray();
 
             $new_match_null    = [];
             $new_inverse_order = AlignUtils::_getNewOrderValue( $inverseReference[ 'order' ], $inverseReference[ 'next' ] );
@@ -751,7 +813,7 @@ class ApiController extends AlignerController {
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
-            throw new \Exception( "Segment update - DB Error: " . $e->getMessage() . " - Merge-align  ", -2 );
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Merge-align  ", -2 );
         }
 
         array_shift( $sources );
@@ -845,8 +907,8 @@ class ApiController extends AlignerController {
             }
 
 
-        } catch ( \Exception $e ) {
-            throw new \Exception( $e->getMessage(), -2 );
+        } catch ( ValidationError $e ) {
+            throw new ValidationError( $e->getMessage(), -2 );
         }
         return $this->getOperations();
     }
@@ -855,7 +917,7 @@ class ApiController extends AlignerController {
         $operation_fields = [ 'type', 'action', 'rif_order', 'data' ];
         foreach ( array_keys( $operation ) as $field ){
             if( !in_array( $field, $operation_fields ) ){
-                throw new \Exception( "Operation format is not valid" );
+                throw new ValidationError( "Operation format is not valid" );
             }
         }
         AlignUtils::_parseArrayIntegers( $operation );
@@ -866,7 +928,7 @@ class ApiController extends AlignerController {
             $data_fields    = AlignUtils::_array_union($segment_fields, $match_fields);
             foreach ( array_keys( $operation[ 'data' ] ) as $field ){
                 if( !in_array( $field, $data_fields ) ){
-                    throw new \Exception( "Operation data format is not valid" );
+                    throw new ValidationError( "Operation data format is not valid" );
                 }
             }
             $operation['data']['content_raw']   = AlignUtils::_mark_xliff_tags($operation['data']['content_raw']);
