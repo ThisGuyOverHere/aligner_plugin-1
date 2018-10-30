@@ -133,6 +133,10 @@
     .form-container{
       display: grid;
       grid-template-columns: 0.2fr 1.5fr 1.3fr;
+      span{
+        i{
+        }
+      }
       input {
         padding: 8px;
         border: 1px solid #cccccc;
@@ -228,7 +232,7 @@ input[type="radio"] {
   display:none;
 }
 
-input[type="radio"] + label span {
+input[type="radio"] + label span{
   display:inline-block;
   width:16px;
   height:16px;
@@ -244,7 +248,7 @@ input[type="radio"] + label span {
   border: 1px solid #ccc;
 }
 
-input[type="radio"]:checked + label span{
+input[type="radio"]:checked + label span {
   background-color: #00AEE4;
   border: 1px solid #00AEE4;
 }

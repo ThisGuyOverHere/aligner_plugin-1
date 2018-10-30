@@ -95,7 +95,7 @@ class ExportModalLogged extends Component {
                                             <button type="submit" className="save ui button">Save</button>
                                         </div>
                                         <div>
-                                            <button type="submit" className="cancel ui button">Cancel</button>
+                                            <button type="" className="cancel ui button" onClick={this.reverseAdd}>Cancel</button>
                                         </div>
                                     </div>
                                 </form>
@@ -138,7 +138,7 @@ class ExportModalLogged extends Component {
                            checked={element.key === this.state.selected.key}
                            onChange={this.handleCheckRadio}
                            value={index} tabIndex={index}/>
-                    <label htmlFor="radio01"><span></span></label>
+                    <label htmlFor="memory"><span></span></label>
                 </div>
                 <div className="memory-info">
                     <p>{element.name ? element.name : 'Private TM and Glossary'}</p>
@@ -208,7 +208,18 @@ class ExportModalLogged extends Component {
         }, error => {
 
         })
+    };
+
+    reverseAdd = () => {
+        this.setState({
+            newTmx: null,
+            selected: {
+                key: this.state.selected.oldKey,
+                oldKey: null
+            },
+        })
     }
+
 
 }
 
