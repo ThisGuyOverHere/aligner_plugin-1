@@ -46,7 +46,7 @@ class LoginComponent extends Component {
                                 <li><i className="icon check"></i>Access the management panel</li>
                                 <li><i className="icon check"></i>Translate Google Drive files</li>
                             </ul>
-                            <button className="ui button primary">Sign up</button>
+                            <button className="ui button primary" onClick={this.openRegistrationModal}>Sign up</button>
                         </div>
                         <div className="dx-content">
                             <div className="login-container-left">
@@ -101,6 +101,11 @@ class LoginComponent extends Component {
 
     openResetPasswordModal = () => {
         SystemActions.setResetPasswordStatus(true);
+        this.onCloseLogin();
+    };
+
+    openRegistrationModal = () => {
+        SystemActions.setRegistrationStatus(true);
         this.onCloseLogin();
     };
 
