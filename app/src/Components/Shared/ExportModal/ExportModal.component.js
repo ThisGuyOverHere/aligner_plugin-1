@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import ExportModalLogged from "./ExportModalLogged/ExportModalLogged.component";
 import ExportModalSendMail from "./ExportModalSendEmail/ExportModalSendEmail.component";
 import ExportModalCompleted from "./ExportModalCompleted/ExportModalCompleted.component";
+import {getUserInitials} from "../../../Helpers/SystemUtils.helper";
 
 
 class ExportModal extends Component {
@@ -28,35 +29,72 @@ class ExportModal extends Component {
     render() {
         return (
             <div>
-                <div className="overlay" onClick={this.onCloseExportModal}>
+                <div className="overlay-b" onClick={this.onCloseExportModal}>
                 </div>
 
                 <div className="exportContainer">
-                    <div className="header">
-                        <div className="sx-header">
-                            <img src="/public/img/logo-ico.png"></img>
-                        </div>
-                        <div className="dx-header">
-                            <span onClick={this.onCloseExportModal}>
-                                <i className="icon window close"></i>
-                            </span>
-                        </div>
-                    </div>
+                    {this.renderHeader()}
                     <div className="content">
 
                         {this.renderComponent()}
 
-                        {(!this.state.sendEmail && !this.state.completed) && <button
-                            onClick={this.sendEmailHandler}
-                            className="sendEmail">
-                            Send me an email
-                        </button>
+                        {(!this.state.sendEmail && !this.state.completed) &&
+                        <div className={"send-email"}>
+                            <button
+                                onClick={this.sendEmailHandler}
+                                className="sendEmail">
+                                Do you want to download only the file?
+                            </button>
+                        </div>
                         }
                     </div>
                 </div>
             </div>
         );
     }
+
+    renderHeader = () => {
+        let header;
+        if (!this.props.user) {
+            header = <div className="header">
+                <div className="sx-header">
+                    <img src="/public/img/logo-ico.png"></img>
+                </div>
+                <div className={"user-profile"}>
+                </div>
+                <div className="dx-header">
+                    <span onClick={this.onCloseExportModal}>
+                        <i className="icon window close"></i>
+                    </span>
+                </div>
+            </div>
+
+        } else {
+            header = <div className="header">
+                <div className="sx-header">
+                    <img src="/public/img/logo-ico.png"></img>
+                </div>
+                <div className={"user-profile"}>
+                    <div className="user-data">
+                        <div className="ui logged label">
+                            US
+                            {/*getUserInitials(this.props.user.first_name, this.props.user.last_name) */}
+                        </div>
+                        <div className="info">
+                            <h3> {this.props.user.first_name} </h3>
+                            <p>  {this.props.user.email} </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="dx-header">
+                    <span onClick={this.onCloseExportModal}>
+                        <i className="icon window close"></i>
+                    </span>
+                </div>
+            </div>
+        }
+        return header;
+    };
 
     renderComponent = () => {
         let component;

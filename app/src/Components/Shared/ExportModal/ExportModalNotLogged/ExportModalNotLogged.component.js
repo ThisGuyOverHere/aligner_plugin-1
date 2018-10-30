@@ -24,47 +24,63 @@ class ExportModalNotLogged extends Component {
 
     render() {
         return (
-            <div id="login">
+            <div>
                 <h1>Please login to the service</h1>
                 <h3>Use your credential or sign in with Google</h3>
-                <button className="google-login" value="" type="">
+                <div id="login">
+                    <div className="sx-content">
+                        <h2>Sign up now to:</h2>
+                        <ul className="">
+                            <li><i className="icon circle"></i>Manage your TMs, glossaries and MT engines</li>
+                            <li><i className="icon circle"></i>Access the management panel</li>
+                            <li><i className="icon circle"></i>Translate Google Drive files</li>
+                        </ul>
+                        <button className="ui button primary">Sign up</button>
+                    </div>
+
+                    <div className="dx-content">
+                        <button className="google-login" value="" type="">
                     <span>
                         <i className="icon google"></i>
                     </span>
-                    Sign in with Google
-                </button>
+                            Sign in with Google
+                        </button>
 
-                <form className="login-form-container" onSubmit={this.login}>
-                    <div className="form-divider">
-                        <div className="divider-line"></div>
-                        <span>OR</span>
-                        <div className="divider-line"></div>
+                        <form className="login-form-container" onSubmit={this.login}>
+                            <div className="form-divider">
+                                <div className="divider-line"></div>
+                                <span>OR</span>
+                                <div className="divider-line"></div>
+                            </div>
+                            <div>
+                                <input type="text" placeholder="Email"
+                                       name="email" tabIndex="1"
+                                       onChange={this.handleInputChange}
+                                       value={this.state.userData.email}>
+                                </input>
+                                <p className="error" hidden={this.state.validEmail}>Please insert a valid
+                                    email.</p>
+                            </div>
+                            <div>
+                                <input type="password" placeholder="Password (minimum 8 characters)"
+                                       name="password" tabIndex="2"
+                                       onChange={this.handleInputChange}
+                                       value={this.state.userData.password}>
+                                </input>
+                                <p className="error" hidden={this.state.validPassword}>Password must be at least
+                                    of 8 characters.</p>
+                            </div>
+                            <button className="login-btn ui button" tabIndex="3" type="submit"
+                                    disabled={!this.state.isValid}> Login
+                            </button>
+                            <p className="error" hidden={!this.props.error}> Login failed </p>
+                        </form>
                     </div>
-                    <div>
-                        <input type="text" placeholder="Email"
-                               name="email" tabIndex="1"
-                               onChange={this.handleInputChange}
-                               value={this.state.userData.email}>
-                        </input>
-                        <p className="error" hidden={this.state.validEmail}>Please insert a valid
-                            email.</p>
-                    </div>
-                    <div>
-                        <input type="password" placeholder="Password (minimum 8 characters)"
-                               name="password" tabIndex="2"
-                               onChange={this.handleInputChange}
-                               value={this.state.userData.password}>
-                        </input>
-                        <p className="error" hidden={this.state.validPassword}>Password must be at least
-                            of 8 characters.</p>
-                    </div>
-                    <button className="login-btn ui button" tabIndex="3" type="submit"
-                            disabled={!this.state.isValid}> Login
-                    </button>
-                    <p className="error" hidden={!this.props.error}> Login failed </p>
-                </form>
 
+
+                </div>
             </div>
+
         );
     }
 

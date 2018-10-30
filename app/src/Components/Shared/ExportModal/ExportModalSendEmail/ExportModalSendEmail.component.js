@@ -26,30 +26,18 @@ class ExportModalSendEmail extends Component {
                 <h3> A copy we’ll be shared in public cloud </h3>
 
                 <div className="sender-content">
-                    <input type="text" tabIndex="0" placeholder="insert an email"
-                           value={this.state.email}
-                           onChange={this.inputHandler}/>
-                    <p> We’ll send you an email when the file is ready </p>
-                </div>
-
-                <div className="selection">
-                    <div className="ui toggle checkbox">
-                        <input
-                            type="checkbox" name="cloud"
-                            tabIndex="5"
-                            checked={this.state.cloudCheckBox}
-                            value={this.state.cloudCheckBox}
-                            onChange={this.cloudHandler} />
-                        <label className={ this.state.cloudCheckBox ? 'active' : 'inactive'}>Help to improve the public cloud</label>
+                    <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Back to login </a>
+                    <p className={"description"}>A copy of your TMX will be sent to our public memory helping us to improve our collaborative translation algorithm</p>
+                    <div className={"btn-container"}>
+                        <input type="text" tabIndex="0" placeholder="insert an email"
+                               value={this.state.email}
+                               onChange={this.inputHandler}/>
+                        <button className="send-btn ui button" disabled={!validEmail} tabIndex="3" type="button" onClick={this.exportTmx}>
+                            Download
+                        </button>
                     </div>
+                    <p className={"small"}> We’ll send you an email when the file is ready </p>
                 </div>
-                <div className="actions">
-                    <button className="send-btn ui button" disabled={!validEmail} tabIndex="3" type="button" onClick={this.exportTmx}>
-                        Send
-                    </button>
-                    <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Go to cloud import</a>
-                </div>
-
 
             </div>
         );

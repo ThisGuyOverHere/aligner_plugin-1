@@ -59,50 +59,55 @@ class ExportModalLogged extends Component {
             <div id="logged">
                 <h1>Export TMX in private or public cloud</h1>
                 <h3>No empty segment or hided row will be exported</h3>
-                <div className="user-data">
-                    <div className="ui logged label">
-                        {getUserInitials(this.props.user.first_name, this.props.user.last_name)}
-                    </div>
-                    <div className="info">
-                        <h3> {this.props.user.first_name} </h3>
-                        <p>  {this.props.user.email} </p>
-                    </div>
+
+                <div className="destinations">
+                    <input type="radio" name="checkbox-option" id="checkbox-button-opt-two"
+                           className="hide-checkbox"
+                           checked={this.state.cloudCheckBox}
+                           value={this.state.cloudCheckBox}
+                           onChange={this.cloudHandler}/>
+                    <label htmlFor="checkbox-button-opt-two">Help to improve the public cloud</label>
+
+                    <input type="radio" name="checkbox-option" id="checkbox-button-opt-three"
+                           className="hide-checkbox"
+                           value={this.state.cloudCheckBox}
+                           onChange={this.cloudHandler}/>
+                    <label htmlFor="checkbox-button-opt-three">Send to private TMX</label>
                 </div>
 
+                {this.state.cloudCheckBox ?
+                    <p> A copy of your TMX will be sent to our public memory helping us to improve
+                        our collaborative translation algorithm.  </p>
+                    :
+                    <div>
+                        <button className="ui button create" onClick={this.createMemory}>Create new TMX</button>
+                        {this.state.newTmx ?
+                            <div className="new-memory">
+                                <form onSubmit={this.saveMemory}>
+                                    <div className="form-container">
+                                        <i className={"icon circle"}/>
+                                        <input type="text" tabIndex="4" onChange={this.handleInput}
+                                               placeholder="Description of tmx"/>
+                                        <p>{this.state.newTmx.key}</p>
+                                    </div>
+                                    <div className="btn-container">
+                                        <div>
+                                            <button type="submit" className="save ui button">Save</button>
+                                        </div>
+                                        <div>
+                                            <button type="submit" className="cancel ui button">Cancel</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            : null}
 
-                <div>
-                    <div className="memories">
-                        {(this.state.tmxList.length > 0 && !this.state.txmInLoad) && this.renderMemories()}
-                        {this.state.txmInLoad && this.renderMemoriesLoader() }
+                        <div className="memories">
+                            {(this.state.tmxList.length > 0 && !this.state.txmInLoad) && this.renderMemories()}
+                            {this.state.txmInLoad && this.renderMemoriesLoader()}
+                        </div>
                     </div>
-                        {(this.state.tmxList.length > 0 && !this.state.txmInLoad) &&  <div className="line"></div>}
-                </div>
-
-
-                {this.state.newTmx ?
-                    <div className="new-memory">
-                        <form onSubmit={this.saveMemory}>
-                            <input type="text" tabIndex="4" onChange={this.handleInput}
-                                   placeholder="Description of tmx"/>
-                            <button type="submit" className="ui button">Save</button>
-                        </form>
-                        <p>{this.state.newTmx.key}</p>
-                    </div>
-                    : <button className="ui button" onClick={this.createMemory}>Create new resource</button>}
-
-
-                <div className="selection">
-                    <div className="ui checked toggle checkbox">
-                        <input
-                            type="checkbox" name="cloud"
-                            tabIndex="5"
-                            checked={this.state.cloudCheckBox}
-                            value={this.state.cloudCheckBox}
-                            onChange={this.cloudHandler}/>
-                        <label className={this.state.cloudCheckBox ? 'active' : 'inactive'}>Help to improve the public
-                            cloud</label>
-                    </div>
-                </div>
+                }
 
                 <button className="export-btn ui button" tabIndex="6" type="" onClick={this.exportTmx}>
                     Export
@@ -133,6 +138,7 @@ class ExportModalLogged extends Component {
                            checked={element.key === this.state.selected.key}
                            onChange={this.handleCheckRadio}
                            value={index} tabIndex={index}/>
+                    <label htmlFor="radio01"><span></span></label>
                 </div>
                 <div className="memory-info">
                     <p>{element.name ? element.name : 'Private TM and Glossary'}</p>
