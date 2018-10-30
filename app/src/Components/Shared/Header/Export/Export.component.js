@@ -13,10 +13,10 @@ class Export extends Component {
 
     render() {
         return (
-            <div id="export">
+            <div>
                 <button className="ui primary button" onClick={this.openExportModal}>
                     <span>
-                        Export
+                        Download TMX
                         <i aria-hidden='true' className="upload icon"></i>
                     </span>
                 </button>

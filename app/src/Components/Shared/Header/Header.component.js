@@ -6,6 +6,7 @@ import User from "./User/User.component";
 import Mismatch from "./Mismatch/Mismatch.component";
 import Export from "./Export/Export.component";
 import ToolbarComponent from "../../Project/Toolbar/Toolbar.component";
+import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
 
 class HeaderComponent extends Component {
 
@@ -13,7 +14,8 @@ class HeaderComponent extends Component {
         hideToolbar: PropTypes.bool,
         match: PropTypes.shape({
             params: PropTypes.shape({
-                jobID: PropTypes.string
+                jobID: PropTypes.string,
+                jobPassword: PropTypes.string
             })
         }).isRequired,
         user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
@@ -26,9 +28,9 @@ class HeaderComponent extends Component {
             && this.props.match.params.jobID) ? this.props.match.params.jobID : null;*/
         this.state = {
             pName: '',
-            projectTitle: 'Sample title for test header ellipsis at center',
-            sourceLang: 'en-US',
-            targetLang: 'it-IT',
+            projectTitle: '',
+            sourceLang: '',
+            targetLang: '',
             job: {
                 config: {
                     password: this.props.match.params.password,
@@ -41,38 +43,68 @@ class HeaderComponent extends Component {
         };
     }
 
-     static getDerivedStateFromProps(nextProps, prevState) {
+    static getDerivedStateFromProps(nextProps, prevState) {
          if(nextProps.match.params && nextProps.match.params.jobID){
              prevState.job.config.id = nextProps.match.params.jobID;
+             prevState.job.config.password = nextProps.match.params.jobPassword;
          }else{
              prevState.job.config.id = null;
+             prevState.job.config.password = null;
          }
         return prevState;
     };
 
     renderHtmlNavigation = () => {
+
         if(this.state.job.config.id){
+            // get job info
+            httpGetAlignmentInfo(this.state.job.config.id, this.state.job.config.password)
+                .then(
+                    response => {
+                        const info = response.data;
+                        this.setState({
+                            projectTitle: info.job_name,
+                            sourceLang: info.source_lang,
+                            targetLang: info.target_lang,
+                        });
+                    }
+
+                ).catch(
+                error => {
+                    console.log(error);
+                }
+            );
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
                     <li>
                         <Link to="/">
                             <div id="logo"></div>
                         </Link>
+                    </li>
+                    <li></li>
+                    <li>
                         <div id="final_title">
                             {textEllipsisCenter(this.state.projectTitle)}
                         </div>
                     </li>
-                    <li>
-                        <div id="source_to_target">
-                            <span id="source">{this.state.sourceLang}</span>
-                            >
-                            <span id="source">{this.state.targetLang}</span>
-                        </div>
+
+                    <li id={"source"}>
+                        <span>{this.state.sourceLang}</span>
                     </li>
-                    <li>
+
+                    <li id={"to"}>
+                        <span> > </span>
+                    </li>
+
+                    <li id={"target"}>
+                        <span>{this.state.targetLang}</span>
+                    </li>
+
+                    <li id="export">
                         {/*<Mismatch />*/}
                         <Export/>
                     </li>
+
                     <li>
                         <User user={this.props.user}/>
                     </li>

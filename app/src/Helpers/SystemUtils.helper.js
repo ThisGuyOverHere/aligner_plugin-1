@@ -12,8 +12,8 @@ import ProjectActions from "../Actions/Project.actions";
  * @returns {string} with a centerd ellipsis
  */
 export const textEllipsisCenter = (text) => {
-    if (text.length > 30) {
-        return text.substr(0, 12) + '[...]' + text.substr(text.length - 12, text.length);
+    if (text.length > 26) {
+        return text.substr(0, 13) + '[...]' + text.substr(text.length - 6, text.length);
     }
     return text;
 };
