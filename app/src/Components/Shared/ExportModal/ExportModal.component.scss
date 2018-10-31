@@ -15,10 +15,8 @@
   animation-duration: 0.4s;
   text-align: center;
   box-shadow: 0 1px 20px #6f6e6e;
-  max-height: 90vh;
-  max-width: 800px;
-  min-width: 600px;
-  overflow: auto;
+  width: 800px;
+  overflow: hidden;
   .header {
 	background-color: #ffffff;
 	display: grid;
@@ -86,10 +84,17 @@
 	}
   }
   .content {
+  	max-height: 90vh;
 	border-radius: 0px 0px 4px 4px;
 	background-color: $white;
-	overflow: hidden;
+	overflow: auto;
 	padding: 0 24px 24px;
+	#cat{
+	  position: absolute;
+	  bottom: -48px;
+	  left: -32px;
+	  height: 150px;
+	}
   }
 }
 

@@ -35,6 +35,9 @@ class ExportModal extends Component {
                 <div className="exportContainer">
                     {this.renderHeader()}
                     <div className="content">
+                        { this.props.user &&
+                            <img id="cat" src={"http://dev.matecat.com/public/img/matecat_watch-left-border.png"}/>
+                         }
 
                         {this.renderComponent()}
 

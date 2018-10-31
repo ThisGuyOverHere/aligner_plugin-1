@@ -22,6 +22,7 @@ class ExportModalLogged extends Component {
             cloudCheckBox: true,
             tmxList: [],
             selected: null,
+            oldKey: null,
             newTmx: null,
             txmInLoad: false,
         };
@@ -83,9 +84,11 @@ class ExportModalLogged extends Component {
                         <button className="ui button create" onClick={this.createMemory}>Create new TMX</button>
                         {this.state.newTmx ?
                             <div className="new-memory">
+                                <div className={"icon-container"}>
+                                    <i className={"icon circle"}/>
+                                </div>
                                 <form onSubmit={this.saveMemory}>
                                     <div className="form-container">
-                                        <i className={"icon circle"}/>
                                         <input type="text" tabIndex="4" onChange={this.handleInput}
                                                placeholder="Description of tmx"/>
                                         <p>{this.state.newTmx.key}</p>
@@ -136,9 +139,9 @@ class ExportModalLogged extends Component {
                 <div className="radio-container">
                     <input type="radio" className="hidden" name="memory"
                            checked={element.key === this.state.selected.key}
-                           onChange={this.handleCheckRadio}
+                           onChange={ () => this.handleCheckRadio(index)}
                            value={index} tabIndex={index}/>
-                    <label htmlFor="memory"><span></span></label>
+                    <label onClick={() => this.handleCheckRadio(index)} htmlFor="memory"><span></span></label>
                 </div>
                 <div className="memory-info">
                     <p>{element.name ? element.name : 'Private TM and Glossary'}</p>
@@ -150,10 +153,17 @@ class ExportModalLogged extends Component {
         });
         return memories;
     };
-    handleCheckRadio = (e) => {
-        this.setState({
-            selected: this.state.tmxList[e.target.value]
-        });
+    handleCheckRadio = (index) => {
+        if(this.state.newTmx){
+           this.reverseAdd();
+            this.setState({
+                selected: this.state.tmxList[index]
+            });
+        }else{
+            this.setState({
+                selected: this.state.tmxList[index]
+            });
+        }
     };
     createMemory = () => {
         httpCreateTmx().then((response) => {
@@ -164,7 +174,9 @@ class ExportModalLogged extends Component {
                 name: null
             };
             this.setState({
-                newTmx: tmx
+                newTmx: tmx,
+                oldKey: this.state.selected,
+                selected: tmx,
             });
         }, (error) => {
 
@@ -213,10 +225,9 @@ class ExportModalLogged extends Component {
     reverseAdd = () => {
         this.setState({
             newTmx: null,
-            selected: {
-                key: this.state.selected.oldKey,
-                oldKey: null
-            },
+            selected: this.state.oldKey,
+            oldKey: null,
+
         })
     }
 
