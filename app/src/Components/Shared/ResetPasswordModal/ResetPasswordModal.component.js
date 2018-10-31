@@ -4,6 +4,9 @@ import SystemActions from "../../../Actions/System.actions";
 class ResetPasswordModal extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            email: ""
+        }
     }
 
     onCloseResetPassword = () => {
@@ -13,6 +16,21 @@ class ResetPasswordModal extends Component {
     onBackToLoginClick = () => {
         SystemActions.setResetPasswordStatus(false);
         SystemActions.setLoginStatus(true);
+    };
+
+    resetPassword = () => {
+
+    };
+
+    emailChange = (event) => {
+        let email = this.state.email;
+        const name = event.target.name;
+        const value = event.target.value;
+        email[name] = value;
+
+        this.setState({
+            userData: email
+        });
     };
 
     render = () => {
@@ -38,14 +56,16 @@ class ResetPasswordModal extends Component {
                                 Enter the email address associated with your account and we'll send you
                                 the link to reset your password.
                             </p>
-                            <div>
+                            <form onSubmit={this.resetPassword}>
                                 <input type="text" placeholder="Email"
-                                       name="emailAddress"
-                                       tabIndex="1" value="">
+                                       name="email"
+                                       value={this.state.email}
+                                       onChange={this.emailChange}
+                                       tabIndex="1">
                                 </input>
-                            </div>
-                            <button className="ui button primary" tabIndex="2">
-                                <span className="button-loader "></span> Send
+                            </form>
+                            <button className="ui button primary" type="submit" tabIndex="2">
+                                Send
                             </button>
                             <br></br>
                             <span onClick={this.onBackToLoginClick} className="forgot-password">Back to login</span>
