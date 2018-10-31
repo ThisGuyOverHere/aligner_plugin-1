@@ -10,6 +10,7 @@ import SystemActions from "../../../Actions/System.actions";
 import LogoutComponent from "../Logout/Logout.component";
 import RegistrationComponent from "../Registration/Registration.component";
 import ConfirmRegistrationComponent from "../ConfirmRegistration/ConfirmRegistration.component";
+import {httpConfig, httpLogout} from "../../../HttpRequests/System.http";
 
 class Layout extends Component {
     constructor(props) {
@@ -24,12 +25,16 @@ class Layout extends Component {
             user: false,
             loginError: false,
             newUserEmail: '',
-            registrationError: ''
+            registrationError: '',
+            googleLogInLink: '',
+            googleDriveLink: '',
+            googleUserImage: ''
         }
     }
 
     componentDidMount() {
         SystemActions.checkUserStatus();
+        this.getConfigs();
         SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.addListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.addListener(SystemConstants.LOGOUT, this.setLogoutStatus);
@@ -58,10 +63,10 @@ class Layout extends Component {
                 {this.state.statusConfirmRegistrationModal && <ConfirmRegistrationComponent email={this.state.newUserEmail}/>}
                 {this.state.statusRegistrationModal && <RegistrationComponent error={this.state.registrationError}/>}
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
-                {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
+                {this.state.statusLogin && < LoginComponent googleLink={this.state.googleLogInLink} error = {this.state.loginError}/>}
                 {this.state.statusExportModal && <ExportModal user = {this.state.user} error = {this.state.loginError}/>}
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
-                <HeaderComponent user = {this.state.user} {...rest} {...matchProps}/>
+                <HeaderComponent image={this.state.googleUserImage} user = {this.state.user} {...rest} {...matchProps}/>
                 <Component {...matchProps} />
                 <div id="hiddenHtml"></div>
             </div>
@@ -72,6 +77,7 @@ class Layout extends Component {
         this.setState({
             statusLogin: status
         })
+
     };
 
     setRegistrationError = (status) => {
@@ -111,7 +117,7 @@ class Layout extends Component {
         })
     };
 
-    userStatus = (status,fromLogin, error) => {
+    userStatus = (status,fromLogin, image, error) => {
         if(status && fromLogin && !error){
             setTimeout(()=>{
                 SystemActions.setLoginStatus(false);
@@ -126,8 +132,22 @@ class Layout extends Component {
             })
         }
         this.setState({
-            user: status
+            user: status,
+            googleUserImage: image
         })
+    };
+
+    getConfigs = () => {
+        httpConfig()
+            .then(response => {
+                this.setState({
+                    googleLogInLink: response.data.authURL,
+                    googleDriveLink: response.data.gdriveAuthURL,
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            })
     };
 }
 

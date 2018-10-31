@@ -29,6 +29,15 @@ export const  httpRegistration = (data) => {
  *
  * @return {Promise}
  */
+export const httpConfig = () => {
+    const url = '/plugins/aligner/configs';
+    return get(url);
+};
+
+/**
+ *
+ * @return {Promise}
+ */
 export const httpMe = () => {
     const url = '/api/app/user';
     return get(url);

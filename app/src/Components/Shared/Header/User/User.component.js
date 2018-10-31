@@ -7,7 +7,8 @@ import UserLogged from "./UserLogged/UserLogged.component";
 class User extends Component {
 
     static propTypes = {
-        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object]),
+        image: PropTypes.string
     };
 
     constructor(props) {
@@ -18,7 +19,7 @@ class User extends Component {
         return (
             <div id="user">
                 {this.props.user ? (
-                    <UserLogged user={this.props.user} />
+                    <UserLogged image={this.props.image} user={this.props.user} />
                 ) : (
                     <UserNotLogged user={this.props.user} />
                 )}

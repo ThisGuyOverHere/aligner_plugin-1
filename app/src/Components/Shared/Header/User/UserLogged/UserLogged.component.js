@@ -6,7 +6,8 @@ import {getUserInitials} from "../../../../../Helpers/SystemUtils.helper";
 class UserLogged extends Component {
 
     static propTypes = {
-        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object]),
+        image: PropTypes.string
     };
 
     constructor(props) {
@@ -18,7 +19,10 @@ class UserLogged extends Component {
             <div>
                 <p>Personal</p>
                 <div className="ui logged label" title="Login" onClick={this.openLogout}>
-                    {getUserInitials(this.props.user.first_name, this.props.user.last_name )}
+                    { this.props.image ?
+                        <img src={this.props.image}/> : null
+                    }
+                    {!this.props.image && getUserInitials(this.props.user.first_name, this.props.user.last_name )}
                 </div>
             </div>
         );

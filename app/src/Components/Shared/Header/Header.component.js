@@ -18,7 +18,8 @@ class HeaderComponent extends Component {
                 jobPassword: PropTypes.string
             })
         }).isRequired,
-        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object]),
+        image: PropTypes.string
     };
 
     constructor(props) {
@@ -58,10 +59,10 @@ class HeaderComponent extends Component {
         this.getInfo();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate =(prevProps) => {
         // Typical usage (don't forget to compare props):
         if (this.props.match.params.jobID !== prevProps.match.params.jobID) {
-            this.getinfo();
+            this.getInfo();
         }
     }
 
@@ -111,7 +112,7 @@ class HeaderComponent extends Component {
                 <Link to="/">
                     <div id="logo"></div>
                 </Link>
-                <User user={this.props.user}/>
+                <User image={this.props.image} user={this.props.user}/>
             </ul>
         }
     };
