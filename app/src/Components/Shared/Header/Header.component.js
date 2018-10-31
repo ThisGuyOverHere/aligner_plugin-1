@@ -54,26 +54,21 @@ class HeaderComponent extends Component {
         return prevState;
     };
 
+    componentDidMount(){
+        this.getInfo();
+    }
+
+    componentDidUpdate(prevProps) {
+        // Typical usage (don't forget to compare props):
+        if (this.props.match.params.jobID !== prevProps.match.params.jobID) {
+            this.getinfo();
+        }
+    }
+
     renderHtmlNavigation = () => {
 
         if(this.state.job.config.id){
-            // get job info
-            httpGetAlignmentInfo(this.state.job.config.id, this.state.job.config.password)
-                .then(
-                    response => {
-                        const info = response.data;
-                        this.setState({
-                            projectTitle: info.job_name,
-                            sourceLang: info.source_lang,
-                            targetLang: info.target_lang,
-                        });
-                    }
-
-                ).catch(
-                error => {
-                    console.log(error);
-                }
-            );
+            console.log('here');
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
                     <li>
@@ -84,7 +79,7 @@ class HeaderComponent extends Component {
                     <li></li>
                     <li>
                         <div id="final_title">
-                            {textEllipsisCenter(this.state.projectTitle)}
+                            {this.state.projectTitle}
                         </div>
                     </li>
 
@@ -126,6 +121,26 @@ class HeaderComponent extends Component {
             <div id="header">
                 { this.renderHtmlNavigation() }
             </div>
+        );
+    }
+
+    getInfo = () => {
+        // get job info
+        httpGetAlignmentInfo(this.state.job.config.id, this.state.job.config.password)
+            .then(
+                response => {
+                    const info = response.data;
+                    this.setState({
+                        projectTitle: textEllipsisCenter(info.job_name),
+                        sourceLang: info.source_lang,
+                        targetLang: info.target_lang,
+                    });
+                }
+
+            ).catch(
+            error => {
+                console.log(error);
+            }
         );
     }
 
