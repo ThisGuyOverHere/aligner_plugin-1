@@ -23,6 +23,7 @@ class Layout extends Component {
             statusConfirmRegistrationModal: false,
             user: false,
             loginError: false,
+            newUserEmail: '',
             registrationError: ''
         }
     }
@@ -54,7 +55,7 @@ class Layout extends Component {
         const {component: Component, ...rest} = this.props;
         return <Route {...rest} render={matchProps => (
             <div className="DefaultLayout">
-                {this.state.statusConfirmRegistrationModal && <ConfirmRegistrationComponent/>}
+                {this.state.statusConfirmRegistrationModal && <ConfirmRegistrationComponent email={this.state.newUserEmail}/>}
                 {this.state.statusRegistrationModal && <RegistrationComponent error={this.state.registrationError}/>}
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
                 {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
@@ -80,16 +81,15 @@ class Layout extends Component {
     };
 
     setStatusRegistration = (status) => {
-        console.log("registration status");
         this.setState({
             statusRegistrationModal: status
         })
     };
 
-    setStatusRegistrationCompleted = (status) => {
-        console.log("registration completed status");
+    setStatusRegistrationCompleted = (status, email) => {
         this.setState({
-            statusConfirmRegistrationModal: status
+            statusConfirmRegistrationModal: status,
+            newUserEmail: email
         })
     };
 

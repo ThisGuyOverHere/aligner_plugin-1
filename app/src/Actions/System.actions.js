@@ -19,10 +19,11 @@ let SystemActions = {
      *
      * @param {Boolean} status The status of confirm registration, true for open the login and false for close
      */
-    setConfirmModalStatus: function (status) {
+    setConfirmModalStatus: function (status,email) {
         AppDispatcher.dispatch({
             actionType: SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL,
-            status: status
+            status: status,
+            email: email
         });
     },
 
@@ -133,11 +134,11 @@ let SystemActions = {
      *
      * @param data , an object with registration field
      */
-    registration: function (data) {
+    registration: function (data,email) {
         httpRegistration(data)
             .then(response => {
                 this.setRegistrationStatus(false);
-                this.setConfirmModalStatus(true);
+                this.setConfirmModalStatus(true,email);
                 //console.log(response);
             })
             .catch(error => {

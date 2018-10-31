@@ -2,17 +2,16 @@ import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
 
-
 class ConfirmRegistrationComponent extends Component {
 
     static propTypes = {
-        error: PropTypes.bool
+        email: PropTypes.string
     };
 
     constructor(props) {
         super(props);
         this.state = {
-           email: ''
+           email: this.props.email,
         }
     }
 
@@ -34,8 +33,8 @@ class ConfirmRegistrationComponent extends Component {
                     </div>
                     <div className="content-confirm">
                         <p>
-                            To complete your registration please follow the instructions in the email we sent you to
-                            usertest22@gmail.com.
+                            To complete your registration please follow the instructions in the email we sent you
+                            {this.state.email}
                         </p>
                         <div className={"resend"}>
                             <p className={"forgot-password"} > Resend email</p>

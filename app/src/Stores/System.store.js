@@ -6,7 +6,6 @@ import EventEmitter from 'events';
 import assign from 'object-assign';
 import SystemConstants from "../Constants/System.constants";
 
-
 EventEmitter.prototype.setMaxListeners(0);
 
 let SystemStore = assign({}, EventEmitter.prototype, {
@@ -24,7 +23,7 @@ AppDispatcher.register(function (action) {
             SystemStore.emitChange(SystemConstants.REGISTRATION_ERROR, action.status);
             break;
         case SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL:
-            SystemStore.emitChange(SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL, action.status);
+            SystemStore.emitChange(SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL, action.status, action.email);
             break;
         case SystemConstants.OPEN_REGISTRATION_MODAL:
             SystemStore.emitChange(SystemConstants.OPEN_REGISTRATION_MODAL, action.status);

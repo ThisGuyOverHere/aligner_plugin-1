@@ -154,7 +154,7 @@ class RegistrationComponent extends Component {
 
             this.state.userData["user[password_confirmation]"] = this.state.userData["user[password]"];
             this.state.userData["user[wanted_url]"] = window.location.href;
-            SystemActions.registration(this.state.userData);
+            SystemActions.registration(this.state.userData, this.state.userData["user[email]"]);
             // close modal reg and open confirm
         
     };
