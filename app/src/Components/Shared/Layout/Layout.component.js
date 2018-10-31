@@ -8,6 +8,7 @@ import ExportModal from "../ExportModal/ExportModal.component";
 import ResetPasswordModal from "../ResetPasswordModal/ResetPasswordModal.component";
 import SystemActions from "../../../Actions/System.actions";
 import LogoutComponent from "../Logout/Logout.component";
+import {httpConfig, httpLogout} from "../../../HttpRequests/System.http";
 
 class Layout extends Component {
     constructor(props) {
@@ -19,11 +20,15 @@ class Layout extends Component {
             statusLogout: false,
             user: false,
             loginError: false,
+            googleLogInLink: '',
+            googleDriveLink: '',
+            googleUserImage: ''
         }
     }
 
     componentDidMount() {
         SystemActions.checkUserStatus();
+        this.getConfigs();
         SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.addListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.addListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
@@ -44,10 +49,10 @@ class Layout extends Component {
         return <Route {...rest} render={matchProps => (
             <div className="DefaultLayout">
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
-                {this.state.statusLogin && < LoginComponent error = {this.state.loginError}/>}
+                {this.state.statusLogin && < LoginComponent googleLink={this.state.googleLogInLink} error = {this.state.loginError}/>}
                 {this.state.statusExportModal && <ExportModal user = {this.state.user} error = {this.state.loginError}/>}
                 {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
-                <HeaderComponent user = {this.state.user} {...rest} {...matchProps}/>
+                <HeaderComponent image={this.state.googleUserImage} user = {this.state.user} {...rest} {...matchProps}/>
                 <Component {...matchProps} />
                 <div id="hiddenHtml"></div>
             </div>
@@ -58,6 +63,7 @@ class Layout extends Component {
         this.setState({
             statusLogin: status
         })
+
     };
 
     setStatusExportModal = (status) => {
@@ -78,7 +84,7 @@ class Layout extends Component {
         })
     };
 
-    userStatus = (status,fromLogin, error) => {
+    userStatus = (status,fromLogin, image, error) => {
         if(status && fromLogin && !error){
             setTimeout(()=>{
                 SystemActions.setLoginStatus(false);
@@ -93,8 +99,22 @@ class Layout extends Component {
             })
         }
         this.setState({
-            user: status
+            user: status,
+            googleUserImage: image
         })
+    };
+
+    getConfigs = () => {
+        httpConfig()
+            .then(response => {
+                this.setState({
+                    googleLogInLink: response.data.authURL,
+                    googleDriveLink: response.data.gdriveAuthURL,
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            })
     };
 }
 

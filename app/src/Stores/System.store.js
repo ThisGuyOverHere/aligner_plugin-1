@@ -30,7 +30,7 @@ AppDispatcher.register(function (action) {
             SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL, action.status);
             break;
         case SystemConstants.USER_STATUS:
-            SystemStore.emitChange(SystemConstants.USER_STATUS, action.status, action.fromLogin, action.error);
+            SystemStore.emitChange(SystemConstants.USER_STATUS, action.status, action.fromLogin, action.image, action.error);
             break;
         case SystemConstants.LOGOUT:
             SystemStore.emitChange(SystemConstants.LOGOUT, action.status);

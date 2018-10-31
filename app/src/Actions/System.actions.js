@@ -58,6 +58,7 @@ let SystemActions = {
                 AppDispatcher.dispatch({
                     actionType: SystemConstants.USER_STATUS,
                     status: response.data.user,
+                    image: response.data.metadata.gplus_picture,
                     fromLogin: false
                 })
             })

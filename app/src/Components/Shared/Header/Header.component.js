@@ -18,7 +18,8 @@ class HeaderComponent extends Component {
                 jobPassword: PropTypes.string
             })
         }).isRequired,
-        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object]),
+        image: PropTypes.string
     };
 
     constructor(props) {
@@ -111,7 +112,7 @@ class HeaderComponent extends Component {
                 <Link to="/">
                     <div id="logo"></div>
                 </Link>
-                <User user={this.props.user}/>
+                <User image={this.props.image} user={this.props.user}/>
             </ul>
         }
     };

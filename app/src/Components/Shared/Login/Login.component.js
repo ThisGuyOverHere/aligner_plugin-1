@@ -6,7 +6,8 @@ import PropTypes from "prop-types";
 class LoginComponent extends Component {
 
     static propTypes = {
-        error: PropTypes.bool
+        error: PropTypes.bool,
+        googleLink: PropTypes.string
     };
 
     constructor(props) {
@@ -50,7 +51,7 @@ class LoginComponent extends Component {
                         </div>
                         <div className="dx-content">
                             <div className="login-container-left">
-                                <button className="google-login">
+                                <button className="google-login" onClick={this.google_popup}>
                                     <i className="google icon"></i>
                                     <span>Sign in with Google</span>
                                 </button>
@@ -140,6 +141,21 @@ class LoginComponent extends Component {
                 validPassword: true,
             })
         }
+    };
+
+    google_popup = () => {
+        let url = this.props.googleLink;
+        let newWindow = window.open( url, 'name', 'height=600,width=900' );
+        if ( window.focus ) {
+            newWindow.focus();
+        }
+        let interval = setInterval(function () {
+            if (newWindow.closed) {
+                SystemActions.checkUserStatus();
+                SystemActions.setLoginStatus(false);
+                clearInterval(interval);
+            }
+        }, 600);
     };
 
     login = (event) => {
