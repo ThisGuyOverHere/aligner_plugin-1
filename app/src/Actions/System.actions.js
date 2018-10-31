@@ -1,5 +1,5 @@
 import SystemConstants from "../Constants/System.constants";
-import {httpLogin, httpLogout, httpMe} from "../HttpRequests/System.http";
+import {httpLogin, httpLogout, httpMe, httpRegistration} from "../HttpRequests/System.http";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 
@@ -14,6 +14,41 @@ let SystemActions = {
             status: status
         });
     },
+
+    /**
+     *
+     * @param {Boolean} status The status of confirm registration, true for open the login and false for close
+     */
+    setConfirmModalStatus: function (status,email) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL,
+            status: status,
+            email: email
+        });
+    },
+
+    /**
+     *
+     * @param {Boolean} status The status of registration
+     */
+    setRegistrationStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.OPEN_REGISTRATION_MODAL,
+            status: status
+        });
+    },
+
+    /**
+     *
+     * @param {Boolean} status The status of registration error
+     */
+    setRegistrationError: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.REGISTRATION_ERROR,
+            status: status
+        });
+    },
+
 
     /**
      *
@@ -93,6 +128,24 @@ let SystemActions = {
                     fromLogin: false,
                     error: true
                 })
+            })
+    },
+
+    /**
+     *
+     * @param data , an object with registration field
+     */
+    registration: function (data,email) {
+        httpRegistration(data)
+            .then(response => {
+                this.setRegistrationStatus(false);
+                this.setConfirmModalStatus(true,email);
+                //console.log(response);
+            })
+            .catch(error => {
+                const err = error.response.data.error.message;
+                //console.log(err);
+                this.setRegistrationError(err);
             })
     },
 

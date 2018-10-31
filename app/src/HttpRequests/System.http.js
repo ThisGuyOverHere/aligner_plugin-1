@@ -16,6 +16,17 @@ export const httpLogin = (data) => {
 
 /**
  *
+ * @param data
+ * @returns {*}
+ */
+export const  httpRegistration = (data) => {
+    console.log('registration: ' ,  data);
+    const url = '/api/app/user';
+    return post(url, qs.stringify(data));
+};
+
+/**
+ *
  * @return {Promise}
  */
 export const httpConfig = () => {

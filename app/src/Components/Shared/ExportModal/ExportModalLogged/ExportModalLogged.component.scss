@@ -1,6 +1,8 @@
 @import "../../../../../assets/theme/variables";
 
 #logged {
+  width: 75%;
+  margin: 0 auto;
   h1, h3 {
     margin: 0px;
     padding: 0px;
@@ -13,48 +15,38 @@
     font-weight: 300;
   }
 
-  .user-data {
+  .destinations{
     display: flex;
+    width: 100%;
     justify-content: center;
     margin: 32px 0;
-    .logged {
-      text-align: center;
-      align-items: center;
-      background-color: $headerText;
-      border-radius: 50%;
-      box-sizing: border-box;
-      color: $white;
-      display: -ms-inline-flexbox;
-      display: inline-flex;
-      -ms-flex-pack: center;
-      justify-content: center;
-      position: relative;
-      font-size: 14px;
-      height: 42px;
-      width: 42px;
-      margin-right: 16px;
-      text-decoration: none;
-      cursor: pointer;
-      border: 1px solid;
+    input[type=radio]{
+      display: none;
     }
-    .info {
-      margin-right: 16px;
-      h3 {
-        text-align: left;
-        color: $secondaryText;
-      }
-      p {
-        font-size: 14px;
-        color: #d5d5d5;
-      }
+    .hide-checkbox + label {
+      width: 240px;
+      padding: 16px 0;
+      text-align: center;
+      border: 1px solid #e4e4e6;
+      color: #6e6e6f;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .hide-checkbox:checked + label {
+      display: inline-block;
+      background-color: #02b7e7;
+      color: #fff;
     }
   }
 
+  .create{
+    border: 2px dashed #e4e4e6;
+    background: transparent;
+    width: 240px;
+  }
+
   .memories {
-    max-height: 104px;
-    overflow-y: scroll;
-    width: 500px;
-    margin: 32px auto;
+    margin: 24px 0;
     .memory-in-loading{
       @extend .memory;
       margin: 16px 0;
@@ -62,11 +54,16 @@
     .memory {
       display: flex;
       justify-content: center;
+      padding: 4px;
       margin-bottom: 8px;
+      line-height: 2;
       .memory-info {
         width: 100%;
         display: flex;
         justify-content: space-between;
+        padding: 4px 0px;
+        margin-left: 8px;
+        border-bottom: 1px solid #e4e4e6;
         .info-sx-text-loader, .info-dx-text-loader{
           width: 180px;
           margin: 0 24px;
@@ -74,10 +71,11 @@
         }
         p {
           margin: 0;
-          padding: 0 16px;
+          padding: 0;
           &:nth-child(1) {
             font-weight: 600;
             font-size: 14px;
+            line-height: 1;
           }
           &:nth-child(2) {
             color: $midGregy;
@@ -89,7 +87,7 @@
     }
   }
   .radio-container{
-    padding: 0 4px;
+    padding: 0 8px;
     .radio-loader{
         height: 16px;
         width: 16px;
@@ -130,29 +128,68 @@
   }
 
   .new-memory {
-    width: 406px;
-    margin: 24px auto;
-    text-align: left;
-    input {
-      width: 75%;
-      height: 56px;
-      padding: 16px;
-      border: 1px solid #cccccc;
-      box-shadow: inset 0 1px 3px #ddd;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 16px;
-      color: #333;
-      font-weight: 300;
+    margin: 24px 0;
+    display: grid;
+    grid-template-columns: 0.2fr 1.8fr;
+    .icon-container{
+      margin: 16px auto;
+      width: 22px;
+      height: 22px;
+      padding: 1px 2px;
+      border-radius: 50%;
+      border: 1px solid #00AEE4;
+      i{
+        color: #00AEE4;
+        font-size: 16px;
+        margin: 0 auto;
+        text-align: left;
+      }
     }
-    button{
-      width: 20%;
-      margin: 0 2%;
-    }
-    p{
-      text-align: left;
-      font-size: 12px;
-      margin: 8px 0;
+    form{
+      padding: 8px 8px 0;
+      border: 2px solid #02b7e7;
+      .form-container{
+        display: grid;
+        grid-template-columns: 1.5fr 1.5fr;
+        input {
+          padding: 8px;
+          border: 1px solid #cccccc;
+          box-shadow: inset 0 1px 3px #ddd;
+          border-radius: 4px;
+          box-sizing: border-box;
+          font-size: 16px;
+          color: #333;
+          font-weight: 300;
+        }
+        p{
+          text-align: right;
+          font-size: 12px;
+          margin: 8px 0;
+        }
+      }
+      .btn-container{
+        display: grid;
+        grid-template-columns: 1.5fr 0.5fr;
+        margin: 8px 0;
+        div{
+          text-align: right;
+          .save , .cancel{
+            width: 96px;
+            padding: 8px 24px;
+            border-radius: 2px;
+          }
+          .save{
+            color: white;
+            border: 1px solid #02c6ed;
+            background-color: #02bfea;
+          }
+          .cancel{
+            box-sizing: border-box;
+            border: 1px solid #6e6e6f;
+            background-color: #fff;
+          }
+        }
+      }
     }
   }
 
@@ -181,7 +218,7 @@
     text-transform: none;
     font-size: 16px;
     font-weight: 300;
-    padding: 12px;
+    padding: 16px;
     box-shadow: 0 2px 8px 0 #C5C5C5 !important;
     border-radius: 2px;
     text-align: center;
@@ -210,4 +247,48 @@
   background: linear-gradient(to right, #ebebeb 8%, #ebebeb 18%, #e4e4e6 33%);
   background-size: 800px 104px;
   position: relative;
+}
+
+.memory{
+  input[type="radio"] {
+    display:none;
+  }
+
+  input[type="radio"] + label{
+    width: 16px;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    padding: 2px;
+  }
+
+  input[type="radio"] + label span{
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 0px 0px -2px;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  input[type="radio"] + label span {
+    background-color: #fff;
+  }
+
+  input[type="radio"]:checked + label {
+    border: 1px solid #00AEE4;
+  }
+
+  input[type="radio"]:checked + label span {
+    background-color: #00AEE4;
+    border: 1px solid #00AEE4;
+  }
+
+  input[type="radio"] + label span,
+  input[type="radio"]:checked + label span {
+    -webkit-transition:background-color 0.4s linear;
+    -o-transition:background-color 0.4s linear;
+    -moz-transition:background-color 0.4s linear;
+    transition:background-color 0.4s linear;
+  }
 }

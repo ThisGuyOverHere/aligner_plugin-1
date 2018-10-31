@@ -8,6 +8,8 @@ import ExportModal from "../ExportModal/ExportModal.component";
 import ResetPasswordModal from "../ResetPasswordModal/ResetPasswordModal.component";
 import SystemActions from "../../../Actions/System.actions";
 import LogoutComponent from "../Logout/Logout.component";
+import RegistrationComponent from "../Registration/Registration.component";
+import ConfirmRegistrationComponent from "../ConfirmRegistration/ConfirmRegistration.component";
 import {httpConfig, httpLogout} from "../../../HttpRequests/System.http";
 
 class Layout extends Component {
@@ -18,8 +20,12 @@ class Layout extends Component {
             statusExportModal: false,
             statusResetPasswordModal: false,
             statusLogout: false,
+            statusRegistrationModal: false,
+            statusConfirmRegistrationModal: false,
             user: false,
             loginError: false,
+            newUserEmail: '',
+            registrationError: '',
             googleLogInLink: '',
             googleDriveLink: '',
             googleUserImage: ''
@@ -30,7 +36,10 @@ class Layout extends Component {
         SystemActions.checkUserStatus();
         this.getConfigs();
         SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
+        SystemStore.addListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.addListener(SystemConstants.LOGOUT, this.setLogoutStatus);
+        SystemStore.addListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
+        SystemStore.addListener(SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL, this.setStatusRegistrationCompleted);
         SystemStore.addListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.addListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         SystemStore.addListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
@@ -38,7 +47,10 @@ class Layout extends Component {
 
     componentWillUnmount() {
         SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
+        SystemStore.addListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.removeListener(SystemConstants.LOGOUT, this.setLogoutStatus);
+        SystemStore.removeListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
+        SystemStore.removeListener(SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL, this.setStatusRegistrationCompleted);
         SystemStore.removeListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.removeListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         SystemStore.removeListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
@@ -48,6 +60,8 @@ class Layout extends Component {
         const {component: Component, ...rest} = this.props;
         return <Route {...rest} render={matchProps => (
             <div className="DefaultLayout">
+                {this.state.statusConfirmRegistrationModal && <ConfirmRegistrationComponent email={this.state.newUserEmail}/>}
+                {this.state.statusRegistrationModal && <RegistrationComponent error={this.state.registrationError}/>}
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
                 {this.state.statusLogin && < LoginComponent googleLink={this.state.googleLogInLink} error = {this.state.loginError}/>}
                 {this.state.statusExportModal && <ExportModal user = {this.state.user} error = {this.state.loginError}/>}
@@ -64,6 +78,25 @@ class Layout extends Component {
             statusLogin: status
         })
 
+    };
+
+    setRegistrationError = (status) => {
+        this.setState({
+            registrationError: status
+        })
+    };
+
+    setStatusRegistration = (status) => {
+        this.setState({
+            statusRegistrationModal: status
+        })
+    };
+
+    setStatusRegistrationCompleted = (status, email) => {
+        this.setState({
+            statusConfirmRegistrationModal: status,
+            newUserEmail: email
+        })
     };
 
     setStatusExportModal = (status) => {
