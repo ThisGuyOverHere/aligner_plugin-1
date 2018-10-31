@@ -55,7 +55,7 @@ class HeaderComponent extends Component {
     };
 
     componentDidMount(){
-        this.getinfo();
+        this.getInfo();
     }
 
     componentDidUpdate(prevProps) {
@@ -124,7 +124,7 @@ class HeaderComponent extends Component {
         );
     }
 
-    getinfo = () => {
+    getInfo = () => {
         // get job info
         httpGetAlignmentInfo(this.state.job.config.id, this.state.job.config.password)
             .then(
