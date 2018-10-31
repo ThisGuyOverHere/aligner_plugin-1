@@ -29,7 +29,7 @@ class ExportModal extends Component {
     render() {
         return (
             <div>
-                <div className="overlay-b" onClick={this.onCloseExportModal}>
+                <div className="overlay" onClick={this.onCloseExportModal}>
                 </div>
 
                 <div className="exportContainer">
