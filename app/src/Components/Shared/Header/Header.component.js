@@ -59,10 +59,10 @@ class HeaderComponent extends Component {
         this.getInfo();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate =(prevProps) => {
         // Typical usage (don't forget to compare props):
         if (this.props.match.params.jobID !== prevProps.match.params.jobID) {
-            this.getinfo();
+            this.getInfo();
         }
     }
 
