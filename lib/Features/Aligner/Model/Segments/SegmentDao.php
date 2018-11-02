@@ -280,18 +280,21 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
 
     public static function mergeSegments( Array $segments ) {
 
-        $raw_merge = "";
-        $clean_merge = "";
+        $raw_array   = [];
+        $clean_array = [];
         $merge_count = 0;
 
         $segments_id = [];
         foreach ($segments as $key => $segment) {
-            $raw_merge   .= " " . $segment[ 'content_raw' ];
-            $clean_merge .= " " . $segment[ 'content_clean' ];
-            $merge_count += $segment[ 'raw_word_count' ];
+            $raw_array[]   = $segment[ 'content_raw' ];
+            $clean_array[] = $segment[ 'content_clean' ];
+            $merge_count   += $segment[ 'raw_word_count' ];
 
             $segments_id[] = $segment['id'];
         }
+
+        $raw_merge   = implode(' ', $raw_array);
+        $clean_merge = implode(' ', $clean_array);
 
         $hash_merge = md5($raw_merge);
 
