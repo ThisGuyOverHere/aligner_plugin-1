@@ -103,7 +103,7 @@ class Alignment {
 
         foreach ($segments as $segment) {
             $text = $segment['content_clean'];
-            $text = strtolower($text);
+            $text = mb_strtolower($text, 'UTF-8');
 
             $elements = preg_split($delimiters, $text, null, PREG_SPLIT_NO_EMPTY);
 
@@ -389,7 +389,7 @@ class Alignment {
             $ss = implode('', $source);  // One of the two will be empty
             $ts = implode('', $target);
 
-            $distance = strlen($ss) + strlen($ts);
+            $distance = mb_strlen($ss,'UTF-8') + mb_strlen($ts, 'UTF-8');
 
             $this->zero += 1;
 
@@ -398,7 +398,7 @@ class Alignment {
 
         // Remove common words
         $commonWords = array_intersect_opt($source, $target);
-        $commonChars = strlen(implode('', $commonWords));
+        $commonChars = mb_strlen(implode('', $commonWords), 'UTF-8');
 
         $ss = array_diff_opt($source, $commonWords);
         $ts = array_diff_opt($target, $commonWords);
@@ -408,8 +408,8 @@ class Alignment {
         $ts = implode('', $ts);
 
         // Distance
-        $sl = strlen($ss);
-        $tl = strlen($ts);
+        $sl = mb_strlen($ss, 'UTF-8');
+        $tl = mb_strlen($ts, 'UTF-8');
 
         if ($sl == 0 || $tl == 0) {  // Check if we can return immediately the upper bound
             $distance = max($sl, $tl);
@@ -429,8 +429,8 @@ class Alignment {
         }
 
         // Score
-        $sl = strlen(implode('', $source));
-        $tl = strlen(implode('', $target));
+        $sl = mb_strlen(implode('', $source), 'UTF-8');
+        $tl = mb_strlen(implode('', $target), 'UTF-8');
 
         $len = min($sl, $tl);
 
@@ -490,8 +490,8 @@ function segments_merge($segments) {
 // Levensthein for 255+ chars strings
 function levenshtein_opt($str1, $str2, $costIns, $costRep, $costDel) {
 
-    $str1Array = str_split($str1, 1);
-    $str2Array = str_split($str2, 1);
+    $str1Array = preg_split('//u', $str1, null, PREG_SPLIT_NO_EMPTY);
+    $str2Array = preg_split('//u', $str2, null, PREG_SPLIT_NO_EMPTY);
 
     $matrix = [];
 
