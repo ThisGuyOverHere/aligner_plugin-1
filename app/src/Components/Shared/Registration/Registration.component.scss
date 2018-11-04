@@ -13,77 +13,49 @@
   text-align: center;
   box-shadow: 0 1px 20px #6f6e6e;
   width: auto;
-  .header {
-	background-color: $headerBlack;
-	height: 48px;
-	display: flex;
-	justify-content: space-between;
-	padding: 11px 10px 7px 23px;
-	border-radius: 4px 4px 0 0;
-	.dx-header {
-	  span {
-		position: relative;
-		bottom: 2px;
-		cursor: pointer;
-		color: $headerText;
-		font-size: 1.2rem;
-		&:hover {
-		  color: $red;
-		}
-	  }
-	}
-	.sx-header {
-	  img {
-		height: 22px;
-	  }
-	}
-  }
   .content {
-	border-radius: 0px 0px 4px 4px;
+	border-radius: 0 0 4px 4px;
 	background-color: $white;
-	display: -ms-flexbox;
-	display: flex;
-	-ms-flex-pack: justify;
-	justify-content: space-between;
 	overflow: hidden;
-	.dx-content {
-	  height: 100%;
-	  width: 600px;
-	  padding: 24px;
-	  background-color: $white;
-	  border-left: 1px solid $googleLoginBorder;
-	  .google-login {
-		cursor: pointer;
-		border-radius: 4px;
-		background-color: #3e82f7;
-		color: $white;
-		padding: 8px;
-		position: relative;
-		height: 44px;
-		width: 196px;
-		i {
-		  color: #3e82f7;
-		  font-size: 24px;
-		  padding: 8px;
-		  background: $white;
-		  width: 40px;
-		  height: 40px;
-		  position: absolute;
-		  top: 1px;
-		  left: 1px;
-		}
-		span {
-		  font-size: 15px;
-		  float: right;
-		}
+	height: 100%;
+	width: 600px;
+	padding: 0 24px 24px;
+	.google-login {
+	  cursor: pointer;
+	  background: $white;
+	  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.24);
+	  border-radius: 2px;
+	  padding: 16px;
+	  text-align: right;
+	  font-size: 16px;
+	  width: 196px;
+	  color: $secondaryText;
+	  span {
+		float: left;
+		color: $black;
 	  }
-	  .login-form-container {
-		width: 70%;
-		margin: 0 auto;
-		h3 {
-		  margin: 16px 0;
-		  font-size: 1.5rem;
-		}
+	}
+	.login-form-container {
+	  width: 80%;
+	  margin: 0 auto;
+	  h3 {
+		margin: 16px 0;
+		font-size: 1.5rem;
+	  }
+	  .divider-line {
+		height: 2px;
+		width: 40%;
+		background-color: #c5c5c5;
+		margin-top: 10px;
+		display: block;
+		float: left;
+	  }
+	  .form-divider {
+		width: 100%;
+		text-align: center;
+		position: relative;
+		height: 20px;
+		margin: 15px 0;
 		.divider-line {
 		  height: 2px;
 		  width: 40%;
@@ -92,92 +64,92 @@
 		  display: block;
 		  float: left;
 		}
-		.form-divider {
-		  width: 100%;
-		  text-align: center;
-		  position: relative;
-		  height: 20px;
-		  margin: 15px 0px;
-		  .divider-line {
-			height: 2px;
-			width: 40%;
-			background-color: #c5c5c5;
-			margin-top: 10px;
-			display: block;
-			float: left;
-		  }
-		  span {
-			float: left;
-			width: 20%;
-			color: #656565;
-			display: inline-block;
-			position: relative;
-			bottom: 6px;
-		  }
-		}
-		input {
-		  width: 100%;
-		  padding: 10px;
+		span {
+		  float: left;
+		  width: 20%;
+		  color: #656565;
 		  display: inline-block;
-		  border: 1px solid $googleLoginBorder;
-		  box-shadow: $loginInputShadow;
-		  border-radius: 4px;
-		  box-sizing: border-box;
-		  font-size: 15px;
-		  color: #333;
-		  margin-bottom: 17px;
-		  margin-top: 5px;
+		  position: relative;
+		  bottom: 0;
 		}
-		input[type="checkbox"] {
-		  width: auto;
+	  }
+	  input {
+		width: 100%;
+		padding: 16px;
+		display: inline-block;
+		border: 1px solid #cccccc;
+		box-shadow: inset 0 1px 3px #ddd;
+		border-radius: 4px;
+		box-sizing: border-box;
+		font-size: 14px;
+		color: #333;
+		margin-bottom: 24px;
+		font-weight: 300;
+		&[type="checkbox"]{
 		  padding: 10px;
 		  display: inline-block;
 		  border: none;
-		  box-shadow: $loginInputShadow;
+		  box-shadow: none;
 		  border-radius: 4px;
 		  box-sizing: border-box;
 		  color: #333;
-		  margin: 0px;
+		  margin: 0;
+		  width: 32px;
 		}
 	  }
-	  .login-btn {
-		width: 160px;
-		margin: 15px auto;
+	}
+
+	.btn-container{
+	  justify-content: space-between;
+	  display: flex;
+	  margin-top: 24px;
+	  .registration-btn,.back-to-login {
+		width: 204px;
+		margin: 0;
 		display: block;
 		text-transform: none;
-		font-size: 18px;
-		padding: 8px 18px;
-	  }
-	  .forgot-password {
+		font-size: 16px;
+		font-weight: 300;
+		padding: 16px;
+		box-shadow: 0 2px 8px 0 #C5C5C5 !important;
+		border-radius: 2px;
+		text-align: center;
+		border: none;
 		cursor: pointer;
-		text-decoration: underline;
-		color: $darkBlue;
-
+	  }
+	  .registration-btn{
+		background: $primary;
+		color: $white;
+	  }
+	  .back-to-login {
+		color: $primary;
+		background: $white;
 	  }
 	}
   }
-  .content-confirm{
-	border-radius: 0px 0px 4px 4px;
+
+  .content-confirm {
+	border-radius: 0 0 4px 4px;
 	background-color: $white;
 	overflow: hidden;
 	width: 400px;
 	text-align: left;
 	font-size: 16px;
 	padding: 16px;
-	p{
+	p {
 	  margin-bottom: 24px;
 	}
-	.resend{
+	.resend {
 	  display: flex;
 	  justify-content: space-between;
 	  margin: 16px;
-	  p{
+	  p {
 		color: #39699a;
 		text-decoration: underline;
 		font-weight: 600;
 		cursor: pointer;
 	  }
-	  .login-btn{
+	  .login-btn {
 		width: auto;
 		padding: 0px 24px;
 		font-size: 12px;
@@ -185,19 +157,11 @@
 	  }
 	}
   }
-}
-
-.error,.error-check {
-  text-align: center;
-  font-size: 12px;
-  color: #cf3d2b;
-  margin-bottom: 8px !important;
-}
-
-.error{
-  margin-top: -8px;
-}
-
-.error-check{
-  margin-top: 4px;
+  .registration-error{
+	padding: 8px;
+  }
+  .registration-error, .error-check {
+	text-align: center;
+	color: #cf3d2b;
+  }
 }

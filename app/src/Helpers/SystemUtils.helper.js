@@ -5,6 +5,7 @@ import {
     httpReverseSegments
 } from "../HttpRequests/Alignment.http";
 import ProjectActions from "../Actions/Project.actions";
+import SystemActions from "../Actions/System.actions";
 
 /**
  *
@@ -16,6 +17,25 @@ export const textEllipsisCenter = (text) => {
         return text.substr(0, 13) + '[...]' + text.substr(text.length - 6, text.length);
     }
     return text;
+};
+
+/**
+ * google login function
+ * @param url
+ */
+export const googleLogin = (url) => {
+    let newWindow = window.open(url, 'name', 'height=600,width=900');
+    if (window.focus) {
+        newWindow.focus();
+    }
+    let interval = setInterval(function () {
+        if (newWindow.closed) {
+            SystemActions.checkUserStatus();
+            SystemActions.setLoginStatus(false);
+            SystemActions.setRegistrationStatus(false);
+            clearInterval(interval);
+        }
+    }, 600);
 };
 
 /**

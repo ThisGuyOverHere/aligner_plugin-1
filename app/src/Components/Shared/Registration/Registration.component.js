@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
-import {emailValidator} from "../../../Helpers/SystemUtils.helper";
+import {emailValidator, googleLogin} from "../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
+import ModalHeader from "../ModalHeader/ModalHeader.component";
 
 
 class RegistrationComponent extends Component {
@@ -36,22 +37,15 @@ class RegistrationComponent extends Component {
                 <div className="overlay" onClick={this.onCloseRegistration}>
                 </div>
                 <div className="registration">
-                    <div className="header">
-                        <div className="sx-header">
-                            <img src="/public/img/logo-ico.png"></img>
-                        </div>
-                        <div className="dx-header">
-                            <span onClick={this.onCloseRegistration}>
-                                <i className="icon window close"></i>
-                            </span>
-                        </div>
-                    </div>
+                    <ModalHeader modalName={"registration"}/>
                     <div className="content">
-                        <div className="dx-content">
-                            <div className="login-container-left">
-                                <button className="google-login">
-                                    <i className="google icon"></i>
-                                    <span>Sign in with Google</span>
+                        <div>
+                            <div className="login-container">
+                                <button className="google-login" onClick={() => googleLogin(this.props.googleLink)}>
+                                    <span>
+                                        <i className="google icon"></i>
+                                    </span>
+                                    Sign in with Google
                                 </button>
                                 <form className="login-form-container" onSubmit={this.registration}>
                                     <div className="form-divider">
@@ -70,7 +64,7 @@ class RegistrationComponent extends Component {
                                             name.</p>
                                     </div>
                                     <div>
-                                        <input type="text" placeholder="Surname"  required
+                                        <input type="text" placeholder="Surname" required
                                                name="user[last_name]" tabIndex="1"
                                                onChange={this.handleInputChange}
                                                value={this.state.userData["user[last_name]"]}>
@@ -102,16 +96,25 @@ class RegistrationComponent extends Component {
                                                checked={this.state.checkbox}
                                                onChange={this.handleCheckChange}
                                         />
-                                        <label>Accetta <a href="" className="forgot-password">Termini e
-                                            condizioni</a></label>
-                                        <p className="error-check " hidden={this.state.checkbox}>Please accept our
-                                            terms.</p>
+                                        <label className={!this.state.checkbox ? "error-check" : null}>
+                                            Accept <span> </span>
+                                            <a href="" target="_blank" className="forgot-password">
+                                                Terms and conditions
+                                            </a>
+                                        </label>
                                     </div>
-                                    <button className="login-btn ui button primary" tabIndex="3" type="submit">
-                                        <span className="button-loader"></span> Register Now
-                                    </button>
-                                    <p className="error" hidden={!this.props.error}> {this.props.error} </p>
-                                    <span className="forgot-password" onClick={this.openLoginModal}>Already registred? Login</span>
+                                    <div className="btn-container">
+                                        <button className="back-to-login ui button primary"
+                                                onClick={this.openLoginModal}>
+                                            Already registred? Login
+                                        </button>
+                                        <button className="registration-btn ui button primary" tabIndex="3"
+                                                type="submit">
+                                            <span className="button-loader"></span> Register Now
+                                        </button>
+                                    </div>
+                                    <p className="registration-error"
+                                       hidden={!this.props.error}> {this.props.error} </p>
                                 </form>
                             </div>
                         </div>
@@ -151,12 +154,11 @@ class RegistrationComponent extends Component {
     registration = (event) => {
         //this.validation();
         event.preventDefault();
+        this.state.userData["user[password_confirmation]"] = this.state.userData["user[password]"];
+        this.state.userData["user[wanted_url]"] = window.location.href;
+        SystemActions.registration(this.state.userData, this.state.userData["user[email]"]);
+        // close modal reg and open confirm
 
-            this.state.userData["user[password_confirmation]"] = this.state.userData["user[password]"];
-            this.state.userData["user[wanted_url]"] = window.location.href;
-            SystemActions.registration(this.state.userData, this.state.userData["user[email]"]);
-            // close modal reg and open confirm
-        
     };
 }
 
