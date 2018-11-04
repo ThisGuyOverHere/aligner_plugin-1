@@ -197,7 +197,21 @@ class TMXController extends AlignerController {
             }
         }
 
-        $TMService->requestChunkTMXEmailDownload( $tmx_id, $email, $userName, $userSurname );
+        $TMService->requestChunkTMXEmailDownload( $tmx_id, $email, $userName, $userSurname );*/
+
+        try {
+            \WorkerClient::init( new \AMQHandler() );
+            \WorkerClient::enqueue( 'TMX_IMPORT_QUEUE', 'Features\Aligner\AsyncTasks\Workers\TMXImportWorker', json_encode( $params ), [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
+        } catch ( \Exception $e ) {
+
+            # Handle the error, logging, ...
+            $output = "**** Project Enqueue failed. AMQ Connection Error. ****\n\t";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $params, true );
+            \Log::doLog( $output );
+            throw $e;
+
+        }
 
         return $this->response->json( true );
 
