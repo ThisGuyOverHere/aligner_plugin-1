@@ -131,24 +131,6 @@ let SystemActions = {
             })
     },
 
-    /**
-     *
-     * @param data , an object with registration field
-     */
-    registration: function (data,email) {
-        httpRegistration(data)
-            .then(response => {
-                this.setRegistrationStatus(false);
-                this.setConfirmModalStatus(true,email);
-                //console.log(response);
-            })
-            .catch(error => {
-                const err = error.response.data.error.message;
-                //console.log(err);
-                this.setRegistrationError(err);
-            })
-    },
-
     logout: function () {
         httpLogout()
             .then(response => {

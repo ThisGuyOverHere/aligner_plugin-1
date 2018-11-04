@@ -3,12 +3,16 @@ import SystemActions from "../../../Actions/System.actions";
 import {emailValidator, googleLogin} from "../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
 import ModalHeader from "../ModalHeader/ModalHeader.component";
+import {httpMe, httpRegistration} from "../../../HttpRequests/System.http";
+import SystemConstants from "../../../Constants/System.constants";
 
 
 class RegistrationComponent extends Component {
 
     static propTypes = {
-        error: PropTypes.string
+        error: PropTypes.string,
+        googleLink : PropTypes.string
+
     };
 
     constructor(props) {
@@ -28,10 +32,16 @@ class RegistrationComponent extends Component {
             validName: true,
             validSurname: true,
             validPassword: true,
+            registered: false,
         }
     }
 
     render = () => {
+        let registrationButton = ['ui', 'primary', 'button','registration-btn'];
+        if(this.state.registered){
+            registrationButton.push('loading');
+        }
+
         return (
             <div>
                 <div className="overlay" onClick={this.onCloseRegistration}>
@@ -108,7 +118,7 @@ class RegistrationComponent extends Component {
                                                 onClick={this.openLoginModal}>
                                             Already registred? Login
                                         </button>
-                                        <button className="registration-btn ui button primary" tabIndex="3"
+                                        <button className={registrationButton.join(" ")} tabIndex="3"
                                                 type="submit">
                                             <span className="button-loader"></span> Register Now
                                         </button>
@@ -156,7 +166,28 @@ class RegistrationComponent extends Component {
         event.preventDefault();
         this.state.userData["user[password_confirmation]"] = this.state.userData["user[password]"];
         this.state.userData["user[wanted_url]"] = window.location.href;
-        SystemActions.registration(this.state.userData, this.state.userData["user[email]"]);
+        //SystemActions.registration(this.state.userData, this.state.userData["user[email]"]);
+        this.setState({
+            registered: true,
+        });
+
+        httpRegistration(this.state.userData)
+            .then(response => {
+                SystemActions.setRegistrationStatus(false);
+                SystemActions.setConfirmModalStatus(true, this.state.userData["user[email]"]);
+                //console.log(response);
+                this.setState({
+                    registered: false,
+                });
+            })
+            .catch(error => {
+                const err = error.response.data.error.message;
+                //console.log(err);
+                SystemActions.setRegistrationError(err);
+                this.setState({
+                    registered: false,
+                });
+            })
         // close modal reg and open confirm
 
     };

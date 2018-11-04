@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
+import ModalHeader from "../ModalHeader/ModalHeader.component";
 
 class ConfirmRegistrationComponent extends Component {
 
@@ -21,16 +22,7 @@ class ConfirmRegistrationComponent extends Component {
                 <div className="overlay" onClick={this.onCloseConfirmRegistration}>
                 </div>
                 <div className="registration">
-                    <div className="header">
-                        <div className="sx-header">
-                            <img src="/public/img/logo-ico.png"></img>
-                        </div>
-                        <div className="dx-header">
-                            <span onClick={this.onCloseConfirmRegistration}>
-                                <i className="icon window close"></i>
-                            </span>
-                        </div>
-                    </div>
+                    <ModalHeader modalName={"registration"}/>
                     <div className="content-confirm">
                         <p>
                             To complete your registration please follow the instructions in the email we sent you
