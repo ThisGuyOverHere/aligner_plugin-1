@@ -14,11 +14,16 @@ class ExportModalSendEmail extends Component {
         super(props);
         this.state = {
             cloudCheckBox: true,
-            email: ''
+            email: '',
+            sending: false
         };
     }
 
     render() {
+        let sendBtn = ['send-btn', 'ui', 'button'];
+        if(this.state.sending){
+            sendBtn.push('loading');
+        }
         const validEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(this.state.email);
         return (
             <div id="sender">
@@ -27,12 +32,14 @@ class ExportModalSendEmail extends Component {
 
                 <div className="sender-content">
                     <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Back to login </a>
-                    <p className={"description"}>A copy of your TMX will be sent to our public memory helping us to improve our collaborative translation algorithm</p>
+                    <p className={"description"}>A copy of your TMX will be sent to our public memory helping us to
+                        improve our collaborative translation algorithm</p>
                     <div className={"btn-container"}>
                         <input type="text" tabIndex="0" placeholder="insert an email"
                                value={this.state.email}
                                onChange={this.inputHandler}/>
-                        <button className="send-btn ui button" disabled={!validEmail} tabIndex="3" type="button" onClick={this.exportTmx}>
+                        <button className={sendBtn.join(" ")} disabled={!validEmail} tabIndex="3" type="button"
+                                onClick={this.exportTmx}>
                             Download
                         </button>
                     </div>
@@ -43,24 +50,36 @@ class ExportModalSendEmail extends Component {
         );
     }
 
-    inputHandler = (e) =>{
+    inputHandler = (e) => {
         this.setState({
             email: e.target.value
         })
     };
+
     cloudHandler = () => {
         this.setState({
             cloudCheckBox: !this.state.cloudCheckBox,
         });
     };
+    
     exportTmx = () => {
-        httpExportTmxFile(this.state.email, !this.state.cloudCheckBox).then(response => {
-            this.props.setCompletedExport();
-            console.log(response)
-        }, error => {
-
-        })
+        this.setState({
+            sending: true
+        });
+        httpExportTmxFile(this.state.email, !this.state.cloudCheckBox)
+            .then(response => {
+                this.setState({
+                    sending: false
+                });
+                this.props.setCompletedExport();
+                console.log(response)
+            }, error => {
+                this.setState({
+                    sending: false
+                });
+            })
     }
 
 }
+
 export default ExportModalSendEmail;
