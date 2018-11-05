@@ -36,7 +36,7 @@ class Layout extends Component {
         const {component: Component, ...rest} = this.props;
         return <Route {...rest} render={matchProps => (
             <div className="DefaultLayout">
-                <Authentication/>
+                <Authentication user = {this.state.user} />
                 {this.state.statusExportModal && <ExportModal user = {this.state.user}
                                                               googleLink={this.state.googleLogInLink}
                                                               error = {this.state.loginError}/>}

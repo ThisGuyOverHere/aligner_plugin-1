@@ -90,12 +90,20 @@ let SystemActions = {
     checkUserStatus: function () {
         httpMe()
             .then(response => {
-                AppDispatcher.dispatch({
-                    actionType: SystemConstants.USER_STATUS,
-                    status: response.data.user,
-                    image: response.data.metadata.gplus_picture,
-                    fromLogin: false
-                })
+                if(response.data.metadata){
+                    AppDispatcher.dispatch({
+                        actionType: SystemConstants.USER_STATUS,
+                        status: response.data.user,
+                        image: response.data.metadata.gplus_picture,
+                        fromLogin: false
+                    })
+                }else{
+                    AppDispatcher.dispatch({
+                        actionType: SystemConstants.USER_STATUS,
+                        status: response.data.user,
+                        fromLogin: false
+                    })
+                }
             })
             .catch(error => {
                 AppDispatcher.dispatch({

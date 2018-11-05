@@ -9,8 +9,14 @@ import RegistrationComponent from "../Registration/Registration.component";
 import ConfirmRegistrationComponent from "../ConfirmRegistration/ConfirmRegistration.component";
 import {httpConfig, httpLogout} from "../../../HttpRequests/System.http";
 import LoginModalComponent from "../LoginModal/LoginModal.component";
+import PropTypes from "prop-types";
 
 class Authentication extends Component {
+
+    static propTypes = {
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object]),
+    };
+
     constructor(props) {
         super(props);
         this.state = {
@@ -30,9 +36,7 @@ class Authentication extends Component {
     }
 
     componentDidMount() {
-        SystemActions.checkUserStatus();
         this.getConfigs();
-        SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.addListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.addListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.addListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
@@ -42,7 +46,6 @@ class Authentication extends Component {
     }
 
     componentWillUnmount() {
-        SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.removeListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.removeListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.removeListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
@@ -61,7 +64,7 @@ class Authentication extends Component {
                 />}
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
                 {this.state.statusLogin && < LoginModalComponent googleLink={this.state.googleLogInLink} error = {this.state.loginError}/>}
-                {this.state.statusLogout && < LogoutComponent user = {this.state.user}/>}
+                {this.state.statusLogout && < LogoutComponent user = {this.props.user}/>}
             </div>
         )
     };
@@ -100,26 +103,6 @@ class Authentication extends Component {
     setLogoutStatus = (status) => {
         this.setState({
             statusLogout: status
-        })
-    };
-
-    userStatus = (status,fromLogin, image, error) => {
-        if(status && fromLogin && !error){
-            setTimeout(()=>{
-                SystemActions.setLoginStatus(false);
-            },0);
-            this.setState({
-                loginError: false
-            })
-        }
-        if(error){
-            this.setState({
-                loginError: true
-            })
-        }
-        this.setState({
-            user: status,
-            googleUserImage: image
         })
     };
 
