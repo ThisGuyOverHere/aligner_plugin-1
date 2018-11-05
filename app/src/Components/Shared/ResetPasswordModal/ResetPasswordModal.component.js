@@ -57,9 +57,9 @@ class ResetPasswordModal extends Component {
     };
 
     render = () => {
-        let resteButton = ['ui', 'button','reset-btn'];
+        let resetButton = ['ui', 'button','reset-btn'];
         if(this.state.sending){
-            resteButton.push('loading');
+            resetButton.push('loading');
         }
 
         return (
@@ -82,7 +82,7 @@ class ResetPasswordModal extends Component {
                                            onChange={this.emailChange}
                                            tabIndex="1">
                                     </input>
-                                    <button className={resteButton.join(" ")} type="submit" tabIndex="2">
+                                    <button className={resetButton.join(" ")} type="submit" tabIndex="2">
                                         Send
                                     </button>
                                 </form>
@@ -91,7 +91,7 @@ class ResetPasswordModal extends Component {
                         </div>
                         :
                         <div className="content">
-                            <div className="resetPasswordForm">
+                            <div className="resetPasswordCompleted">
                                 <p>
                                     We sent an email to <b>{this.state.userData.email}</b> Follow the instructions to create a new password.
                                 </p>

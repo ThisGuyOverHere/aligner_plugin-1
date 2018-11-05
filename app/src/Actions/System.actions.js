@@ -74,6 +74,17 @@ let SystemActions = {
 
     /**
      *
+     * @param {Boolean} status The status of Change Password Modal, true for open the modal and false for close
+     */
+    setChangePasswordStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.OPEN_CHANGE_PASSWORD_MODAL,
+            status: status
+        });
+    },
+
+    /**
+     *
      * @param {Boolean} status The status of Logout Modal, true for open the modal and false for close
      */
     setLogoutStatus: function (status) {
