@@ -25,6 +25,9 @@ class ModalHeader extends Component {
             case 'registration':
                 SystemActions.setRegistrationStatus(false);
                 break;
+            case 'reset-password':
+                SystemActions.setResetPasswordStatus(false);
+                break;
         }
     };
 

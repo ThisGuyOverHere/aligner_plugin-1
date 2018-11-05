@@ -50,3 +50,21 @@ export const httpLogout = () => {
     const url = '/api/app/user/logout';
     return post(url , null);
 };
+
+/**
+ *
+ * @returns {Promise}
+ */
+export const httpResetPassword = (data) => {
+    const url = '/api/app/user/forgot_password';
+    return post(url , qs.stringify(data));
+};
+
+/**
+ *
+ * @returns {Promise}
+ */
+export const httpChangePassword = (data) => {
+    const url = '/api/app/user/password';
+    return post(url , qs.stringify(data));
+};
