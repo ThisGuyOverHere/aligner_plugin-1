@@ -83,6 +83,33 @@ let SystemActions = {
         });
     },
 
+    /**
+     *
+     * @param status
+     * @param fromLogin
+     */
+    loggedIn: function(status, fromLogin){
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.USER_STATUS,
+            status: status,
+            fromLogin: fromLogin,
+        });
+    },
+
+    /**
+     *
+     * @param status
+     * @param fromLogin
+     * @param error
+     */
+    setLoginError: function(status, fromLogin, error) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.USER_STATUS,
+            status: status,
+            fromLogin: fromLogin,
+            error: error
+        });
+    },
 
     /**
      *

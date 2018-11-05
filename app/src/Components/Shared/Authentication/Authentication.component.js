@@ -63,7 +63,7 @@ class Authentication extends Component {
                     googleLink={this.state.googleLogInLink}
                 />}
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
-                {this.state.statusLogin && < LoginModalComponent googleLink={this.state.googleLogInLink} error = {this.state.loginError}/>}
+                {this.state.statusLogin && < LoginModalComponent googleLink={this.state.googleLogInLink} />}
                 {this.state.statusLogout && < LogoutComponent user = {this.props.user}/>}
             </div>
         )

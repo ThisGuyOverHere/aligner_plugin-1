@@ -7,7 +7,6 @@ import ModalHeader from "../ModalHeader/ModalHeader.component";
 class LoginModalComponent extends Component {
 
     static propTypes = {
-        error: PropTypes.bool,
         googleLink: PropTypes.string
     };
 
@@ -23,7 +22,7 @@ class LoginModalComponent extends Component {
                 <div className="loginContainer">
                     <ModalHeader user={this.props.user} modalName={"login"}/>
                     <div className="content">
-                        <LoginComponent error={this.props.error} googleLink={this.props.googleLink}/>
+                        <LoginComponent googleLink={this.props.googleLink}/>
                     </div>
                 </div>
             </div>

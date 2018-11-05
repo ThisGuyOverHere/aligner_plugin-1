@@ -2,11 +2,12 @@ import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import {emailValidator, googleLogin} from "../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
+import SystemConstants from "../../../Constants/System.constants";
+import {httpLogin, httpMe} from "../../../HttpRequests/System.http";
 
 class LoginComponent extends Component {
 
     static propTypes = {
-        error: PropTypes.bool,
         googleLink: PropTypes.string
     };
 
@@ -20,10 +21,17 @@ class LoginComponent extends Component {
             isValid: false,
             validEmail: true,
             validPassword: true,
+            logged: false,
+            error: false
         }
     }
 
     render = () => {
+        let loginButton = ['ui', 'button','login-btn'];
+        if(this.state.logged){
+            loginButton.push('loading');
+        }
+
         return (
             <div id="login">
                 <div className="sx-content">
@@ -68,11 +76,11 @@ class LoginComponent extends Component {
                             <p className="error" hidden={this.state.validPassword}>Password must be at least
                                 of 8 characters.</p>
                         </div>
-                        <button className="login-btn ui button" tabIndex="3" type="submit"
+                        <p onClick={this.openResetPasswordModal} className={"reset"}> Forgot Password? </p>
+                        <button className={loginButton.join(" ")} tabIndex="3" type="submit"
                                 disabled={!this.state.isValid}> Login
                         </button>
-                        <p onClick={this.openResetPasswordModal} className={"reset"}> Forgot Password? </p>
-                        <p className="error" hidden={!this.props.error}> Login failed </p>
+                        <p className="error" hidden={!this.state.error}> Login failed </p>
                     </form>
                 </div>
             </div>
@@ -139,7 +147,26 @@ class LoginComponent extends Component {
     login = (event) => {
         event.preventDefault();
         if (this.state.isValid) {
-            SystemActions.login(this.state.userData);
+            this.setState({
+                logged: true,
+            });
+            httpLogin(this.state.userData)
+                .then(() => {
+                    httpMe().then(response => {
+                        SystemActions.loggedIn(response.data.user, true);
+                        this.setState({
+                            error: false,
+                            logged: false,
+                        })
+                    })
+                })
+                .catch(error => {
+                    SystemActions.setLoginError(false, false, true);
+                    this.setState({
+                        logged: false,
+                        error: true,
+                    })
+                })
         }
     };
 }
