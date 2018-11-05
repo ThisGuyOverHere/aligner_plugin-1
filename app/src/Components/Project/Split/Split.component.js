@@ -3,6 +3,7 @@ import ProjectActions from "../../../Actions/Project.actions";
 import PropTypes from "prop-types";
 import SplitCharComponent from "./SplitCharComponent/SplitCharComponent.component";
 import SplitDivisor from "./SplitDivisor/SplitDivisor.component";
+import ModalHeader from "../../Shared/ModalHeader/ModalHeader.component";
 
 class SplitComponent extends Component {
     static propTypes = {
@@ -75,22 +76,12 @@ class SplitComponent extends Component {
                     <div className="overlay" onClick={this.onCloseSplitModal}>
                     </div>
                     <div className="splitContainer">
-                        <div className="header">
-                            <div className="sx-header">
-                                <img src="/public/img/logo-ico.png"></img>
-                                <h1>Split Segment</h1>
-                            </div>
-                            <div className="dx-header">
-                            <span onClick={this.onCloseSplitModal}>
-                                <i className="icon window close"></i>
-                            </span>
-                            </div>
-                        </div>
+                        <ModalHeader modalName={"split"}/>
                         <div className="content">
                             <p id="toSplit" onMouseLeave={() => this.onCharHover(-1)}>
                                 {this.renderItems()}
                             </p>
-                            <button className="ui button primary" onClick={this.onSave}>Split</button>
+                            <button className="ui button primary splitBtn" onClick={this.onSave}>Split</button>
                         </div>
                     </div>
                 </div>

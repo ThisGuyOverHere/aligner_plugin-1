@@ -52,16 +52,32 @@
     min-height: 50px;
     margin: 0 auto;
     text-align: left;
-    padding: 24px;
+    padding: 0 24px 24px;
     #toSplit {
       border: 2px dotted #d5d5d5;
       padding: 16px;
       font-size: 14px;
       width: 100%;
       display: inline-block;
+      margin: 24px 0;
       > * {
         cursor: pointer;
       }
+    }
+    .splitBtn{
+      background: $primary;
+      color: $white;
+      width: 180px;
+      margin: 16px auto;
+      display: block;
+      text-transform: none;
+      font-size: 16px;
+      font-weight: 300;
+      padding: 16px;
+      box-shadow: 0 2px 8px 0 #C5C5C5 !important;
+      border-radius: 2px;
+      text-align: center;
+      border: none;
     }
   }
 }

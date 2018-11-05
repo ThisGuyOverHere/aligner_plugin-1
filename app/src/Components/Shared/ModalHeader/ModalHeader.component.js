@@ -2,6 +2,7 @@ import {getUserInitials} from "../../../Helpers/SystemUtils.helper";
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import SystemActions from "../../../Actions/System.actions";
+import ProjectActions from "../../../Actions/Project.actions";
 
 class ModalHeader extends Component {
     static propTypes = {
@@ -18,6 +19,9 @@ class ModalHeader extends Component {
         switch(this.props.modalName) {
             case 'export':
                 SystemActions.setExportModalStatus(false);
+                break;
+            case 'split':
+                ProjectActions.openSegmentToSplit(false);
                 break;
             case 'login':
                 SystemActions.setLoginStatus(false);
