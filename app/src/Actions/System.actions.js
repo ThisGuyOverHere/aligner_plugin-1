@@ -1,5 +1,9 @@
 import SystemConstants from "../Constants/System.constants";
-import {httpLogin, httpLogout, httpMe, httpRegistration} from "../HttpRequests/System.http";
+import {
+    httpLogin,
+    httpLogout,
+    httpMe,
+} from "../HttpRequests/System.http";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 
@@ -12,18 +16,6 @@ let SystemActions = {
         AppDispatcher.dispatch({
             actionType: SystemConstants.OPEN_LOGIN,
             status: status
-        });
-    },
-
-    /**
-     *
-     * @param {Boolean} status The status of confirm registration, true for open the login and false for close
-     */
-    setConfirmModalStatus: function (status,email) {
-        AppDispatcher.dispatch({
-            actionType: SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL,
-            status: status,
-            email: email
         });
     },
 

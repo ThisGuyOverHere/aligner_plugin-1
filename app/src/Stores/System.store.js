@@ -22,9 +22,6 @@ AppDispatcher.register(function (action) {
         case SystemConstants.REGISTRATION_ERROR:
             SystemStore.emitChange(SystemConstants.REGISTRATION_ERROR, action.status);
             break;
-        case SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL:
-            SystemStore.emitChange(SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL, action.status, action.email);
-            break;
         case SystemConstants.OPEN_REGISTRATION_MODAL:
             SystemStore.emitChange(SystemConstants.OPEN_REGISTRATION_MODAL, action.status);
             break;

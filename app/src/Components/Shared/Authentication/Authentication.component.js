@@ -4,7 +4,6 @@ import SystemStore from "../../../Stores/System.store";
 import ResetPasswordModal from "../ResetPasswordModal/ResetPasswordModal.component";
 import LogoutComponent from "../Logout/Logout.component";
 import RegistrationComponent from "../Registration/Registration.component";
-import ConfirmRegistrationComponent from "../ConfirmRegistration/ConfirmRegistration.component";
 import {httpConfig, httpLogout} from "../../../HttpRequests/System.http";
 import LoginModalComponent from "../LoginModal/LoginModal.component";
 import PropTypes from "prop-types";
@@ -24,7 +23,6 @@ class Authentication extends Component {
             statusResetPasswordModal: false,
             statusLogout: false,
             statusRegistrationModal: false,
-            statusConfirmRegistrationModal: false,
             statusChangePasswordModal: false,
             user: false,
             loginError: false,
@@ -41,7 +39,6 @@ class Authentication extends Component {
         SystemStore.addListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.addListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.addListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
-        SystemStore.addListener(SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL, this.setStatusRegistrationCompleted);
         SystemStore.addListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.addListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
         SystemStore.addListener(SystemConstants.OPEN_CHANGE_PASSWORD_MODAL, this.setStatusChangePasswordModal);
@@ -51,7 +48,6 @@ class Authentication extends Component {
         SystemStore.removeListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.removeListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.removeListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
-        SystemStore.removeListener(SystemConstants.OPEN_CONFIRM_REGISTRATION_MODAL, this.setStatusRegistrationCompleted);
         SystemStore.removeListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
         SystemStore.removeListener(SystemConstants.OPEN_RESET_PASSWORD_MODAL, this.setStatusResetPasswordModal);
         SystemStore.addListener(SystemConstants.OPEN_CHANGE_PASSWORD_MODAL, this.setStatusChangePasswordModal);
@@ -60,7 +56,6 @@ class Authentication extends Component {
     render = () => {
         return (
             <div className="AuthenticationLayout">
-                {this.state.statusConfirmRegistrationModal && <ConfirmRegistrationComponent email={this.state.newUserEmail}/>}
                 {this.state.statusRegistrationModal && <RegistrationComponent
                     error={this.state.registrationError}
                     googleLink={this.state.googleLogInLink}
@@ -88,13 +83,6 @@ class Authentication extends Component {
     setStatusRegistration = (status) => {
         this.setState({
             statusRegistrationModal: status
-        })
-    };
-
-    setStatusRegistrationCompleted = (status, email) => {
-        this.setState({
-            statusConfirmRegistrationModal: status,
-            newUserEmail: email
         })
     };
 

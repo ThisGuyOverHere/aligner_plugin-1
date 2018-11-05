@@ -68,3 +68,13 @@ export const httpChangePassword = (data) => {
     const url = '/api/app/user/password';
     return post(url , qs.stringify(data));
 };
+
+
+/**
+ *
+ * @returns {Promise}
+ */
+export const httpResendConfirmationEmail= (email) => {
+    const url = '/api/app/user/resend_email_confirm';
+    return post(url , qs.stringify({email: email}) );
+};

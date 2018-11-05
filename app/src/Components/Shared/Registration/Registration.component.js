@@ -3,9 +3,7 @@ import SystemActions from "../../../Actions/System.actions";
 import {emailValidator, googleLogin} from "../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
 import ModalHeader from "../ModalHeader/ModalHeader.component";
-import {httpMe, httpRegistration} from "../../../HttpRequests/System.http";
-import SystemConstants from "../../../Constants/System.constants";
-
+import {httpMe, httpRegistration, httpResendConfirmationEmail} from "../../../HttpRequests/System.http";
 
 class RegistrationComponent extends Component {
 
@@ -32,104 +30,132 @@ class RegistrationComponent extends Component {
             validName: true,
             validSurname: true,
             validPassword: true,
+            sendingRegistration: false,
             registered: false,
+            sending: false,
+            success: false,
         }
     }
 
     render = () => {
         let registrationButton = ['ui', 'primary', 'button','registration-btn'];
-        if(this.state.registered){
+        let resendButton = ['ui', 'button','back-to-login'];
+
+        if(this.state.sendingRegistration){
             registrationButton.push('loading');
+        }
+
+        if(this.state.sending){
+            resendButton.push('loading');
         }
 
         return (
             <div>
                 <div className="overlay" onClick={this.onCloseRegistration}>
                 </div>
-                <div className="registration">
-                    <ModalHeader modalName={"registration"}/>
-                    <div className="content">
-                        <div>
-                            <div className="login-container">
-                                <button className="google-login" onClick={() => googleLogin(this.props.googleLink)}>
+                {!this.state.registered ?
+                    <div className="registration">
+                        <ModalHeader modalName={"registration"}/>
+                        <div className="content">
+                            <div>
+                                <div className="login-container">
+                                    <button className="google-login" onClick={() => googleLogin(this.props.googleLink)}>
                                     <span>
                                         <i className="google icon"></i>
                                     </span>
-                                    Sign in with Google
-                                </button>
-                                <form className="login-form-container" onSubmit={this.registration}>
-                                    <div className="form-divider">
-                                        <div className="divider-line"></div>
-                                        <span>OR</span>
-                                        <div className="divider-line"></div>
-                                    </div>
-                                    <h3>Register with your email</h3>
-                                    <div>
-                                        <input type="text" placeholder="Name" required
-                                               name="user[first_name]" tabIndex="1"
-                                               onChange={this.handleInputChange}
-                                               value={this.state.userData["user[first_name]"]}>
-                                        </input>
-                                        <p className="error" hidden={this.state.validName}>Please insert a valid
-                                            name.</p>
-                                    </div>
-                                    <div>
-                                        <input type="text" placeholder="Surname" required
-                                               name="user[last_name]" tabIndex="1"
-                                               onChange={this.handleInputChange}
-                                               value={this.state.userData["user[last_name]"]}>
-                                        </input>
-                                        <p className="error" hidden={this.state.validSurname}>Please insert a valid
-                                            surname.</p>
-                                    </div>
-                                    <div>
-                                        <input type="email" placeholder="Email" required
-                                               name="user[email]" tabIndex="1"
-                                               onChange={this.handleInputChange}
-                                               value={this.state.userData["user[email]"]}>
-                                        </input>
-                                        <p className="error" hidden={this.state.validEmail}>Please insert a valid
-                                            email.</p>
-                                    </div>
-                                    <div>
-                                        <input type="password" placeholder="Password (minimum 8 characters)"
-                                               name="user[password]" tabIndex="2" required
-                                               minLength="8"
-                                               onChange={this.handleInputChange}
-                                               value={this.state.userData["user[password]"]}>
-                                        </input>
-                                        <p className="error" hidden={this.state.validPassword}>Password must be at least
-                                            of 8 characters.</p>
-                                    </div>
-                                    <div>
-                                        <input type="checkbox" name="checkbox" tabIndex="2" required
-                                               checked={this.state.checkbox}
-                                               onChange={this.handleCheckChange}
-                                        />
-                                        <label className={!this.state.checkbox ? "error-check" : null}>
-                                            Accept <span> </span>
-                                            <a href="" target="_blank" className="forgot-password">
-                                                Terms and conditions
-                                            </a>
-                                        </label>
-                                    </div>
-                                    <div className="btn-container">
-                                        <button className="back-to-login ui button primary"
-                                                onClick={this.openLoginModal}>
-                                            Already registred? Login
-                                        </button>
-                                        <button className={registrationButton.join(" ")} tabIndex="3"
-                                                type="submit">
-                                            <span className="button-loader"></span> Register Now
-                                        </button>
-                                    </div>
-                                    <p className="registration-error"
-                                       hidden={!this.props.error}> {this.props.error} </p>
-                                </form>
+                                        Sign in with Google
+                                    </button>
+                                    <form className="login-form-container" onSubmit={this.registration}>
+                                        <div className="form-divider">
+                                            <div className="divider-line"></div>
+                                            <span>OR</span>
+                                            <div className="divider-line"></div>
+                                        </div>
+                                        <h3>Register with your email</h3>
+                                        <div>
+                                            <input type="text" placeholder="Name" required
+                                                   name="user[first_name]" tabIndex="1"
+                                                   onChange={this.handleInputChange}
+                                                   value={this.state.userData["user[first_name]"]}>
+                                            </input>
+                                            <p className="error" hidden={this.state.validName}>Please insert a valid
+                                                name.</p>
+                                        </div>
+                                        <div>
+                                            <input type="text" placeholder="Surname" required
+                                                   name="user[last_name]" tabIndex="1"
+                                                   onChange={this.handleInputChange}
+                                                   value={this.state.userData["user[last_name]"]}>
+                                            </input>
+                                            <p className="error" hidden={this.state.validSurname}>Please insert a valid
+                                                surname.</p>
+                                        </div>
+                                        <div>
+                                            <input type="email" placeholder="Email" required
+                                                   name="user[email]" tabIndex="1"
+                                                   onChange={this.handleInputChange}
+                                                   value={this.state.userData["user[email]"]}>
+                                            </input>
+                                            <p className="error" hidden={this.state.validEmail}>Please insert a valid
+                                                email.</p>
+                                        </div>
+                                        <div>
+                                            <input type="password" placeholder="Password (minimum 8 characters)"
+                                                   name="user[password]" tabIndex="2" required
+                                                   minLength="8"
+                                                   onChange={this.handleInputChange}
+                                                   value={this.state.userData["user[password]"]}>
+                                            </input>
+                                            <p className="error" hidden={this.state.validPassword}>Password must be at least
+                                                of 8 characters.</p>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" name="checkbox" tabIndex="2" required
+                                                   checked={this.state.checkbox}
+                                                   onChange={this.handleCheckChange}
+                                            />
+                                            <label className={!this.state.checkbox ? "error-check" : null}>
+                                                Accept <span> </span>
+                                                <a href="" target="_blank" className="forgot-password">
+                                                    Terms and conditions
+                                                </a>
+                                            </label>
+                                        </div>
+                                        <div className="btn-container">
+                                            <button className="back-to-login ui button primary"
+                                                    onClick={this.openLoginModal}>
+                                                Already registred? Login
+                                            </button>
+                                            <button className={registrationButton.join(" ")} tabIndex="3"
+                                                    type="submit">
+                                                <span className="button-loader"></span> Register Now
+                                            </button>
+                                        </div>
+                                        <p className="registration-error"
+                                           hidden={!this.props.error}> {this.props.error} </p>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                    :
+                    <div className="registration">
+                        <ModalHeader modalName={"registration"}/>
+                        <div className="content-confirm">
+                            <p>
+                                To complete your registration please follow the instructions in the email we sent
+                                you <b>{this.state.email}</b>
+                            </p>
+                            <div className={"btn-container"}>
+                                <button className={resendButton.join(" ")} onClick={this.resendConfirmationEmail} > Resend email </button>
+                                <button className="registration-btn ui button primary" tabIndex="3" type="submit" onClick={this.onCloseRegistration}>
+                                    Ok
+                                </button>
+                            </div>
+                            { this.state.success && <p className={"success-message"}> Email sent again </p>}
+                        </div>
+                    </div>
+                }
             </div>
         );
     };
@@ -168,16 +194,16 @@ class RegistrationComponent extends Component {
         this.state.userData["user[wanted_url]"] = window.location.href;
         //SystemActions.registration(this.state.userData, this.state.userData["user[email]"]);
         this.setState({
-            registered: true,
+            sendingRegistration: true,
+            registered: false
         });
 
         httpRegistration(this.state.userData)
             .then(response => {
-                SystemActions.setRegistrationStatus(false);
-                SystemActions.setConfirmModalStatus(true, this.state.userData["user[email]"]);
                 //console.log(response);
                 this.setState({
-                    registered: false,
+                    sendingRegistration: false,
+                    registered: true
                 });
             })
             .catch(error => {
@@ -185,11 +211,33 @@ class RegistrationComponent extends Component {
                 //console.log(err);
                 SystemActions.setRegistrationError(err);
                 this.setState({
-                    registered: false,
+                    sendingRegistration: false,
+                    registered: false
                 });
             })
         // close modal reg and open confirm
+    };
 
+    resendConfirmationEmail = (event) => {
+        event.preventDefault();
+        this.setState({
+            sending: true,
+            success: false,
+        });
+        httpResendConfirmationEmail(this.state.userData["user[email]"])
+            .then(response => {
+                this.setState({
+                    sending: false,
+                    success: true,
+                })
+            })
+            .catch(error => {
+                this.setState({
+                    sending: false,
+                    success: false,
+                })
+            })
+        // close modal reg and open confirm
     };
 }
 

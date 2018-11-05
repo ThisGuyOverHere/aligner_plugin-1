@@ -13,6 +13,7 @@
   text-align: center;
   box-shadow: 0 1px 20px #6f6e6e;
   width: auto;
+  background-color: $white;
   .content {
 	border-radius: 0 0 4px 4px;
 	background-color: $white;
@@ -98,65 +99,51 @@
 		}
 	  }
 	}
-
-	.btn-container{
-	  justify-content: space-between;
-	  display: flex;
-	  margin-top: 24px;
-	  .registration-btn,.back-to-login {
-		width: 204px;
-		margin: 0;
-		display: block;
-		text-transform: none;
-		font-size: 16px;
-		font-weight: 300;
-		padding: 16px;
-		box-shadow: 0 2px 8px 0 #C5C5C5 !important;
-		border-radius: 2px;
-		text-align: center;
-		border: none;
-		cursor: pointer;
-	  }
-	  .registration-btn{
-		background: $primary;
-		color: $white;
-	  }
-	  .back-to-login {
-		color: $primary;
-		background: $white;
-	  }
-	}
   }
 
   .content-confirm {
 	border-radius: 0 0 4px 4px;
-	background-color: $white;
 	overflow: hidden;
-	width: 400px;
 	text-align: left;
 	font-size: 16px;
-	padding: 16px;
+	padding: 24px;
 	p {
 	  margin-bottom: 24px;
+	  text-align: center;
 	}
-	.resend {
-	  display: flex;
-	  justify-content: space-between;
-	  margin: 16px;
-	  p {
-		color: #39699a;
-		text-decoration: underline;
-		font-weight: 600;
-		cursor: pointer;
-	  }
-	  .login-btn {
-		width: auto;
-		padding: 0px 24px;
-		font-size: 12px;
-		height: 32px;
-	  }
+	.success-message{
+	  margin: 16px auto;
 	}
   }
+
+  .btn-container{
+	justify-content: space-between;
+	display: flex;
+	margin-top: 24px;
+	.registration-btn,.back-to-login {
+	  width: 204px;
+	  margin: 0;
+	  display: block;
+	  text-transform: none;
+	  font-size: 16px;
+	  font-weight: 300;
+	  padding: 16px;
+	  box-shadow: 0 2px 8px 0 #C5C5C5 !important;
+	  border-radius: 2px;
+	  text-align: center;
+	  border: none;
+	  cursor: pointer;
+	}
+	.registration-btn{
+	  background: $primary;
+	  color: $white;
+	}
+	.back-to-login {
+	  color: $primary;
+	  background: $white;
+	}
+  }
+
   .registration-error{
 	padding: 8px;
   }
