@@ -11,7 +11,7 @@ class ResetPasswordModal extends Component {
                 email: "",
                 wanted_url: "",
             },
-            loader: false,
+            sending: false,
             completed: false
         }
     }
@@ -29,17 +29,17 @@ class ResetPasswordModal extends Component {
         event.preventDefault();
         this.state.userData.wanted_url = window.location.href;
         this.setState({
-            loader: true,
+            sending: true,
         });
         httpResetPassword(this.state.userData)
             .then(response => {
                 this.setState({
-                    loader: false,
+                    sending: false,
                     completed: true,
                 });
             }).catch(error => {
                 this.setState({
-                    loader: false,
+                    sending: false,
                     completed: false,
                 });
         })
@@ -57,6 +57,11 @@ class ResetPasswordModal extends Component {
     };
 
     render = () => {
+        let resteButton = ['ui', 'button','reset-btn'];
+        if(this.state.sending){
+            resteButton.push('loading');
+        }
+
         return (
             <div>
                 <div className="overlay" onClick={this.onCloseResetPassword}>
@@ -77,19 +82,18 @@ class ResetPasswordModal extends Component {
                                            onChange={this.emailChange}
                                            tabIndex="1">
                                     </input>
-                                    <button className="ui button primary" type="submit" tabIndex="2">
+                                    <button className={resteButton.join(" ")} type="submit" tabIndex="2">
                                         Send
                                     </button>
                                 </form>
-                                <br></br>
-                                <span onClick={this.onBackToLoginClick} className="forgot-password">Back to login</span>
+                                <p onClick={this.onBackToLoginClick} className="forgot-password">Back to login</p>
                             </div>
                         </div>
                         :
                         <div className="content">
                             <div className="resetPasswordForm">
                                 <p>
-                                    Check your email! {this.state.userData.email}
+                                    We sent an email to <b>{this.state.userData.email}</b> Follow the instructions to create a new password.
                                 </p>
                             </div>
                         </div>
