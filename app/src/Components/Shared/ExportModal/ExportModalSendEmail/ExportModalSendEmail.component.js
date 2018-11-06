@@ -14,7 +14,7 @@ class ExportModalSendEmail extends Component {
         super(props);
         this.state = {
             cloudCheckBox: true,
-            email: '',
+            email: this.props.user ? this.props.user.email : '',
             sending: false
         };
     }
@@ -28,14 +28,13 @@ class ExportModalSendEmail extends Component {
         return (
             <div id="sender">
                 <h1> Download your TMX </h1>
-                <h3> A copy we’ll be shared in public cloud </h3>
 
                 <div className="sender-content">
                     <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Go back </a>
                     <p className={"description"}>A copy of your TMX will be sent to our public memory helping us to
                         improve our collaborative translation algorithm</p>
                     <div className={"btn-container"}>
-                        <input type="text" tabIndex="0" placeholder="insert an email"
+                        <input type="email" tabIndex="0" placeholder="insert an email"
                                value={this.state.email}
                                onChange={this.inputHandler}/>
                         <button className={sendBtn.join(" ")} disabled={!validEmail} tabIndex="3" type="button"
@@ -43,7 +42,7 @@ class ExportModalSendEmail extends Component {
                             Download
                         </button>
                     </div>
-                    <p className={"small"}> We’ll send you an email when the file is ready </p>
+                    <p className={"small"}> We'll send you an e-mail when the download link is ready </p>
                 </div>
 
             </div>
@@ -66,7 +65,7 @@ class ExportModalSendEmail extends Component {
         this.setState({
             sending: true
         });
-        httpExportTmxFile(this.state.email, !this.state.cloudCheckBox)
+        httpExportTmxFile(this.state.email)
             .then(response => {
                 this.setState({
                     sending: false
