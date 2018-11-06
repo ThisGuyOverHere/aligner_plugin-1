@@ -6,12 +6,13 @@ import ExportModalLogged from "./ExportModalLogged/ExportModalLogged.component";
 import ExportModalSendMail from "./ExportModalSendEmail/ExportModalSendEmail.component";
 import ExportModalCompleted from "./ExportModalCompleted/ExportModalCompleted.component";
 import {getUserInitials} from "../../../Helpers/SystemUtils.helper";
-
+import ModalHeader from "../ModalHeader/ModalHeader.component";
 
 class ExportModal extends Component {
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
         error: PropTypes.bool,
+        googleLink: PropTypes.string
     };
 
     constructor(props) {
@@ -33,7 +34,7 @@ class ExportModal extends Component {
                 </div>
 
                 <div className="exportContainer">
-                    {this.renderHeader()}
+                    <ModalHeader user={this.props.user} modalName={"export"}/>
                     <div className="content">
                         { this.props.user &&
                             <img id="cat" src={"http://dev.matecat.com/public/img/matecat_watch-left-border.png"}/>
@@ -56,49 +57,6 @@ class ExportModal extends Component {
         );
     }
 
-    renderHeader = () => {
-        let header;
-        if (!this.props.user) {
-            header = <div className="header">
-                <div className="sx-header">
-                    <img src="/public/img/logo-ico.png"></img>
-                </div>
-                <div className={"user-profile"}>
-                </div>
-                <div className="dx-header">
-                    <span onClick={this.onCloseExportModal}>
-                        <i className="icon window close"></i>
-                    </span>
-                </div>
-            </div>
-
-        } else {
-            header = <div className="header">
-                <div className="sx-header">
-                    <img src="/public/img/logo-ico.png"></img>
-                </div>
-                <div className={"user-profile"}>
-                    <div className="user-data">
-                        <div className="ui logged label">
-                            US
-                            {/*getUserInitials(this.props.user.first_name, this.props.user.last_name) */}
-                        </div>
-                        <div className="info">
-                            <h3> {this.props.user.first_name} </h3>
-                            <p>  {this.props.user.email} </p>
-                        </div>
-                    </div>
-                </div>
-                <div className="dx-header">
-                    <span onClick={this.onCloseExportModal}>
-                        <i className="icon window close"></i>
-                    </span>
-                </div>
-            </div>
-        }
-        return header;
-    };
-
     renderComponent = () => {
         let component;
         if (this.state.completed) {
@@ -109,7 +67,11 @@ class ExportModal extends Component {
         } else if (this.props.user) {
             component = <ExportModalLogged setCompletedExport={this.setCompletedExport} user={this.props.user}/>;
         } else {
-            component = <ExportModalNotLogged/>;
+            component = <ExportModalNotLogged
+                googleLink={this.props.googleLink}
+                error={this.props.error}
+                user={this.props.user}
+            />;
         }
         return component;
     };
