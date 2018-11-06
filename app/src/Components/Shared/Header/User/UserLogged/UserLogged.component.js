@@ -17,7 +17,6 @@ class UserLogged extends Component {
     render() {
         return (
             <div>
-                <p>Personal</p>
                 <div className="ui logged label" title="Login" onClick={this.openLogout}>
                     { this.props.image ?
                         <img src={this.props.image}/> : null

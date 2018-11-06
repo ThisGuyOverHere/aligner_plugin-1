@@ -102,17 +102,21 @@ class HeaderComponent extends Component {
                     </li>
 
                     <li>
-                        <User user={this.props.user}/>
+                        <User image={this.props.image} user={this.props.user}/>
                     </li>
                 </ul>
                 {!this.props.hideToolbar && <ToolbarComponent jobConf={this.state.job.config}/>}
             </div>;
         } else {
             return <ul className="aligner-nav-nolog" role="navigation">
-                <Link to="/">
-                    <div id="logo"></div>
-                </Link>
-                <User image={this.props.image} user={this.props.user}/>
+                <li>
+                    <Link to="/">
+                        <div id="logo"></div>
+                    </Link>
+                </li>
+                <li>
+                    <User image={this.props.image} user={this.props.user}/>
+                </li>
             </ul>
         }
     };

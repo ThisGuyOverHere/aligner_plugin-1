@@ -16,12 +16,13 @@
     justify-content: center;
     position: relative;
     font-size: 14px;
-    height: 36px;
-    width: 36px;
+    height: 42px;
+    width: 42px;
     margin-left: 24px;
     text-decoration: none;
     cursor: pointer;
     border: 1px dashed;
+    overflow: hidden;
     &:hover {
       color: $lightBlue
     }
