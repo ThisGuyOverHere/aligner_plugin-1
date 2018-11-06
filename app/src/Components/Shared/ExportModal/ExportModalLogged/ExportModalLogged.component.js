@@ -25,6 +25,7 @@ class ExportModalLogged extends Component {
             oldKey: null,
             newTmx: null,
             txmInLoad: false,
+            exporting: false
         };
     }
 
@@ -56,6 +57,10 @@ class ExportModalLogged extends Component {
     };
 
     render() {
+        let exportBtn = ['export-btn', 'ui', 'button'];
+        if(this.state.exporting){
+            exportBtn.push('loading');
+        }
         return (
             <div id="logged">
                 <h1>Export TMX in private or public cloud</h1>
@@ -112,7 +117,7 @@ class ExportModalLogged extends Component {
                     </div>
                 }
 
-                <button className="export-btn ui button" tabIndex="6" type="" onClick={this.exportTmx}>
+                <button className={exportBtn.join(" ")} tabIndex="6" type="" onClick={this.exportTmx}>
                     Export
                 </button>
             </div>
@@ -214,11 +219,19 @@ class ExportModalLogged extends Component {
     };
 
     exportTmx = () => {
+        this.setState({
+            exporting: true
+        });
         httpExportTmxCloud(this.state.selected.key, !this.state.cloudCheckBox).then(response => {
+            this.setState({
+                exporting: false
+            });
             this.props.setCompletedExport();
             console.log(response)
         }, error => {
-
+            this.setState({
+                exporting: false
+            });
         })
     };
 
