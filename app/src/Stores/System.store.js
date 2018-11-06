@@ -19,9 +19,6 @@ let SystemStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
     switch (action.actionType) {
-        case SystemConstants.REGISTRATION_ERROR:
-            SystemStore.emitChange(SystemConstants.REGISTRATION_ERROR, action.status);
-            break;
         case SystemConstants.OPEN_REGISTRATION_MODAL:
             SystemStore.emitChange(SystemConstants.OPEN_REGISTRATION_MODAL, action.status);
             break;

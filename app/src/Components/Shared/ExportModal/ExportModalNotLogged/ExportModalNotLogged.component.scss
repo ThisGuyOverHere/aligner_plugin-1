@@ -65,7 +65,7 @@ h3{
 	width: 39%;
 	padding-left: 24px;
 	.google-login{
-	  background: $white;
+	  background: transparent;
 	  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.24);
 	  border-radius: 2px;
 	  margin-top: 56px;
@@ -76,7 +76,7 @@ h3{
 	  color: $secondaryText;
 	  span{
 		float: left;
-		color: $black;
+		color: $darkBlue;
 	  }
 	}
 

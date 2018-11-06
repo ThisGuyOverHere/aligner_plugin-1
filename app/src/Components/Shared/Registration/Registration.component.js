@@ -8,9 +8,7 @@ import {httpMe, httpRegistration, httpResendConfirmationEmail} from "../../../Ht
 class RegistrationComponent extends Component {
 
     static propTypes = {
-        error: PropTypes.string,
         googleLink : PropTypes.string
-
     };
 
     constructor(props) {
@@ -34,11 +32,13 @@ class RegistrationComponent extends Component {
             registered: false,
             sending: false,
             success: false,
+            error: false,
+            errorMessage: '',
         }
     }
 
     render = () => {
-        let registrationButton = ['ui', 'primary', 'button','registration-btn'];
+        let registrationButton = ['ui','button','registration-btn'];
         let resendButton = ['ui', 'button','back-to-login'];
 
         if(this.state.sendingRegistration){
@@ -122,7 +122,7 @@ class RegistrationComponent extends Component {
                                             </label>
                                         </div>
                                         <div className="btn-container">
-                                            <button className="back-to-login ui button primary"
+                                            <button className="back-to-login ui button"
                                                     onClick={this.openLoginModal}>
                                                 Already registred? Login
                                             </button>
@@ -132,7 +132,7 @@ class RegistrationComponent extends Component {
                                             </button>
                                         </div>
                                         <p className="registration-error"
-                                           hidden={!this.props.error}> {this.props.error} </p>
+                                           hidden={!this.state.error}> {this.state.errorMessage} </p>
                                     </form>
                                 </div>
                             </div>
@@ -195,7 +195,9 @@ class RegistrationComponent extends Component {
         //SystemActions.registration(this.state.userData, this.state.userData["user[email]"]);
         this.setState({
             sendingRegistration: true,
-            registered: false
+            registered: false,
+            error: false,
+            errorMessage: ''
         });
 
         httpRegistration(this.state.userData)
@@ -209,10 +211,11 @@ class RegistrationComponent extends Component {
             .catch(error => {
                 const err = error.response.data.error.message;
                 //console.log(err);
-                SystemActions.setRegistrationError(err);
                 this.setState({
                     sendingRegistration: false,
-                    registered: false
+                    registered: false,
+                    error: true,
+                    errorMessage: err
                 });
             })
         // close modal reg and open confirm
