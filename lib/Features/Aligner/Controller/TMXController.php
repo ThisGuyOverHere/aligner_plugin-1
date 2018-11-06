@@ -178,34 +178,21 @@ class TMXController extends AlignerController {
             }
         }
 
-        $TMService = new TMSService();
-        $TMService->setTmKey( $tm_key );
-
-        $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
-
-        $TMService->setName( "Aligner-" . $id_job . ".tmx" );
-
-        $response = $TMService->importTMXInTM();
-
-        $tmx_id = $response->id;
-
-        while ( 1 ) {
-            sleep( 1 );
-            $upload_status = $TMService->tmxUploadStatus();
-            if ( $upload_status[ 'completed' ] == true ) {
-                break;
-            }
-        }
-
-        $TMService->requestChunkTMXEmailDownload( $tmx_id, $email, $userName, $userSurname );*/
+        $params = [];
+        $params['job'] = $job;
+        $params['tm_key'] = $tm_key;
+        $params['email'] = $email;
+        $params['first_name'] = $userName;
+        $params['last_name'] = $userSurname;
 
         try {
             \WorkerClient::init( new \AMQHandler() );
-            \WorkerClient::enqueue( 'TMX_IMPORT_QUEUE', 'Features\Aligner\AsyncTasks\Workers\TMXImportWorker', json_encode( $params ), [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
+            \WorkerClient::enqueue( 'ALIGNER_TMX_IMPORT', 'Features\Aligner\Utils\AsyncTasks\Workers\TMXImportWorker', json_encode( $params ), [ 'persistent' => \WorkerClient::$_HANDLER->persistent
+            ] );
         } catch ( \Exception $e ) {
 
             # Handle the error, logging, ...
-            $output = "**** Project Enqueue failed. AMQ Connection Error. ****\n\t";
+            $output = "**** TMX Import Enqueue failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
             \Log::doLog( $output );

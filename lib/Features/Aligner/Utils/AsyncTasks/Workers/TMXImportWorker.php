@@ -6,9 +6,11 @@
  * Time: 11:24
  */
 
-namespace Features\Aligner\AsyncTasks\Workers;
+namespace Features\Aligner\Utils\AsyncTasks\Workers;
 
-class TMXImportWorker extends \TaskRunner\Commons\AbstractWorker {
+use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
+
+class TMXImportWorker extends AbstractWorker {
 
     public function process( \TaskRunner\Commons\AbstractElement $queueElement ) {
 
@@ -18,7 +20,6 @@ class TMXImportWorker extends \TaskRunner\Commons\AbstractWorker {
         $this->_checkForReQueueEnd( $queueElement );
         $this->_checkDatabaseConnection();
         $this->_TMXImport( $queueElement );
-        $this->_publishResults();
 
     }
 
