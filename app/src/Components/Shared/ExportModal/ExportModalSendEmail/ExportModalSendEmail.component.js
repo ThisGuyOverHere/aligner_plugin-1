@@ -31,7 +31,7 @@ class ExportModalSendEmail extends Component {
                 <h3> A copy we’ll be shared in public cloud </h3>
 
                 <div className="sender-content">
-                    <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Back to login </a>
+                    <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Go back </a>
                     <p className={"description"}>A copy of your TMX will be sent to our public memory helping us to
                         improve our collaborative translation algorithm</p>
                     <div className={"btn-container"}>
