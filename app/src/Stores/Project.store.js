@@ -35,9 +35,30 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
         },
         count: 0
     },
+
     updateAll: function (volumeAnalysis, project) {
 
     },
+
+    /**
+     * reset Store to initial state
+     */
+    emptyStore: function (){
+        console.log("here i am");
+        this.jobID = null;
+        this.jobPassword = null;
+        this.job.source = List();
+        this.job.target = List();
+        this.job.size = 0;
+        this.selection.source.count = 0;
+        this.selection.source.list = [];
+        this.selection.source.map = {};
+        this.selection.target.count = 0;
+        this.selection.target.list = [];
+        this.selection.target.map = {};
+        this.selection.count = 0;
+    },
+
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
     },
@@ -259,6 +280,10 @@ AppDispatcher.register(function (action) {
         case ProjectConstants.SET_JOB_ID:
             ProjectStore.jobID = action.jobID;
             ProjectStore.jobPassword = action.jobPassword;
+            break;
+        case ProjectConstants.EMPTY_STORE:
+            ProjectStore.emitChange(ProjectConstants.EMPTY_STORE, action.status);
+            ProjectStore.emptyStore();
             break;
         case ProjectConstants.STORE_SEGMENTS:
             ProjectStore.storeSegments(action.segments);
