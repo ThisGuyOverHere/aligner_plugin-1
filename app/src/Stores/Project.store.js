@@ -44,7 +44,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
      * reset Store to initial state
      */
     emptyStore: function (){
-        console.log("here i am");
         this.jobID = null;
         this.jobPassword = null;
         this.job.source = List();
