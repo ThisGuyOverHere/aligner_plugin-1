@@ -9,12 +9,18 @@ import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
 import HTML5Backend from 'react-dnd-html5-backend';
 import VirtualList from 'react-tiny-virtual-list';
 import {syncWithBackend} from "../../Helpers/SystemUtils.helper";
+import ExportModal from "../Shared/ExportModal/ExportModal.component";
+import SystemConstants from "../../Constants/System.constants";
+import SystemStore from "../../Stores/System.store";
+import SystemActions from "../../Actions/System.actions";
+import {httpConfig} from "../../HttpRequests/System.http";
 
 
 class JobComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            statusExportModal: false,
             segmentToSplit: {},
             job: {
                 config: {
@@ -46,7 +52,9 @@ class JobComponent extends Component {
                     map: {}
                 },
                 count: 0
-            }
+            },
+            user: false,
+            googleUserImage: ''
         };
 
         this.elementsRef = {};
@@ -56,6 +64,9 @@ class JobComponent extends Component {
     }
 
     componentDidMount() {
+        SystemActions.checkUserStatus();
+        SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
+        SystemStore.addListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
@@ -63,10 +74,18 @@ class JobComponent extends Component {
     }
 
     componentWillUnmount() {
+        SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
+        SystemStore.removeListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
     }
+
+    setStatusExportModal = (status) => {
+        this.setState({
+            statusExportModal: status
+        })
+    };
 
     render() {
         const data = this.renderItems(this.state.job.rows);
@@ -76,6 +95,11 @@ class JobComponent extends Component {
         }
         return (
             <div className={classes.join(" ")}>
+                {this.state.statusExportModal &&
+                <ExportModal
+                    user = {this.state.user}
+                    image = {this.state.googleUserImage}
+                />}
                 <VirtualList
                     ref={(instance) => {
                         this.virtualList = instance;
@@ -227,7 +251,15 @@ class JobComponent extends Component {
         this.setState({
             selection: selection
         })
-    }
+    };
+
+    // export component
+    userStatus = (status,fromLogin, image, error) => {
+        this.setState({
+            user: status,
+            googleUserImage: image
+        })
+    };
 }
 
 export default DragDropContext(HTML5Backend)(JobComponent);

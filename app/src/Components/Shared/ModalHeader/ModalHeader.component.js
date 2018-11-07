@@ -9,23 +9,12 @@ import SystemStore from "../../../Stores/System.store";
 class ModalHeader extends Component {
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-        modalName: PropTypes.string,
+        image: PropTypes.string,
+        modalName: PropTypes.string
     };
 
     constructor(props) {
         super(props);
-        this.state = {
-            image: ''
-        }
-    }
-
-    componentDidMount() {
-        SystemActions.checkUserStatus();
-        SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
-    }
-
-    componentWillUnmount() {
-        SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
     }
 
     onCloseModal = ( ) => {
@@ -76,8 +65,8 @@ class ModalHeader extends Component {
                     <div className={"user-profile"}>
                         <div className="user-data">
                             <div className="ui logged label">
-                                { this.state.image ?
-                                    <img src={this.state.image}/> : null
+                                { this.props.image ?
+                                    <img src={this.props.image}/> : null
                                 }
                                 {getUserInitials(this.props.user.first_name, this.props.user.last_name) }
                             </div>
@@ -95,12 +84,6 @@ class ModalHeader extends Component {
                 </div>
         );
     }
-
-    userStatus = (status,fromLogin, image, error) => {
-        this.setState({
-            image: image
-        })
-    };
 };
 
 export default ModalHeader;
