@@ -32,18 +32,6 @@ let SystemActions = {
 
     /**
      *
-     * @param {Boolean} status The status of registration error
-     */
-    setRegistrationError: function (status) {
-        AppDispatcher.dispatch({
-            actionType: SystemConstants.REGISTRATION_ERROR,
-            status: status
-        });
-    },
-
-
-    /**
-     *
      * @param {Boolean} status The status of Export Modal, true for open the modal and false for close
      */
     setExportModalStatus: function (status) {

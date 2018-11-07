@@ -27,7 +27,6 @@ class Authentication extends Component {
             user: false,
             loginError: false,
             newUserEmail: '',
-            registrationError: '',
             googleLogInLink: '',
             googleDriveLink: '',
             googleUserImage: ''
@@ -36,7 +35,6 @@ class Authentication extends Component {
 
     componentDidMount() {
         this.getConfigs();
-        SystemStore.addListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.addListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.addListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
         SystemStore.addListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
@@ -45,7 +43,6 @@ class Authentication extends Component {
     }
 
     componentWillUnmount() {
-        SystemStore.removeListener(SystemConstants.REGISTRATION_ERROR, this.setRegistrationError);
         SystemStore.removeListener(SystemConstants.LOGOUT, this.setLogoutStatus);
         SystemStore.removeListener(SystemConstants.OPEN_REGISTRATION_MODAL, this.setStatusRegistration);
         SystemStore.removeListener(SystemConstants.OPEN_LOGIN, this.setStatusLogin);
@@ -57,7 +54,6 @@ class Authentication extends Component {
         return (
             <div className="AuthenticationLayout">
                 {this.state.statusRegistrationModal && <RegistrationComponent
-                    error={this.state.registrationError}
                     googleLink={this.state.googleLogInLink}
                 />}
                 {this.state.statusResetPasswordModal && <ResetPasswordModal />}
@@ -71,12 +67,6 @@ class Authentication extends Component {
     setStatusLogin = (status) => {
         this.setState({
             statusLogin: status
-        })
-    };
-
-    setRegistrationError = (status) => {
-        this.setState({
-            registrationError: status
         })
     };
 
