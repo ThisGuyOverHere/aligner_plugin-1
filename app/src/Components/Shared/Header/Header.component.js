@@ -69,7 +69,6 @@ class HeaderComponent extends Component {
     renderHtmlNavigation = () => {
 
         if(this.state.job.config.id){
-            console.log('here');
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
                     <li>

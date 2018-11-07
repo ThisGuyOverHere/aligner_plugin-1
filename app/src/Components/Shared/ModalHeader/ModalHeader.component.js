@@ -3,6 +3,8 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import SystemActions from "../../../Actions/System.actions";
 import ProjectActions from "../../../Actions/Project.actions";
+import SystemConstants from "../../../Constants/System.constants";
+import SystemStore from "../../../Stores/System.store";
 
 class ModalHeader extends Component {
     static propTypes = {
@@ -12,10 +14,21 @@ class ModalHeader extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            image: ''
+        }
+    }
+
+    componentDidMount() {
+        SystemActions.checkUserStatus();
+        SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
+    }
+
+    componentWillUnmount() {
+        SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
     }
 
     onCloseModal = ( ) => {
-        console.log("close");
         switch(this.props.modalName) {
             case 'export':
                 SystemActions.setExportModalStatus(false);
@@ -63,6 +76,9 @@ class ModalHeader extends Component {
                     <div className={"user-profile"}>
                         <div className="user-data">
                             <div className="ui logged label">
+                                { this.state.image ?
+                                    <img src={this.state.image}/> : null
+                                }
                                 {getUserInitials(this.props.user.first_name, this.props.user.last_name) }
                             </div>
                             <div className="info">
@@ -79,6 +95,12 @@ class ModalHeader extends Component {
                 </div>
         );
     }
+
+    userStatus = (status,fromLogin, image, error) => {
+        this.setState({
+            image: image
+        })
+    };
 };
 
 export default ModalHeader;
