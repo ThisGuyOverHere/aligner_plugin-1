@@ -63,7 +63,7 @@ class ExportModalLogged extends Component {
         }
         return (
             <div id="logged">
-                <h1>Export TMX in private or public cloud</h1>
+                <h1>Export TMX in public cloud or private</h1>
                 <h3>No empty segment or hidden row will be exported</h3>
 
                 <div className="destinations">
