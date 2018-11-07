@@ -6,7 +6,7 @@ import {
     httpCreateTmx,
     httpSaveTmx,
     httpExportTmxFile,
-    httpExportTmxCloud
+    httpExportTmxCloud, httpExportTmxPrivate
 } from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalLogged extends Component {
@@ -64,7 +64,7 @@ class ExportModalLogged extends Component {
         return (
             <div id="logged">
                 <h1>Export TMX in private or public cloud</h1>
-                <h3>No empty segment or hided row will be exported</h3>
+                <h3>No empty segment or hidden row will be exported</h3>
 
                 <div className="destinations">
                     <input type="radio" name="checkbox-option" id="checkbox-button-opt-two"
@@ -117,7 +117,7 @@ class ExportModalLogged extends Component {
                     </div>
                 }
 
-                <button className={exportBtn.join(" ")} tabIndex="6" type="" onClick={this.exportTmx}>
+                <button className={exportBtn.join(" ")} tabIndex="6" disabled={!(this.state.tmxList.length > 0) && !this.state.cloudCheckBox} type="" onClick={this.exportTmx}>
                     Export
                 </button>
             </div>
@@ -222,17 +222,33 @@ class ExportModalLogged extends Component {
         this.setState({
             exporting: true
         });
-        httpExportTmxCloud(this.state.selected.key, !this.state.cloudCheckBox).then(response => {
-            this.setState({
-                exporting: false
-            });
-            this.props.setCompletedExport();
-            console.log(response)
-        }, error => {
-            this.setState({
-                exporting: false
-            });
-        })
+        if(this.state.cloudCheckBox){
+            console.log("public");
+            httpExportTmxCloud().then(response => {
+                this.setState({
+                    exporting: false
+                });
+                this.props.setCompletedExport();
+                console.log(response)
+            }, error => {
+                this.setState({
+                    exporting: false
+                });
+            })
+        } else {
+            console.log("private");
+            httpExportTmxPrivate(this.state.selected.key).then(response => {
+                this.setState({
+                    exporting: false
+                });
+                this.props.setCompletedExport();
+                console.log(response)
+            }, error => {
+                this.setState({
+                    exporting: false
+                });
+            })
+        }
     };
 
     reverseAdd = () => {
