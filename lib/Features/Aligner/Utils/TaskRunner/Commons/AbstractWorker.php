@@ -17,6 +17,7 @@ use \PDOException;
  */
 abstract class AbstractWorker extends \TaskRunner\Commons\AbstractWorker {
 
+    protected $dbHandler;
 
     protected function _checkDatabaseConnection(){
 
@@ -24,19 +25,17 @@ abstract class AbstractWorker extends \TaskRunner\Commons\AbstractWorker {
 
         $config = Aligner::getConfig();
 
-        $db = NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE']);
+        $this->dbHandler = NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE']);
         try {
-            $db->ping();
+            $this->dbHandler->ping();
         } catch ( PDOException $e ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} " );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Database connection reloaded. " );
-            $db->close();
+            $this->dbHandler->close();
             //reconnect
-            $db->getConnection();
+            $this->dbHandler->getConnection();
         }
-
-
-
+        
 
     }
 
