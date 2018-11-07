@@ -18,10 +18,12 @@ use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\Alignment;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
+use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 
-class AlignJobWorker extends \TaskRunner\Commons\AbstractWorker {
+class AlignJobWorker extends AbstractWorker {
 
     private $id_job;
+    private $job;
 
     public function process( \TaskRunner\Commons\AbstractElement $queueElement ) {
 
@@ -61,12 +63,12 @@ class AlignJobWorker extends \TaskRunner\Commons\AbstractWorker {
         $source_file  = Files_FileDao::getByJobId( $this->id_job, "source" );
         $target_file  = Files_FileDao::getByJobId( $this->id_job, "target" );*/
 
-        $job          = $attributes->job;
+        $this->job    = $attributes->job;
         $source_file  = $attributes->source_file;
         $target_file  = $attributes->target_file;
 
-        $source_lang = $job->source;
-        $target_lang = $job->target;
+        $source_lang = $this->job->source;
+        $target_lang = $this->job->target;
 
         $source_segments = $this->_file2segments($source_file, $source_lang);
         $target_segments = $this->_file2segments($target_file, $target_lang);
