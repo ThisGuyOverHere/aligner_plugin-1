@@ -63,18 +63,7 @@ class HeaderComponent extends Component {
 
     componentDidMount(){
         this.getInfo();
-        ProjectStore.addListener(SystemActions.EMPTY_STORE, this.emptySoreStatus);
     }
-
-    componentWillUnmount() {
-        ProjectStore.removeListener(SystemActions.EMPTY_STORE, this.emptySoreStatus);
-    }
-
-    emptySoreStatus = (status) => {
-        this.setState({
-            statusEmptyModal: status
-        })
-    };
 
     componentDidUpdate =(prevProps) => {
         // Typical usage (don't forget to compare props):
@@ -91,7 +80,7 @@ class HeaderComponent extends Component {
                 <ul className="aligner-nav-log" role="navigation">
                     <li>
                         <Link to="/">
-                            <div onClick={ () => ProjectActions.emptyStore(true)} id="logo"></div>
+                            <div id="logo"></div>
                         </Link>
                     </li>
                     <li></li>
@@ -128,7 +117,7 @@ class HeaderComponent extends Component {
             return <ul className="aligner-nav-nolog" role="navigation">
                 <li>
                     <Link to="/">
-                        <div onClick={ () => ProjectActions.emptyStore(true)} id="logo"></div>
+                        <div id="logo"></div>
                     </Link>
                 </li>
                 <li>

@@ -1,10 +1,16 @@
 import React, {Component} from 'react';
 import UploadComponent from "./Upload/Upload.component";
+import ProjectActions from "../../Actions/Project.actions";
 
 class HomeComponent extends Component {
     constructor() {
         super();
     }
+
+    componentDidMount(){
+        ProjectActions.emptyStore(true);
+    }
+
     render() {
         return (
             <div className="homeComponent">
