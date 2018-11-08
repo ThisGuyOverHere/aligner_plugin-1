@@ -3,11 +3,14 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import SystemActions from "../../../Actions/System.actions";
 import ProjectActions from "../../../Actions/Project.actions";
+import SystemConstants from "../../../Constants/System.constants";
+import SystemStore from "../../../Stores/System.store";
 
 class ModalHeader extends Component {
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-        modalName: PropTypes.string,
+        image: PropTypes.string,
+        modalName: PropTypes.string
     };
 
     constructor(props) {
@@ -15,7 +18,6 @@ class ModalHeader extends Component {
     }
 
     onCloseModal = ( ) => {
-        console.log("close");
         switch(this.props.modalName) {
             case 'export':
                 SystemActions.setExportModalStatus(false);
@@ -63,6 +65,9 @@ class ModalHeader extends Component {
                     <div className={"user-profile"}>
                         <div className="user-data">
                             <div className="ui logged label">
+                                { this.props.image ?
+                                    <img src={this.props.image}/> : null
+                                }
                                 {getUserInitials(this.props.user.first_name, this.props.user.last_name) }
                             </div>
                             <div className="info">

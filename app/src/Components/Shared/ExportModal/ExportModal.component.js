@@ -7,20 +7,25 @@ import ExportModalSendMail from "./ExportModalSendEmail/ExportModalSendEmail.com
 import ExportModalCompleted from "./ExportModalCompleted/ExportModalCompleted.component";
 import {getUserInitials} from "../../../Helpers/SystemUtils.helper";
 import ModalHeader from "../ModalHeader/ModalHeader.component";
+import {httpConfig} from "../../../HttpRequests/System.http";
 
 class ExportModal extends Component {
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-        error: PropTypes.bool,
-        googleLink: PropTypes.string
+        image: PropTypes.string
     };
 
     constructor(props) {
         super(props);
         this.state = {
             sendEmail: false,
-            completed: false
+            completed: false,
+            googleLogInLink: ''
         }
+    }
+
+    componentDidMount() {
+        this.getConfigs();
     }
 
     onCloseExportModal = () => {
@@ -34,7 +39,7 @@ class ExportModal extends Component {
                 </div>
 
                 <div className="exportContainer">
-                    <ModalHeader user={this.props.user} modalName={"export"}/>
+                    <ModalHeader user={this.props.user}  image={this.props.image} modalName={"export"}/>
                     <div className="content">
                         { this.props.user &&
                             <img id="cat" src={"http://dev.matecat.com/public/img/matecat_watch-left-border.png"}/>
@@ -68,8 +73,7 @@ class ExportModal extends Component {
             component = <ExportModalLogged setCompletedExport={this.setCompletedExport} user={this.props.user}/>;
         } else {
             component = <ExportModalNotLogged
-                googleLink={this.props.googleLink}
-                error={this.props.error}
+                googleLink={this.state.googleLogInLink}
                 user={this.props.user}
             />;
         }
@@ -85,6 +89,19 @@ class ExportModal extends Component {
         this.setState({
             sendEmail: !this.state.sendEmail
         })
+    };
+
+    // to do: move on open of modals
+    getConfigs = () => {
+        httpConfig()
+            .then(response => {
+                this.setState({
+                    googleLogInLink: response.data.authURL,
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            })
     };
 }
 

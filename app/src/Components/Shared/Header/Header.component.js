@@ -69,7 +69,6 @@ class HeaderComponent extends Component {
     renderHtmlNavigation = () => {
 
         if(this.state.job.config.id){
-            console.log('here');
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
                     <li>
@@ -97,7 +96,10 @@ class HeaderComponent extends Component {
                     </li>
 
                     <li id="export">
-                        {/*<Mismatch />*/}
+                        {/*<Mismatch />
+                          to do: with pulling process completed,
+                          pass disable property while align process will be completed
+                        */}
                         <Export/>
                     </li>
 
@@ -135,13 +137,14 @@ class HeaderComponent extends Component {
             .then(
                 response => {
                     const info = response.data;
-                    this.setState({
-                        projectTitle: textEllipsisCenter(info.job_name),
-                        sourceLang: info.source_lang,
-                        targetLang: info.target_lang,
-                    });
+                    if(info){
+                        this.setState({
+                            projectTitle: textEllipsisCenter(info.job_name),
+                            sourceLang: info.source_lang,
+                            targetLang: info.target_lang,
+                        });
+                    }
                 }
-
             ).catch(
             error => {
                 console.log(error);
