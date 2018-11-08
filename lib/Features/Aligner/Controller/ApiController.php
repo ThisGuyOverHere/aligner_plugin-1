@@ -10,6 +10,7 @@ namespace Features\Aligner\Controller;
 
 
 use Exceptions\ValidationError;
+use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
@@ -21,6 +22,71 @@ use Features\Aligner\Utils\Constants;
 class ApiController extends AlignerController {
 
     protected $operations;
+
+    public function checkProgress() {
+
+        $id_job          = $this->params[ 'id_job' ];
+        $count_requested = $this->params[ 'count_requested' ];
+
+        $job = Jobs_JobDao::getById( $id_job );
+
+        $status_analysis = ( !empty($job) ) ? $job[0]['status_analysis'] : 'not_started';
+
+        $segmentDao = new Segments_SegmentDao();
+
+        $source_segments = null;
+        $target_segments = null;
+
+        switch ( $status_analysis ){
+            case 'not_started':
+                $phase = 0;
+                break;
+            case 'started':
+                $phase = 1;
+                break;
+            case 'segments_created':
+                $phase = 2;
+                break;
+            case 'fetching':
+                $phase = 3;
+                break;
+            case 'translating':
+                $phase = 4;
+                break;
+            case 'aligning':
+                $phase = 5;
+                break;
+            case 'merging':
+                $phase = 6;
+                break;
+            case 'complete':
+                $phase = 7;
+                break;
+        }
+
+        if ( $count_requested ) {
+
+            switch ( $status_analysis ){
+                case 'segments_created':
+                case 'fetching':
+                case 'translating':
+                case 'aligning':
+                case 'merging':
+                case 'complete':
+                    $source_segments = $segmentDao->countByJobId( $id_job, 'source' );
+                    $target_segments = $segmentDao->countByJobId( $id_job, 'target' );
+                    break;
+            }
+
+        }
+
+        return $this->response->json( [ 'phase' => $phase,
+            'phase_name' => $status_analysis,
+            'source_segments' => $source_segments,
+            'target_segments' => $target_segments ]
+        );
+
+    }
 
     public function merge() {
 

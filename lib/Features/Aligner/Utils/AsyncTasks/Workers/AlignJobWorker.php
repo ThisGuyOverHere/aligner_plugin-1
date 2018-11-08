@@ -59,6 +59,8 @@ class AlignJobWorker extends AbstractWorker {
 
         $this->id_job = $attributes->id_job;
 
+        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'started' );
+
         /*$job          = Jobs_JobDao::getById( $this->id_job )[ 0 ];
         $source_file  = Files_FileDao::getByJobId( $this->id_job, "source" );
         $target_file  = Files_FileDao::getByJobId( $this->id_job, "target" );*/
@@ -76,14 +78,20 @@ class AlignJobWorker extends AbstractWorker {
         $this->_storeSegments($source_segments, "source", $source_lang);
         $this->_storeSegments($target_segments, "target", $target_lang);
 
+        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'segments_created' );
+
         $segmentsMatchDao = new Segments_SegmentMatchDao;
         $segmentsMatchDao->deleteByJobId( $this->id_job );
+
+        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'fetching' );
 
         $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
         $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
 
         $alignment_class = new Alignment;
-        $alignment       = $alignment_class->alignSegments( $source_segments, $target_segments, $source_lang, $target_lang );
+        $alignment       = $alignment_class->alignSegments( $this->id_job, $source_segments, $target_segments, $source_lang, $target_lang );
+
+        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'merging' );
 
         $source_array = [];
         $target_array = [];
@@ -127,9 +135,11 @@ class AlignJobWorker extends AbstractWorker {
         $source_array[ count( $source_array ) - 1 ][ 'next' ] = null;
         $target_array[ count( $target_array ) - 1 ][ 'next' ] = null;
 
-
         $segmentsMatchDao->createList( $source_array );
         $segmentsMatchDao->createList( $target_array );
+
+        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'complete' );
+
     }
 
     /**
