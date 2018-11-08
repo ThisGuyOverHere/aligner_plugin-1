@@ -33,7 +33,7 @@ class AnalyseComponent extends Component {
         httpGetAlignmentInfo(this.state.job.id, this.state.job.password)
             .then(
                 response => {
-                    console.log(response);
+                    //console.log(response);
                     const info = response.data;
                     this.setState({
                         sourceLang: info.source_lang,

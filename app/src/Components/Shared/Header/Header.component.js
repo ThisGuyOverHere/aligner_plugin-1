@@ -7,6 +7,11 @@ import Mismatch from "./Mismatch/Mismatch.component";
 import Export from "./Export/Export.component";
 import ToolbarComponent from "../../Project/Toolbar/Toolbar.component";
 import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
+import SystemConstants from "../../../Constants/System.constants";
+import SystemActions from "../../../Actions/System.actions";
+import SystemStore from "../../../Stores/System.store";
+import ProjectStore from "../../../Stores/Project.store";
+import ProjectActions from "../../../Actions/Project.actions";
 
 class HeaderComponent extends Component {
 
@@ -41,6 +46,7 @@ class HeaderComponent extends Component {
                 segments: null
             },
             loggedIn: false,
+            statusEmptyModal: false,
         };
     }
 
@@ -64,7 +70,7 @@ class HeaderComponent extends Component {
         if (this.props.match.params.jobID !== prevProps.match.params.jobID) {
             this.getInfo();
         }
-    }
+    };
 
     renderHtmlNavigation = () => {
 
