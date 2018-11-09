@@ -70,7 +70,7 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
-        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.jobPassword);
+        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.password);
     }
 
     componentWillUnmount() {
