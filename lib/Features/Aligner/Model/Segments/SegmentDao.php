@@ -9,7 +9,6 @@
 namespace Features\Aligner\Model;
 
 use Features\Aligner;
-use Features\Aligner\Utils\Constants;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = "segments";
@@ -223,12 +222,12 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
     public function countByJobId($id_job, $type, $ttl = 0){
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = ($type == Constants::JOBTYPESOURCE)
+        $stmt = ($type == "source")
             ? $conn->prepare( "SELECT count(id) as source_segments FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" )
             : $conn->prepare( "SELECT count(id) as target_segments FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
 
         $result = $thisDao->setCacheTTL($ttl)->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_job, $type ] );
-        $result = (is_object($result)) ? $result->toArray() : $result;
+        $result = (is_object($result)) ? $result->toArray()[0] : $result;
         return $result;
     }
 

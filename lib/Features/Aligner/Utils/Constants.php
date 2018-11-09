@@ -15,8 +15,4 @@ class Constants {
 
     const GTPLACEHOLDER = "##GREATERTHAN##";
 
-    const JOBTYPESOURCE = "source";
-
-    const JOBTYPETARGET = "target";
-
 }

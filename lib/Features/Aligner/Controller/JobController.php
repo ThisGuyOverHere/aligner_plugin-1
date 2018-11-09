@@ -12,7 +12,6 @@ use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
-use Features\Aligner\Utils\Constants;
 
 class JobController extends AlignerController {
 
@@ -23,13 +22,13 @@ class JobController extends AlignerController {
         $project = $job->getProject();
 
         $segmentDao            = new Segments_SegmentDao;
-        $count_source_segments = $segmentDao->countByJobId( $id_job, Constants::JOBTYPESOURCE );
+        $count_source_segments = $segmentDao->countByJobId( $id_job, "source" );
         $count_source_segments = ( !empty($count_source_segments) ) ? $count_source_segments[0]['source_segments'] : 0;
-        $count_target_segments = $segmentDao->countByJobId( $id_job, Constants::JOBTYPETARGET );
+        $count_target_segments = $segmentDao->countByJobId( $id_job, "target" );
         $count_target_segments = ( !empty($count_target_segments) ) ? $count_target_segments[0]['target_segments'] : 0;
 
-        $source_file = Files_FileDao::getByJobId($id_job, Constants::JOBTYPESOURCE);
-        $target_file = Files_FileDao::getByJobId($id_job, Constants::JOBTYPETARGET);
+        $source_file = Files_FileDao::getByJobId($id_job, "source");
+        $target_file = Files_FileDao::getByJobId($id_job, "target");
 
         $segmentMatchDao = new Segments_SegmentMatchDao;
         $miss_alignments = $segmentMatchDao->missAlignments($id_job);
