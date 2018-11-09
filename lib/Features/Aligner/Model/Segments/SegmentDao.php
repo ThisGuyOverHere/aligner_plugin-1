@@ -9,6 +9,7 @@
 namespace Features\Aligner\Model;
 
 use Features\Aligner;
+use Features\Aligner\Utils\Constants;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = "segments";
@@ -219,13 +220,16 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), $queryParams );
     }
 
-    public function countByJobId($id_job, $type){
+    public function countByJobId($id_job, $type, $ttl = 0){
+        $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT count(id) FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
-        $stmt->execute( [$id_job, $type] );
+        $stmt = ($type == Constants::JOBTYPESOURCE)
+            ? $conn->prepare( "SELECT count(id) as source_segments FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" )
+            : $conn->prepare( "SELECT count(id) as target_segments FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
 
-        $result = $stmt->fetch();
-        return $result[0];
+        $result = $thisDao->setCacheTTL($ttl)->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_job, $type ] );
+        $result = (is_object($result)) ? $result->toArray() : $result;
+        return $result;
     }
 
     public function createList( Array $obj_arr ) {

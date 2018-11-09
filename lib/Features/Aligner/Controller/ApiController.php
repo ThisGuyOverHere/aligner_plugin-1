@@ -25,10 +25,8 @@ class ApiController extends AlignerController {
 
     public function checkProgress() {
 
-        $id_job          = $this->params[ 'id_job' ];
-        $count_requested = $this->params[ 'count_requested' ];
-
-        $job = Jobs_JobDao::getById( $id_job );
+        $id_job = $this->params[ 'id_job' ];
+        $job    = Jobs_JobDao::getById( $id_job );
 
         $status_analysis = ( !empty($job) ) ? $job[0]['status_analysis'] : 'not_started';
 
@@ -64,21 +62,20 @@ class ApiController extends AlignerController {
                 break;
         }
 
-        if ( $count_requested ) {
-
-            switch ( $status_analysis ){
-                case 'segments_created':
-                case 'fetching':
-                case 'translating':
-                case 'aligning':
-                case 'merging':
-                case 'complete':
-                    $source_segments = $segmentDao->countByJobId( $id_job, 'source' );
-                    $target_segments = $segmentDao->countByJobId( $id_job, 'target' );
-                    break;
-            }
-
+        switch ( $status_analysis ) {
+            case 'segments_created':
+            case 'fetching':
+            case 'translating':
+            case 'aligning':
+            case 'merging':
+            case 'complete':
+                $source_segments = $segmentDao->countByJobId($id_job, Constants::JOBTYPESOURCE);
+                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[0]['source_segments'] : null;
+                $target_segments = $segmentDao->countByJobId($id_job, Constants::JOBTYPETARGET);
+                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[0]['target_segments'] : null;
+                break;
         }
+
 
         return $this->response->json( [ 'phase' => $phase,
             'phase_name' => $status_analysis,
@@ -156,7 +153,7 @@ class ApiController extends AlignerController {
         $id_job        = $this->params[ 'id_job' ];
         $type          = $this->params[ 'type' ];
         $inverse_order = $this->params[ 'inverse_order' ];
-        $inverse_type  = ( $type == 'target' ) ? 'source' : 'target';
+        $inverse_type  = ( $type == Constants::JOBTYPETARGET ) ? Constants::JOBTYPESOURCE : Constants::JOBTYPETARGET;
         $positions     = $this->params[ 'positions' ];
 
         if ( empty( $positions ) ) {
@@ -284,19 +281,19 @@ class ApiController extends AlignerController {
         }
 
         //Check which segments to retrieve for source/target
-        $source_start = ( $type == 'source' ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
-        $source_end   = ( $type == 'source' ) ? $original_next : $original_inverse_next;
-        $target_start = ( $type == 'target' ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
-        $target_end   = ( $type == 'target' ) ? $original_next : $original_inverse_next;
+        $source_start = ( $type == Constants::JOBTYPESOURCE ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
+        $source_end   = ( $type == Constants::JOBTYPESOURCE ) ? $original_next : $original_inverse_next;
+        $target_start = ( $type == Constants::JOBTYPETARGET ) ? $split_segment[ 'order' ] : $inverse_segment[ 'order' ];
+        $target_end   = ( $type == Constants::JOBTYPETARGET ) ? $original_next : $original_inverse_next;
 
         $segments       = array_merge( [ $split_segment ], $new_segments );
-        $sourceSegments = ( $type == 'source' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
-        $targetSegments = ( $type == 'target' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
+        $sourceSegments = ( $type == Constants::JOBTYPESOURCE ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
+        $targetSegments = ( $type == Constants::JOBTYPETARGET ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
         
         try{
 
             $this->pushOperation( [
-                'type'      => 'source',
+                'type'      => Constants::JOBTYPESOURCE,
                 'action'    => 'update',
                 'rif_order' => $source_start,
                 'data'      => array_shift( $sourceSegments )
@@ -305,7 +302,7 @@ class ApiController extends AlignerController {
             foreach ( $sourceSegments as $sourceSegment ) {
 
                 $this->pushOperation( [
-                    'type'      => 'source',
+                    'type'      => Constants::JOBTYPESOURCE,
                     'action'    => 'create',
                     'rif_order' => $source_end,
                     'data'      => $sourceSegment
@@ -314,7 +311,7 @@ class ApiController extends AlignerController {
             }
 
             $this->pushOperation( [
-                'type'      => 'target',
+                'type'      => Constants::JOBTYPETARGET,
                 'action'    => 'update',
                 'rif_order' => $target_start,
                 'data'      => array_shift( $targetSegments )
@@ -323,7 +320,7 @@ class ApiController extends AlignerController {
             foreach ( $targetSegments as $targetSegment ) {
 
                 $this->pushOperation( [
-                    'type'      => 'target',
+                    'type'      => Constants::JOBTYPETARGET,
                     'action'    => 'create',
                     'rif_order' => $target_end,
                     'data'      => $targetSegment
@@ -403,7 +400,7 @@ class ApiController extends AlignerController {
         $order               = $this->params[ 'order' ];
         $id_job              = $this->params[ 'id_job' ];
         $type                = $this->params[ 'type' ];
-        $inverse_type        = ( $type == 'target' ) ? 'source' : 'target';
+        $inverse_type        = ( $type == Constants::JOBTYPETARGET ) ? Constants::JOBTYPESOURCE : Constants::JOBTYPETARGET;
         $destination_order         = $this->params[ 'destination' ];
         $inverse_destination_order = $this->params[ 'inverse_destination' ];
 
@@ -540,7 +537,7 @@ class ApiController extends AlignerController {
         $order      = $this->params[ 'order' ];
         $id_job     = $this->params[ 'id_job' ];
         $type       = $this->params[ 'type' ];
-        $other_type = ( $type == 'target' ) ? 'source' : 'target';
+        $other_type = ( $type == Constants::JOBTYPETARGET ) ? Constants::JOBTYPESOURCE : Constants::JOBTYPETARGET;
 
         $gap_match     = [];
         $balance_match = [];
@@ -661,7 +658,7 @@ class ApiController extends AlignerController {
         $targets = [];
 
         foreach ( $matches as $match ) {
-            if ( $match[ 'type' ] == 'target' ) {
+            if ( $match[ 'type' ] == Constants::JOBTYPETARGET ) {
                 $targets[] = $match[ 'order' ];
             } else {
                 $sources[] = $match[ 'order' ];
@@ -672,8 +669,8 @@ class ApiController extends AlignerController {
             throw new ValidationError( "There is a different amount of source matches and target matches, Deletion cancelled", -2 );
         }
 
-        $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, 'source' );
-        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $targets, $id_job, 'target' );
+        $sourceMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $sources, $id_job, Constants::JOBTYPESOURCE );
+        $targetMatches = Segments_SegmentMatchDao::getMatchesFromOrderArray( $targets, $id_job, Constants::JOBTYPETARGET );
 
         foreach ( $sourceMatches as $sourceMatch ) {
             if ( $sourceMatch[ 'segment_id' ] != null ) {
@@ -691,12 +688,12 @@ class ApiController extends AlignerController {
         try {
             $conn->beginTransaction();
             if ( !empty( $sources ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $sources, $id_job, 'source' );
-                Segments_SegmentMatchDao::deleteMatches( $sources, $id_job, 'source' );
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $sources, $id_job, Constants::JOBTYPESOURCE );
+                Segments_SegmentMatchDao::deleteMatches( $sources, $id_job, Constants::JOBTYPESOURCE );
             }
             if ( !empty( $targets ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $targets, $id_job, 'target' );
-                Segments_SegmentMatchDao::deleteMatches( $targets, $id_job, 'target' );
+                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $targets, $id_job, Constants::JOBTYPETARGET );
+                Segments_SegmentMatchDao::deleteMatches( $targets, $id_job, Constants::JOBTYPETARGET );
             }
             $conn->commit();
         } catch ( \PDOException $e ) {
@@ -779,7 +776,7 @@ class ApiController extends AlignerController {
         $targetOrders   = [];
 
         foreach ( $matches as $match ) {
-            if ( $match[ 'type' ] == 'target' ){
+            if ( $match[ 'type' ] == Constants::JOBTYPETARGET ){
                 $targetOrders[] = $match['order'];
             } else {
                 $sourceOrders[] = $match['order'];
@@ -790,14 +787,14 @@ class ApiController extends AlignerController {
         sort($targetOrders);
 
         foreach ( $sourceOrders as $order ) {
-            $source = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, 'source');
+            $source = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, Constants::JOBTYPESOURCE);
             if(!is_object($source)){
                 throw new ValidationError("There's no segment with the parameters specified in the input");
             }
             $sources[] = $source->toArray();
         }
         foreach ( $targetOrders as $order ) {
-            $target = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, 'target' );
+            $target = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, Constants::JOBTYPETARGET );
             if(!is_object($target)){
                 throw new ValidationError("There's no segment with the parameters specified in the input");
             }
@@ -808,7 +805,7 @@ class ApiController extends AlignerController {
         $first_target = $targets[0];
 
         if($first_target['order'] != $destination_order){
-            $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, 'target' );
+            $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, Constants::JOBTYPETARGET );
             if(!is_object($referenceMatch)){
                 throw new ValidationError("There's no segment with the parameters specified in the input");
             }
@@ -831,13 +828,13 @@ class ApiController extends AlignerController {
             $new_match_destination[ 'next' ]           = $referenceMatch['next'];
             $new_match_destination[ 'score' ]          = 100;
             $new_match_destination[ 'segment_id' ]     = $referenceMatch[ 'id' ];
-            $new_match_destination[ 'type' ]           = 'target';
+            $new_match_destination[ 'type' ]           = Constants::JOBTYPETARGET;
             $new_match_destination[ 'id_job' ]         = $id_job;
             $new_match_destination[ 'content_raw' ]    = $referenceMatch['content_raw'];
             $new_match_destination[ 'content_clean' ]  = $referenceMatch['content_clean'];
             $new_match_destination[ 'raw_word_count' ] = $referenceMatch['raw_word_count'];
 
-            $inverseReference  = Segments_SegmentMatchDao::getSegmentMatch( $first_source['order'], $id_job, 'source' );
+            $inverseReference  = Segments_SegmentMatchDao::getSegmentMatch( $first_source['order'], $id_job, Constants::JOBTYPESOURCE );
             if(!is_object($inverseReference)){
                 throw new ValidationError("There's no segment with the parameters specified in the input");
             }
@@ -850,7 +847,7 @@ class ApiController extends AlignerController {
             $new_match_null[ 'next' ]           = $inverseReference[ 'next' ];
             $new_match_null[ 'score' ]          = 100;
             $new_match_null[ 'segment_id' ]     = null;
-            $new_match_null[ 'type' ]           = 'source';
+            $new_match_null[ 'type' ]           = Constants::JOBTYPESOURCE;
             $new_match_null[ 'id_job' ]         = $id_job;
             $new_match_null[ 'content_raw' ]    = null;
             $new_match_null[ 'content_clean' ]  = null;
@@ -865,15 +862,15 @@ class ApiController extends AlignerController {
             $conn->beginTransaction();
             $first_source_segment = ( count($sources) > 1 ) ? Segments_SegmentDao::mergeSegments( $sources ) : $first_source;
             $first_target_segment = ( count($targets) > 1 ) ? Segments_SegmentDao::mergeSegments( $targets ) : $first_target;
-            if( !empty($sourceOrders) ){ Segments_SegmentMatchDao::nullifySegmentsInMatches( $sourceOrders, $id_job, 'source' ); }
-            if( !empty($targetOrders) ){ Segments_SegmentMatchDao::nullifySegmentsInMatches( $targetOrders, $id_job, 'target' ); }
+            if( !empty($sourceOrders) ){ Segments_SegmentMatchDao::nullifySegmentsInMatches( $sourceOrders, $id_job, Constants::JOBTYPESOURCE ); }
+            if( !empty($targetOrders) ){ Segments_SegmentMatchDao::nullifySegmentsInMatches( $targetOrders, $id_job, Constants::JOBTYPETARGET ); }
 
             if($first_target['order'] != $destination_order ){
                 $segmentsMatchDao = new Segments_SegmentMatchDao;
                 $segmentsMatchDao->createList( [ $new_match_destination, $new_match_null ] );
-                Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $first_target['order'] ], $id_job, 'target' );
-                Segments_SegmentMatchDao::updateFields( ['segment_id' => $first_target_segment['id'], 'next' => $new_match_order], $destination_order, $id_job, 'target' );
-                Segments_SegmentMatchDao::updateFields( ['next' => $new_inverse_order], $first_source_segment['order'], $id_job, 'source' );
+                Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $first_target['order'] ], $id_job, Constants::JOBTYPETARGET );
+                Segments_SegmentMatchDao::updateFields( ['segment_id' => $first_target_segment['id'], 'next' => $new_match_order], $destination_order, $id_job, Constants::JOBTYPETARGET );
+                Segments_SegmentMatchDao::updateFields( ['next' => $new_inverse_order], $first_source_segment['order'], $id_job, Constants::JOBTYPESOURCE );
             }
 
             $conn->commit();
@@ -897,7 +894,7 @@ class ApiController extends AlignerController {
         try{
 
             $this->pushOperation( [
-                'type'      => 'source',
+                'type'      => Constants::JOBTYPESOURCE,
                 'action'    => 'update',
                 'rif_order' => $first_source_segment['order'],
                 'data'      => $first_source_segment
@@ -908,7 +905,7 @@ class ApiController extends AlignerController {
                 $source['content_clean'] = null;
                 $source['raw_word_count'] = null;
                 $this->pushOperation( [
-                    'type'      => 'source',
+                    'type'      => Constants::JOBTYPESOURCE,
                     'action'    => 'update',
                     'rif_order' => $source['order'],
                     'data' => $source
@@ -916,7 +913,7 @@ class ApiController extends AlignerController {
             }
 
             $this->pushOperation( [
-                'type'      => 'target',
+                'type'      => Constants::JOBTYPETARGET,
                 'action'    => 'update',
                 'rif_order' => $first_target_segment['order'],
                 'data'      => $first_target_segment
@@ -927,7 +924,7 @@ class ApiController extends AlignerController {
                 $target['content_clean'] = null;
                 $target['raw_word_count'] = null;
                 $this->pushOperation( [
-                    'type'      => 'target',
+                    'type'      => Constants::JOBTYPETARGET,
                     'action'    => 'update',
                     'rif_order' => $target['order'],
                     'data' => $target
@@ -936,21 +933,21 @@ class ApiController extends AlignerController {
 
             if($first_target['order'] != $destination_order){
                 $this->pushOperation( [
-                    'type'      => 'target',
+                    'type'      => Constants::JOBTYPETARGET,
                     'action'    => 'update',
                     'rif_order' => $destination_order,
                     'data'      => $destination_match
                 ] );
 
                 $this->pushOperation( [
-                    'type'      => 'target',
+                    'type'      => Constants::JOBTYPETARGET,
                     'action'    => 'update',
                     'rif_order' => $first_target['order'],
                     'data'      => $starting_match
                 ] );
 
                 $this->pushOperation( [
-                    'type'      => 'target',
+                    'type'      => Constants::JOBTYPETARGET,
                     'action'    => 'create',
                     'rif_order' => $referenceMatch['next'],
                     'data'      => $new_match_destination
@@ -958,14 +955,14 @@ class ApiController extends AlignerController {
 
                 //TODO fix rif_order for front-end
                 $this->pushOperation( [
-                    'type'      => 'source',
+                    'type'      => Constants::JOBTYPESOURCE,
                     'action'    => 'create',
                     'rif_order' => $first_source[ 'next' ],
                     'data'      => $new_match_null
                 ] );
 
                 $this->pushOperation( [
-                    'type'      => 'source',
+                    'type'      => Constants::JOBTYPESOURCE,
                     'action'    => 'update',
                     'rif_order' => $inverseReference['order'],
                     'data'      => $inverseReference

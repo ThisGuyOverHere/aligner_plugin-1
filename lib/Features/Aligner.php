@@ -33,7 +33,7 @@ class Aligner extends BaseFeature
 
         route( '/segments/[:id_job]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
 
-        route( '/job/[:id_job]/[:password]/check_progress/[:count_requested]', 'GET', 'Features\Aligner\Controller\ApiController', 'checkProgress' );
+        route( '/job/[:id_job]/[:password]/check_progress', 'GET', 'Features\Aligner\Controller\ApiController', 'checkProgress' );
 
         route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\ApiController', 'split' );
         route( '/job/[:id_job]/[:password]/segment/merge', 'POST', 'Features\Aligner\Controller\ApiController', 'merge' );
