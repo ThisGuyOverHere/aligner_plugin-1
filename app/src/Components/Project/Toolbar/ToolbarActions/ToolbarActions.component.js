@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ToolbarActionsMergeComponent from "./ToolbarActionsMerge/ToolbarActionsMerge.component";
-import ToolbarActionsReverseComponent from "./ToolbarActionsReverse/ToolbarActionsReverse.component";
+import ToolbarActionsSwitchComponent from "./ToolbarActionsSwitch/ToolbarActionsSwitch.component";
 import ToolbarActionsSplitComponent from "./ToolbarActionsSplit/ToolbarActionsSplit.component";
 import ToolbarActionsAlignWrapperComponent from "./ToolbarActionsAlignWrapper/ToolbarActionsAlignWrapper.component";
 
@@ -43,7 +43,7 @@ class ToolbarActionsComponent extends Component {
                         <ToolbarActionsSplitComponent selection={this.props.selection}/>
                     </li>
                     <li>
-                        <ToolbarActionsReverseComponent selection={this.props.selection}/>
+                        <ToolbarActionsSwitchComponent selection={this.props.selection}/>
                     </li>
                     {/*<li>
                         <i
