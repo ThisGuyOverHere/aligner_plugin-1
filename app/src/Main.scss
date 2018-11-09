@@ -26,9 +26,13 @@
 @import "Components/Shared/Header/User/UserNotLogged/UserNotLogged.component";
 @import "Components/Shared/Header/Mismatch/Mismatch.component.scss";
 @import "Components/Shared/Footer/Footer.component";
+@import "Components/Shared/LoginModal/LoginModal.component";
 @import "Components/Shared/Login/Login.component";
 @import "Components/Shared/Logout/Logout.component";
 @import "Components/Shared/ResetPasswordModal/ResetPasswordModal.component";
+@import "Components/Shared/Registration/Registration.component.scss";
+@import "Components/Shared/ModalHeader/ModalHeader.component.scss";
+
 @import "Components/Project/Toolbar/Toolbar.component";
 @import "Components/Project/Toolbar/ToolbarActions/ToolbarActions.component";
 @import "Components/Project/Toolbar/ToolbarRightHint/ToolbarRightHint.component";

@@ -27,7 +27,7 @@ class ExportModalCompleted extends Component {
         return (
             <div id="completed">
                 <h1>Export completed</h1>
-                <h3>your tmx has been exported correctly.</h3>
+                <h3>We will send you an e-mail when the download link is ready</h3>
 
                 <div className="btn-container">
                     <button className="close-btn ui button" tabIndex="6" type="" onClick={this.onCloseExportModal}>

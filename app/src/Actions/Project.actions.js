@@ -557,6 +557,13 @@ let ProjectActions = {
                     }
                 }
             });
+        },
+
+        emptyStore: function (status) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.EMPTY_STORE,
+                status: status
+            })
         }
     }
 ;

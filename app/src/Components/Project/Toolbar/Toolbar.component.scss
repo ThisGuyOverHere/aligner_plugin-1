@@ -3,7 +3,6 @@
 #toolbar {
   padding: 0 32px;
   z-index: 20;
-  position: fixed;
   height: 56px;
   background-color: $white;
   color: $midGregy;
@@ -11,7 +10,7 @@
   top: 48px;
   left: 0;
   display: grid;
-  grid-template-columns: 45px 0.6fr 1.5fr 1.4fr;
+  grid-template-columns: 45px 0.4fr 1.6fr 1.4fr;
   align-items: center;
   box-shadow: 0 5px 10px 0 rgba(198, 198, 198, 0.50);
   >:first-child{
@@ -22,6 +21,6 @@
     cursor: pointer;
     float: right;
     line-height: 1;
-    margin: 0px;
+    margin: 0;
   }
 }

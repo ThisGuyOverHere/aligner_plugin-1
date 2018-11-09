@@ -8,6 +8,7 @@
 	position: relative;
 	color: #fff;
 	font-weight: 500;
+	line-height: 2;
   }
   .logged {
 	text-align: center;
@@ -20,14 +21,19 @@
 	display: inline-flex;
 	-ms-flex-pack: center;
 	justify-content: center;
-	position: relative;
 	font-size: 14px;
-	height: 36px;
-	width: 36px;
+	height: 42px;
+	width: 42px;
 	margin-left: 24px;
 	text-decoration: none;
 	cursor: pointer;
 	border: 1px solid;
+	overflow: hidden;
+	position: relative;
+	img{
+	  position: absolute;
+	  height: 42px!important;
+	}
 	&:hover {
 	  color: $lightBlue
 	}
