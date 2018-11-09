@@ -157,14 +157,14 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
     }
 
     public static function getTargetOrdered($id_job, $where, $order, $amount){
-        return self::getTypeOrderedByJobId($id_job, "target",0, $where, $order, $amount);
+        return self::getTypeOrderedByJobIdWithPagination($id_job, "target",0, $where, $order, $amount);
     }
 
     public static function getSourceOrdered($id_job, $where, $order, $amount){
-        return self::getTypeOrderedByJobId($id_job, "source", 0, $where, $order, $amount);
+        return self::getTypeOrderedByJobIdWithPagination($id_job, "source", 0, $where, $order, $amount);
     }
 
-    public static function getTypeOrderedByJobId($id_job, $type, $ttl = 0, $where, $order, $segmentAmount){
+    public static function getTypeOrderedByJobIdWithPagination($id_job, $type, $ttl = 0, $where, $order, $segmentAmount){
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
 
@@ -213,6 +213,23 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
         ORDER by sm.order";
 
         $queryParams = array_merge( array( $id_job, $type ), $queryParams );
+
+        $stmt = $conn->prepare( $query );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), $queryParams );
+    }
+
+    public static function getTypeOrderedByJobId($id_job, $type, $ttl = 0){
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+
+
+        $query = "SELECT * FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ? AND sm.type = ?
+        ORDER by sm.order";
+
+        $queryParams =  array( $id_job, $type );
 
         $stmt = $conn->prepare( $query );
 
