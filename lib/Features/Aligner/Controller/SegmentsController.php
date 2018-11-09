@@ -16,7 +16,7 @@ class SegmentsController extends AlignerController {
     public function get(){
 
         $id_job = $this->params['id_job'];
-        
+        $password = $this->params['password'];
         /*$where  = $this->request->param( 'where' );
         $order_source  = $this->request->param( 'order_source' );
         $order_target  = $this->request->param( 'order_target' );
