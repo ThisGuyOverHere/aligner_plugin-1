@@ -23,9 +23,9 @@ class JobController extends AlignerController {
 
         $segmentDao            = new Segments_SegmentDao;
         $count_source_segments = $segmentDao->countByJobId( $id_job, "source" );
-        $count_source_segments = ( !empty($count_source_segments) ) ? $count_source_segments[0]['source_segments'] : 0;
+        $count_source_segments = ( !empty($count_source_segments) ) ? $count_source_segments[0]['amount'] : 0;
         $count_target_segments = $segmentDao->countByJobId( $id_job, "target" );
-        $count_target_segments = ( !empty($count_target_segments) ) ? $count_target_segments[0]['target_segments'] : 0;
+        $count_target_segments = ( !empty($count_target_segments) ) ? $count_target_segments[0]['amount'] : 0;
 
         $source_file = Files_FileDao::getByJobId($id_job, "source");
         $target_file = Files_FileDao::getByJobId($id_job, "target");

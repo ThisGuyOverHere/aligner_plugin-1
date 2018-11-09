@@ -70,10 +70,10 @@ class ApiController extends AlignerController {
             case ConstantsJobAnalysis::ALIGN_PHASE_5:
             case ConstantsJobAnalysis::ALIGN_PHASE_6:
             case ConstantsJobAnalysis::ALIGN_PHASE_7:
-                $source_segments = $segmentDao->countByJobId($id_job, 'source');
-                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[0]['source_segments'] : null;
-                $target_segments = $segmentDao->countByJobId($id_job, 'target');
-                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[0]['target_segments'] : null;
+                $source_segments = $segmentDao->countByJobId($id_job, 'source', 3600);
+                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[0]['amount'] : null;
+                $target_segments = $segmentDao->countByJobId($id_job, 'target', 3600);
+                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[0]['amount'] : null;
                 break;
         }
 

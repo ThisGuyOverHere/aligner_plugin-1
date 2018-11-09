@@ -23,9 +23,6 @@ class Jobs_JobStruct extends \DataAccess_AbstractDaoSilentStruct implements \Dat
     public $status;
     public $subject;
     public $status_analysis;
-    public $source_segments;
-    public $target_segments;
-
 
     /**
      * @return Files_FileStruct[]
