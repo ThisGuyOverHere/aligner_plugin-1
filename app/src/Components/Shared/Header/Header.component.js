@@ -48,7 +48,7 @@ class HeaderComponent extends Component {
             },
             loggedIn: false,
             statusEmptyModal: false,
-            getJobError: false
+            jobError: false
         };
     }
 
@@ -65,11 +65,11 @@ class HeaderComponent extends Component {
 
     componentDidMount() {
         this.getInfo();
-        ProjectStore.addListener(ProjectConstants.GET_JOB_ERROR, this.getJobError);
+        ProjectStore.addListener(ProjectConstants.JOB_ERROR, this.getJobError);
     }
 
     componentWillUnmount() {
-        ProjectStore.removeListener(ProjectConstants.GET_JOB_ERROR, this.getJobError);
+        ProjectStore.removeListener(ProjectConstants.JOB_ERROR, this.getJobError);
     }
 
     componentDidUpdate(prevProps) {
@@ -80,13 +80,13 @@ class HeaderComponent extends Component {
 
     getJobError = (error) => {
         this.setState({
-            getJobError: error
+            jobError: error
         })
     };
 
     renderHtmlNavigation = () => {
 
-        if(this.state.job.config.id && !this.state.getJobError){
+        if(this.state.job.config.id && !this.state.jobError){
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
                     <li>

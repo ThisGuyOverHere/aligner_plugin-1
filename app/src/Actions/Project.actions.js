@@ -32,7 +32,7 @@ let ProjectActions = {
             }, error => {
                 console.log(error);
                 AppDispatcher.dispatch({
-                    actionType: ProjectConstants.GET_JOB_ERROR,
+                    actionType: ProjectConstants.JOB_ERROR,
                     error: error.response.data.error
                 })
             });

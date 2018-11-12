@@ -33,7 +33,7 @@ class AlignComponent extends Component {
                 }
             },
             inSync: false,
-            getJobError: false
+            jobError: false
         };
         ProjectActions.setJobID(this.props.match.params.jobID, this.props.match.params.password)
     }
@@ -41,13 +41,13 @@ class AlignComponent extends Component {
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
-        ProjectStore.addListener(ProjectConstants.GET_JOB_ERROR, this.getJobError);
+        ProjectStore.addListener(ProjectConstants.JOB_ERROR, this.getJobError);
         ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.password);
     }
 
     componentWillUnmount() {
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
-        ProjectStore.removeListener(ProjectConstants.GET_JOB_ERROR, this.getJobError);
+        ProjectStore.removeListener(ProjectConstants.JOB_ERROR, this.getJobError);
     }
 
     render() {
@@ -55,14 +55,14 @@ class AlignComponent extends Component {
             <div id="Align">
                 <ToolbarComponent jobConf={this.state.job.config}/>
                 {this.state.job.rows && <JobComponent inSync={this.state.inSync} job={this.state.job}/>}
-                {this.state.getJobError && <JobError/>}
+                {this.state.jobError && <JobError/>}
             </div>
         );
     }
 
     getJobError = (error) => {
         this.setState({
-            getJobError: error
+            jobError: error
         })
     };
 

@@ -280,8 +280,8 @@ AppDispatcher.register(function (action) {
             ProjectStore.jobID = action.jobID;
             ProjectStore.jobPassword = action.jobPassword;
             break;
-        case ProjectConstants.GET_JOB_ERROR:
-            ProjectStore.emitChange(ProjectConstants.GET_JOB_ERROR, action.error);
+        case ProjectConstants.JOB_ERROR:
+            ProjectStore.emitChange(ProjectConstants.JOB_ERROR, action.error);
             break;
         case ProjectConstants.EMPTY_STORE:
             ProjectStore.emitChange(ProjectConstants.EMPTY_STORE, action.status);
