@@ -79,14 +79,11 @@ class RowComponent extends Component {
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.ANIMATE_ROW_POSITION, this.animateRow);
         ProjectStore.addListener(ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION, this.alignSegments);
-        ProjectStore.addListener(ProjectConstants.SCROLL_TO_SEGMENT, this.scrollToThisSegment);
-
     }
 
     componentWillUnmount() {
         ProjectStore.removeListener(ProjectConstants.ANIMATE_ROW_POSITION, this.animateRow);
         ProjectStore.removeListener(ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION, this.alignSegments);
-        ProjectStore.removeListener(ProjectConstants.SCROLL_TO_SEGMENT, this.scrollToThisSegment);
     }
 
     render() {
@@ -119,21 +116,6 @@ class RowComponent extends Component {
             </div>
         );
     }
-
-    scrollToThisSegment = (data) => {
-        if (data.ref === this.ref) {
-            const domNode = ReactDOM.findDOMNode(this.ref);
-            if (data.y) {
-                window.scrollTo(0, data.y);
-            } else {
-                domNode.scrollIntoView({
-                    block: 'center',
-                    behavior: 'smooth'
-                })
-            }
-
-        }
-    };
 
     animateRow = (data) => {
         const {type, order, position, rec} = data;

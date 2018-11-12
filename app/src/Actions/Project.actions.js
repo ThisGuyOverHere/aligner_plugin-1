@@ -166,10 +166,10 @@ let ProjectActions = {
 
         },
 
-        scrollToSegment: function (ref, y = false) {
+        scrollToSegment: function (index) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.SCROLL_TO_SEGMENT,
-                data: {ref: ref, y: y}
+                data: index
             });
         },
         /**

@@ -54,19 +54,27 @@ class JobComponent extends Component {
                 count: 0
             },
             user: false,
-            googleUserImage: ''
+            googleUserImage: '',
+            scrollToSegment: 0,
+            window: {
+                width: 0,
+                height: 0,
+            }
         };
 
         this.elementsRef = {};
         this.virtualList = null;
-        ProjectActions.setJobID(this.props.match.params.jobID,this.props.match.params.password)
+        ProjectActions.setJobID(this.props.match.params.jobID, this.props.match.params.password)
 
     }
 
     componentDidMount() {
         SystemActions.checkUserStatus();
+        this.updateWindowDimensions();
+        window.addEventListener('resize', this.updateWindowDimensions);
         SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.addListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
+        ProjectStore.addListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
@@ -76,16 +84,13 @@ class JobComponent extends Component {
     componentWillUnmount() {
         SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
         SystemStore.removeListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
+        ProjectStore.removeListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
-    }
+        window.removeEventListener('resize', this.updateWindowDimensions);
 
-    setStatusExportModal = (status) => {
-        this.setState({
-            statusExportModal: status
-        })
-    };
+    }
 
     render() {
         const data = this.renderItems(this.state.job.rows);
@@ -97,18 +102,21 @@ class JobComponent extends Component {
             <div className={classes.join(" ")}>
                 {this.state.statusExportModal &&
                 <ExportModal
-                    user = {this.state.user}
-                    image = {this.state.googleUserImage}
+                    user={this.state.user}
+                    image={this.state.googleUserImage}
                 />}
+                {data.length > 0 &&
                 <VirtualList
                     ref={(instance) => {
                         this.virtualList = instance;
                     }}
-                    width='100%'
-                    height='calc(100vh - 108px)'
+                    width={this.state.window.width}
+                    height={this.state.window.height-112}
                     overscanCount={10}
                     itemCount={data.length}
-
+                    scrollToIndex={this.state.scrollToSegment}
+                    estimatedItemSize={80}
+                    scrollToAlignment="center"
                     itemSize={(index) => {
 
                         let source = document.createElement('p');
@@ -136,7 +144,7 @@ class JobComponent extends Component {
                             {data[index]}
                         </div>
                     }
-                />,
+                />}
                 <AdvancedDragLayer/>
                 {this.state.splitModalStatus &&
                 <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
@@ -145,6 +153,27 @@ class JobComponent extends Component {
         );
     }
 
+    setStatusExportModal = (status) => {
+        this.setState({
+            statusExportModal: status
+        })
+    };
+    updateWindowDimensions = () => {
+        let data = {};
+
+        data.width = window.innerWidth;
+        data.height = window.innerHeight;
+
+        this.setState({
+            window: data
+        })
+    };
+    setScrollToSegment = (index) =>{
+        console.log(index);
+        this.setState({
+            scrollToSegment: index
+        })
+    };
     setSegmentToSplit = (segment) => {
         if (segment) {
             this.setState({
@@ -199,10 +228,10 @@ class JobComponent extends Component {
         let inSync = false;
         if (syncAPI) {
             inSync = true;
-            syncWithBackend(syncAPI,()=>{
+            syncWithBackend(syncAPI, () => {
                 if (deletes.length > 0) {
                     setTimeout(() => {
-                        ProjectActions.deleteEmptyRows(deletes,matches);
+                        ProjectActions.deleteEmptyRows(deletes, matches);
                     }, 0);
 
                 }
@@ -210,10 +239,10 @@ class JobComponent extends Component {
                     inSync: false
                 })
             });
-        }else{
+        } else {
             if (deletes.length > 0) {
                 setTimeout(() => {
-                    ProjectActions.deleteEmptyRows(deletes,matches);
+                    ProjectActions.deleteEmptyRows(deletes, matches);
                 }, 0);
 
             }
@@ -247,6 +276,7 @@ class JobComponent extends Component {
         }
         return values;
     }
+
     storeSelection = (selection) => {
         this.setState({
             selection: selection
@@ -254,7 +284,7 @@ class JobComponent extends Component {
     };
 
     // export component
-    userStatus = (status,fromLogin, image, error) => {
+    userStatus = (status, fromLogin, image, error) => {
         this.setState({
             user: status,
             googleUserImage: image
