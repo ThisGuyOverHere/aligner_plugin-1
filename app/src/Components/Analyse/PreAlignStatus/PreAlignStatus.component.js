@@ -5,27 +5,31 @@ import env from "../../../Constants/Env.constants";
 import PropTypes from "prop-types";
 
 class PreAlignStatus extends Component {
-    static propTypes = {};
+    static propTypes = {
+        jobId: PropTypes.string,
+        jobPassword: PropTypes.string,
+        actualPhase: PropTypes.number,
+    };
 
     constructor(props) {
         super(props);
         this.state = {
             job: {
-                password: props.props.match.params.password,
-                id: props.props.match.params.jobID
+                password: this.props.jobPassword,
+                id: this.props.jobId
             },
-            progress: 30,
+            progress: 0
         }
     };
 
     componentDidMount() {
         // check for the end of alignment process
-       httpAlignJob(this.state.job.id)
+       /*httpAlignJob(this.props.jobId)
             .then(
                 response => {
                     this.setState(
                         {
-                            progress: 100,
+                            progress: 101,
                         }
                     );
                 }
@@ -33,8 +37,18 @@ class PreAlignStatus extends Component {
             .catch(error => {
                     console.log(error);
                 }
-            );
+            ); */
     };
+
+    componentDidUpdate(prevProps) {
+        if (this.props.actualPhase !== prevProps.actualPhase) {
+            this.setState(
+                {
+                    progress: (this.props.actualPhase + 1) * env.progressPercent,
+                }
+            );
+        }
+    }
 
     render() {
         if (this.state.progress === 100) {

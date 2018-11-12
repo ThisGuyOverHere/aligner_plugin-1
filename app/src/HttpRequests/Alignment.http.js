@@ -39,8 +39,8 @@ export const httpAlignJob = (jobID) => {
 };
 
 
-export const httpGetSegments = (jobID,jobPassword) => {
-    const url = '/plugins/aligner/segments/' + jobID+'/'+ jobPassword;
+export const httpGetSegments = (jobID, jobPassword) => {
+    const url = '/plugins/aligner/segments/' + jobID + '/' + jobPassword;
     return get(url);
 };
 
@@ -72,8 +72,13 @@ export const httpSplitSegment = (jobID, jobPassword, data) => {
  * @param jobPassword
  * @returns {*}
  */
- export const httpGetAlignmentInfo = (jobID,jobPassword) => {
-    const url = '/plugins/aligner/job/'+jobID+'/'+jobPassword+'/information';
+export const httpGetAlignmentInfo = (jobID, jobPassword) => {
+    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/information';
+    return get(url);
+};
+
+export const httpGetPullingInfo = (jobID, jobPassword) => {
+    const url = '/job/' + jobID +'/' + jobPassword + '/check_progress';
     return get(url);
 };
 

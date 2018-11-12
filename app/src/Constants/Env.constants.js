@@ -164,7 +164,9 @@ const env = {
         order: null,
         next: null
     },
-    orderElevation: 1000000000
+    orderElevation: 1000000000,
+    pullingCallInterval: 1000,
+    progressPercent: (100/8)
 };
 
 export default env;

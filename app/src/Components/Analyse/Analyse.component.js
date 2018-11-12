@@ -6,6 +6,7 @@ import AlignmentScoreComponent from "./AlignmentScore/AlignmentScore.component";
 import SegmentAlignedComponent from "./SegmentAligned/SegmentAligned.component";
 import SourceComponent from "./Source/Source.component";
 import TargetComponent from "./Target/Trget.component";
+import env from "../../Constants/Env.constants";
 
 
 class AnalyseComponent extends Component {
@@ -24,7 +25,9 @@ class AnalyseComponent extends Component {
             totalSourceSegments: '',
             targetLang: '',
             targetLangFileName: '',
-            totalTargetSegments: ''
+            totalTargetSegments: '',
+            pullingId: null,
+            actualPhase: 0,
         };
     };
 
@@ -50,7 +53,17 @@ class AnalyseComponent extends Component {
             }
         );
         //console.log(this.state.job);
+        // pulling
+        let pullingId = setInterval(this.pullingInfo, env.pullingCallInterval);
+        // store intervalId in the state so it can be accessed later:
+        this.setState({pullingId: pullingId});
+        console.log('pulling :', pullingId);
     };
+
+    componentWillUnmount() {
+        // use intervalId from the state to clear the interval
+        clearInterval(this.state.pullingId);
+    }
 
     render() {
         return (
@@ -73,7 +86,9 @@ class AnalyseComponent extends Component {
                     />
                 </div>
 
-                <PreAlignStatus props={this.props}/>
+                <PreAlignStatus jobId={this.state.job.id}
+                                jobPassword={this.props.match.params.password}
+                                actualPhase = {this.state.actualPhase}/>
 
                 <div className="process-info">
                     <SegmentAlignedComponent/>
@@ -82,6 +97,31 @@ class AnalyseComponent extends Component {
                 <Animation/>
             </div>
         );
+    }
+
+    pullingInfo = () => {
+        // call pulling info api
+        console.log('hey');
+        // update data to pass to the component
+        this.setState({
+            actualPhase: this.state.actualPhase + 1
+        });
+        // get job info
+        /*httpGetPullingInfo(this.state.job.id, this.state.job.password)
+            .then(
+                response => {
+                    console.log(error);
+                    //console.log(response);
+                    const progressInfo = response.data;
+                   /* this.setState({
+
+                    });
+                }
+            ).catch(
+            error => {
+                console.log(error);
+            }
+        );*/
     }
 }
 
