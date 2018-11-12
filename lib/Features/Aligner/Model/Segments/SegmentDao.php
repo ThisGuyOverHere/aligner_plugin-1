@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Model;
 
+use DataAccess\ShapelessConcreteStruct;
 use Features\Aligner;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
@@ -219,13 +220,13 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), $queryParams );
     }
 
-    public function countByJobId($id_job, $type){
+    public function countByJobId($id_job, $type, $ttl = 0){
+        $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT count(id) FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
-        $stmt->execute( [$id_job, $type] );
+        $stmt = $conn->prepare( "SELECT count(id) as amount FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
 
-        $result = $stmt->fetch();
-        return $result[0];
+        $result = $thisDao->setCacheTTL($ttl)->_fetchObject($stmt, new ShapelessConcreteStruct(), [ $id_job, $type ]);
+        return $result;
     }
 
     public function createList( Array $obj_arr ) {

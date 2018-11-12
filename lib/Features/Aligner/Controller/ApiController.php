@@ -10,6 +10,7 @@ namespace Features\Aligner\Controller;
 
 
 use Exceptions\ValidationError;
+use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
@@ -17,10 +18,73 @@ use Features\Aligner\Model\Segments_SegmentMatchStruct;
 use Features\Aligner\Model\Segments_SegmentStruct;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
+use Features\Aligner\Utils\ConstantsJobAnalysis;
 
 class ApiController extends AlignerController {
 
     protected $operations;
+
+    public function checkProgress() {
+
+        $id_job = $this->params[ 'id_job' ];
+        $job    = Jobs_JobDao::getById( $id_job );
+
+        $status_analysis = ( !empty($job) ) ? $job[0]['status_analysis'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+
+        $segmentDao = new Segments_SegmentDao();
+
+        $source_segments = null;
+        $target_segments = null;
+
+        switch ( $status_analysis ){
+            case ConstantsJobAnalysis::ALIGN_PHASE_0:
+                $phase = 0;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_1:
+                $phase = 1;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_2:
+                $phase = 2;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_3:
+                $phase = 3;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_4:
+                $phase = 4;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_5:
+                $phase = 5;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_6:
+                $phase = 6;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_7:
+                $phase = 7;
+                break;
+        }
+
+        switch ( $status_analysis ) {
+            case ConstantsJobAnalysis::ALIGN_PHASE_2:
+            case ConstantsJobAnalysis::ALIGN_PHASE_3:
+            case ConstantsJobAnalysis::ALIGN_PHASE_4:
+            case ConstantsJobAnalysis::ALIGN_PHASE_5:
+            case ConstantsJobAnalysis::ALIGN_PHASE_6:
+            case ConstantsJobAnalysis::ALIGN_PHASE_7:
+                $source_segments = $segmentDao->countByJobId($id_job, 'source', 3600);
+                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[0]['amount'] : null;
+                $target_segments = $segmentDao->countByJobId($id_job, 'target', 3600);
+                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[0]['amount'] : null;
+                break;
+        }
+
+
+        return $this->response->json( [ 'phase' => $phase,
+            'phase_name' => $status_analysis,
+            'source_segments' => $source_segments,
+            'target_segments' => $target_segments ]
+        );
+
+    }
 
     public function merge() {
 

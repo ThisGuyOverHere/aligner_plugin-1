@@ -139,6 +139,18 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function changeStatusAnalysis( $id, $new_status ){
 
+        $query = "UPDATE `jobs`
+        SET `jobs`.`status_analysis` = ?
+        WHERE `jobs`.`id` = ?;";
+
+        $params = [ $new_status, $id ];
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+        $stm->execute( $params );
+
+    }
 
 }

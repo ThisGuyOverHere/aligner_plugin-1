@@ -9,6 +9,7 @@
 namespace Features\Aligner\Utils;
 
 use Features\Aligner;
+use Features\Aligner\Model\Jobs_JobDao;
 use Log;
 
 class Alignment {
@@ -19,10 +20,12 @@ class Alignment {
     public $lessCommon = 0;
     public $long = 0;
 
-    public function alignSegments($source, $target, $source_lang, $target_lang) {
+    public function alignSegments($id_job, $source, $target, $source_lang, $target_lang) {
         // Variant on Church and Gale algorithm with Levenshtein distance
 
         $time_start = microtime(true);
+
+        Jobs_JobDao::changeStatusAnalysis( $id_job, "translating" );
 
         $source_translated = $this->translateSegments($source, $source_lang, $target_lang);
 
@@ -33,6 +36,8 @@ class Alignment {
         $target_clean = $this->cleanSegments($target);
 
         $time_start = microtime(true);
+
+        Jobs_JobDao::changeStatusAnalysis( $id_job, "aligning" );
 
         $indexes = $this->align($source_clean, $target_clean);
         $alignment = $this->mapAlignment($source, $target, $indexes);
