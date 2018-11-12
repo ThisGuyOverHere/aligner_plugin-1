@@ -83,7 +83,15 @@ class ApiController extends AlignerController {
             'source_segments' => $source_segments,
             'target_segments' => $target_segments ]
         );
+    }
 
+    public function getConfig(){
+        $config = [];
+
+        $oauth_client = \OauthClient::getInstance()->getClient();
+        $config[ 'authURL' ] = $oauth_client->createAuthUrl();
+        $config[ 'gdriveAuthURL' ] = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        return $this->response->json( $config );
     }
 
     public function merge() {

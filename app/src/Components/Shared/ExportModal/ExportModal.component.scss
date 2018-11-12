@@ -1,70 +1,43 @@
 @import "../../../../assets/theme/variables";
 
-.exportContainer{
-  z-index: 999;
+.exportContainer {
+  background: #ffffff;
+  z-index: 9999;
   position: fixed;
   margin: auto;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: 10%;
+  transform: translateX(-50%);
   border-radius: 4px;
   -webkit-animation-name: animatetop;
   -webkit-animation-duration: 0.4s;
   animation-name: animatetop;
   animation-duration: 0.4s;
   text-align: center;
-  -webkit-box-shadow: 0 1px 20px #000;
   box-shadow: 0 1px 20px #6f6e6e;
-  width: 80%;
-  max-width: 800px;
-  min-width: 600px;
-  .header{
-	background-color: $white;
-	height: 56px;
-	display: flex;
-	justify-content: space-between;
-	padding: 11px 10px 7px 23px;
-	border-radius: 4px 4px 0 0;
-	.dx-header{
-	  span{
-		position: relative;
-		bottom: 2px;
-		cursor: pointer;
-		color: $headerText;
-		font-size: 1.2rem;
-		&:hover{
-		  color: $red;
-		}
-	  }
-	}
-	.sx-header{
-	  img{
-		height: 32px;
-	  }
-	}
-  }
+  width: 800px;
+  overflow: hidden;
   .content {
+  	max-height: 70vh;
 	border-radius: 0px 0px 4px 4px;
 	background-color: $white;
-	overflow: hidden;
-	padding: 24px;
+	overflow: auto;
+	padding: 0 24px 24px;
+	#cat{
+	  position: absolute;
+	  bottom: -48px;
+	  left: -32px;
+	  height: 150px;
+	}
   }
 }
 
-.sendEmail{
-  background: #00AEE4;
-  display: block;
-  text-transform: none;
-  padding: 12px;
-  box-shadow: 0 2px 8px 0 #C5C5C5 !important;
-  border-radius: 2px;
-  text-align: center;
-  border: none;
-  font-weight: 300;
-  width: 180px;
-  font-size: 14px;
-  color: $midGregy;
-  background: $white;
-  margin: 0 auto;
-  cursor: pointer;
+.send-email {
+  padding: 24px 0 0;
+  button {
+	color: #7C7A7A;
+	border: none;
+	text-decoration: underline;
+	cursor: pointer;
+  }
 }

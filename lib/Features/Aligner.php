@@ -31,7 +31,7 @@ class Aligner extends BaseFeature
 
         route( '/job/[:id_job]/[:password]/information', 'GET', 'Features\Aligner\Controller\JobController', 'information' );
 
-        route( '/segments/[:id_job]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
+        route( '/segments/[:id_job]/[:password]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
 
         route( '/job/[:id_job]/[:password]/check_progress', 'GET', 'Features\Aligner\Controller\ApiController', 'checkProgress' );
 
@@ -42,6 +42,8 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\ApiController', 'delete' );
         route( '/job/[:id_job]/[:password]/segment/reverse', 'POST', 'Features\Aligner\Controller\ApiController', 'reverse' );
         route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\ApiController', 'mergeAndAlign' );
+
+        route( '/configs', 'GET', 'Features\Aligner\Controller\ApiController', 'getConfig' );
 
         route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TMXController', 'getUserTM' );
         route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TMXController', 'createTmKey' );

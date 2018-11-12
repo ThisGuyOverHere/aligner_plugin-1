@@ -5,20 +5,27 @@ import PropTypes from "prop-types";
 import ExportModalLogged from "./ExportModalLogged/ExportModalLogged.component";
 import ExportModalSendMail from "./ExportModalSendEmail/ExportModalSendEmail.component";
 import ExportModalCompleted from "./ExportModalCompleted/ExportModalCompleted.component";
-
+import {getUserInitials} from "../../../Helpers/SystemUtils.helper";
+import ModalHeader from "../ModalHeader/ModalHeader.component";
+import {httpConfig} from "../../../HttpRequests/System.http";
 
 class ExportModal extends Component {
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-        error: PropTypes.bool,
+        image: PropTypes.string
     };
 
     constructor(props) {
         super(props);
         this.state = {
             sendEmail: false,
-            completed: false
+            completed: false,
+            googleLogInLink: ''
         }
+    }
+
+    componentDidMount() {
+        this.getConfigs();
     }
 
     onCloseExportModal = () => {
@@ -32,25 +39,22 @@ class ExportModal extends Component {
                 </div>
 
                 <div className="exportContainer">
-                    <div className="header">
-                        <div className="sx-header">
-                            <img src="/public/img/logo-ico.png"></img>
-                        </div>
-                        <div className="dx-header">
-                            <span onClick={this.onCloseExportModal}>
-                                <i className="icon window close"></i>
-                            </span>
-                        </div>
-                    </div>
+                    <ModalHeader user={this.props.user}  image={this.props.image} modalName={"export"}/>
                     <div className="content">
+                        { this.props.user &&
+                            <img id="cat" src={"http://dev.matecat.com/public/img/matecat_watch-left-border.png"}/>
+                         }
 
                         {this.renderComponent()}
 
-                        {(!this.state.sendEmail && !this.state.completed) && <button
-                            onClick={this.sendEmailHandler}
-                            className="sendEmail">
-                            Send me an email
-                        </button>
+                        {(!this.state.sendEmail && !this.state.completed) &&
+                        <div className={"send-email"}>
+                            <button
+                                onClick={this.sendEmailHandler}
+                                className="sendEmail">
+                                Do you want to download only the file?
+                            </button>
+                        </div>
                         }
                     </div>
                 </div>
@@ -68,7 +72,10 @@ class ExportModal extends Component {
         } else if (this.props.user) {
             component = <ExportModalLogged setCompletedExport={this.setCompletedExport} user={this.props.user}/>;
         } else {
-            component = <ExportModalNotLogged/>;
+            component = <ExportModalNotLogged
+                googleLink={this.state.googleLogInLink}
+                user={this.props.user}
+            />;
         }
         return component;
     };
@@ -82,6 +89,19 @@ class ExportModal extends Component {
         this.setState({
             sendEmail: !this.state.sendEmail
         })
+    };
+
+    // to do: move on open of modals
+    getConfigs = () => {
+        httpConfig()
+            .then(response => {
+                this.setState({
+                    googleLogInLink: response.data.authURL,
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            })
     };
 }
 

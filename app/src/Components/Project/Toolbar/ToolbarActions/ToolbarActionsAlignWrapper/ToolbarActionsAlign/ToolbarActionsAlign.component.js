@@ -26,7 +26,11 @@ class ToolbarActionsAlignComponent extends Component {
         let disabled = true;
         if (this.props.selection.source.count === 1
             && this.props.selection.target.count === 1) {
-            disabled = false;
+
+            //check elements not are in same line
+            if (getSegmentIndexByOrder(this.props.selection.source.list[0], 'source') !== getSegmentIndexByOrder(this.props.selection.target.list[0], 'target')) {
+                disabled = false;
+            }
         }
         return <Hotkeys
             keyName="alt+a"

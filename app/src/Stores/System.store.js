@@ -6,7 +6,6 @@ import EventEmitter from 'events';
 import assign from 'object-assign';
 import SystemConstants from "../Constants/System.constants";
 
-
 EventEmitter.prototype.setMaxListeners(0);
 
 let SystemStore = assign({}, EventEmitter.prototype, {
@@ -20,6 +19,9 @@ let SystemStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
     switch (action.actionType) {
+        case SystemConstants.OPEN_REGISTRATION_MODAL:
+            SystemStore.emitChange(SystemConstants.OPEN_REGISTRATION_MODAL, action.status);
+            break;
         case SystemConstants.OPEN_LOGIN:
             SystemStore.emitChange(SystemConstants.OPEN_LOGIN, action.status);
             break;
@@ -29,8 +31,11 @@ AppDispatcher.register(function (action) {
         case SystemConstants.OPEN_RESET_PASSWORD_MODAL:
             SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL, action.status);
             break;
+        case SystemConstants.  OPEN_CHANGE_PASSWORD_MODAL:
+            SystemStore.emitChange(SystemConstants.  OPEN_CHANGE_PASSWORD_MODAL, action.status);
+            break;
         case SystemConstants.USER_STATUS:
-            SystemStore.emitChange(SystemConstants.USER_STATUS, action.status, action.fromLogin, action.error);
+            SystemStore.emitChange(SystemConstants.USER_STATUS, action.status, action.fromLogin, action.image, action.error);
             break;
         case SystemConstants.LOGOUT:
             SystemStore.emitChange(SystemConstants.LOGOUT, action.status);

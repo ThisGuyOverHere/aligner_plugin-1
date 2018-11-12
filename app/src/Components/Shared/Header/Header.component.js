@@ -6,6 +6,12 @@ import User from "./User/User.component";
 import Mismatch from "./Mismatch/Mismatch.component";
 import Export from "./Export/Export.component";
 import ToolbarComponent from "../../Project/Toolbar/Toolbar.component";
+import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
+import SystemConstants from "../../../Constants/System.constants";
+import SystemActions from "../../../Actions/System.actions";
+import SystemStore from "../../../Stores/System.store";
+import ProjectStore from "../../../Stores/Project.store";
+import ProjectActions from "../../../Actions/Project.actions";
 
 class HeaderComponent extends Component {
 
@@ -13,10 +19,12 @@ class HeaderComponent extends Component {
         hideToolbar: PropTypes.bool,
         match: PropTypes.shape({
             params: PropTypes.shape({
-                jobID: PropTypes.string
+                jobID: PropTypes.string,
+                jobPassword: PropTypes.string
             })
         }).isRequired,
-        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object])
+        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object]),
+        image: PropTypes.string
     };
 
     constructor(props) {
@@ -26,9 +34,9 @@ class HeaderComponent extends Component {
             && this.props.match.params.jobID) ? this.props.match.params.jobID : null;*/
         this.state = {
             pName: '',
-            projectTitle: 'Sample title for test header ellipsis at center',
-            sourceLang: 'en-US',
-            targetLang: 'it-IT',
+            projectTitle: '',
+            sourceLang: '',
+            targetLang: '',
             job: {
                 config: {
                     password: this.props.match.params.password,
@@ -38,19 +46,34 @@ class HeaderComponent extends Component {
                 segments: null
             },
             loggedIn: false,
+            statusEmptyModal: false,
         };
     }
 
-     static getDerivedStateFromProps(nextProps, prevState) {
+    static getDerivedStateFromProps(nextProps, prevState) {
          if(nextProps.match.params && nextProps.match.params.jobID){
              prevState.job.config.id = nextProps.match.params.jobID;
+             prevState.job.config.password = nextProps.match.params.jobPassword;
          }else{
              prevState.job.config.id = null;
+             prevState.job.config.password = null;
          }
         return prevState;
     };
 
+    componentDidMount(){
+        this.getInfo();
+    }
+
+    componentDidUpdate =(prevProps) => {
+        // Typical usage (don't forget to compare props):
+        if (this.props.match.params.jobID !== prevProps.match.params.jobID) {
+            this.getInfo();
+        }
+    };
+
     renderHtmlNavigation = () => {
+
         if(this.state.job.config.id){
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
@@ -58,33 +81,50 @@ class HeaderComponent extends Component {
                         <Link to="/">
                             <div id="logo"></div>
                         </Link>
+                    </li>
+                    <li></li>
+                    <li>
                         <div id="final_title">
-                            {textEllipsisCenter(this.state.projectTitle)}
+                            {this.state.projectTitle}
                         </div>
                     </li>
-                    <li>
-                        <div id="source_to_target">
-                            <span id="source">{this.state.sourceLang}</span>
-                            >
-                            <span id="source">{this.state.targetLang}</span>
-                        </div>
+
+                    <li id={"source"}>
+                        <span>{this.state.sourceLang}</span>
                     </li>
-                    <li>
-                        {/*<Mismatch />*/}
+
+                    <li id={"to"}>
+                        <span> > </span>
+                    </li>
+
+                    <li id={"target"}>
+                        <span>{this.state.targetLang}</span>
+                    </li>
+
+                    <li id="export">
+                        {/*<Mismatch />
+                          to do: with pulling process completed,
+                          pass disable property while align process will be completed
+                        */}
                         <Export/>
                     </li>
+
                     <li>
-                        <User user={this.props.user}/>
+                        <User image={this.props.image} user={this.props.user}/>
                     </li>
                 </ul>
                 {!this.props.hideToolbar && <ToolbarComponent jobConf={this.state.job.config}/>}
             </div>;
         } else {
             return <ul className="aligner-nav-nolog" role="navigation">
-                <Link to="/">
-                    <div id="logo"></div>
-                </Link>
-                <User user={this.props.user}/>
+                <li>
+                    <Link to="/">
+                        <div id="logo"></div>
+                    </Link>
+                </li>
+                <li>
+                    <User image={this.props.image} user={this.props.user}/>
+                </li>
             </ul>
         }
     };
@@ -94,6 +134,27 @@ class HeaderComponent extends Component {
             <div id="header">
                 { this.renderHtmlNavigation() }
             </div>
+        );
+    }
+
+    getInfo = () => {
+        // get job info
+        httpGetAlignmentInfo(this.state.job.config.id, this.state.job.config.password)
+            .then(
+                response => {
+                    const info = response.data;
+                    if(info){
+                        this.setState({
+                            projectTitle: textEllipsisCenter(info.job_name),
+                            sourceLang: info.source_lang,
+                            targetLang: info.target_lang,
+                        });
+                    }
+                }
+            ).catch(
+            error => {
+                console.log(error);
+            }
         );
     }
 

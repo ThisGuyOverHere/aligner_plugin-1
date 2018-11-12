@@ -1,5 +1,9 @@
 import SystemConstants from "../Constants/System.constants";
-import {httpLogin, httpLogout, httpMe} from "../HttpRequests/System.http";
+import {
+    httpLogin,
+    httpLogout,
+    httpMe,
+} from "../HttpRequests/System.http";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 
@@ -11,6 +15,17 @@ let SystemActions = {
     setLoginStatus: function (status) {
         AppDispatcher.dispatch({
             actionType: SystemConstants.OPEN_LOGIN,
+            status: status
+        });
+    },
+
+    /**
+     *
+     * @param {Boolean} status The status of registration
+     */
+    setRegistrationStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.OPEN_REGISTRATION_MODAL,
             status: status
         });
     },
@@ -39,6 +54,17 @@ let SystemActions = {
 
     /**
      *
+     * @param {Boolean} status The status of Change Password Modal, true for open the modal and false for close
+     */
+    setChangePasswordStatus: function (status) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.OPEN_CHANGE_PASSWORD_MODAL,
+            status: status
+        });
+    },
+
+    /**
+     *
      * @param {Boolean} status The status of Logout Modal, true for open the modal and false for close
      */
     setLogoutStatus: function (status) {
@@ -48,6 +74,33 @@ let SystemActions = {
         });
     },
 
+    /**
+     *
+     * @param status
+     * @param fromLogin
+     */
+    loggedIn: function(status, fromLogin){
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.USER_STATUS,
+            status: status,
+            fromLogin: fromLogin,
+        });
+    },
+
+    /**
+     *
+     * @param status
+     * @param fromLogin
+     * @param error
+     */
+    setLoginError: function(status, fromLogin, error) {
+        AppDispatcher.dispatch({
+            actionType: SystemConstants.USER_STATUS,
+            status: status,
+            fromLogin: fromLogin,
+            error: error
+        });
+    },
 
     /**
      *
@@ -55,11 +108,20 @@ let SystemActions = {
     checkUserStatus: function () {
         httpMe()
             .then(response => {
-                AppDispatcher.dispatch({
-                    actionType: SystemConstants.USER_STATUS,
-                    status: response.data.user,
-                    fromLogin: false
-                })
+                if(response.data.metadata){
+                    AppDispatcher.dispatch({
+                        actionType: SystemConstants.USER_STATUS,
+                        status: response.data.user,
+                        image: response.data.metadata.gplus_picture,
+                        fromLogin: false
+                    })
+                }else{
+                    AppDispatcher.dispatch({
+                        actionType: SystemConstants.USER_STATUS,
+                        status: response.data.user,
+                        fromLogin: false
+                    })
+                }
             })
             .catch(error => {
                 AppDispatcher.dispatch({
