@@ -20,17 +20,12 @@
       }
     }
   }
-  .aligner-nav-log{
-    padding: 8px 12px 6px;
-  }
-  .aligner-nav-nolog{
-    padding: 8px 12px;
-  }
   .aligner-nav-log , .aligner-nav-nolog{
     background: $headerBlack;
     display: -ms-flexbox;
     list-style: none;
     margin: 0;
+    padding: 8px 12px;
     #logo{
       top: 4px;
       border: 0;
