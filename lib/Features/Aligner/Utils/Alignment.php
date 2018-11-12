@@ -193,7 +193,7 @@ class Alignment {
 
     // Sub-part alignment
     function alignPart($source, $target, $offset) {
-        $MAX_NUMBER_OF_SEGMENTS = 0;
+        $MAX_NUMBER_OF_SEGMENTS = 16;
 
         if (count($source) < $MAX_NUMBER_OF_SEGMENTS && count($target) < $MAX_NUMBER_OF_SEGMENTS) {
             $scores = $this->buildScores($source, $target);
@@ -291,19 +291,28 @@ class Alignment {
         }
 
         // Potrebbero esserci dei target rimasti fuori dall'algoritmo, andrebbero aggiunti come orfani nella "giusta" posizione
-        foreach ($res as $key=>$value) {
-            $next = $value[1][0] + $value[1][1];  // Current target + 0, 1, 2 based on merge strategy
+        for ($i = 0; $i < $tc; $i++) {
+            if ($target[$i] != null) {
 
-            if ($target[$next] != null) {
-                // Add target in place
-                $item = [[$value[0][0], 0], [$next, 1], 0];
+                // Search where to place this pending target
+                foreach ($res as $key=>$value) {
 
-                $before = array_slice($res, 0, $key + 1);
-                $after = array_slice($res, $key + 1);
+                    // Place it before its successor
+                    if ($value[1][0] > $i) {
 
-                $res = array_merge($before, [$item], $after);
+                        // Add target in place
+                        $item = [[$value[0][0], 0], [$i, 1], 0];
 
-                $target[$next] = null;
+                        $before = array_slice($res, 0, $key );
+                        $after = array_slice($res, $key );
+
+                        $res = array_merge($before, [$item], $after);
+
+                        $target[$i] = null;
+
+                        break;
+                    }
+                }
             }
         }
 
