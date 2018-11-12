@@ -12,6 +12,7 @@ import SystemActions from "../../../Actions/System.actions";
 import SystemStore from "../../../Stores/System.store";
 import ProjectStore from "../../../Stores/Project.store";
 import ProjectActions from "../../../Actions/Project.actions";
+import ProjectConstants from "../../../Constants/Project.constants";
 
 class HeaderComponent extends Component {
 
@@ -47,6 +48,7 @@ class HeaderComponent extends Component {
             },
             loggedIn: false,
             statusEmptyModal: false,
+            jobError: false
         };
     }
 
@@ -61,20 +63,30 @@ class HeaderComponent extends Component {
         return prevState;
     };
 
-    componentDidMount(){
+    componentDidMount() {
         this.getInfo();
+        ProjectStore.addListener(ProjectConstants.JOB_ERROR, this.getJobError);
     }
 
-    componentDidUpdate =(prevProps) => {
-        // Typical usage (don't forget to compare props):
+    componentWillUnmount() {
+        ProjectStore.removeListener(ProjectConstants.JOB_ERROR, this.getJobError);
+    }
+
+    componentDidUpdate(prevProps) {
         if (this.props.match.params.jobID !== prevProps.match.params.jobID) {
             this.getInfo();
         }
+    }
+
+    getJobError = (error) => {
+        this.setState({
+            jobError: error
+        })
     };
 
     renderHtmlNavigation = () => {
 
-        if(this.state.job.config.id){
+        if(this.state.job.config.id && !this.state.jobError){
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
                     <li>

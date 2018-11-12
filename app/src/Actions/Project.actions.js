@@ -29,6 +29,12 @@ let ProjectActions = {
                     actionType: ProjectConstants.STORE_SEGMENTS,
                     segments: response.data
                 })
+            }, error => {
+                console.log(error);
+                AppDispatcher.dispatch({
+                    actionType: ProjectConstants.JOB_ERROR,
+                    error: error.response.data.error
+                })
             });
         },
 
