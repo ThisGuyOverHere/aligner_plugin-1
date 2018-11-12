@@ -5,13 +5,18 @@ import ToolbarSelectionComponent from "./ToolbarSelection/ToolbarSelection.compo
 import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
 import PropTypes from "prop-types";
 import ToolbarRightHintComponent from "./ToolbarRightHint/ToolbarRightHint.component";
+import SearchComponent from "./Search/Search.component";
 
 class ToolbarComponent extends Component {
     static propTypes = {
-        jobConf: PropTypes.shape({
-            password: PropTypes.string,
-            id: PropTypes.any
-        })
+        job: PropTypes.shape({
+            config: PropTypes.shape({
+                password: PropTypes.any,
+                id: PropTypes.any
+            }),
+            rows: PropTypes.array,
+            rowsDictionary: PropTypes.any
+        }),
     };
     constructor(props) {
         super(props);
@@ -49,9 +54,10 @@ class ToolbarComponent extends Component {
                     {!!this.state.selection.count && <ToolbarSelectionComponent selection={this.state.selection}/>}
                 </div>
                 <div>
-                    <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.jobConf}/>
+                    <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.job.config}/>
                 </div>
                 <div>
+                    <SearchComponent job={this.props.job}/>
                     <i className=" hint icon question circle outline" onClick={ this.hintModalOpened }></i>
                 </div>
                 { this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}

@@ -1,14 +1,12 @@
 import React, {Component} from 'react';
 import ProjectStore from "../../../Stores/Project.store";
 import ProjectConstants from "../../../Constants/Project.constants"
-import ProjectActions from '../../../Actions/Project.actions';
 import {DragDropContext} from 'react-dnd';
 import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
 import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
 import HTML5Backend from 'react-dnd-html5-backend';
 import VirtualList from 'react-tiny-virtual-list';
-import {syncWithBackend} from "../../../Helpers/SystemUtils.helper";
 import ExportModal from "../../Shared/ExportModal/ExportModal.component";
 import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";

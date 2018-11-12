@@ -49,7 +49,7 @@ class AlignComponent extends Component {
     render() {
         return (
             <div id="Align">
-                <ToolbarComponent jobConf={this.state.job.config}/>
+                <ToolbarComponent job={this.state.job}/>
                 {this.state.job.rows && <JobComponent inSync={this.state.inSync} job={this.state.job}/>}
             </div>
         );
