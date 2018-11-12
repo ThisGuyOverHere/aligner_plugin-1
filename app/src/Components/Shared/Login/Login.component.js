@@ -156,10 +156,6 @@ class LoginComponent extends Component {
                     httpMe().then(response => {
                         SystemActions.loggedIn(response.data.user, true);
                     });
-                    this.setState({
-                        error: false,
-                        logged: false,
-                    })
                 })
                 .catch(error => {
                     SystemActions.setLoginError(false, false, true);
