@@ -18,13 +18,15 @@ import PropTypes from "prop-types";
 
 class JobComponent extends Component {
     static propTypes = {
-        match: PropTypes.shape({
-            params: PropTypes.shape({
+        job: PropTypes.shape({
+            config: PropTypes.shape({
                 password: PropTypes.any,
-                jobID: PropTypes.any
-            })
-
-        })
+                id: PropTypes.any
+            }),
+            rows: PropTypes.array,
+            rowsDictionary: PropTypes.any
+        }),
+        inSync: PropTypes.bool
     };
 
     constructor(props) {
@@ -32,24 +34,12 @@ class JobComponent extends Component {
         this.state = {
             statusExportModal: false,
             segmentToSplit: {},
-            job: {
-                config: {
-                    password: this.props.match.params.password,
-                    id: this.props.match.params.jobID
-                },
-                rows: [],
-                rowsDictionary: {
-                    source: {},
-                    target: {}
-                }
-            },
             animateRowToOrder: {
                 type: null,
                 order: null,
                 yCoord: null
             },
             splitModalStatus: false,
-            inSync: false,
             selection: {
                 source: {
                     count: 0,
@@ -84,7 +74,6 @@ class JobComponent extends Component {
         SystemStore.addListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         ProjectStore.addListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
-        ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
     }
 
@@ -93,16 +82,15 @@ class JobComponent extends Component {
         SystemStore.removeListener(SystemConstants.OPEN_EXPORT_MODAL, this.setStatusExportModal);
         ProjectStore.removeListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
-        ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         window.removeEventListener('resize', this.updateWindowDimensions);
 
     }
 
     render() {
-        const data = this.renderItems(this.state.job.rows);
+        const data = this.renderItems(this.props.job.rows);
         let classes = ['align-project'];
-        if (this.state.inSync) {
+        if (this.props.inSync) {
             classes.push('inSync');
         }
         return (
@@ -129,14 +117,14 @@ class JobComponent extends Component {
                         let source = document.createElement('p');
                         source.style.width = "437px";
                         source.style.fontSize = "16px";
-                        source.innerHTML = this.state.job.rows[index].source.content_clean;
+                        source.innerHTML = this.props.job.rows[index].source.content_clean;
                         document.getElementById('hiddenHtml').appendChild(source);
                         const sourceHeight = source.getBoundingClientRect().height;
 
                         let target = document.createElement('p');
                         target.style.width = "437px";
                         target.style.fontSize = "16px";
-                        target.innerHTML = this.state.job.rows[index].target.content_clean;
+                        target.innerHTML = this.props.job.rows[index].target.content_clean;
                         document.getElementById('hiddenHtml').appendChild(target);
                         const targetHeight = target.getBoundingClientRect().height;
 
@@ -154,8 +142,8 @@ class JobComponent extends Component {
                 />}
                 <AdvancedDragLayer/>
                 {this.state.splitModalStatus &&
-                <SplitComponent segment={this.state.segmentToSplit} jobConf={this.state.job.config}
-                                inverseSegmentOrder={this.state.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
+                <SplitComponent segment={this.state.segmentToSplit} jobConf={this.props.job.config}
+                                inverseSegmentOrder={this.props.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
             </div>
         );
     }
@@ -185,7 +173,7 @@ class JobComponent extends Component {
         if (segment) {
             this.setState({
                 segmentToSplit: segment,
-                inverseOrder: this.state.job.rowsDictionary[segment.type][segment.order],
+                inverseOrder: this.props.job.rowsDictionary[segment.type][segment.order],
                 splitModalStatus: true
             });
         } else {
@@ -197,70 +185,7 @@ class JobComponent extends Component {
 
     };
 
-    setRows = (job, syncAPI) => {
-        let rows = [];
-        let deletes = [];
-        let matches = [];
-        let previousJob = this.state.job;
-        let rowsDictionary = {
-            source: {},
-            target: {}
-        };
-        job.source.map((e, index) => {
-            rowsDictionary.source[e.order] = job.target[index].order;
-            rowsDictionary.target[job.target[index].order] = e.order;
-            //todo: send API for remove empty/empty from DB
-            if (e.content_clean || job.target[index].content_clean) {
-                rows.push({
-                    source: e,
-                    target: job.target[index]
-                });
-            } else {
-                deletes.push(index);
-                matches.push({
-                    type: 'source',
-                    order: e.order
-                });
-                matches.push({
-                    type: 'target',
-                    order: job.target[index].order
-                });
-            }
-        });
 
-        previousJob.rows = rows;
-        previousJob.rowsDictionary = rowsDictionary;
-
-
-        let inSync = false;
-        if (syncAPI) {
-            inSync = true;
-            syncWithBackend(syncAPI, () => {
-                if (deletes.length > 0) {
-                    setTimeout(() => {
-                        ProjectActions.deleteEmptyRows(deletes, matches);
-                    }, 0);
-
-                }
-                this.setState({
-                    inSync: false
-                })
-            });
-        } else {
-            if (deletes.length > 0) {
-                setTimeout(() => {
-                    ProjectActions.deleteEmptyRows(deletes, matches);
-                }, 0);
-
-            }
-        }
-
-
-        this.setState({
-            job: previousJob,
-            inSync: inSync
-        })
-    };
 
 
     renderItems(array) {
