@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
-import {ItemTypes} from '../../../../Constants/Draggable.constants';
+import {ItemTypes} from '../../../../../Constants/Draggable.constants';
 import {DragSource, DropTarget} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
-import ProjectActions from "../../../../Actions/Project.actions";
+import ProjectActions from "../../../../../Actions/Project.actions";
 
 const ItemSource = {
     beginDrag(props) {

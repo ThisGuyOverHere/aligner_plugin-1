@@ -1,22 +1,32 @@
 import React, {Component} from 'react';
-import ProjectStore from "../../Stores/Project.store";
-import ProjectConstants from "../../Constants/Project.constants"
-import ProjectActions from '../../Actions/Project.actions';
+import ProjectStore from "../../../Stores/Project.store";
+import ProjectConstants from "../../../Constants/Project.constants"
+import ProjectActions from '../../../Actions/Project.actions';
 import {DragDropContext} from 'react-dnd';
 import RowWrapperComponent from "./Row/RowWrapper.component";
 import SplitComponent from "./Split/Split.component";
 import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
 import HTML5Backend from 'react-dnd-html5-backend';
 import VirtualList from 'react-tiny-virtual-list';
-import {syncWithBackend} from "../../Helpers/SystemUtils.helper";
-import ExportModal from "../Shared/ExportModal/ExportModal.component";
-import SystemConstants from "../../Constants/System.constants";
-import SystemStore from "../../Stores/System.store";
-import SystemActions from "../../Actions/System.actions";
-import {httpConfig} from "../../HttpRequests/System.http";
+import {syncWithBackend} from "../../../Helpers/SystemUtils.helper";
+import ExportModal from "../../Shared/ExportModal/ExportModal.component";
+import SystemConstants from "../../../Constants/System.constants";
+import SystemStore from "../../../Stores/System.store";
+import SystemActions from "../../../Actions/System.actions";
+import PropTypes from "prop-types";
 
 
 class JobComponent extends Component {
+    static propTypes = {
+        match: PropTypes.shape({
+            params: PropTypes.shape({
+                password: PropTypes.any,
+                jobID: PropTypes.any
+            })
+
+        })
+    };
+
     constructor(props) {
         super(props);
         this.state = {
@@ -64,8 +74,6 @@ class JobComponent extends Component {
 
         this.elementsRef = {};
         this.virtualList = null;
-        ProjectActions.setJobID(this.props.match.params.jobID, this.props.match.params.password)
-
     }
 
     componentDidMount() {
@@ -78,7 +86,6 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
-        ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.password);
     }
 
     componentWillUnmount() {

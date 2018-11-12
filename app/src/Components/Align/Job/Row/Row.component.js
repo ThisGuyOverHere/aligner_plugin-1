@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
-import {ItemTypes} from '../../../Constants/Draggable.constants';
+import {ItemTypes} from '../../../../Constants/Draggable.constants';
 import {DropTarget} from 'react-dnd';
-import ProjectActions from "../../../Actions/Project.actions";
+import ProjectActions from "../../../../Actions/Project.actions";
 import PropTypes from "prop-types";
 import SegmentComponent from "./Segment/Segment.component";
-import ProjectStore from "../../../Stores/Project.store";
-import ProjectConstants from "../../../Constants/Project.constants";
+import ProjectStore from "../../../../Stores/Project.store";
+import ProjectConstants from "../../../../Constants/Project.constants";
 import ReactDOM, {findDOMNode} from "react-dom";
 
 const RowTarget = {

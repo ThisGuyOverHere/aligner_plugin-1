@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {DragLayer, XYCoord} from 'react-dnd'
-import {ItemTypes} from '../../../Constants/Draggable.constants';
+import {ItemTypes} from '../../../../Constants/Draggable.constants';
 import SegmentDragLayer from './SegmentDragLayer.component';
 import {Component} from "react";
 

@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
-import ProjectActions from "../../../../Actions/Project.actions";
-import ProjectStore from "../../../../Stores/Project.store";
-import ProjectConstants from "../../../../Constants/Project.constants";
-import SystemConstants from "../../../../Constants/System.constants";
-import SystemStore from "../../../../Stores/System.store";
+import ProjectActions from "../../../../../Actions/Project.actions";
+import ProjectStore from "../../../../../Stores/Project.store";
+import ProjectConstants from "../../../../../Constants/Project.constants";
+import SystemConstants from "../../../../../Constants/System.constants";
+import SystemStore from "../../../../../Stores/System.store";
 
 class ActionsBetweenLines extends Component {
     static propTypes = {

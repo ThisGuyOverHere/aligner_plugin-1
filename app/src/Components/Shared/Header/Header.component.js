@@ -5,7 +5,7 @@ import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
 import User from "./User/User.component";
 import Mismatch from "./Mismatch/Mismatch.component";
 import Export from "./Export/Export.component";
-import ToolbarComponent from "../../Project/Toolbar/Toolbar.component";
+import ToolbarComponent from "../../Align/Toolbar/Toolbar.component";
 import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
 import SystemConstants from "../../../Constants/System.constants";
 import SystemActions from "../../../Actions/System.actions";
@@ -113,7 +113,7 @@ class HeaderComponent extends Component {
                         <User image={this.props.image} user={this.props.user}/>
                     </li>
                 </ul>
-                {!this.props.hideToolbar && <ToolbarComponent jobConf={this.state.job.config}/>}
+
             </div>;
         } else {
             return <ul className="aligner-nav-nolog" role="navigation">

@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
-import ProjectActions from "../../../Actions/Project.actions";
+import ProjectActions from "../../../../Actions/Project.actions";
 import PropTypes from "prop-types";
 import SplitCharComponent from "./SplitCharComponent/SplitCharComponent.component";
 import SplitDivisor from "./SplitDivisor/SplitDivisor.component";
-import ModalHeader from "../../Shared/ModalHeader/ModalHeader.component";
+import ModalHeader from "../../../Shared/ModalHeader/ModalHeader.component";
 
 class SplitComponent extends Component {
     static propTypes = {

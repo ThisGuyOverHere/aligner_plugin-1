@@ -1,7 +1,7 @@
 import * as React from 'react'
 import SegmentComponent from '../Row/Segment/Segment.component'
-import SystemActions from "../../../Actions/System.actions";
-import ProjectActions from "../../../Actions/Project.actions";
+import SystemActions from "../../../../Actions/System.actions";
+import ProjectActions from "../../../../Actions/Project.actions";
 
 export default class SegmentDragLayer extends React.PureComponent {
 
