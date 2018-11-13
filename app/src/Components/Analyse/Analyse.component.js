@@ -11,6 +11,7 @@ import env from "../../Constants/Env.constants";
 
 class AnalyseComponent extends Component {
     static propTypes = {};
+    pullingId = null;
 
     constructor(props) {
         super(props);
@@ -26,7 +27,6 @@ class AnalyseComponent extends Component {
             targetLang: '',
             targetLangFileName: '',
             totalTargetSegments: '',
-            pullingId: null,
             actualPhase: 0,
         };
     };
@@ -54,15 +54,12 @@ class AnalyseComponent extends Component {
         );
         //console.log(this.state.job);
         // pulling
-        let pullingId = setInterval(this.pullingInfo, env.pullingCallInterval);
-        // store intervalId in the state so it can be accessed later:
-        this.setState({pullingId: pullingId});
-        console.log('pulling :', pullingId);
+        this.pullingId = setInterval(this.pullingInfo, env.pullingCallInterval);
     };
 
     componentWillUnmount() {
         // use intervalId from the state to clear the interval
-        clearInterval(this.state.pullingId);
+        clearInterval(this.pullingId);
     }
 
     render() {
