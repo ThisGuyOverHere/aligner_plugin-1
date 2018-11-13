@@ -78,7 +78,7 @@ export const httpGetAlignmentInfo = (jobID, jobPassword) => {
 };
 
 export const httpGetPullingInfo = (jobID, jobPassword) => {
-    const url = '/job/' + jobID +'/' + jobPassword + '/check_progress';
+    const url = '/plugins/aligner/job/' + jobID +'/' + jobPassword + '/check_progress';
     return get(url);
 };
 

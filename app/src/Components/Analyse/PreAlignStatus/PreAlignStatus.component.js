@@ -22,24 +22,6 @@ class PreAlignStatus extends Component {
         }
     };
 
-    componentDidMount() {
-        // check for the end of alignment process
-       /*httpAlignJob(this.props.jobId)
-            .then(
-                response => {
-                    this.setState(
-                        {
-                            progress: 101,
-                        }
-                    );
-                }
-            )
-            .catch(error => {
-                    console.log(error);
-                }
-            ); */
-    };
-
     componentDidUpdate(prevProps) {
         if (this.props.actualPhase !== prevProps.actualPhase) {
             this.setState(
