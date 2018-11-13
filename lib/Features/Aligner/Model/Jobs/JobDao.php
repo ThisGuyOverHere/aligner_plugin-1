@@ -38,10 +38,13 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         );
 
         $thisDao = new self();
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [
                 'id_job' => $id_job,
                 'password' => $password
-        ] )[ 0 ];
+        ] );
+
+        $result = (!empty($result)) ? $result[0] : $result;
+        return $result;
 
     }
 

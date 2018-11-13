@@ -4,7 +4,7 @@ import ProjectActions from "../../../../../Actions/Project.actions";
 import {getSegmentByOrder} from "../../../../../Helpers/SegmentUtils.helper";
 import Hotkeys from "react-hot-keys";
 
-class ToolbarActionsReverseComponent extends Component {
+class ToolbarActionsSwitchComponent extends Component {
     static propTypes = {
         selection: PropTypes.object.isRequired
     };
@@ -35,7 +35,7 @@ class ToolbarActionsReverseComponent extends Component {
             <button
                 disabled={disabled}
                 onClick={this.onReverseClick}>
-                Reverse
+                Switch
             </button>
         </Hotkeys>;
     }
@@ -56,4 +56,4 @@ class ToolbarActionsReverseComponent extends Component {
 
 }
 
-export default ToolbarActionsReverseComponent;
+export default ToolbarActionsSwitchComponent;

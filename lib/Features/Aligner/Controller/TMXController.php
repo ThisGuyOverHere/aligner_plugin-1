@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Controller;
 
+use Exceptions\ValidationError;
 use Features\Aligner;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Utils\TMSService;
@@ -34,6 +35,7 @@ class TMXController extends AlignerController {
 
         } catch ( \Exception $e ) {
             \Log::doLog( $e->getMessage() );
+            throw new ValidationError($e->getMessage());
         }
 
         return $this->response->json( $tm );
@@ -41,7 +43,13 @@ class TMXController extends AlignerController {
     }
 
     public function createTmKey() {
-        $tms          = \Engine::getInstance( 1 );
+
+        try{
+            $tms = \Engine::getInstance( 1 );
+        } catch ( \Exception $e ){
+            throw new ValidationError( $e->getMessage() );
+        }
+
         $mymemory_key = $tms->createMyMemoryKey();
 
         return $this->response->json( $mymemory_key );
@@ -65,12 +73,17 @@ class TMXController extends AlignerController {
         $mkDao = new \TmKeyManagement_MemoryKeyDao( \Database::obtain() );
 
         $memoryKeyToUpdate = $this->createTmData();
-        $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
+
+        try{
+            $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
+        } catch (\Exception $e) {
+            throw new ValidationError( $e->getMessage() );
+        }
 
         if ( !empty( $userMemoryKeys ) ) {
             return $this->response->json( true );
         } else {
-            throw new \Exception( "Unable to create" );
+            throw new ValidationError( "Unable to create" );
         }
 
     }
@@ -91,8 +104,11 @@ class TMXController extends AlignerController {
         $TMService = new TMSService();
         $TMService->setTmKey( $tm_key );
 
-
-        $file = $TMService->uploadFile();
+        try{
+            $file = $TMService->uploadFile();
+        } catch (\Exception $e) {
+            throw new ValidationError( $e->getMessage() );
+        }
 
         foreach ( $file as $fileInfo ) {
             if ( \FilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
@@ -100,7 +116,11 @@ class TMXController extends AlignerController {
             }
 
             $TMService->setName( $fileInfo->name );
-            $TMService->addTmxInMyMemory();
+            try {
+                $TMService->addTmxInMyMemory();
+            } catch ( \Exception $e ) {
+                throw new \Exception( $e->getMessage() );
+            }
 
             /*
              * We update the KeyRing only if this is NOT the Default MyMemory Key
@@ -119,11 +139,20 @@ class TMXController extends AlignerController {
 
                 $searchMemoryKey->uid    = $this->user->uid;
                 $searchMemoryKey->tm_key = $key;
-                $userMemoryKey           = $mkDao->read( $searchMemoryKey );
+
+                try {
+                    $userMemoryKey = $mkDao->read( $searchMemoryKey );
+                } catch ( \Exception $e ){
+                    throw new ValidationError( $e->getMessage() );
+                }
 
                 if ( empty( $userMemoryKey[ 0 ]->tm_key->name ) && !empty( $userMemoryKey ) ) {
                     $userMemoryKey[ 0 ]->tm_key->name = $fileInfo->name;
-                    $mkDao->updateList( $userMemoryKey );
+                    try{
+                        $mkDao->updateList( $userMemoryKey );
+                    } catch ( \Exception $e ){
+                        throw new ValidationError( $e->getMessage() );
+                    }
                 }
 
             }
@@ -137,18 +166,28 @@ class TMXController extends AlignerController {
         $tm_key   = $this->params[ 'tm_key' ];
         $filename = $this->params[ 'filename' ];
 
-        $TMService = new TMSService();
-        $TMService->setTmKey( $tm_key );
+        try {
+            $TMService = new TMSService();
+            $TMService->setTmKey( $tm_key );
 
-        $TMService->setName( \Upload::fixFileName( $filename ) );
-        $status = $TMService->tmxUploadStatus();
+            $TMService->setName( \Upload::fixFileName( $filename ) );
+            $status = $TMService->tmxUploadStatus();
+        } catch ( \Exception $e ){
+            throw new ValidationError( $e->getMessage() );
+        }
 
         $this->response->json( $status );
 
     }
 
     public function pushTMXInTM() {
-        $config    = Aligner::getConfig();
+
+        try{
+            $config = Aligner::getConfig();
+        } catch ( \Exception $e ) {
+            throw new ValidationError( $e->getMessage() );
+        }
+
         $id_job    = $this->params[ 'id_job' ];
         $password  = $this->params[ 'password' ];
         $is_public = $this->params[ 'is_public' ];
@@ -172,29 +211,39 @@ class TMXController extends AlignerController {
             if ( $is_public == 1 ) {
                 $tm_key = $config[ 'GLOBAL_PRIVATE_TM' ];
             } else {
-                $tms          = \Engine::getInstance( 1 );
-                $mymemory_key = $tms->createMyMemoryKey();
-                $tm_key       = $mymemory_key[ 'key' ];
+                try {
+                    $tms          = \Engine::getInstance( 1 );
+                    $mymemory_key = $tms->createMyMemoryKey();
+                    $tm_key       = $mymemory_key[ 'key' ];
+                } catch (\Exception $e){
+                    throw new ValidationError( $e->getMessage() );
+                }
             }
         }
 
-        $TMService = new TMSService();
-        $TMService->setTmKey( $tm_key );
+        try {
+            $TMService = new TMSService();
+            $TMService->setTmKey( $tm_key );
 
-        $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
+            $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
 
-        $TMService->setName( "Aligner-" . $id_job . ".tmx" );
+            $TMService->setName( "Aligner-" . $id_job . ".tmx" );
 
-        $response = $TMService->importTMXInTM();
+            $response = $TMService->importTMXInTM();
+        } catch ( \Exception $e ){
+            throw new ValidationError( $e->getMessage() );
+        }
 
         $tmx_id = $response->id;
 
-        while ( 1 ) {
+        while ( empty($upload_status[ 'completed' ]) ) {
             sleep( 1 );
-            $upload_status = $TMService->tmxUploadStatus();
-            if ( $upload_status[ 'completed' ] == true ) {
-                break;
+            try {
+                $upload_status = $TMService->tmxUploadStatus();
+            } catch ( \Exception $e ){
+                throw new ValidationError( $e->getMessage() );
             }
+
         }
 
         $TMService->requestChunkTMXEmailDownload( $tmx_id, $email, $userName, $userSurname );
@@ -207,14 +256,18 @@ class TMXController extends AlignerController {
         $id_job   = $this->params[ 'id_job' ];
         $password = $this->params[ 'password' ];
 
-        $TMService = new TMSService();
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+        try{
+            $TMService = new TMSService();
+            $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
 
-        $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
+            $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
 
-        $project = $job->getProject();
+            $project = $job->getProject();
 
-        $TMService->downloadTMX($project->name);
+            $TMService->downloadTMX($project->name);
+        } catch (\Exception $e){
+            throw new ValidationError( $e->getMessage() );
+        }
 
     }
 

@@ -24,7 +24,7 @@ let ProjectActions = {
          * @param {String} jobPassword The password of current Job ID
          */
         getSegments: function (jobID, jobPassword) {
-            httpGetSegments(jobID).then(response => {
+            httpGetSegments(jobID,jobPassword).then(response => {
                 AppDispatcher.dispatch({
                     actionType: ProjectConstants.STORE_SEGMENTS,
                     segments: response.data
