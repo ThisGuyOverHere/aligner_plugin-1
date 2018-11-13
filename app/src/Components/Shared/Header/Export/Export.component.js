@@ -3,9 +3,7 @@ import SystemActions from "../../../../Actions/System.actions";
 
 class Export extends Component {
 
-    static propTypes = {
-
-    };
+    static propTypes = {};
 
     constructor(props) {
         super(props);

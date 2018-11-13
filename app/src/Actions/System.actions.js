@@ -21,7 +21,7 @@ let SystemActions = {
 
     /**
      *
-     * @param {Boolean} status The status of registration
+     * @param {Boolean} status The status of registration, true for open the modal and false for close
      */
     setRegistrationStatus: function (status) {
         AppDispatcher.dispatch({
@@ -76,8 +76,8 @@ let SystemActions = {
 
     /**
      *
-     * @param status
-     * @param fromLogin
+     * @param {Boolean} status, true if user was logged
+     * @param {Boolean} fromLogin
      */
     loggedIn: function(status, fromLogin){
         AppDispatcher.dispatch({
@@ -88,22 +88,7 @@ let SystemActions = {
     },
 
     /**
-     *
-     * @param status
-     * @param fromLogin
-     * @param error
-     */
-    setLoginError: function(status, fromLogin, error) {
-        AppDispatcher.dispatch({
-            actionType: SystemConstants.USER_STATUS,
-            status: status,
-            fromLogin: fromLogin,
-            error: error
-        });
-    },
-
-    /**
-     *
+     * check if user was logged in, and retrieve useful information about it
      */
     checkUserStatus: function () {
         httpMe()
@@ -157,6 +142,9 @@ let SystemActions = {
             })
     },
 
+    /**
+     * logout user and dispatch user_status change
+     */
     logout: function () {
         httpLogout()
             .then(response => {

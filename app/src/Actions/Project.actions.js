@@ -24,7 +24,7 @@ let ProjectActions = {
          * @param {String} jobPassword The password of current Job ID
          */
         getSegments: function (jobID, jobPassword) {
-            httpGetSegments(jobID,jobPassword).then(response => {
+            httpGetSegments(jobID, jobPassword).then(response => {
                 AppDispatcher.dispatch({
                     actionType: ProjectConstants.STORE_SEGMENTS,
                     segments: response.data
@@ -81,7 +81,7 @@ let ProjectActions = {
             let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1);
             segmentNextToPosition = segmentNextToPosition ? segmentNextToPosition.toJS() : null;
             let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
-            let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1)
+            let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1);
             inverseSegmentToPosition = inverseSegmentToPosition ? inverseSegmentToPosition.toJS() : null;
             let inverseSegmentToPositionBE = tmpJob[inverse[log.type]].get(toIndex).toJS().order;
 
@@ -172,6 +172,10 @@ let ProjectActions = {
 
         },
 
+        /**
+         *
+         * @param {Number} index of target segments for scroll
+         */
         scrollToSegment: function (index) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.SCROLL_TO_SEGMENT,
@@ -189,15 +193,15 @@ let ProjectActions = {
         mergeAndAlignSegments: function (selection) {
             let matches = [];
             if (selection.source.count > 0) {
-                selection.source.list.map((e)=>{
-                   matches.push({
-                       type: 'source',
-                       order: e
-                   })
+                selection.source.list.map((e) => {
+                    matches.push({
+                        type: 'source',
+                        order: e
+                    })
                 });
             }
             if (selection.target.count > 0) {
-                selection.target.list.map((e)=>{
+                selection.target.list.map((e) => {
                     matches.push({
                         type: 'target',
                         order: e
@@ -205,8 +209,8 @@ let ProjectActions = {
                 });
             }
             const sourceOrderList = selection.source.list.sort();
-            const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0],'source');
-            const destination = getSegmentByIndex(firstSourceIndex,'target').order;
+            const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0], 'source');
+            const destination = getSegmentByIndex(firstSourceIndex, 'target').order;
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.MERGE_ALIGN,
                 syncAPI: {
@@ -550,6 +554,11 @@ let ProjectActions = {
             });
         },
 
+        /**
+         *
+         * @param deletes
+         * @param matches
+         */
         deleteEmptyRows: function (deletes, matches) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.DELETE_ROWS,
@@ -565,6 +574,10 @@ let ProjectActions = {
             });
         },
 
+        /**
+         *
+         * @param {boolean} status, true when user was on homepage, to initialise the store
+         */
         emptyStore: function (status) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.EMPTY_STORE,
@@ -572,6 +585,10 @@ let ProjectActions = {
             })
         },
 
+        /**
+         *
+         * @param search
+         */
         emitSearchResults: function (search) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.SEARCH_RESULTS,

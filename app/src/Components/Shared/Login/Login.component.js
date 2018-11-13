@@ -161,7 +161,6 @@ class LoginComponent extends Component {
                     })
                 })
                 .catch(error => {
-                    SystemActions.setLoginError(false, false, true);
                     this.setState({
                         logged: false,
                         error: true,

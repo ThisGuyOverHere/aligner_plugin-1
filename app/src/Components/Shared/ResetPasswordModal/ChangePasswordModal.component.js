@@ -1,9 +1,13 @@
 import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import ModalHeader from "../ModalHeader/ModalHeader.component";
-import {httpChangePassword, httpResetPassword} from "../../../HttpRequests/System.http";
+import {httpChangePassword} from "../../../HttpRequests/System.http";
+import PropTypes from "prop-types";
 
 class ChangePasswordModal extends Component {
+
+    static propTypes = {};
+
     constructor(props) {
         super(props);
         this.state = {
