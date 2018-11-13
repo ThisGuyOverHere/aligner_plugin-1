@@ -15,7 +15,8 @@ const ProjectConstants = keyMirror({
     ON_ACTION_HOVER: null,
     DELETE_ROWS: null,
     MERGE_ALIGN: null,
-    EMPTY_STORE: null
+    EMPTY_STORE: null,
+    SEARCH_RESULTS: null
 });
 
 export default ProjectConstants;

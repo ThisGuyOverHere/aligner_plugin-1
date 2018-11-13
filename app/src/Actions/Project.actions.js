@@ -570,6 +570,13 @@ let ProjectActions = {
                 actionType: ProjectConstants.EMPTY_STORE,
                 status: status
             })
+        },
+
+        emitSearchResults: function (search) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.SEARCH_RESULTS,
+                data: search
+            })
         }
     }
 ;

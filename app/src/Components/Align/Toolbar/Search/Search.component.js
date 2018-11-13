@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
-import elasticlunr from "elasticlunr";
 
 class SearchComponent extends Component {
     static propTypes = {
@@ -14,16 +13,13 @@ class SearchComponent extends Component {
         }),
     };
 
-    searchEngine = elasticlunr(function () {
-        this.addField('content');
-        this.setRef('id');
-    });
-
     constructor(props) {
         super(props);
         this.state = {
             elements: [],
-            mapElements: {},
+            searchResults: [],
+            featuredSearchResult: null,
+            active: false,
             searchTxt: ''
         };
     }
@@ -35,61 +31,55 @@ class SearchComponent extends Component {
     componentWillUnmount() {
 
     }
-    static getDerivedStateFromProps = (props,state) =>{
+
+    static getDerivedStateFromProps = (props, state) => {
         let elements = [];
-        let mapElements = {};
         props.job.rows.map((row, index) => {
             const source = {
-                content: row.source.content_clean,
+                content: row.source.content_clean.toLowerCase(),
                 type: 'source',
                 id: row.source.id,
                 index: index,
             };
             const target = {
-                content: row.target.content_clean,
+                content: row.target.content_clean.toLowerCase(),
                 type: 'target',
                 id: row.target.id,
                 index: index,
             };
-            mapElements[row.source.id] = source;
-            mapElements[row.target.id] = target;
-            elements.push(source,target);
+            elements.push(source, target);
         });
 
         state.elements = elements;
-        state.mapElements = mapElements;
         return state;
-    };
-
-    shouldComponentUpdate = (nextProps,nextState) =>{
-        this.state.elements.map(e=>{
-           this.searchEngine.removeDoc(e)
-        });
-        nextState.elements.map(e=>{
-            this.searchEngine.addDoc(e);
-        });
-        return true;
     };
 
     render() {
         return (
             <div id="search">
-                <input type="text" value={this.state.searchTxt} onChange={this.onSearch}/>
+                <form onSubmit={this.onPerformSearch}>
+                    <input type="text" value={this.state.searchTxt} onChange={this.onSearchChange}/>
+                </form>
             </div>
         );
     }
 
-    onSearch = (event) =>{
-        let search = this.searchEngine.search(event.target.value,{expand: true});
+    onPerformSearch = (e) => {
+        e.preventDefault();
+        let fulltext = this.state.searchTxt.toLowerCase();
 
-        search.sort((a,b)=>{
-            return parseInt(a.ref) - parseInt(b.ref);
+        const result = this.state.elements.filter(function (item) {
+            return item.content.indexOf(fulltext) !== -1;
         });
-        
-        search.map(item =>{
-           console.log(this.state.mapElements[item.ref]);
+
+        console.log(result);
+        this.setState({
+            active: true,
+            searchResults: result,
+            featuredSearchResult: 0
         });
-        console.log("\n \n \n \n")
+    };
+    onSearchChange = (event) => {
         this.setState({
             searchTxt: event.target.value
         })
