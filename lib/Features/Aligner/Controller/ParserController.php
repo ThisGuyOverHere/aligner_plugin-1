@@ -41,7 +41,7 @@ class ParserController extends AlignerController {
      * @throws Exception
      */
     public function jobParser() {
-        ini_set('max_execution_time', 2000);
+        /*ini_set('max_execution_time', 2000);
         $this->id_job = $this->params['id_job'];
         $job = Jobs_JobDao::getById($this->id_job)[0];
 
@@ -106,7 +106,7 @@ class ParserController extends AlignerController {
         $segmentsMatchDao->createList($source_array);
         $segmentsMatchDao->createList($target_array);
 
-        $this->response->json( ['source' => $source_array, 'target' => $target_array] );
+        $this->response->json( ['source' => $source_array, 'target' => $target_array] );*/
     }
 
 }

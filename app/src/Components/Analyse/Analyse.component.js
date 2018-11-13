@@ -1,15 +1,17 @@
 import React, {Component} from 'react';
 import PreAlignStatus from "./PreAlignStatus/PreAlignStatus.component";
 import Animation from "./Animation/Animation.component";
-import {httpGetAlignmentInfo} from "../../HttpRequests/Alignment.http";
+import {httpGetAlignmentInfo, httpGetPullingInfo} from "../../HttpRequests/Alignment.http";
 import AlignmentScoreComponent from "./AlignmentScore/AlignmentScore.component";
 import SegmentAlignedComponent from "./SegmentAligned/SegmentAligned.component";
 import SourceComponent from "./Source/Source.component";
 import TargetComponent from "./Target/Trget.component";
+import env from "../../Constants/Env.constants";
 
 
 class AnalyseComponent extends Component {
     static propTypes = {};
+    pullingId = null;
 
     constructor(props) {
         super(props);
@@ -18,13 +20,14 @@ class AnalyseComponent extends Component {
                 password: props.match.params.password,
                 id: props.match.params.jobID
             },
-            progress: 30,
             sourceLang: '',
             sourceLangFileName: '',
             totalSourceSegments: '',
             targetLang: '',
             targetLangFileName: '',
-            totalTargetSegments: ''
+            totalTargetSegments: '',
+            actualPhase: 0,
+            phaseName: ''
         };
     };
 
@@ -38,10 +41,8 @@ class AnalyseComponent extends Component {
                     this.setState({
                         sourceLang: info.source_lang,
                         sourceLangFileName: info.target_filename,
-                        totalSourceSegments: info.total_source_segments,
                         targetLang: info.target_lang,
                         targetLangFileName: info.target_filename,
-                        totalTargetSegments: info.total_target_segments
                     });
                 }
             ).catch(
@@ -49,17 +50,21 @@ class AnalyseComponent extends Component {
                 console.log(error);
             }
         );
-        //console.log(this.state.job);
+        // pulling
+        this.pullingId = setInterval(this.pullingInfo, env.pullingCallInterval);
+
     };
+
+    componentWillUnmount() {
+        clearInterval(this.pullingId);
+    }
 
     render() {
         return (
             <div className="container analyse">
-                {/* <div id="title">
-                    <h1>Matecat's intelligence is currently aligning your files, please wait</h1>
-                </div>
-                <PreAlignStatus props = {this.props}/>
-                <Animation/> */}
+                {/*<div id="title">
+                    <h1> {this.state.phaseName} </h1>
+                </div>*/}
                 <div className="files-info">
                     <SourceComponent
                         sourceLang={this.state.sourceLang}
@@ -73,15 +78,42 @@ class AnalyseComponent extends Component {
                     />
                 </div>
 
-                <PreAlignStatus props={this.props}/>
+                <PreAlignStatus jobId={this.state.job.id}
+                                jobPassword={this.props.match.params.password}
+                                actualPhase = {this.state.actualPhase}/>
 
-                <div className="process-info">
+                {/*<div className="process-info">
                     <SegmentAlignedComponent/>
                     <AlignmentScoreComponent/>
-                </div>
+                </div>*/}
                 <Animation/>
             </div>
         );
+    }
+
+    pullingInfo = () => {
+        // call pulling info api
+        httpGetPullingInfo(this.state.job.id, this.state.job.password)
+            .then(
+                response => {
+                    const data = response.data;
+                    // update info
+                    this.setState({
+                        actualPhase: data.phase,
+                        totalSourceSegments: data.source_segments,
+                        totalTargetSegments: data.target_segments,
+                        phaseName: data.phase_name
+                    });
+                }
+            ).catch(
+                error => {
+                    console.log(error);
+                }
+        );
+        //clear pulling interval
+        if(this.state.actualPhase === 7){
+            clearInterval(this.pullingId);
+        }
     }
 }
 

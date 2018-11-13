@@ -29,6 +29,7 @@ CREATE TABLE `jobs` (
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` enum('active', 'archived', 'cancelled') NOT NULL DEFAULT 'active',
+  `status_analysis` enum('not_started', 'started', 'segments_created', 'fetching', 'translating', 'aligning', 'merging', 'complete') NOT NULL DEFAULT 'not_started',
   `subject` varchar(100) DEFAULT 'general',
   PRIMARY KEY (`id`),
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
