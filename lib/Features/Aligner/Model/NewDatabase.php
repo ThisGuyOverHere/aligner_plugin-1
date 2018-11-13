@@ -46,7 +46,7 @@ class NewDatabase extends Database {
 
         // Check that the variables are not empty
         if ($server == null || $user == null || $database == null) {
-            throw new InvalidArgumentException("Database information must be passed in when the object is first created.");
+            throw new \InvalidArgumentException("Database information must be passed in when the object is first created.");
         }
 
         // Set fields
