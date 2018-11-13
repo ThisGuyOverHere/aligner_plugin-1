@@ -30,11 +30,11 @@ let ProjectActions = {
                     segments: response.data
                 })
             }, error => {
-                console.log(error);
                 AppDispatcher.dispatch({
                     actionType: ProjectConstants.JOB_ERROR,
-                    error: error.response.data.error
-                })
+                    error: error.response.data.errors[0].message
+                });
+                console.log(error.response.data.errors[0].message);
             });
         },
 

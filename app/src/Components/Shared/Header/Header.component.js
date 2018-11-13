@@ -3,15 +3,9 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
 import User from "./User/User.component";
-import Mismatch from "./Mismatch/Mismatch.component";
 import Export from "./Export/Export.component";
-import ToolbarComponent from "../../Align/Toolbar/Toolbar.component";
 import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
-import SystemConstants from "../../../Constants/System.constants";
-import SystemActions from "../../../Actions/System.actions";
-import SystemStore from "../../../Stores/System.store";
 import ProjectStore from "../../../Stores/Project.store";
-import ProjectActions from "../../../Actions/Project.actions";
 import ProjectConstants from "../../../Constants/Project.constants";
 
 class HeaderComponent extends Component {

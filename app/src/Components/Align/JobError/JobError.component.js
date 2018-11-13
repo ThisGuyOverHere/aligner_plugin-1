@@ -1,12 +1,12 @@
 import React from 'react';
 
-const JobError = (props) => (
+const JobError = () => (
    <div className={"job-error"}>
        <div className={"text"}>
-           <h1> Error message </h1>
-           <h4> Short description of error </h4>
+           <h1> Error  </h1>
+           <h4> Invalid alignment link. </h4>
        </div>
-       <button className={"new-align"}> New Align </button>
+       <a href={"/plugins/aligner/index"} className={"new-align"}> New Align </a>
    </div>
 );
 
