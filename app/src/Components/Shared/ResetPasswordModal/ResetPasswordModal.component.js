@@ -4,6 +4,9 @@ import ModalHeader from "../ModalHeader/ModalHeader.component";
 import {httpResetPassword} from "../../../HttpRequests/System.http";
 
 class ResetPasswordModal extends Component {
+
+    static propTypes = {};
+
     constructor(props) {
         super(props);
         this.state = {

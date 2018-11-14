@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {httpExportTmxCloud, httpExportTmxFile} from "../../../../HttpRequests/Tmx.http";
+import {httpExportTmxFile} from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalSendEmail extends Component {
 

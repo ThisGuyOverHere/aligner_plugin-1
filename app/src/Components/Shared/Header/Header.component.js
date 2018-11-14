@@ -24,9 +24,6 @@ class HeaderComponent extends Component {
 
     constructor(props) {
         super(props);
-/*        const jobID = (this.props.match
-            && this.props.match.params
-            && this.props.match.params.jobID) ? this.props.match.params.jobID : null;*/
         this.state = {
             pName: '',
             projectTitle: '',
