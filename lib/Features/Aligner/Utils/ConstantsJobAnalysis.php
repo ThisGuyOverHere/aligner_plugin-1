@@ -18,4 +18,5 @@ class ConstantsJobAnalysis
     const ALIGN_PHASE_5 = 'aligning';
     const ALIGN_PHASE_6 = 'merging';
     const ALIGN_PHASE_7 = 'complete';
+
 }

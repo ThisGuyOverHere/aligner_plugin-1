@@ -31,6 +31,8 @@ class ApiController extends AlignerController {
 
         $status_analysis = ( !empty($job) ) ? $job[0]['status_analysis'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
+        $progress = ( !empty($job) ) ? $job[0]['progress'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+
         $segmentDao = new Segments_SegmentDao();
 
         $source_segments = null;
@@ -80,6 +82,7 @@ class ApiController extends AlignerController {
 
         return $this->response->json( [ 'phase' => $phase,
             'phase_name' => $status_analysis,
+            'progress' => $progress,
             'source_segments' => $source_segments,
             'target_segments' => $target_segments ]
         );
