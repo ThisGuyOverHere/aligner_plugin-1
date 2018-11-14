@@ -105,7 +105,7 @@ class JobComponent extends Component {
                     }}
                     width={this.state.window.width}
                     height={this.state.window.height-112}
-                    overscanCount={10}
+                    overscanCount={2}
                     itemCount={data.length}
                     scrollToIndex={this.state.scrollToSegment}
                     estimatedItemSize={80}
