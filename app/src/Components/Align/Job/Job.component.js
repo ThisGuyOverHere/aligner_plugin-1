@@ -12,6 +12,7 @@ import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
+import ProjectActions from "../../../Actions/Project.actions";
 
 
 class JobComponent extends Component {
@@ -73,6 +74,7 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
+        ProjectStore.addListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
     }
 
     componentWillUnmount() {
@@ -81,6 +83,7 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
+        ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
         window.removeEventListener('resize', this.updateWindowDimensions);
 
     }
@@ -104,7 +107,7 @@ class JobComponent extends Component {
                         this.virtualList = instance;
                     }}
                     width={this.state.window.width}
-                    height={this.state.window.height-112}
+                    height={this.state.window.height - 112}
                     overscanCount={10}
                     itemCount={data.length}
                     scrollToIndex={this.state.scrollToSegment}
@@ -161,8 +164,8 @@ class JobComponent extends Component {
             window: data
         })
     };
-    setScrollToSegment = (index) =>{
-        console.log(index);
+    setScrollToSegment = (index) => {
+        console.log("to scroll :", index);
         this.setState({
             scrollToSegment: index
         })
@@ -180,10 +183,7 @@ class JobComponent extends Component {
                 splitModalStatus: false
             });
         }
-
     };
-
-
 
 
     renderItems(array) {
@@ -220,6 +220,12 @@ class JobComponent extends Component {
             googleUserImage: image
         })
     };
+
+    onSearchEvent = (search) => {
+        this.setState({
+            scrollToSegment: search.searchResults[search.featuredSearchResult].index
+        });
+    }
 }
 
 export default DragDropContext(HTML5Backend)(JobComponent);
