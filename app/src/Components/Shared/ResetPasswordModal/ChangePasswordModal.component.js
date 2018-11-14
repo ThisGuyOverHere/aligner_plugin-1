@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import ModalHeader from "../ModalHeader/ModalHeader.component";
 import {httpChangePassword} from "../../../HttpRequests/System.http";
-import PropTypes from "prop-types";
 
 class ChangePasswordModal extends Component {
 

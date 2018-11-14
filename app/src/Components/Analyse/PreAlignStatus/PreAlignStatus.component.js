@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
 import {Redirect} from 'react-router';
 import {httpAlignJob, httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
-import env from "../../../Constants/Env.constants";
-import PropTypes from "prop-types";
 
 class PreAlignStatus extends Component {
     static propTypes = {};

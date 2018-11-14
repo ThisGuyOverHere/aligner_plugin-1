@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import {emailValidator, googleLogin} from "../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
-import SystemConstants from "../../../Constants/System.constants";
 import {httpLogin, httpMe} from "../../../HttpRequests/System.http";
 
 class LoginComponent extends Component {
