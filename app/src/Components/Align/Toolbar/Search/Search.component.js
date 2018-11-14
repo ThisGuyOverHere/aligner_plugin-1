@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
+import ProjectActions from "../../../../Actions/Project.actions";
 
 class SearchComponent extends Component {
     static propTypes = {
@@ -72,7 +73,16 @@ class SearchComponent extends Component {
             return item.content.indexOf(fulltext) !== -1;
         });
 
-        console.log(result);
+        const idList = result.map(e=>{
+            return e.id
+        });
+
+        ProjectActions.emitSearchResults({
+            q: fulltext,
+            searchResults: result,
+            idList: idList,
+            featuredSearchResult: 0
+        });
         this.setState({
             active: true,
             searchResults: result,

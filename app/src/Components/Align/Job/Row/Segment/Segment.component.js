@@ -4,6 +4,7 @@ import {DragSource, DropTarget} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
+import SegmentContentComponent from "./SegmentContent/SegmentContent.component";
 
 const ItemSource = {
     beginDrag(props) {
@@ -114,11 +115,7 @@ class SegmentComponent extends Component {
                 {dropHover && <span className="dropAlignArea"> </span>}
                 <i className="icon check circle outline"></i>
                 <div className="segmentBox-content">
-                    <p>
-                        {segment.content_clean}
-                    </p>
-                    {false && !segment.content_clean && !dragEl && <i className="trash alternate outline icon"> </i>}
-
+                    <SegmentContentComponent content={segment.content_clean} id={segment.id}/>
                 </div>
 
             </div>
