@@ -29,11 +29,23 @@ class SearchComponent extends Component {
         };
     }
 
-    
+
     componentDidUpdate(prevProps) {
         if (!equal(this.state.elements, this.getElements(this.props.job.rows))) {
             this.resetSearch();
         }
+    }
+
+    componentWillUnmount(){
+        setTimeout(() => {
+            ProjectActions.emitSearchResults({
+                q: '',
+                searchResults: [],
+                searchResultsDictionary: {},
+                occurrencesList: [],
+                featuredSearchResult: 0
+            });
+        }, 0)
     }
 
     render() {

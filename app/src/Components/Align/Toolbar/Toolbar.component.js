@@ -6,6 +6,7 @@ import ToolbarActionsComponent from "./ToolbarActions/ToolbarActions.component";
 import PropTypes from "prop-types";
 import ToolbarRightHintComponent from "./ToolbarRightHint/ToolbarRightHint.component";
 import SearchComponent from "./Search/Search.component";
+import Hotkeys from "react-hot-keys";
 
 class ToolbarComponent extends Component {
     static propTypes = {
@@ -18,10 +19,12 @@ class ToolbarComponent extends Component {
             rowsDictionary: PropTypes.any
         }),
     };
+
     constructor(props) {
         super(props);
         this.state = {
             hintOpened: false,
+            searchStatus: false,
             selection: {
                 source: {
                     count: 0,
@@ -57,15 +60,26 @@ class ToolbarComponent extends Component {
                     <ToolbarActionsComponent selection={this.state.selection} jobConf={this.props.job.config}/>
                 </div>
                 <div>
-                    <SearchComponent job={this.props.job}/>
-                    <i className=" hint icon question circle outline" onClick={ this.hintModalOpened }></i>
+                    <Hotkeys
+                        keyName="command+f,ctrl+f,esc"
+                        onKeyDown={this.handlerSearch}>
+                        {this.state.searchStatus && <SearchComponent job={this.props.job}/>}
+                    </Hotkeys>
+                    <i className=" hint icon question circle outline" onClick={this.hintModalOpened}></i>
                 </div>
-                { this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}
+                {this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}
             </div>
         );
     }
 
+    handlerSearch = (keyName, e, handle) => {
+        e.preventDefault();
+        this.setState({
+            searchStatus: keyName !== 'esc'
+        })
 
+
+    };
     storeSelection = (selection) => {
         this.setState({
             selection: selection
