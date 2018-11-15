@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import equal from "fast-deep-equal";
 import ProjectActions from "../../../../Actions/Project.actions";
 import SearchControlsComponent from "./SearchControls/SearchControls.component";
+import Hotkeys from "react-hot-keys";
 
 class SearchComponent extends Component {
     static propTypes = {
@@ -36,7 +37,11 @@ class SearchComponent extends Component {
         }
     }
 
-    componentWillUnmount(){
+    componentDidMount() {
+        this.searchInput.focus();
+    }
+
+    componentWillUnmount() {
         setTimeout(() => {
             ProjectActions.emitSearchResults({
                 q: '',
@@ -53,7 +58,13 @@ class SearchComponent extends Component {
         return (
             <div id="search">
                 <form onSubmit={this.onPerformSearch}>
-                    <input type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
+                    <Hotkeys
+                        keyName="command+f,ctrl+f"
+                        onKeyDown={this.handlerSearch}>
+                        <input ref={(input) => {
+                            this.searchInput = input;
+                        }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
+                    </Hotkeys>
                 </form>
                 {active && <SearchControlsComponent occurrencesList={occurrencesList}
                                                     featuredSearchResult={featuredSearchResult}
@@ -61,7 +72,10 @@ class SearchComponent extends Component {
             </div>
         );
     }
-
+    handlerSearch = (keyName, e, handle) => {
+        e.preventDefault();
+        this.searchInput.focus();
+    };
     onPerformSearch = (e) => {
         e.preventDefault();
         this.setFeatured(this.state.featuredSearchResult + 1);
