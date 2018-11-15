@@ -21,18 +21,16 @@ class Alignment {
     public $lessCommon = 0;
     public $long = 0;
 
+    private $id_job = null;
+    private $password = null;
+
     public function alignSegments($id_job, $password, $source, $target, $source_lang, $target_lang) {
+        // Save job data used later to update Progress
+        $this->id_job = $id_job;
+        $this->password = $password;
+
         // Variant on Church and Gale algorithm with Levenshtein distance
-
         $time_start = microtime(true);
-
-        try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_4 ], $id_job, $password );
-        } catch (ValidationError $e){
-            throw new ValidationError( $e->getMessage() );
-        } catch (\PDOException $e){
-            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
-        }
 
         $source_translated = $this->translateSegments($source, $source_lang, $target_lang);
 
@@ -43,14 +41,6 @@ class Alignment {
         $target_clean = $this->cleanSegments($target);
 
         $time_start = microtime(true);
-
-        try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5], $id_job, $password );
-        } catch (ValidationError $e){
-            throw new ValidationError( $e->getMessage() );
-        } catch (\PDOException $e){
-            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
-        }
 
         $indexes = $this->align($source_clean, $target_clean);
         $alignment = $this->mapAlignment($source, $target, $indexes);
@@ -89,7 +79,9 @@ class Alignment {
             $engine = new Engines_MyMemory($engineRecord);
         }
 
-
+        // Progress - translate updates from 10 to 50
+        $progress = 10;
+        Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_4, 'progress' => $progress], $this->id_job, $this->password);
 
         $input_segments = array();
 
@@ -99,11 +91,14 @@ class Alignment {
 
         $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
         foreach ($input_chunks as $chunk){
-
-            //Gets the translated segments and filters just the elements with the 'translation' key before merging
+            // Gets the translated segments and filters just the elements with the 'translation' key before merging
             $translation = $engine->getMulti($chunk);
             $translation = array_map(function ($ar) {return $ar['translation'];}, $translation);
             $result = array_merge($result,$translation);
+
+            // Progress
+            $progress = $progress + 40 * count($translation) / count($segments);
+            Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
         }
 
         foreach ($segments as $key => $segment){
@@ -134,6 +129,10 @@ class Alignment {
     // Perform alignment
     function align($source, $target) {
 
+        // Progress - align updates from 50 to 90
+        $progress = 50;
+        Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5, 'progress' => $progress], $this->id_job, $this->password);
+
         $matches = $this->find100x100Matches($source, $target);
 
         Log::doLog('Found '.count($matches).' 100% matches');
@@ -141,8 +140,6 @@ class Alignment {
         // No exact match has been found, we need to align entire document
         if (empty($matches)) {
             $alignment = $this->alignPart($source, $target, [0, 0]);
-
-            return $alignment;
         } else {
             // Perform alignment on all sub-array, then merge them
             $alignment = [];
@@ -166,6 +163,10 @@ class Alignment {
                 // Update lastMatch to skip current match
                 $lastMatch[0] = $match[0] + 1;
                 $lastMatch[1] = $match[1] + 1;
+
+                // Progress
+                $progress = $progress + 40 * count($subSource) / count($source);
+                Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
             }
 
             // Align last part of documents, after last exact match
@@ -175,9 +176,12 @@ class Alignment {
             $subAlignment = $this->alignPart($subSource, $subTarget, $lastMatch);
 
             $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
-
-            return $alignment;
         }
+
+        // Progress
+        Jobs_JobDao::updateFields(['progress' => 90], $this->id_job, $this->password);
+
+        return $alignment;
     }
 
     // 100% matches
