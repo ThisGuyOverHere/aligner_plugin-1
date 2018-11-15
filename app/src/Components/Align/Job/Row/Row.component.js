@@ -44,7 +44,8 @@ class RowComponent extends Component {
         enableDrag: PropTypes.bool,
         rec: PropTypes.any,
         row: PropTypes.object.isRequired,
-        selection: PropTypes.object
+        selection: PropTypes.object,
+        search: PropTypes.object,
     };
 
     constructor(props) {
@@ -105,10 +106,12 @@ class RowComponent extends Component {
                 <div>{this.props.index}</div>
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
+                                  search={this.props.search}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.source}
                                   segment={this.props.row.source}/>
                 <SegmentComponent type="target"
+                                  search={this.props.search}
                                   dropHover={isOver && canDrop && dragElType === 'target'}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.target}

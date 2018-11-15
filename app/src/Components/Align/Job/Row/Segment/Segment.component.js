@@ -34,6 +34,7 @@ class SegmentComponent extends Component {
         dropHover: PropTypes.bool.isRequired,
         selected: PropTypes.bool,
         enableDrag: PropTypes.bool,
+        search: PropTypes.object,
         segment: PropTypes.shape({
             order: PropTypes.number.isRequired,
             content_clean: PropTypes.oneOfType([() => {
@@ -115,7 +116,7 @@ class SegmentComponent extends Component {
                 {dropHover && <span className="dropAlignArea"> </span>}
                 <i className="icon check circle outline"></i>
                 <div className="segmentBox-content">
-                    <SegmentContentComponent content={segment.content_clean} id={segment.id}/>
+                    <SegmentContentComponent search={this.props.search} content={segment.content_clean} id={segment.id}/>
                 </div>
 
             </div>

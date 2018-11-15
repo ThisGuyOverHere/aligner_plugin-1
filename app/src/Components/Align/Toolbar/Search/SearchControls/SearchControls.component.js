@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 class SearchControlsComponent extends Component {
     static propTypes = {
         featuredSearchResult: PropTypes.number,
-        searchResults: PropTypes.array,
+        occurrencesList: PropTypes.array,
         setFeatured: PropTypes.func,
     };
 
@@ -26,14 +26,19 @@ class SearchControlsComponent extends Component {
 
     static getDerivedStateFromProps = (props, state) => {
         state.featuredSearchResult = props.featuredSearchResult;
-        state.searchResults = props.searchResults;
+        state.occurrencesList = props.occurrencesList;
         return state;
     };
 
     render() {
         return (
             <div id="controls">
-
+                <button className={"increment ui button"} onClick={() => this.props.setFeatured(this.props.featuredSearchResult + 1)}>
+                    +
+                </button>
+                <button className={"decrement ui button"} onClick={() => this.props.setFeatured(this.props.featuredSearchResult - 1)}>
+                    -
+                </button>
             </div>
         );
     }

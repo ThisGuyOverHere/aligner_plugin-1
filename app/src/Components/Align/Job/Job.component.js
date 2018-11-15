@@ -54,6 +54,7 @@ class JobComponent extends Component {
             user: false,
             googleUserImage: '',
             scrollToSegment: 0,
+            search: {},
             window: {
                 width: 0,
                 height: 0,
@@ -73,6 +74,7 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
+        ProjectStore.addListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
     }
 
     componentWillUnmount() {
@@ -81,6 +83,7 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.SCROLL_TO_SEGMENT, this.setScrollToSegment);
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
+        ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
         window.removeEventListener('resize', this.updateWindowDimensions);
 
     }
@@ -104,7 +107,7 @@ class JobComponent extends Component {
                         this.virtualList = instance;
                     }}
                     width={this.state.window.width}
-                    height={this.state.window.height-112}
+                    height={this.state.window.height - 112}
                     overscanCount={2}
                     itemCount={data.length}
                     scrollToIndex={this.state.scrollToSegment}
@@ -161,7 +164,7 @@ class JobComponent extends Component {
             window: data
         })
     };
-    setScrollToSegment = (index) =>{
+    setScrollToSegment = (index) => {
         console.log(index);
         this.setState({
             scrollToSegment: index
@@ -184,8 +187,6 @@ class JobComponent extends Component {
     };
 
 
-
-
     renderItems(array) {
         let values = [];
         const enableDrag = true;
@@ -196,11 +197,13 @@ class JobComponent extends Component {
                     target: !!this.state.selection.target.map[row.target.order],
                     count: this.state.selection.count
                 };
-                values.push(<RowWrapperComponent key={index}
-                                                 index={index}
-                                                 enableDrag={enableDrag}
-                                                 selection={selection}
-                                                 row={row}/>);
+                values.push(<RowWrapperComponent
+                    search={this.state.search}
+                    key={index}
+                    index={index}
+                    enableDrag={enableDrag}
+                    selection={selection}
+                    row={row}/>);
                 return row;
             });
         }
@@ -220,6 +223,14 @@ class JobComponent extends Component {
             googleUserImage: image
         })
     };
+
+    onSearchEvent = (search) => {
+        const scrollToSegment = search.occurrencesList.length > 0 ? search.occurrencesList[search.featuredSearchResult].index : null;
+            this.setState({
+                search: search,
+                scrollToSegment: scrollToSegment
+            });
+    }
 }
 
 export default DragDropContext(HTML5Backend)(JobComponent);
