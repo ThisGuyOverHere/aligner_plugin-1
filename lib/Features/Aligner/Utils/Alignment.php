@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Utils;
 
+use Exceptions\ValidationError;
 use Features\Aligner;
 use Features\Aligner\Model\Jobs_JobDao;
 use Log;
@@ -20,12 +21,18 @@ class Alignment {
     public $lessCommon = 0;
     public $long = 0;
 
-    public function alignSegments($id_job, $source, $target, $source_lang, $target_lang) {
+    public function alignSegments($id_job, $password, $source, $target, $source_lang, $target_lang) {
         // Variant on Church and Gale algorithm with Levenshtein distance
 
         $time_start = microtime(true);
 
-        Jobs_JobDao::changeStatusAnalysis( $id_job, "translating" );
+        try{
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_4 ], $id_job, $password );
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
 
         $source_translated = $this->translateSegments($source, $source_lang, $target_lang);
 
@@ -37,7 +44,13 @@ class Alignment {
 
         $time_start = microtime(true);
 
-        Jobs_JobDao::changeStatusAnalysis( $id_job, "aligning" );
+        try{
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5], $id_job, $password );
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
 
         $indexes = $this->align($source_clean, $target_clean);
         $alignment = $this->mapAlignment($source, $target, $indexes);

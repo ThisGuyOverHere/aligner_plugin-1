@@ -9,6 +9,8 @@ namespace Features\Aligner\Model;
 
 use DataAccess\LoudArray;
 use DataAccess\ShapelessConcreteStruct;
+use Exceptions\ValidationError;
+use Features\Aligner\Utils\AlignUtils;
 
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
@@ -138,19 +140,28 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $jStruct;
 
     }
+    
+    public static function updateFields($attributes, $id_job, $password){
+        $qMark = [];
+        $qValues = [];
 
-    public static function changeStatusAnalysis( $id, $new_status ){
+        $valid_fields= AlignUtils::_getObjectVariables(new Jobs_JobStruct());
 
-        $query = "UPDATE `jobs`
-        SET `jobs`.`status_analysis` = ?
-        WHERE `jobs`.`id` = ?;";
-
-        $params = [ $new_status, $id ];
+        foreach($attributes as $attribute_k => $attribute_v){
+            if( !in_array( $attribute_k, $valid_fields ) ){
+                throw new ValidationError("You tried to update an invalid field, the update has been canceled");
+            }
+            $qMark[] = "jobs.".$attribute_k." = ?";
+            $qValues[] = $attribute_v;
+        }
+        $query = "UPDATE jobs
+        SET ".implode(", ", $qMark)."
+        WHERE jobs.id = ? AND jobs.password = ?";
+        $params = array_merge( $qValues, array( $id_job, $password ) );
 
         $conn = NewDatabase::obtain()->getConnection();
         $stm = $conn->prepare( $query );
         $stm->execute( $params );
-
     }
 
 }
