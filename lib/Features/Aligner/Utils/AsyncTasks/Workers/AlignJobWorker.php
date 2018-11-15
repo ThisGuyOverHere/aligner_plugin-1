@@ -10,6 +10,7 @@ namespace Features\Aligner\Utils\AsyncTasks\Workers;
 
 include_once \INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
+use Exceptions\ValidationError;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\NewDatabase;
@@ -18,6 +19,7 @@ use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\Alignment;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
+use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 
 class AlignJobWorker extends AbstractWorker {
@@ -58,14 +60,20 @@ class AlignJobWorker extends AbstractWorker {
         $attributes = json_decode( $queueElement->params );
 
         $this->id_job = $attributes->id_job;
+        $this->job    = $attributes->job;
 
-        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'started' );
+        try{
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_1], $this->id_job, $this->job->password );
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
 
         /*$job          = Jobs_JobDao::getById( $this->id_job )[ 0 ];
         $source_file  = Files_FileDao::getByJobId( $this->id_job, "source" );
         $target_file  = Files_FileDao::getByJobId( $this->id_job, "target" );*/
 
-        $this->job    = $attributes->job;
         $source_file  = $attributes->source_file;
         $target_file  = $attributes->target_file;
 
@@ -78,20 +86,54 @@ class AlignJobWorker extends AbstractWorker {
         $this->_storeSegments($source_segments, "source", $source_lang);
         $this->_storeSegments($target_segments, "target", $target_lang);
 
-        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'segments_created' );
+        try{
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2 ], $this->id_job, $this->job->password );
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
 
         $segmentsMatchDao = new Segments_SegmentMatchDao;
         $segmentsMatchDao->deleteByJobId( $this->id_job );
 
-        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'fetching' );
+        try{
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_3 ], $this->id_job, $this->job->password );
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
 
         $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
         $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
 
         $alignment_class = new Alignment;
-        $alignment       = $alignment_class->alignSegments( $this->id_job, $source_segments, $target_segments, $source_lang, $target_lang );
 
-        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'merging' );
+        try{
+
+            $alignment = $alignment_class->alignSegments(
+                $this->id_job,
+                $this->job->password,
+                $source_segments,
+                $target_segments,
+                $source_lang,
+                $target_lang
+            );
+
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
+
+        try{
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_6 ], $this->id_job, $this->job->password );
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
 
         $source_array = [];
         $target_array = [];
@@ -138,7 +180,13 @@ class AlignJobWorker extends AbstractWorker {
         $segmentsMatchDao->createList( $source_array );
         $segmentsMatchDao->createList( $target_array );
 
-        Jobs_JobDao::changeStatusAnalysis( $this->id_job, 'complete' );
+        try{
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_7 ], $this->id_job, $this->job->password );
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage() );
+        } catch (\PDOException $e){
+            throw new \PDOException( "An error occured while updating the database: " . $e->getMessage() );
+        }
 
     }
 
