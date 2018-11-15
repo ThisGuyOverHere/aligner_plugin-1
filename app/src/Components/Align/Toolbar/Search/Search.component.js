@@ -181,7 +181,6 @@ class SearchComponent extends Component {
             value = 0;
         }
 
-        console.log(value);
         ProjectActions.emitSearchResults({
             q: this.state.fulltext,
             searchResults: this.state.searchResults,
