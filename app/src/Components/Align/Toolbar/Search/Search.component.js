@@ -199,7 +199,7 @@ class SearchComponent extends Component {
         }*/
     };
 
-    // handling module 
+    // handling module
     mod = (n, m) => {
         return ((n % m) + m) % m;
     }

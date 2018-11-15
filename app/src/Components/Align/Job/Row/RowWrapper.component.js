@@ -12,6 +12,7 @@ class RowWrapperComponent extends Component {
         scrollY: PropTypes.any,
         enableDrag: PropTypes.bool,
         rec: PropTypes.any,
+        search: PropTypes.object,
         row: PropTypes.object.isRequired,
         selection: PropTypes.object
     };

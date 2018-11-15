@@ -53,8 +53,8 @@ class JobComponent extends Component {
             },
             user: false,
             googleUserImage: '',
-            occurrencesList: [],
             scrollToSegment: 0,
+            search: {},
             window: {
                 width: 0,
                 height: 0,
@@ -107,7 +107,7 @@ class JobComponent extends Component {
                         this.virtualList = instance;
                     }}
                     width={this.state.window.width}
-                    height={this.state.window.height-112}
+                    height={this.state.window.height - 112}
                     overscanCount={2}
                     itemCount={data.length}
                     scrollToIndex={this.state.scrollToSegment}
@@ -164,7 +164,7 @@ class JobComponent extends Component {
             window: data
         })
     };
-    setScrollToSegment = (index) =>{
+    setScrollToSegment = (index) => {
         console.log(index);
         this.setState({
             scrollToSegment: index
@@ -198,6 +198,7 @@ class JobComponent extends Component {
                     count: this.state.selection.count
                 };
                 values.push(<RowWrapperComponent
+                    search={this.state.search}
                     key={index}
                     index={index}
                     enableDrag={enableDrag}
@@ -224,13 +225,11 @@ class JobComponent extends Component {
     };
 
     onSearchEvent = (search) => {
-        console.log(search)
-        if(search.occurrencesList.toString()){
+        const scrollToSegment = search.occurrencesList.length > 0 ? search.occurrencesList[search.featuredSearchResult].index : null;
             this.setState({
-                occurrencesList: search.occurrencesList,
-                scrollToSegment: search.occurrencesList[search.featuredSearchResult].index
+                search: search,
+                scrollToSegment: scrollToSegment
             });
-        }
     }
 }
 

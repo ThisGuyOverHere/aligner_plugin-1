@@ -5,6 +5,7 @@ import ProjectConstants from "../../../../../../Constants/Project.constants";
 
 class SegmentContentComponent extends Component {
     static propTypes = {
+        search: PropTypes.object,
         content: PropTypes.string,
         id: PropTypes.any
     };
@@ -13,9 +14,7 @@ class SegmentContentComponent extends Component {
         super(props);
         this.state = {
             content: this.props.content,
-            lastSearchContent: this.props.content,
             id: this.props.id,
-            searchOn: false
         }
     }
 
@@ -25,33 +24,38 @@ class SegmentContentComponent extends Component {
         return state;
     }
 
-    componentDidMount() {
-        ProjectStore.addListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEmit);
-    }
-
-    componentWillUnmount() {
-        ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEmit);
-    }
-
-
     render = () => {
-        const content = this.state.searchOn ? this.state.lastSearchContent : this.state.content;
+
+        let {id, content} = this.state;
+        if (this.props.search && this.props.search.searchResultsDictionary && this.props.search.searchResultsDictionary[id]) {
+            this.props.search.searchResultsDictionary[id].occurrences.reverse().map(occurrence => {
+                const endIndex = occurrence.matchPosition + this.props.search.q.length;
+                content = content.slice(0, endIndex) + "</mark>" + content.slice(endIndex);
+                if (occurrence.searchProgressiveIndex === this.props.search.featuredSearchResult) {
+                    content = content.slice(0, occurrence.matchPosition) + "<mark class='active'>" + content.slice(occurrence.matchPosition);
+                } else {
+                    content = content.slice(0, occurrence.matchPosition) + "<mark>" + content.slice(occurrence.matchPosition);
+                }
+            });
+        }
+
+
         return <p dangerouslySetInnerHTML={{__html: content}}>
         </p>
     };
 
-    onSearchEmit = (search) => {
+    /*onSearchEmit = (search) => {
         const {id, content} = this.state;
         let searchOn = false;
         let lastSearchContent = content;
 
         if (search && search.searchResultsDictionary[id]) {
-            search.searchResultsDictionary[id].occurrences.reverse().map(occurrence =>{
-                const endIndex =  occurrence.matchPosition + search.q.length;
+            search.searchResultsDictionary[id].occurrences.reverse().map(occurrence => {
+                const endIndex = occurrence.matchPosition + search.q.length;
                 lastSearchContent = lastSearchContent.slice(0, endIndex) + "</mark>" + lastSearchContent.slice(endIndex);
-                if(occurrence.searchProgressiveIndex === search.featuredSearchResult){
+                if (occurrence.searchProgressiveIndex === search.featuredSearchResult) {
                     lastSearchContent = lastSearchContent.slice(0, occurrence.matchPosition) + "<mark class='active'>" + lastSearchContent.slice(occurrence.matchPosition);
-                }else{
+                } else {
                     lastSearchContent = lastSearchContent.slice(0, occurrence.matchPosition) + "<mark>" + lastSearchContent.slice(occurrence.matchPosition);
                 }
             });
@@ -64,7 +68,7 @@ class SegmentContentComponent extends Component {
             searchOn: searchOn,
             lastSearchContent: lastSearchContent
         });
-    }
+    }*/
 
 }
 
