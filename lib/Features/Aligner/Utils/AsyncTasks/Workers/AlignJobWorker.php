@@ -19,6 +19,7 @@ use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\Alignment;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
+use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 
 class AlignJobWorker extends AbstractWorker {
@@ -62,7 +63,7 @@ class AlignJobWorker extends AbstractWorker {
         $this->job    = $attributes->job;
 
         try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => 'started' ], $this->id_job, $this->job->password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_1], $this->id_job, $this->job->password );
         } catch (ValidationError $e){
             throw new ValidationError( $e->getMessage() );
         } catch (\PDOException $e){
@@ -86,7 +87,7 @@ class AlignJobWorker extends AbstractWorker {
         $this->_storeSegments($target_segments, "target", $target_lang);
 
         try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => 'segments_created' ], $this->id_job, $this->job->password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2 ], $this->id_job, $this->job->password );
         } catch (ValidationError $e){
             throw new ValidationError( $e->getMessage() );
         } catch (\PDOException $e){
@@ -97,7 +98,7 @@ class AlignJobWorker extends AbstractWorker {
         $segmentsMatchDao->deleteByJobId( $this->id_job );
 
         try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => 'fetching' ], $this->id_job, $this->job->password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_3 ], $this->id_job, $this->job->password );
         } catch (ValidationError $e){
             throw new ValidationError( $e->getMessage() );
         } catch (\PDOException $e){
@@ -127,7 +128,7 @@ class AlignJobWorker extends AbstractWorker {
         }
 
         try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => 'merging' ], $this->id_job, $this->job->password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_6 ], $this->id_job, $this->job->password );
         } catch (ValidationError $e){
             throw new ValidationError( $e->getMessage() );
         } catch (\PDOException $e){
@@ -180,7 +181,7 @@ class AlignJobWorker extends AbstractWorker {
         $segmentsMatchDao->createList( $target_array );
 
         try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => 'complete' ], $this->id_job, $this->job->password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_7 ], $this->id_job, $this->job->password );
         } catch (ValidationError $e){
             throw new ValidationError( $e->getMessage() );
         } catch (\PDOException $e){

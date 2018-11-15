@@ -27,7 +27,7 @@ class Alignment {
         $time_start = microtime(true);
 
         try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => 'translating' ], $id_job, $password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_4 ], $id_job, $password );
         } catch (ValidationError $e){
             throw new ValidationError( $e->getMessage() );
         } catch (\PDOException $e){
@@ -45,7 +45,7 @@ class Alignment {
         $time_start = microtime(true);
 
         try{
-            Jobs_JobDao::updateFields( [ 'status_analysis' => 'aligning' ], $id_job, $password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5], $id_job, $password );
         } catch (ValidationError $e){
             throw new ValidationError( $e->getMessage() );
         } catch (\PDOException $e){
