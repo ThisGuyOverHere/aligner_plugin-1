@@ -19,6 +19,7 @@ class Engines_MyMemory extends \Engines_MyMemory {
      * @param $userEmail
      * @param $userName
      * @param $userSurname
+     * @param $id_tmx
      *
      *
      * @return Engines_Results_MyMemory_ExportResponse

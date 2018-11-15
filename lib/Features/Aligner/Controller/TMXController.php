@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Controller;
 
+use Exceptions\NotFoundError;
 use Exceptions\ValidationError;
 use Features\Aligner;
 use Features\Aligner\Model\Jobs_JobDao;
@@ -182,11 +183,7 @@ class TMXController extends AlignerController {
 
     public function pushTMXInTM() {
 
-        try{
-            $config = Aligner::getConfig();
-        } catch ( \Exception $e ) {
-            throw new ValidationError( $e->getMessage() );
-        }
+        $config = Aligner::getConfig();
 
         $id_job    = $this->params[ 'id_job' ];
         $password  = $this->params[ 'password' ];
@@ -194,9 +191,17 @@ class TMXController extends AlignerController {
 
 
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+        if(empty($job)){
+            throw new NotFoundError("Job not found");
+        }
 
         if ( $this->getUser() ) {
-            $email       = $this->user->email;
+            if ( !empty( $this->params[ 'email' ] ) ) {
+                $email = $this->params[ 'email' ];
+            } else {
+                $email = $this->user->email;
+            }
+
             $userName    = $this->user->first_name;
             $userSurname = $this->user->last_name;
             if ( $is_public == 1 ) {
@@ -215,10 +220,14 @@ class TMXController extends AlignerController {
                     $tms          = \Engine::getInstance( 1 );
                     $mymemory_key = $tms->createMyMemoryKey();
                     $tm_key       = $mymemory_key[ 'key' ];
-                } catch (\Exception $e){
+                } catch ( \Exception $e ) {
                     throw new ValidationError( $e->getMessage() );
                 }
             }
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new ValidationError("Invalid email address");
         }
 
 
@@ -245,25 +254,6 @@ class TMXController extends AlignerController {
         }
 
         return $this->response->json( true );
-
-    }
-
-    public function downloadTMX() {
-        $id_job   = $this->params[ 'id_job' ];
-        $password = $this->params[ 'password' ];
-
-        try{
-            $TMService = new TMSService();
-            $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
-
-            $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
-
-            $project = $job->getProject();
-
-            $TMService->downloadTMX($project->name);
-        } catch (\Exception $e){
-            throw new ValidationError( $e->getMessage() );
-        }
 
     }
 

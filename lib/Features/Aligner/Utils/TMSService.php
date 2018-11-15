@@ -19,17 +19,14 @@ class TMSService extends \TMSService {
      * Export Job as Tmx File
      *
      * @param          $jid
-     * @param          $jPassword
      * @param          $sourceLang
      * @param          $targetLang
      *
-     * @param int|null $uid
      *
      * @return \SplTempFileObject $tmpFile
      *
-     * @throws \Exception
      */
-    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ) {
+    public function exportJobAsTMX( $jid, $sourceLang, $targetLang ) {
 
         $this->tmxFilePath = tempnam("/tmp", "TMX_");
         $tmxHandler = new \SplFileObject($this->tmxFilePath, "w");
@@ -58,7 +55,7 @@ class TMSService extends \TMSService {
             }
 
             $tmx = '
-    <tu datatype="plaintext" srclang="' . $sourceLang . '">
+    <tu tuid="'.$row['source_segment_id'].'-'.$row['target_segment_id'].'" datatype="plaintext" srclang="' . $sourceLang . '">
         <tuv xml:lang="' . $sourceLang . '">
             <seg>' . \CatUtils::rawxliff2rawview( $row[ 'source' ] ) . '</seg>
         </tuv>';
@@ -99,6 +96,7 @@ class TMSService extends \TMSService {
     /**
      * Send a mail with link for direct prepared download
      *
+     * @param $id_tmx
      * @param $userMail
      * @param $userName
      * @param $userSurname

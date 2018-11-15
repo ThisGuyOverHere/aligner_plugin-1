@@ -89,12 +89,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $conn->query("set @RN2=0");
 
         $stmt = $conn->prepare( "
-SELECT source, target FROM (
-SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1 FROM segments as s
+SELECT source, target, source_segment_id, target_segment_id FROM (
+SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_id FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order
         ) s LEFT JOIN (
-        SELECT s.content_raw as target, @RN2 := @RN2 + 1 as RN2 FROM segments as s
+        SELECT s.content_raw as target, @RN2 := @RN2 + 1 as RN2, s.id as target_segment_id FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ?
         ORDER by sm.order

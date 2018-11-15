@@ -48,7 +48,7 @@ class TMXImportWorker extends AbstractWorker {
         $TMService = new \Features\Aligner\Utils\TMSService();
         $TMService->setTmKey( $options['tm_key'] );
 
-        $TMService->exportJobAsTMX( $options['job']['id'], $options['job']['password'], $options['job']['source'], $options['job']['target'] );
+        $TMService->exportJobAsTMX( $options['job']['id'], $options['job']['source'], $options['job']['target'] );
 
         $TMService->setName( "Aligner-" . $options['job']['id'] . ".tmx" );
 
