@@ -221,32 +221,28 @@ class TMXController extends AlignerController {
             }
         }
 
+
+        $params = [];
+        $params['job'] = $job;
+        $params['tm_key'] = $tm_key;
+        $params['email'] = $email;
+        $params['first_name'] = $userName;
+        $params['last_name'] = $userSurname;
+
         try {
-            $TMService = new TMSService();
-            $TMService->setTmKey( $tm_key );
+            \WorkerClient::init( new \AMQHandler() );
+            \WorkerClient::enqueue( 'ALIGNER_TMX_IMPORT', 'Features\Aligner\Utils\AsyncTasks\Workers\TMXImportWorker', json_encode( $params ), [ 'persistent' => \WorkerClient::$_HANDLER->persistent
+            ] );
+        } catch ( \Exception $e ) {
 
-            $TMService->exportJobAsTMX( $id_job, $password, $job->source, $job->target );
-
-            $TMService->setName( "Aligner-" . $id_job . ".tmx" );
-
-            $response = $TMService->importTMXInTM();
-        } catch ( \Exception $e ){
-            throw new ValidationError( $e->getMessage() );
-        }
-
-        $tmx_id = $response->id;
-
-        while ( empty($upload_status[ 'completed' ]) ) {
-            sleep( 1 );
-            try {
-                $upload_status = $TMService->tmxUploadStatus();
-            } catch ( \Exception $e ){
-                throw new ValidationError( $e->getMessage() );
-            }
+            # Handle the error, logging, ...
+            $output = "**** TMX Import Enqueue failed. AMQ Connection Error. ****\n\t";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $params, true );
+            \Log::doLog( $output );
+            throw $e;
 
         }
-
-        $TMService->requestChunkTMXEmailDownload( $tmx_id, $email, $userName, $userSurname );
 
         return $this->response->json( true );
 

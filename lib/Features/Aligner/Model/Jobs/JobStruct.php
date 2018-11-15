@@ -22,7 +22,8 @@ class Jobs_JobStruct extends \DataAccess_AbstractDaoSilentStruct implements \Dat
     public $last_update;
     public $status;
     public $subject;
-
+    public $status_analysis;
+    public $progress;
 
     /**
      * @return Files_FileStruct[]
