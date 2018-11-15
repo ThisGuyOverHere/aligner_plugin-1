@@ -29,15 +29,7 @@ class SearchComponent extends Component {
         };
     }
 
-
-    componentDidMount() {
-
-    }
-
-    componentWillUnmount() {
-
-    }
-
+    
     componentDidUpdate(prevProps) {
         if (!equal(this.state.elements, this.getElements(this.props.job.rows))) {
             this.resetSearch();
@@ -60,9 +52,7 @@ class SearchComponent extends Component {
 
     onPerformSearch = (e) => {
         e.preventDefault();
-        this.setState({
-            featuredSearchResult: this.state.featuredSearchResult++
-        })
+        this.setFeatured(this.state.featuredSearchResult + 1);
     };
 
     getElements = () => {
@@ -158,10 +148,14 @@ class SearchComponent extends Component {
     };
 
     setFeatured = (value) => {
-        let module = this.state.occurrencesList.length - 1;
+        if (this.state.occurrencesList.length > 1) {
+            let module = this.state.occurrencesList.length - 1;
+            value = this.mod(value, module);
+        } else {
+            value = 0;
+        }
 
-        value = this.mod(value,module);
-
+        console.log(value);
         ProjectActions.emitSearchResults({
             q: this.state.fulltext,
             searchResults: this.state.searchResults,
@@ -173,30 +167,7 @@ class SearchComponent extends Component {
             featuredSearchResult: value
         })
 
-        /*else if (value < 0) {
-            ProjectActions.emitSearchResults({
-                q: this.state.fulltext,
-                searchResults: this.state.searchResults,
-                searchResultsDictionary: this.state.searchResultsDictionary,
-                occurrencesList: this.state.occurrencesList,
-                featuredSearchResult: this.state.searchResults.length - 1
-            });
-            this.setState({
-                featuredSearchResult: this.state.searchResults.length - 1
-            })
-        }
-        else {
-            ProjectActions.emitSearchResults({
-                q: this.state.fulltext,
-                searchResults: this.state.searchResults,
-                searchResultsDictionary: this.state.searchResultsDictionary,
-                occurrencesList: this.state.occurrencesList,
-                featuredSearchResult: 0
-            });
-            this.setState({
-                featuredSearchResult: 0
-            })
-        }*/
+
     };
 
     // handling module
