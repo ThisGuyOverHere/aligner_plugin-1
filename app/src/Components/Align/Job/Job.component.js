@@ -12,7 +12,6 @@ import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
-import ProjectActions from "../../../Actions/Project.actions";
 
 
 class JobComponent extends Component {
@@ -54,6 +53,7 @@ class JobComponent extends Component {
             },
             user: false,
             googleUserImage: '',
+            occurrencesList: [],
             scrollToSegment: 0,
             window: {
                 width: 0,
@@ -107,8 +107,8 @@ class JobComponent extends Component {
                         this.virtualList = instance;
                     }}
                     width={this.state.window.width}
-                    height={this.state.window.height - 112}
-                    overscanCount={10}
+                    height={this.state.window.height-112}
+                    overscanCount={2}
                     itemCount={data.length}
                     scrollToIndex={this.state.scrollToSegment}
                     estimatedItemSize={80}
@@ -164,8 +164,8 @@ class JobComponent extends Component {
             window: data
         })
     };
-    setScrollToSegment = (index) => {
-        console.log("to scroll :", index);
+    setScrollToSegment = (index) =>{
+        console.log(index);
         this.setState({
             scrollToSegment: index
         })
@@ -183,6 +183,7 @@ class JobComponent extends Component {
                 splitModalStatus: false
             });
         }
+
     };
 
 
@@ -196,11 +197,12 @@ class JobComponent extends Component {
                     target: !!this.state.selection.target.map[row.target.order],
                     count: this.state.selection.count
                 };
-                values.push(<RowWrapperComponent key={index}
-                                                 index={index}
-                                                 enableDrag={enableDrag}
-                                                 selection={selection}
-                                                 row={row}/>);
+                values.push(<RowWrapperComponent
+                    key={index}
+                    index={index}
+                    enableDrag={enableDrag}
+                    selection={selection}
+                    row={row}/>);
                 return row;
             });
         }
@@ -222,9 +224,13 @@ class JobComponent extends Component {
     };
 
     onSearchEvent = (search) => {
-        this.setState({
-            scrollToSegment: search.searchResults[search.featuredSearchResult].index
-        });
+        console.log(search)
+        if(search.occurrencesList.toString()){
+            this.setState({
+                occurrencesList: search.occurrencesList,
+                scrollToSegment: search.occurrencesList[search.featuredSearchResult].index
+            });
+        }
     }
 }
 

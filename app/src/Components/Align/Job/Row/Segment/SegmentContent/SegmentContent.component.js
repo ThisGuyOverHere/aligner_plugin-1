@@ -44,13 +44,19 @@ class SegmentContentComponent extends Component {
         const {id, content} = this.state;
         let searchOn = false;
         let lastSearchContent = content;
-        if (search && search.idList.indexOf(id) >= 0) {
-            const startIndex = content.toLowerCase().indexOf(search.q);
-            const endIndex = startIndex + search.q.length;
-            console.log(startIndex, startIndex + search.q.length);
-            console.log(lastSearchContent);
-            lastSearchContent = lastSearchContent.slice(0, endIndex)+"</mark>"+lastSearchContent.slice(endIndex);
-            lastSearchContent = lastSearchContent.slice(0, startIndex)+"<mark>"+lastSearchContent.slice(startIndex);
+
+        if (search && search.searchResultsDictionary[id]) {
+            search.searchResultsDictionary[id].occurrences.reverse().map(occurrence =>{
+                const endIndex =  occurrence.matchPosition + search.q.length;
+                lastSearchContent = lastSearchContent.slice(0, endIndex) + "</mark>" + lastSearchContent.slice(endIndex);
+                if(occurrence.searchProgressiveIndex === search.featuredSearchResult){
+                    lastSearchContent = lastSearchContent.slice(0, occurrence.matchPosition) + "<mark class='active'>" + lastSearchContent.slice(occurrence.matchPosition);
+                }else{
+                    lastSearchContent = lastSearchContent.slice(0, occurrence.matchPosition) + "<mark>" + lastSearchContent.slice(occurrence.matchPosition);
+                }
+            });
+
+
             searchOn = true;
         }
 
