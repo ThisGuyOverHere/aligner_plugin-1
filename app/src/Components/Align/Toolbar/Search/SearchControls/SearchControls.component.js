@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
+import { Icon } from 'semantic-ui-react'
 
 class SearchControlsComponent extends Component {
     static propTypes = {
@@ -33,12 +34,9 @@ class SearchControlsComponent extends Component {
     render() {
         return (
             <div id="controls">
-                <button className={"increment ui button"} onClick={() => this.props.setFeatured(this.props.featuredSearchResult + 1)}>
-                    +
-                </button>
-                <button className={"decrement ui button"} onClick={() => this.props.setFeatured(this.props.featuredSearchResult - 1)}>
-                    -
-                </button>
+                <Icon className={"increment"} name='chevron up'/>
+                <Icon className={"decrement"} name='chevron down'/>
+                <Icon className={"close"} name='window close outline'/>
             </div>
         );
     }
