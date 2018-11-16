@@ -30,7 +30,6 @@ class SearchComponent extends Component {
         };
     }
 
-
     componentDidUpdate(prevProps) {
         if (!equal(this.state.elements, this.getElements(this.props.job.rows))) {
             this.resetSearch();
@@ -61,9 +60,11 @@ class SearchComponent extends Component {
                     <Hotkeys
                         keyName="command+f,ctrl+f"
                         onKeyDown={this.handlerSearch}>
+
                         <input ref={(input) => {
                             this.searchInput = input;
                         }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
+                        {active && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
                     </Hotkeys>
                 </form>
                 {active && <SearchControlsComponent occurrencesList={occurrencesList}
@@ -72,6 +73,7 @@ class SearchComponent extends Component {
             </div>
         );
     }
+
     handlerSearch = (keyName, e, handle) => {
         e.preventDefault();
         this.searchInput.focus();
@@ -191,8 +193,6 @@ class SearchComponent extends Component {
         this.setState({
             featuredSearchResult: value
         })
-
-
     };
 
     // handling module
