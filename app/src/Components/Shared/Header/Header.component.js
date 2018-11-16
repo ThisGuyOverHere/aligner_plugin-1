@@ -55,7 +55,9 @@ class HeaderComponent extends Component {
     };
 
     componentDidMount() {
-        this.getInfo();
+        if(this.props.match.params.jobID){
+            this.getInfo();
+        }
         ProjectStore.addListener(ProjectConstants.JOB_ERROR, this.getJobError);
     }
 
@@ -64,7 +66,7 @@ class HeaderComponent extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.match.params.jobID !== prevProps.match.params.jobID) {
+        if (this.props.match.params.jobID && this.props.match.params.jobID !== prevProps.match.params.jobID) {
             this.getInfo();
         }
     }
@@ -142,7 +144,7 @@ class HeaderComponent extends Component {
 
     getInfo = () => {
         // get job info
-        httpGetAlignmentInfo(this.state.job.config.id, this.state.job.config.password)
+        httpGetAlignmentInfo(this.props.match.params.jobID, this.props.match.params.password)
             .then(
                 response => {
                     const info = response.data;
