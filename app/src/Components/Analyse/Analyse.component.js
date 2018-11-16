@@ -2,8 +2,6 @@ import React, {Component} from 'react';
 import PreAlignStatus from "./PreAlignStatus/PreAlignStatus.component";
 import Animation from "./Animation/Animation.component";
 import {httpGetAlignmentInfo, httpGetPullingInfo} from "../../HttpRequests/Alignment.http";
-import AlignmentScoreComponent from "./AlignmentScore/AlignmentScore.component";
-import SegmentAlignedComponent from "./SegmentAligned/SegmentAligned.component";
 import SourceComponent from "./Source/Source.component";
 import TargetComponent from "./Target/Trget.component";
 import env from "../../Constants/Env.constants";
@@ -27,7 +25,8 @@ class AnalyseComponent extends Component {
             targetLangFileName: '',
             totalTargetSegments: '',
             actualPhase: 0,
-            phaseName: ''
+            phaseName: '',
+            progress: 0
         };
     };
 
@@ -62,9 +61,6 @@ class AnalyseComponent extends Component {
     render() {
         return (
             <div className="container analyse">
-                {/*<div id="title">
-                    <h1> {this.state.phaseName} </h1>
-                </div>*/}
                 <div className="files-info">
                     <SourceComponent
                         sourceLang={this.state.sourceLang}
@@ -80,12 +76,9 @@ class AnalyseComponent extends Component {
 
                 <PreAlignStatus jobId={this.state.job.id}
                                 jobPassword={this.props.match.params.password}
-                                actualPhase = {this.state.actualPhase}/>
-
-                {/*<div className="process-info">
-                    <SegmentAlignedComponent/>
-                    <AlignmentScoreComponent/>
-                </div>*/}
+                                actualPhase = {this.state.actualPhase}
+                                progress = {this.state.progress}
+                />
                 <Animation/>
             </div>
         );
@@ -102,7 +95,8 @@ class AnalyseComponent extends Component {
                         actualPhase: data.phase,
                         totalSourceSegments: data.source_segments,
                         totalTargetSegments: data.target_segments,
-                        phaseName: data.phase_name
+                        phaseName: data.phase_name,
+                        progress: +data.progress
                     });
                 }
             ).catch(
