@@ -28,7 +28,7 @@ class SegmentContentComponent extends Component {
 
         let {id, content} = this.state;
         if (this.props.search && this.props.search.searchResultsDictionary && this.props.search.searchResultsDictionary[id]) {
-            this.props.search.searchResultsDictionary[id].occurrences.reverse().map(occurrence => {
+            this.props.search.searchResultsDictionary[id].occurrences.map(occurrence => {
                 const endIndex = occurrence.matchPosition + this.props.search.q.length;
                 content = content.slice(0, endIndex) + "</mark>" + content.slice(endIndex);
                 if (occurrence.searchProgressiveIndex === this.props.search.featuredSearchResult) {
@@ -38,38 +38,8 @@ class SegmentContentComponent extends Component {
                 }
             });
         }
-
-
-        return <p className="segmentBox-content-text" dangerouslySetInnerHTML={{__html: content}}>
-        </p>
+        return <p className="segmentBox-content-text" dangerouslySetInnerHTML={{__html: content}}/>
     };
-
-    /*onSearchEmit = (search) => {
-        const {id, content} = this.state;
-        let searchOn = false;
-        let lastSearchContent = content;
-
-        if (search && search.searchResultsDictionary[id]) {
-            search.searchResultsDictionary[id].occurrences.reverse().map(occurrence => {
-                const endIndex = occurrence.matchPosition + search.q.length;
-                lastSearchContent = lastSearchContent.slice(0, endIndex) + "</mark>" + lastSearchContent.slice(endIndex);
-                if (occurrence.searchProgressiveIndex === search.featuredSearchResult) {
-                    lastSearchContent = lastSearchContent.slice(0, occurrence.matchPosition) + "<mark class='active'>" + lastSearchContent.slice(occurrence.matchPosition);
-                } else {
-                    lastSearchContent = lastSearchContent.slice(0, occurrence.matchPosition) + "<mark>" + lastSearchContent.slice(occurrence.matchPosition);
-                }
-            });
-
-
-            searchOn = true;
-        }
-
-        this.setState({
-            searchOn: searchOn,
-            lastSearchContent: lastSearchContent
-        });
-    }*/
-
 }
 
 export default SegmentContentComponent;

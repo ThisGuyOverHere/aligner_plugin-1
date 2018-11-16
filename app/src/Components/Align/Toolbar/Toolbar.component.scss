@@ -17,11 +17,14 @@
   >:first-child{
     grid-column-end: span 2;
   }
-  .hint{
+  .hint, .search-ico{
     font-size: 24px;
     cursor: pointer;
     float: right;
-    line-height: 1;
-    margin: 0;
+    margin: 0 0 0 24px;
+    color: #8c8d90;
+  }
+  .search-ico{
+    font-size: 20px;
   }
 }

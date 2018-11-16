@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PreAlignStatus from "./PreAlignStatus/PreAlignStatus.component";
 import Animation from "./Animation/Animation.component";
-import {httpGetAlignmentInfo} from "../../HttpRequests/Alignment.http";
+import {httpGetAlignmentInfo, httpGetPullingInfo} from "../../HttpRequests/Alignment.http";
 import SourceComponent from "./Source/Source.component";
 import TargetComponent from "./Target/Trget.component";
 import env from "../../Constants/Env.constants";

@@ -15,6 +15,7 @@ class SearchComponent extends Component {
             rows: PropTypes.array,
             rowsDictionary: PropTypes.any
         }),
+        close: PropTypes.func
     };
 
     constructor(props) {
@@ -60,16 +61,18 @@ class SearchComponent extends Component {
                     <Hotkeys
                         keyName="command+f,ctrl+f"
                         onKeyDown={this.handlerSearch}>
-
                         <input ref={(input) => {
                             this.searchInput = input;
                         }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
-                        {active && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
+                        {(active && occurrencesList.length > 0)  && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
+                        {(active && occurrencesList.length === 0 )  && <span> 0 / 0</span>}
                     </Hotkeys>
                 </form>
-                {active && <SearchControlsComponent occurrencesList={occurrencesList}
-                                                    featuredSearchResult={featuredSearchResult}
-                                                    setFeatured={this.setFeatured}/>}
+                <SearchControlsComponent occurrencesList={occurrencesList}
+                                         featuredSearchResult={featuredSearchResult}
+                                         setFeatured={this.setFeatured}
+                                         close={this.props.close}
+                />
             </div>
         );
     }
@@ -78,6 +81,7 @@ class SearchComponent extends Component {
         e.preventDefault();
         this.searchInput.focus();
     };
+
     onPerformSearch = (e) => {
         e.preventDefault();
         this.setFeatured(this.state.featuredSearchResult + 1);
@@ -141,7 +145,7 @@ class SearchComponent extends Component {
                 return item.content.indexOf(fulltext) !== -1;
             }).map(item => {
                 item.occurrences = [];
-                let searchStrLen = fulltext.length
+                let searchStrLen = fulltext.length;
                 let startIndex = 0, index;
                 while ((index = item.content.indexOf(fulltext, startIndex)) > -1) {
                     item.occurrences.push({matchPosition: index, searchProgressiveIndex: searchProgressiveIndex});
@@ -149,10 +153,10 @@ class SearchComponent extends Component {
                     searchProgressiveIndex++;
                     startIndex = index + searchStrLen;
                 }
+                item.occurrences.reverse();
                 searchResultsDictionary[item.id] = item;
                 return item
             });
-
             ProjectActions.emitSearchResults({
                 q: fulltext,
                 searchResults: searchResults,
