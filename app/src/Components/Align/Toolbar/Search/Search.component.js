@@ -15,6 +15,7 @@ class SearchComponent extends Component {
             rows: PropTypes.array,
             rowsDictionary: PropTypes.any
         }),
+        close: PropTypes.func
     };
 
     constructor(props) {
@@ -60,16 +61,17 @@ class SearchComponent extends Component {
                     <Hotkeys
                         keyName="command+f,ctrl+f"
                         onKeyDown={this.handlerSearch}>
-
                         <input ref={(input) => {
                             this.searchInput = input;
                         }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
-                        {active && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
+                        {(active && occurrencesList.length > 0)  && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
                     </Hotkeys>
                 </form>
-                {active && <SearchControlsComponent occurrencesList={occurrencesList}
-                                                    featuredSearchResult={featuredSearchResult}
-                                                    setFeatured={this.setFeatured}/>}
+                <SearchControlsComponent occurrencesList={occurrencesList}
+                                         featuredSearchResult={featuredSearchResult}
+                                         setFeatured={this.setFeatured}
+                                         close={this.props.close}
+                />
             </div>
         );
     }
@@ -78,6 +80,7 @@ class SearchComponent extends Component {
         e.preventDefault();
         this.searchInput.focus();
     };
+
     onPerformSearch = (e) => {
         e.preventDefault();
         this.setFeatured(this.state.featuredSearchResult + 1);

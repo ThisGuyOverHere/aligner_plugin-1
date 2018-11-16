@@ -63,9 +63,10 @@ class ToolbarComponent extends Component {
                     <Hotkeys
                         keyName="command+f,ctrl+f,esc"
                         onKeyDown={this.handlerSearch}>
-                        {this.state.searchStatus && <SearchComponent job={this.props.job}/>}
+                        {this.state.searchStatus && <SearchComponent close={this.closeSearch} job={this.props.job}/>}
                     </Hotkeys>
-                    <i className=" hint icon question circle outline" onClick={this.hintModalOpened}></i>
+                    <i className=" hint icon question circle outline" onClick={this.hintModalOpened}/>
+                    <i className={"search-ico icon search"} onClick={this.onSearchIconClick} />
                 </div>
                 {this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}
             </div>
@@ -77,9 +78,20 @@ class ToolbarComponent extends Component {
         this.setState({
             searchStatus: keyName !== 'esc'
         })
-
-
     };
+
+    closeSearch = () => {
+        this.setState({
+            searchStatus: false
+        })
+    };
+
+    onSearchIconClick = () => {
+        this.setState({
+            searchStatus: !this.state.searchStatus
+        })
+    };
+
     storeSelection = (selection) => {
         this.setState({
             selection: selection
