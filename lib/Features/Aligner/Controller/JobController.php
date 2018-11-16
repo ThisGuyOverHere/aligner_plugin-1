@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Controller;
 
+use Exceptions\NotFoundError;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Segments_SegmentDao;
@@ -18,7 +19,11 @@ class JobController extends AlignerController {
     public function information() {
 
         $id_job  = $this->params[ 'id_job' ];
-        $job     = Jobs_JobDao::getById( $id_job )[ 0 ];
+        $password  = $this->params[ 'password' ];
+        $job     = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+        if(empty($job)){
+            throw new NotFoundError("Job not found");
+        }
         $project = $job->getProject();
 
         $segmentDao            = new Segments_SegmentDao;

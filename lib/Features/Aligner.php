@@ -27,8 +27,6 @@ class Aligner extends BaseFeature
         route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
         route( '/create_project', 'POST', 'Features\Aligner\Controller\CreateProjectController', 'create' );
 
-        route( '/parse/[:id_job]', 'GET', 'Features\Aligner\Controller\ParserController', 'jobParser' );
-
         route( '/job/[:id_job]/[:password]/information', 'GET', 'Features\Aligner\Controller\JobController', 'information' );
 
         route( '/segments/[:id_job]/[:password]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
@@ -40,7 +38,7 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/segment/gap', 'POST', 'Features\Aligner\Controller\ApiController', 'addGap' );
         route( '/job/[:id_job]/[:password]/segment/move', 'POST', 'Features\Aligner\Controller\ApiController', 'move' );
         route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\ApiController', 'delete' );
-        route( '/job/[:id_job]/[:password]/segment/reverse', 'POST', 'Features\Aligner\Controller\ApiController', 'reverse' );
+        route( '/job/[:id_job]/[:password]/segment/switch', 'POST', 'Features\Aligner\Controller\ApiController', 'switchAction' );
         route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\ApiController', 'mergeAndAlign' );
 
         route( '/configs', 'GET', 'Features\Aligner\Controller\ApiController', 'getConfig' );

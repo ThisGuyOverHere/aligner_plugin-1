@@ -715,7 +715,7 @@ class ApiController extends AlignerController {
 
     }
 
-    public function reverse() {
+    public function switchAction() {
 
         $id_job = $this->params[ 'id_job' ];
         $type   = $this->params[ 'type' ];
