@@ -40,7 +40,7 @@ class SegmentContentComponent extends Component {
         }
 
 
-        return <p dangerouslySetInnerHTML={{__html: content}}>
+        return <p className="segmentBox-content-text" dangerouslySetInnerHTML={{__html: content}}>
         </p>
     };
 

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import equal from "fast-deep-equal";
 import ProjectActions from "../../../../Actions/Project.actions";
 import SearchControlsComponent from "./SearchControls/SearchControls.component";
+import Hotkeys from "react-hot-keys";
 
 class SearchComponent extends Component {
     static propTypes = {
@@ -29,19 +30,26 @@ class SearchComponent extends Component {
         };
     }
 
-
-    componentDidMount() {
-
-    }
-
-    componentWillUnmount() {
-
-    }
-
     componentDidUpdate(prevProps) {
         if (!equal(this.state.elements, this.getElements(this.props.job.rows))) {
             this.resetSearch();
         }
+    }
+
+    componentDidMount() {
+        this.searchInput.focus();
+    }
+
+    componentWillUnmount() {
+        setTimeout(() => {
+            ProjectActions.emitSearchResults({
+                q: '',
+                searchResults: [],
+                searchResultsDictionary: {},
+                occurrencesList: [],
+                featuredSearchResult: 0
+            });
+        }, 0)
     }
 
     render() {
@@ -49,8 +57,15 @@ class SearchComponent extends Component {
         return (
             <div id="search">
                 <form onSubmit={this.onPerformSearch}>
-                    <input type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
-                    {active && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
+                    <Hotkeys
+                        keyName="command+f,ctrl+f"
+                        onKeyDown={this.handlerSearch}>
+
+                        <input ref={(input) => {
+                            this.searchInput = input;
+                        }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
+                        {active && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
+                    </Hotkeys>
                 </form>
                 {active && <SearchControlsComponent occurrencesList={occurrencesList}
                                                     featuredSearchResult={featuredSearchResult}
@@ -59,11 +74,13 @@ class SearchComponent extends Component {
         );
     }
 
+    handlerSearch = (keyName, e, handle) => {
+        e.preventDefault();
+        this.searchInput.focus();
+    };
     onPerformSearch = (e) => {
         e.preventDefault();
-        this.setState({
-            featuredSearchResult: this.state.featuredSearchResult++
-        })
+        this.setFeatured(this.state.featuredSearchResult + 1);
     };
 
     getElements = () => {
@@ -159,9 +176,12 @@ class SearchComponent extends Component {
     };
 
     setFeatured = (value) => {
-        let module = this.state.occurrencesList.length - 1;
-
-        value = this.mod(value,module);
+        if (this.state.occurrencesList.length > 1) {
+            let module = this.state.occurrencesList.length - 1;
+            value = this.mod(value, module);
+        } else {
+            value = 0;
+        }
 
         ProjectActions.emitSearchResults({
             q: this.state.fulltext,
