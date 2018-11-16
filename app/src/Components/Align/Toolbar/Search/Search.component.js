@@ -50,6 +50,7 @@ class SearchComponent extends Component {
             <div id="search">
                 <form onSubmit={this.onPerformSearch}>
                     <input type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
+                    {active && <span>{featuredSearchResult} / {occurrencesList.length}</span>}
                 </form>
                 {active && <SearchControlsComponent occurrencesList={occurrencesList}
                                                     featuredSearchResult={featuredSearchResult}
@@ -172,31 +173,6 @@ class SearchComponent extends Component {
         this.setState({
             featuredSearchResult: value
         })
-
-        /*else if (value < 0) {
-            ProjectActions.emitSearchResults({
-                q: this.state.fulltext,
-                searchResults: this.state.searchResults,
-                searchResultsDictionary: this.state.searchResultsDictionary,
-                occurrencesList: this.state.occurrencesList,
-                featuredSearchResult: this.state.searchResults.length - 1
-            });
-            this.setState({
-                featuredSearchResult: this.state.searchResults.length - 1
-            })
-        }
-        else {
-            ProjectActions.emitSearchResults({
-                q: this.state.fulltext,
-                searchResults: this.state.searchResults,
-                searchResultsDictionary: this.state.searchResultsDictionary,
-                occurrencesList: this.state.occurrencesList,
-                featuredSearchResult: 0
-            });
-            this.setState({
-                featuredSearchResult: 0
-            })
-        }*/
     };
 
     // handling module

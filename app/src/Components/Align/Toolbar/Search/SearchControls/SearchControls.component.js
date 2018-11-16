@@ -12,8 +12,8 @@ class SearchControlsComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            featuredSearchResult: 0,
-            searchResults: [],
+            featuredSearchResult: this.props.featuredSearchResult,
+            occurrencesList: [],
         };
     }
 
@@ -34,8 +34,8 @@ class SearchControlsComponent extends Component {
     render() {
         return (
             <div id="controls">
-                <Icon className={"increment"} name='chevron up'/>
-                <Icon className={"decrement"} name='chevron down'/>
+                <Icon className={"increment"} name='chevron up' onClick={() => this.props.setFeatured(this.props.featuredSearchResult + 1)}/>
+                <Icon className={"decrement"} name='chevron down' onClick={() => this.props.setFeatured(this.props.featuredSearchResult - 1)}/>
                 <Icon className={"close"} name='window close outline'/>
             </div>
         );
