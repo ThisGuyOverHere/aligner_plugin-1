@@ -7,7 +7,8 @@ import {httpLogin, httpMe} from "../../../HttpRequests/System.http";
 class LoginComponent extends Component {
 
     static propTypes = {
-        googleLink: PropTypes.string
+        googleLink: PropTypes.string,
+        showLogin: PropTypes.func
     };
 
     constructor(props) {
@@ -153,11 +154,7 @@ class LoginComponent extends Component {
                 .then(() => {
                     httpMe().then(response => {
                         SystemActions.loggedIn(response.data.user, true);
-                        this.setState({
-                            error: false,
-                            logged: false,
-                        })
-                    })
+                    });
                 })
                 .catch(error => {
                     this.setState({

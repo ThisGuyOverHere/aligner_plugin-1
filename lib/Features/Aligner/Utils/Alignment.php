@@ -8,7 +8,9 @@
 
 namespace Features\Aligner\Utils;
 
+use Exceptions\ValidationError;
 use Features\Aligner;
+use Features\Aligner\Model\Jobs_JobDao;
 use Log;
 
 class Alignment {
@@ -19,9 +21,15 @@ class Alignment {
     public $lessCommon = 0;
     public $long = 0;
 
-    public function alignSegments($source, $target, $source_lang, $target_lang) {
-        // Variant on Church and Gale algorithm with Levenshtein distance
+    private $id_job = null;
+    private $password = null;
 
+    public function alignSegments($id_job, $password, $source, $target, $source_lang, $target_lang) {
+        // Save job data used later to update Progress
+        $this->id_job = $id_job;
+        $this->password = $password;
+
+        // Variant on Church and Gale algorithm with Levenshtein distance
         $time_start = microtime(true);
 
         $source_translated = $this->translateSegments($source, $source_lang, $target_lang);
@@ -71,7 +79,9 @@ class Alignment {
             $engine = new Engines_MyMemory($engineRecord);
         }
 
-
+        // Progress - translate updates from 10 to 50
+        $progress = 10;
+        Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_4, 'progress' => $progress], $this->id_job, $this->password);
 
         $input_segments = array();
 
@@ -81,11 +91,14 @@ class Alignment {
 
         $input_chunks = array_chunk($input_segments,$config['PARALLEL_CURL_TRANSLATIONS'],true);
         foreach ($input_chunks as $chunk){
-
-            //Gets the translated segments and filters just the elements with the 'translation' key before merging
+            // Gets the translated segments and filters just the elements with the 'translation' key before merging
             $translation = $engine->getMulti($chunk);
             $translation = array_map(function ($ar) {return $ar['translation'];}, $translation);
             $result = array_merge($result,$translation);
+
+            // Progress
+            $progress = $progress + 40 * count($translation) / count($segments);
+            Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
         }
 
         foreach ($segments as $key => $segment){
@@ -116,6 +129,10 @@ class Alignment {
     // Perform alignment
     function align($source, $target) {
 
+        // Progress - align updates from 50 to 90
+        $progress = 50;
+        Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5, 'progress' => $progress], $this->id_job, $this->password);
+
         $matches = $this->find100x100Matches($source, $target);
 
         Log::doLog('Found '.count($matches).' 100% matches');
@@ -123,8 +140,6 @@ class Alignment {
         // No exact match has been found, we need to align entire document
         if (empty($matches)) {
             $alignment = $this->alignPart($source, $target, [0, 0]);
-
-            return $alignment;
         } else {
             // Perform alignment on all sub-array, then merge them
             $alignment = [];
@@ -148,6 +163,10 @@ class Alignment {
                 // Update lastMatch to skip current match
                 $lastMatch[0] = $match[0] + 1;
                 $lastMatch[1] = $match[1] + 1;
+
+                // Progress
+                $progress = $progress + 40 * count($subSource) / count($source);
+                Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
             }
 
             // Align last part of documents, after last exact match
@@ -157,9 +176,12 @@ class Alignment {
             $subAlignment = $this->alignPart($subSource, $subTarget, $lastMatch);
 
             $alignment = array_merge($alignment, $subAlignment);  // Add alignments for sub-array
-
-            return $alignment;
         }
+
+        // Progress
+        Jobs_JobDao::updateFields(['progress' => 90], $this->id_job, $this->password);
+
+        return $alignment;
     }
 
     // 100% matches
@@ -193,7 +215,7 @@ class Alignment {
 
     // Sub-part alignment
     function alignPart($source, $target, $offset) {
-        $MAX_NUMBER_OF_SEGMENTS = 0;
+        $MAX_NUMBER_OF_SEGMENTS = 16;
 
         if (count($source) < $MAX_NUMBER_OF_SEGMENTS && count($target) < $MAX_NUMBER_OF_SEGMENTS) {
             $scores = $this->buildScores($source, $target);
@@ -291,19 +313,28 @@ class Alignment {
         }
 
         // Potrebbero esserci dei target rimasti fuori dall'algoritmo, andrebbero aggiunti come orfani nella "giusta" posizione
-        foreach ($res as $key=>$value) {
-            $next = $value[1][0] + $value[1][1];  // Current target + 0, 1, 2 based on merge strategy
+        for ($i = 0; $i < $tc; $i++) {
+            if ($target[$i] != null) {
 
-            if ($target[$next] != null) {
-                // Add target in place
-                $item = [[$value[0][0], 0], [$next, 1], 0];
+                // Search where to place this pending target
+                foreach ($res as $key=>$value) {
 
-                $before = array_slice($res, 0, $key + 1);
-                $after = array_slice($res, $key + 1);
+                    // Place it before its successor
+                    if ($value[1][0] > $i) {
 
-                $res = array_merge($before, [$item], $after);
+                        // Add target in place
+                        $item = [[$value[0][0], 0], [$i, 1], 0];
 
-                $target[$next] = null;
+                        $before = array_slice($res, 0, $key );
+                        $after = array_slice($res, $key );
+
+                        $res = array_merge($before, [$item], $after);
+
+                        $target[$i] = null;
+
+                        break;
+                    }
+                }
             }
         }
 

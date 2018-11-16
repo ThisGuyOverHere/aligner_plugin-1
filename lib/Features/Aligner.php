@@ -33,6 +33,8 @@ class Aligner extends BaseFeature
 
         route( '/segments/[:id_job]/[:password]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
 
+        route( '/job/[:id_job]/[:password]/check_progress', 'GET', 'Features\Aligner\Controller\ApiController', 'checkProgress' );
+
         route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\ApiController', 'split' );
         route( '/job/[:id_job]/[:password]/segment/merge', 'POST', 'Features\Aligner\Controller\ApiController', 'merge' );
         route( '/job/[:id_job]/[:password]/segment/gap', 'POST', 'Features\Aligner\Controller\ApiController', 'addGap' );
@@ -51,8 +53,6 @@ class Aligner extends BaseFeature
 
         route( '/job/[:id_job]/[:password]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
         route( '/job/[:id_job]/[:password]/tm/[:key]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
-
-        route( '/job/[:id_job]/[:password]/download_tmx', 'GET', 'Features\Aligner\Controller\TMXController', 'downloadTMX' );
 
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
     }

@@ -114,8 +114,8 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
                 $stm = $conn->prepare( $query );
                 $stm->execute( $values );
 
-            } catch ( PDOException $e ) {
-                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+            } catch ( \PDOException $e ) {
+                throw new \PDOException( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
             }
 
         }
@@ -131,7 +131,7 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
         foreach($attributes as $attribute_k => $attribute_v){
             if( !in_array( $attribute_k, $valid_fields ) ){
-                throw new \Exception("You tried to update an invalid field, the update has been canceled");
+                throw new \PDOException("You tried to update an invalid field, the update has been canceled");
             }
             $qMark[] = "sm.".$attribute_k." = ?";
             $qValues[] = $attribute_v;

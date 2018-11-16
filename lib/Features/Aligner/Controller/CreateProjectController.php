@@ -135,13 +135,40 @@ class CreateProjectController extends AlignerController {
         $source_file = $this->_insertFile( $this->postInput[ 'file_name_source' ], $sha1_source_file, $this->postInput[ 'source_lang' ], "source" );
 
         $sha1_target_file = sha1_file( $this->fileTargetPath );
-        $target_file = $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ], "target" );
+        $target_file      = $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ], "target" );
+
+        $params = [
+                'id_job'      => $this->job->id,
+                'job'         => $this->job,
+                'project'     => $this->project,
+                'source_file' => $source_file,
+                'target_file' => $target_file
+        ];
+
+        try {
+            \WorkerClient::init( new \AMQHandler() );
+            \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $params ), [
+                    'persistent' => \WorkerClient::$_HANDLER->persistent
+            ] );
+        } catch ( \Exception $e ) {
+
+            # Handle the error, logging, ...
+            $output = "**** Align Job Enqueue failed. AMQ Connection Error. ****\n\t";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $params, true );
+            \Log::doLog( $output );
+            throw $e;
+
+        }
+
+        /*$source_file  = Files_FileDao::getByJobId( $this->job->id, "source" );
+        $target_file  = Files_FileDao::getByJobId( $this->job->id, "target" );
 
         $source_segments = $this->_file2segments($source_file, $this->postInput[ 'source_lang' ]);
         $target_segments = $this->_file2segments($target_file, $this->postInput[ 'target_lang' ]);
 
         $this->_storeSegments($source_segments, "source", $this->postInput[ 'source_lang' ]);
-        $this->_storeSegments($target_segments, "target", $this->postInput[ 'target_lang' ]);
+        $this->_storeSegments($target_segments, "target", $this->postInput[ 'target_lang' ]);*/
 
         $this->result = [
                 'project' => $this->project,
@@ -188,21 +215,21 @@ class CreateProjectController extends AlignerController {
             $fileStorage = new \FilesStorage;
             $xliff_file = $fileStorage->getXliffFromCache($sha1, $file->language_code);
             $xliff_content = file_get_contents($xliff_file);
-        } catch ( Exception $e ) {
-            throw new Exception( $file, $e->getCode(), $e );
+        } catch ( \Exception $e ) {
+            throw new \Exception( $file, $e->getCode(), $e );
         }
 
         // Parse xliff
         try {
             $parser = new \Xliff_Parser;
             $xliff = $parser->Xliff2Array($xliff_content);
-        } catch ( Exception $e ) {
-            throw new Exception( $file, $e->getCode(), $e );
+        } catch ( \Exception $e ) {
+            throw new \Exception( $file, $e->getCode(), $e );
         }
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
-            throw new Exception( $file, -4 );
+            throw new \Exception( $file, -4 );
         }
 
         // Creating the Segments
