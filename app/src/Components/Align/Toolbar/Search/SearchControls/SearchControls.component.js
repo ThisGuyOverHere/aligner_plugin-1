@@ -34,8 +34,8 @@ class SearchControlsComponent extends Component {
     render() {
         return (
             <div id="controls">
-                <Icon className={"increment"} name='chevron up' onClick={() => this.props.setFeatured(this.props.featuredSearchResult + 1)}/>
-                <Icon className={"decrement"} name='chevron down' onClick={() => this.props.setFeatured(this.props.featuredSearchResult - 1)}/>
+                <Icon className={"increment"} name='chevron up' onClick={() => this.props.setFeatured(this.props.featuredSearchResult -1)}/>
+                <Icon className={"decrement"} name='chevron down' onClick={() => this.props.setFeatured(this.props.featuredSearchResult + 1)}/>
                 <Icon className={"close"} name='window close outline'/>
             </div>
         );

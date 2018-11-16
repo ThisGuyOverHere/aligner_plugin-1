@@ -50,7 +50,7 @@ class SearchComponent extends Component {
             <div id="search">
                 <form onSubmit={this.onPerformSearch}>
                     <input type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
-                    {active && <span>{featuredSearchResult} / {occurrencesList.length}</span>}
+                    {active && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
                 </form>
                 {active && <SearchControlsComponent occurrencesList={occurrencesList}
                                                     featuredSearchResult={featuredSearchResult}
