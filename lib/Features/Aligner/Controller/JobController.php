@@ -8,43 +8,37 @@
 
 namespace Features\Aligner\Controller;
 
-use Exceptions\NotFoundError;
+use Features\Aligner\Controller\Validators\JobPasswordValidator;
 use Features\Aligner\Model\Files_FileDao;
-use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Segments_SegmentDao;
-use Features\Aligner\Model\Segments_SegmentMatchDao;
+use Features\Aligner\Utils\ConstantsJobAnalysis;
+
 
 class JobController extends AlignerController {
 
+    protected $job;
+    protected $project;
+
+    public function afterConstruct() {
+        $jobValidator = ( new JobPasswordValidator( $this ) );
+
+        $jobValidator->onSuccess( function () use ( $jobValidator ) {
+            $this->job     = $jobValidator->getJob();
+            $this->project = $this->job->getProject();
+        } );
+
+        $this->appendValidator( $jobValidator );
+    }
+
     public function information() {
 
-        $id_job  = $this->params[ 'id_job' ];
-        $password  = $this->params[ 'password' ];
-        $job     = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
-        if(empty($job)){
-            throw new NotFoundError("Job not found");
-        }
-        $project = $job->getProject();
-
-        $segmentDao            = new Segments_SegmentDao;
-        $count_source_segments = $segmentDao->countByJobId( $id_job, "source" );
-        $count_source_segments = ( !empty($count_source_segments) ) ? $count_source_segments[0]['amount'] : 0;
-        $count_target_segments = $segmentDao->countByJobId( $id_job, "target" );
-        $count_target_segments = ( !empty($count_target_segments) ) ? $count_target_segments[0]['amount'] : 0;
-
-        $source_file = Files_FileDao::getByJobId($id_job, "source");
-        $target_file = Files_FileDao::getByJobId($id_job, "target");
-
-        $segmentMatchDao = new Segments_SegmentMatchDao;
-        $miss_alignments = $segmentMatchDao->missAlignments($id_job);
+        $source_file = Files_FileDao::getByJobId( $this->job->id, "source" );
+        $target_file = Files_FileDao::getByJobId( $this->job->id, "target" );
 
         $information = [
-                'job_name'              => $project->name,
-                'source_lang'           => $job->source,
-                'target_lang'           => $job->target,
-                'total_source_segments' => $count_source_segments,
-                'total_target_segments' => $count_target_segments,
-                'miss_alignments' => $miss_alignments,
+                'job_name'        => $this->project->name,
+                'source_lang'     => $this->job->source,
+                'target_lang'     => $this->job->target,
                 'source_filename' => $source_file->filename,
                 'target_filename' => $target_file->filename
         ];
@@ -52,5 +46,69 @@ class JobController extends AlignerController {
 
         return $this->response->json( $information );
 
+    }
+
+    public function checkProgress() {
+
+        $id_job = $this->job->id;
+        $job    = $this->job;
+
+        $status_analysis = ( !empty($job) ) ? $job['status_analysis'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+
+        $progress = ( !empty($job) ) ? $job['progress'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+
+        $segmentDao = new Segments_SegmentDao;
+
+        $source_segments = null;
+        $target_segments = null;
+
+        switch ( $status_analysis ){
+            case ConstantsJobAnalysis::ALIGN_PHASE_0:
+                $phase = 0;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_1:
+                $phase = 1;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_2:
+                $phase = 2;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_3:
+                $phase = 3;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_4:
+                $phase = 4;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_5:
+                $phase = 5;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_6:
+                $phase = 6;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_7:
+                $phase = 7;
+                break;
+        }
+
+        switch ( $status_analysis ) {
+            case ConstantsJobAnalysis::ALIGN_PHASE_2:
+            case ConstantsJobAnalysis::ALIGN_PHASE_3:
+            case ConstantsJobAnalysis::ALIGN_PHASE_4:
+            case ConstantsJobAnalysis::ALIGN_PHASE_5:
+            case ConstantsJobAnalysis::ALIGN_PHASE_6:
+            case ConstantsJobAnalysis::ALIGN_PHASE_7:
+                $source_segments = $segmentDao->countByJobId($id_job, 'source', 3600);
+                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[0]['amount'] : null;
+                $target_segments = $segmentDao->countByJobId($id_job, 'target', 3600);
+                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[0]['amount'] : null;
+                break;
+        }
+
+
+        return $this->response->json( [ 'phase' => $phase,
+                                        'phase_name' => $status_analysis,
+                                        'progress' => 100,
+                                        'source_segments' => $source_segments,
+                                        'target_segments' => $target_segments ]
+        );
     }
 }

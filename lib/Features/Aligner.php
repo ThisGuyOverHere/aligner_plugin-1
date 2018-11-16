@@ -41,8 +41,6 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/segment/switch', 'POST', 'Features\Aligner\Controller\ApiController', 'switchAction' );
         route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\ApiController', 'mergeAndAlign' );
 
-        route( '/configs', 'GET', 'Features\Aligner\Controller\ApiController', 'getConfig' );
-
         route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TMXController', 'getUserTM' );
         route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TMXController', 'createTmKey' );
         route( '/tm/[:key]/save', 'POST', 'Features\Aligner\Controller\TMXController', 'saveTm' );
@@ -53,6 +51,7 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/tm/[:key]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
 
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
+        $klein->respond( 'GET', '/configs', [ __CLASS__, 'getConfigs' ] );
     }
 
     public static function homeRoute( $request, $response, $service, $app ) {
@@ -60,6 +59,17 @@ class Aligner extends BaseFeature
         $template_path = dirname( __FILE__ ) . '/Aligner/View/Html/index.html';
         $controller->setView( $template_path );
         $controller->respond( 'composeView' );
+    }
+
+    public static function getConfigs($request, $response, $service, $app){
+
+        $config = [];
+
+        $oauth_client = \OauthClient::getInstance()->getClient();
+        $config[ 'authURL' ] = $oauth_client->createAuthUrl();
+        $config[ 'gdriveAuthURL' ] = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        return $response->json( $config );
+
     }
 
 

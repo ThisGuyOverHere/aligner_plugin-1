@@ -8,9 +8,8 @@
 
 namespace Features\Aligner\Controller;
 
-
+use Features\Aligner\Controller\Validators\JobPasswordValidator;
 use Exceptions\ValidationError;
-use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
@@ -23,86 +22,29 @@ use Features\Aligner\Utils\ConstantsJobAnalysis;
 class ApiController extends AlignerController {
 
     protected $operations;
+    protected $job;
 
-    public function checkProgress() {
+    public function afterConstruct() {
+        $jobValidator = ( new JobPasswordValidator( $this ) );
 
-        $id_job = $this->params[ 'id_job' ];
-        $job    = Jobs_JobDao::getById( $id_job );
+        $jobValidator->onSuccess( function () use ( $jobValidator ) {
+            $this->job     = $jobValidator->getJob();
+            $this->project = $this->job->getProject();
+        } );
 
-        $status_analysis = ( !empty($job) ) ? $job[0]['status_analysis'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
-
-        $progress = ( !empty($job) ) ? $job[0]['progress'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
-
-        $segmentDao = new Segments_SegmentDao();
-
-        $source_segments = null;
-        $target_segments = null;
-
-        switch ( $status_analysis ){
-            case ConstantsJobAnalysis::ALIGN_PHASE_0:
-                $phase = 0;
-                break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_1:
-                $phase = 1;
-                break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_2:
-                $phase = 2;
-                break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_3:
-                $phase = 3;
-                break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_4:
-                $phase = 4;
-                break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_5:
-                $phase = 5;
-                break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_6:
-                $phase = 6;
-                break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_7:
-                $phase = 7;
-                break;
-        }
-
-        switch ( $status_analysis ) {
-            case ConstantsJobAnalysis::ALIGN_PHASE_2:
-            case ConstantsJobAnalysis::ALIGN_PHASE_3:
-            case ConstantsJobAnalysis::ALIGN_PHASE_4:
-            case ConstantsJobAnalysis::ALIGN_PHASE_5:
-            case ConstantsJobAnalysis::ALIGN_PHASE_6:
-            case ConstantsJobAnalysis::ALIGN_PHASE_7:
-                $source_segments = $segmentDao->countByJobId($id_job, 'source', 3600);
-                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[0]['amount'] : null;
-                $target_segments = $segmentDao->countByJobId($id_job, 'target', 3600);
-                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[0]['amount'] : null;
-                break;
-        }
-
-
-        return $this->response->json( [ 'phase' => $phase,
-            'phase_name' => $status_analysis,
-            'progress' => $progress,
-            'source_segments' => $source_segments,
-            'target_segments' => $target_segments ]
-        );
+        $this->appendValidator( $jobValidator );
     }
 
-    public function getConfig(){
-        $config = [];
 
-        $oauth_client = \OauthClient::getInstance()->getClient();
-        $config[ 'authURL' ] = $oauth_client->createAuthUrl();
-        $config[ 'gdriveAuthURL' ] = \ConnectedServices\GDrive::generateGDriveAuthUrl();
-        return $this->response->json( $config );
-    }
+
 
     public function merge() {
 
+        $id_job   = $this->job->id;
         $segments = [];
         $orders   = $this->params[ 'order' ];
         $type     = $this->params[ 'type' ];
-        $id_job   = $this->params[ 'id_job' ];
+
 
         sort( $orders );
 
@@ -160,9 +102,9 @@ class ApiController extends AlignerController {
 
 
     public function split() {
+        $id_job   = $this->job->id;
 
         $order         = $this->params[ 'order' ];
-        $id_job        = $this->params[ 'id_job' ];
         $type          = $this->params[ 'type' ];
         $inverse_order = $this->params[ 'inverse_order' ];
         $inverse_type  = ( $type == 'target' ) ? 'source' : 'target';
@@ -349,9 +291,9 @@ class ApiController extends AlignerController {
 
     public function moveInEmpty($referenceMatch){
 
+        $id_job   = $this->job->id;
 
         $order                     = $this->params[ 'order' ];
-        $id_job                    = $this->params[ 'id_job' ];
         $type                      = $this->params[ 'type' ];
         $destination_order         = $this->params[ 'destination' ];
 
@@ -409,8 +351,9 @@ class ApiController extends AlignerController {
 
     public function moveInFill($referenceMatch){
 
+        $id_job   = $this->job->id;
+
         $order               = $this->params[ 'order' ];
-        $id_job              = $this->params[ 'id_job' ];
         $type                = $this->params[ 'type' ];
         $inverse_type        = ( $type == 'target' ) ? 'source' : 'target';
         $destination_order         = $this->params[ 'destination' ];
@@ -523,7 +466,8 @@ class ApiController extends AlignerController {
 
     public function move() {
 
-        $id_job              = $this->params[ 'id_job' ];
+        $id_job   = $this->job->id;
+
         $type                = $this->params[ 'type' ];
         $destination_order   = $this->params[ 'destination' ];
 
@@ -663,6 +607,8 @@ class ApiController extends AlignerController {
 
     public function delete() {
 
+        $id_job   = $this->job->id;
+
         $matches = $this->params[ 'matches' ];
         $id_job  = $this->params[ 'id_job' ];
 
@@ -717,7 +663,8 @@ class ApiController extends AlignerController {
 
     public function switchAction() {
 
-        $id_job = $this->params[ 'id_job' ];
+        $id_job   = $this->job->id;
+
         $type   = $this->params[ 'type' ];
         $order1 = $this->params[ 'order1' ];
         $order2 = $this->params[ 'order2' ];
@@ -778,8 +725,10 @@ class ApiController extends AlignerController {
     }
 
     public function mergeAndAlign() {
+
+        $id_job   = $this->job->id;
+
         $matches           = $this->params[ 'matches' ];
-        $id_job            = $this->params[ 'id_job' ];
         $destination_order = $this->params[ 'destination' ];
 
         $sources        = [];
