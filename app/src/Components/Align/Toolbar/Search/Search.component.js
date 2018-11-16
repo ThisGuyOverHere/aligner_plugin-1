@@ -65,6 +65,7 @@ class SearchComponent extends Component {
                             this.searchInput = input;
                         }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
                         {(active && occurrencesList.length > 0)  && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
+                        {(active && occurrencesList.length === 0 )  && <span> 0 / 0</span>}
                     </Hotkeys>
                 </form>
                 <SearchControlsComponent occurrencesList={occurrencesList}
