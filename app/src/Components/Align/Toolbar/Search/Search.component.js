@@ -144,7 +144,7 @@ class SearchComponent extends Component {
                 return item.content.indexOf(fulltext) !== -1;
             }).map(item => {
                 item.occurrences = [];
-                let searchStrLen = fulltext.length
+                let searchStrLen = fulltext.length;
                 let startIndex = 0, index;
                 while ((index = item.content.indexOf(fulltext, startIndex)) > -1) {
                     item.occurrences.push({matchPosition: index, searchProgressiveIndex: searchProgressiveIndex});
@@ -152,10 +152,10 @@ class SearchComponent extends Component {
                     searchProgressiveIndex++;
                     startIndex = index + searchStrLen;
                 }
+                item.occurrences.reverse();
                 searchResultsDictionary[item.id] = item;
                 return item
             });
-
             ProjectActions.emitSearchResults({
                 q: fulltext,
                 searchResults: searchResults,
