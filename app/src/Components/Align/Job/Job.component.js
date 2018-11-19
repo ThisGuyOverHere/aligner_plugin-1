@@ -149,7 +149,7 @@ class JobComponent extends Component {
                         </div>
                     }
                 />}
-                <AdvancedDragLayer/>
+                {/*<AdvancedDragLayer/>*/}
                 {this.state.splitModalStatus &&
                 <SplitComponent segment={this.state.segmentToSplit} jobConf={this.props.job.config}
                                 inverseSegmentOrder={this.props.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
