@@ -113,6 +113,6 @@ export const httpDeleteSegments = (jobID, jobPassword, data) => {
 };
 
 export const httpReverseSegments = (jobID, jobPassword, data) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/reverse';
+    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/switch';
     return post(url, qs.stringify(data));
 };
