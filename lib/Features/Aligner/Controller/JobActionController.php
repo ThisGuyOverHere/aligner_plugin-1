@@ -17,9 +17,8 @@ use Features\Aligner\Model\Segments_SegmentMatchStruct;
 use Features\Aligner\Model\Segments_SegmentStruct;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
-use Features\Aligner\Utils\ConstantsJobAnalysis;
 
-class ApiController extends AlignerController {
+class JobActionController extends AlignerController {
 
     protected $operations;
     protected $job;

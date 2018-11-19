@@ -20,7 +20,7 @@ use Features\Aligner\Model\Segments_SegmentDao;
 use CatUtils;
 use Features\Aligner\Utils\AlignUtils;
 
-class CreateProjectController extends AlignerController {
+class ProjectController extends AlignerController {
 
     protected $postInput;
 

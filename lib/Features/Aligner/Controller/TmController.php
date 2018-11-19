@@ -2,20 +2,17 @@
 /**
  * Created by PhpStorm.
  * User: vincenzoruffa
- * Date: 11/10/2018
- * Time: 18:53
+ * Date: 19/11/2018
+ * Time: 15:11
  */
+
 
 namespace Features\Aligner\Controller;
 
-use Exceptions\NotFoundError;
 use Exceptions\ValidationError;
-use Features\Aligner;
-use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Utils\TMSService;
-use Features\Aligner\Utils\Email\SendTMXEmail;
 
-class TMXController extends AlignerController {
+class TmController extends AlignerController {
 
 
     public function getUserTM() {
@@ -88,6 +85,11 @@ class TMXController extends AlignerController {
         }
 
     }
+
+    /**
+     * Note: Methods under below are not used yet, but I think they will be implement soon
+     *
+     */
 
     public function updateTm() {
         $mkDao = new \TmKeyManagement_MemoryKeyDao( \Database::obtain() );
@@ -178,82 +180,6 @@ class TMXController extends AlignerController {
         }
 
         $this->response->json( $status );
-
-    }
-
-    public function pushTMXInTM() {
-
-        $config = Aligner::getConfig();
-
-        $id_job    = $this->params[ 'id_job' ];
-        $password  = $this->params[ 'password' ];
-        $is_public = $this->params[ 'is_public' ];
-
-
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
-        if(empty($job)){
-            throw new NotFoundError("Job not found");
-        }
-
-        if ( $this->getUser() ) {
-            if ( !empty( $this->params[ 'email' ] ) ) {
-                $email = $this->params[ 'email' ];
-            } else {
-                $email = $this->user->email;
-            }
-
-            $userName    = $this->user->first_name;
-            $userSurname = $this->user->last_name;
-            if ( $is_public == 1 ) {
-                $tm_key = $config[ 'GLOBAL_PRIVATE_TM' ];
-            } else {
-                $tm_key = $this->params[ 'key' ];
-            }
-        } else {
-            $email       = $this->params[ 'email' ];
-            $userName    = null;
-            $userSurname = null;
-            if ( $is_public == 1 ) {
-                $tm_key = $config[ 'GLOBAL_PRIVATE_TM' ];
-            } else {
-                try {
-                    $tms          = \Engine::getInstance( 1 );
-                    $mymemory_key = $tms->createMyMemoryKey();
-                    $tm_key       = $mymemory_key[ 'key' ];
-                } catch ( \Exception $e ) {
-                    throw new ValidationError( $e->getMessage() );
-                }
-            }
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new ValidationError("Invalid email address");
-        }
-
-
-        $params = [];
-        $params['job'] = $job;
-        $params['tm_key'] = $tm_key;
-        $params['email'] = $email;
-        $params['first_name'] = $userName;
-        $params['last_name'] = $userSurname;
-
-        try {
-            \WorkerClient::init( new \AMQHandler() );
-            \WorkerClient::enqueue( 'ALIGNER_TMX_IMPORT', 'Features\Aligner\Utils\AsyncTasks\Workers\TMXImportWorker', json_encode( $params ), [ 'persistent' => \WorkerClient::$_HANDLER->persistent
-            ] );
-        } catch ( \Exception $e ) {
-
-            # Handle the error, logging, ...
-            $output = "**** TMX Import Enqueue failed. AMQ Connection Error. ****\n\t";
-            $output .= "{$e->getMessage()}";
-            $output .= var_export( $params, true );
-            \Log::doLog( $output );
-            throw $e;
-
-        }
-
-        return $this->response->json( true );
 
     }
 
