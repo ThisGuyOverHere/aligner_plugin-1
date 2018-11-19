@@ -20,7 +20,7 @@ use Features\Aligner\Model\Segments_SegmentDao;
 use CatUtils;
 use Features\Aligner\Utils\AlignUtils;
 
-class CreateProjectController extends AlignerController {
+class ProjectController extends AlignerController {
 
     protected $postInput;
 
@@ -34,7 +34,6 @@ class CreateProjectController extends AlignerController {
     public $result;
 
     public function __construct( $request, $response, $service, $app ) {
-        ini_set('max_execution_time', 2000);
         $filterArgs = [
                 'project_name'     => [
                         'filter' => FILTER_SANITIZE_STRING,
@@ -161,15 +160,6 @@ class CreateProjectController extends AlignerController {
 
         }
 
-        /*$source_file  = Files_FileDao::getByJobId( $this->job->id, "source" );
-        $target_file  = Files_FileDao::getByJobId( $this->job->id, "target" );
-
-        $source_segments = $this->_file2segments($source_file, $this->postInput[ 'source_lang' ]);
-        $target_segments = $this->_file2segments($target_file, $this->postInput[ 'target_lang' ]);
-
-        $this->_storeSegments($source_segments, "source", $this->postInput[ 'source_lang' ]);
-        $this->_storeSegments($target_segments, "target", $this->postInput[ 'target_lang' ]);*/
-
         $this->result = [
                 'project' => $this->project,
                 'job'     => $this->job
@@ -201,85 +191,6 @@ class CreateProjectController extends AlignerController {
 
     }
 
-    /**
-     * @param $file
-     * @param $lang
-     * @return array
-     * @throws Exception
-     */
-    protected function _file2segments($file, $lang) {
-        list($date, $sha1) = explode("/", $file->sha1_original_file);
-
-        // Get file content
-        try {
-            $fileStorage = new \FilesStorage;
-            $xliff_file = $fileStorage->getXliffFromCache($sha1, $file->language_code);
-            $xliff_content = file_get_contents($xliff_file);
-        } catch ( \Exception $e ) {
-            throw new \Exception( $file, $e->getCode(), $e );
-        }
-
-        // Parse xliff
-        try {
-            $parser = new \Xliff_Parser;
-            $xliff = $parser->Xliff2Array($xliff_content);
-        } catch ( \Exception $e ) {
-            throw new \Exception( $file, $e->getCode(), $e );
-        }
-
-        // Checking that parsing went well
-        if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
-            throw new \Exception( $file, -4 );
-        }
-
-        // Creating the Segments
-        $segments = array();
-
-        foreach ( $xliff[ 'files' ] as $xliff_file ) {
-
-            // An xliff can contains multiple files (docx has style, settings, ...) but only some with useful trans-units
-            if ( !array_key_exists( 'trans-units', $xliff_file ) ) {
-                continue;
-            }
-
-            foreach ($xliff_file[ 'trans-units' ] as $trans_unit) {
-
-                // Extract only raw-content
-                $unit_segments = array_map(function ($item) {
-                    return $item['raw-content'];
-                }, $trans_unit[ 'seg-source' ]);
-
-                // Build an object with raw-content and clean-content
-                $unit_segments = array_map(function ($item) use ($lang) {
-                    return [
-                            'content_raw' => $item,
-                            'content_clean' => AlignUtils::_cleanSegment($item, $lang),
-                            'raw_word_count' => AlignUtils::_countWordsInSegment($item, $lang)
-                    ];
-                }, $unit_segments);
-
-                // Append to existing Segments
-                $segments = array_merge($segments, $unit_segments);
-            }
-        }
-
-        return $segments;
-    }
 
 
-    private function _storeSegments($segments, $type, $lang){
-
-        $sequenceIds = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $segments ) );
-        foreach($sequenceIds as $key => $sequenceId){
-            $segments[$key]['id'] = $sequenceId;
-            $segments[$key]['type'] = $type;
-            $segments[$key]['language_code'] = $lang;
-            $segments[$key]['id_job'] = $this->job->id;
-            $segments[$key]['content_hash'] = md5($segments[$key]['content_raw']);
-        }
-
-        $segmentsDao = new Segments_SegmentDao;
-        $segmentsDao->createList( $segments );
-
-    }
 }
