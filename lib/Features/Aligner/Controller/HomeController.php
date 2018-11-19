@@ -24,9 +24,6 @@ class HomeController extends \BaseKleinViewController {
      */
     protected $view;
 
-    public function afterConstruct() {
-
-    }
 
     public function setView( $template_name ) {
         $this->view = new PHPTALWithAppend( $template_name );

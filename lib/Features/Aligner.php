@@ -25,36 +25,30 @@ class Aligner extends BaseFeature
     public static function loadRoutes( Klein $klein ) {
         route( '/upload', 'POST', 'Features\Aligner\Controller\UploadController', 'upload' );
         route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
-        route( '/create_project', 'POST', 'Features\Aligner\Controller\CreateProjectController', 'create' );
+        route( '/create_project', 'POST', 'Features\Aligner\Controller\ProjectController', 'create' );
 
-        route( '/parse/[:id_job]', 'GET', 'Features\Aligner\Controller\ParserController', 'jobParser' );
+        route( '/job/[:id_job]/[:password]/check_progress', 'GET', 'Features\Aligner\Controller\JobController', 'checkProgress' );
 
         route( '/job/[:id_job]/[:password]/information', 'GET', 'Features\Aligner\Controller\JobController', 'information' );
 
-        route( '/segments/[:id_job]/[:password]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
+        route( '/job/[:id_job]/[:password]/segments', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
+        
+        route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\JobActionController', 'split' );
+        route( '/job/[:id_job]/[:password]/segment/merge', 'POST', 'Features\Aligner\Controller\JobActionController', 'merge' );
+        route( '/job/[:id_job]/[:password]/segment/move', 'POST', 'Features\Aligner\Controller\JobActionController', 'move' );
+        route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\JobActionController', 'delete' );
+        route( '/job/[:id_job]/[:password]/segment/switch', 'POST', 'Features\Aligner\Controller\JobActionController', 'switchAction' );
+        route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\JobActionController', 'mergeAndAlign' );
 
-        route( '/job/[:id_job]/[:password]/check_progress', 'GET', 'Features\Aligner\Controller\ApiController', 'checkProgress' );
+        route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TmController', 'getUserTM' );
+        route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TmController', 'createTmKey' );
+        route( '/tm/[:key]/save', 'POST', 'Features\Aligner\Controller\TmController', 'saveTm' );
 
-        route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\ApiController', 'split' );
-        route( '/job/[:id_job]/[:password]/segment/merge', 'POST', 'Features\Aligner\Controller\ApiController', 'merge' );
-        route( '/job/[:id_job]/[:password]/segment/gap', 'POST', 'Features\Aligner\Controller\ApiController', 'addGap' );
-        route( '/job/[:id_job]/[:password]/segment/move', 'POST', 'Features\Aligner\Controller\ApiController', 'move' );
-        route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\ApiController', 'delete' );
-        route( '/job/[:id_job]/[:password]/segment/reverse', 'POST', 'Features\Aligner\Controller\ApiController', 'reverse' );
-        route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\ApiController', 'mergeAndAlign' );
-
-        route( '/configs', 'GET', 'Features\Aligner\Controller\ApiController', 'getConfig' );
-
-        route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TMXController', 'getUserTM' );
-        route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TMXController', 'createTmKey' );
-        route( '/tm/[:key]/save', 'POST', 'Features\Aligner\Controller\TMXController', 'saveTm' );
-        route( '/tm/[:key]/update', 'POST', 'Features\Aligner\Controller\TMXController', 'updateTm' );
-        route( '/tm/[:key]/check_upload', 'POST', 'Features\Aligner\Controller\TMXController', 'checkStatusUploadTMX' );
-
-        route( '/job/[:id_job]/[:password]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
-        route( '/job/[:id_job]/[:password]/tm/[:key]/push_tmx', 'POST', 'Features\Aligner\Controller\TMXController', 'pushTMXInTM' );
+        route( '/job/[:id_job]/[:password]/push_tmx', 'POST', 'Features\Aligner\Controller\JobTmxController', 'pushTMXInTM' );
+        route( '/job/[:id_job]/[:password]/tm/[:key]/push_tmx', 'POST', 'Features\Aligner\Controller\JobTmxController', 'pushTMXInTM' );
 
         $klein->respond( 'GET', '/index', [ __CLASS__, 'homeRoute' ] );
+        $klein->respond( 'GET', '/configs', [ __CLASS__, 'getConfigs' ] );
     }
 
     public static function homeRoute( $request, $response, $service, $app ) {
@@ -62,6 +56,17 @@ class Aligner extends BaseFeature
         $template_path = dirname( __FILE__ ) . '/Aligner/View/Html/index.html';
         $controller->setView( $template_path );
         $controller->respond( 'composeView' );
+    }
+
+    public static function getConfigs($request, $response, $service, $app){
+
+        $config = [];
+
+        $oauth_client = \OauthClient::getInstance()->getClient();
+        $config[ 'authURL' ] = $oauth_client->createAuthUrl();
+        $config[ 'gdriveAuthURL' ] = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        return $response->json( $config );
+
     }
 
 

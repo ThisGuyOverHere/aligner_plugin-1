@@ -40,7 +40,7 @@ export const httpAlignJob = (jobID) => {
 
 
 export const httpGetSegments = (jobID, jobPassword) => {
-    const url = '/plugins/aligner/segments/' + jobID + '/' + jobPassword;
+    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segments';
     return get(url);
 };
 
