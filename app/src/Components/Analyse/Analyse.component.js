@@ -5,6 +5,9 @@ import {httpGetAlignmentInfo, httpGetPullingInfo} from "../../HttpRequests/Align
 import SourceComponent from "./Source/Source.component";
 import TargetComponent from "./Target/Trget.component";
 import env from "../../Constants/Env.constants";
+import ProjectConstants from "../../Constants/Project.constants";
+import ProjectStore from "../../Stores/Project.store";
+import {textEllipsisCenter} from "../../Helpers/SystemUtils.helper";
 
 class AnalyseComponent extends Component {
     static propTypes = {};
@@ -30,29 +33,14 @@ class AnalyseComponent extends Component {
     };
 
     componentDidMount() {
-        // get job info
-        httpGetAlignmentInfo(this.state.job.id, this.state.job.password)
-            .then(
-                response => {
-                    const info = response.data;
-                    this.setState({
-                        sourceLang: info.source_lang,
-                        sourceLangFileName: info.target_filename,
-                        targetLang: info.target_lang,
-                        targetLangFileName: info.target_filename,
-                    });
-                }
-            ).catch(
-            error => {
-                console.log(error);
-            }
-        );
+        ProjectStore.addListener(ProjectConstants.STORE_JOB_INFO, this.getInfo);
         // pulling
         this.pullingId = setInterval(this.pullingInfo, env.pullingCallInterval);
 
     };
 
     componentWillUnmount() {
+        ProjectStore.removeListener(ProjectConstants.STORE_JOB_INFO, this.getInfo);
         clearInterval(this.pullingId);
     }
 
@@ -106,6 +94,16 @@ class AnalyseComponent extends Component {
         if(this.state.actualPhase === 7){
             clearInterval(this.pullingId);
         }
+    };
+
+    getInfo = (info) => {
+        this.setState({
+            sourceLang: info.source_lang,
+            sourceLangFileName: info.target_filename,
+            targetLang: info.target_lang,
+            targetLangFileName: info.target_filename,
+
+        });
     }
 }
 
