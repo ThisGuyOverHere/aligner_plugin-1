@@ -1,7 +1,5 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
-import ProjectStore from "../../../../../../Stores/Project.store";
-import ProjectConstants from "../../../../../../Constants/Project.constants";
 
 class SegmentContentComponent extends Component {
     static propTypes = {
