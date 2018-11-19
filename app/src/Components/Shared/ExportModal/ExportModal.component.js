@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import ExportModalLogged from "./ExportModalLogged/ExportModalLogged.component";
 import ExportModalSendMail from "./ExportModalSendEmail/ExportModalSendEmail.component";
 import ExportModalCompleted from "./ExportModalCompleted/ExportModalCompleted.component";
-import {getUserInitials} from "../../../Helpers/SystemUtils.helper";
 import ModalHeader from "../ModalHeader/ModalHeader.component";
 import {httpConfig} from "../../../HttpRequests/System.http";
 

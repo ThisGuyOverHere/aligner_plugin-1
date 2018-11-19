@@ -1,0 +1,30 @@
+@import "../../../../../../assets/theme/variables";
+
+.icon-container {
+  .icon-divisor {
+    i {
+      display: inline;
+      font-size: 16px;
+      padding: 0 4px;
+    }
+  }
+  .splitted {
+    i {
+      color: $primary;
+      &:hover {
+        color: $red;
+      }
+    }
+  }
+}
+
+@keyframes divisor {
+  0% {
+    font-size: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+

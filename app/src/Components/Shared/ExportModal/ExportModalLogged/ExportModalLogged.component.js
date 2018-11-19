@@ -1,13 +1,6 @@
 import React, {Component} from 'react';
-import {getUserInitials} from "../../../../Helpers/SystemUtils.helper";
 import PropTypes from "prop-types";
-import {
-    httpGetTmxList,
-    httpCreateTmx,
-    httpSaveTmx,
-    httpExportTmxFile,
-    httpExportTmxCloud, httpExportTmxPrivate
-} from "../../../../HttpRequests/Tmx.http";
+import {httpCreateTmx, httpSaveTmx, httpExportTmxCloud, httpExportTmxPrivate} from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalLogged extends Component {
 

@@ -3,9 +3,7 @@ import {Route} from 'react-router-dom'
 import HeaderComponent from "../Header/Header.component";
 import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
-import ExportModal from "../ExportModal/ExportModal.component";
 import SystemActions from "../../../Actions/System.actions";
-import {httpConfig, httpLogout} from "../../../HttpRequests/System.http";
 import Authentication from "../Authentication/Authentication.component";
 
 class Layout extends Component {
@@ -58,19 +56,5 @@ class Layout extends Component {
         })
     };
 }
-
-
-/*const Layout = ({component: Component, ...rest}) => {
-
-    return (
-        <Route {...rest} render={matchProps => (
-            <div className="DefaultLayout">
-                <HeaderComponent {...matchProps}/>
-                <Component {...matchProps} />
-                <FooterComponent {...matchProps}/>
-            </div>
-        )} />
-    )
-};*/
 
 export default Layout;

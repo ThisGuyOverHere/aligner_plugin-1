@@ -6,7 +6,6 @@ import SourceComponent from "./Source/Source.component";
 import TargetComponent from "./Target/Trget.component";
 import env from "../../Constants/Env.constants";
 
-
 class AnalyseComponent extends Component {
     static propTypes = {};
     pullingId = null;
@@ -35,7 +34,6 @@ class AnalyseComponent extends Component {
         httpGetAlignmentInfo(this.state.job.id, this.state.job.password)
             .then(
                 response => {
-                    //console.log(response);
                     const info = response.data;
                     this.setState({
                         sourceLang: info.source_lang,

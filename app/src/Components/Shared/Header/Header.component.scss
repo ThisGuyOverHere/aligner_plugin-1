@@ -8,11 +8,9 @@
   left: 0;
   width: 100%;
   .aligner-nav-log{
-
     li{
       color: $headerText;
       font-size: 14px;
-      //line-height: 32px;
       font-weight: 300;
       &:last-child{
         margin-right: 0px;
@@ -20,17 +18,12 @@
       }
     }
   }
-  .aligner-nav-log{
-    padding: 8px 12px 6px;
-  }
-  .aligner-nav-nolog{
-    padding: 8px 12px;
-  }
   .aligner-nav-log , .aligner-nav-nolog{
     background: $headerBlack;
     display: -ms-flexbox;
     list-style: none;
     margin: 0;
+    padding: 8px 12px;
     #logo{
       top: 4px;
       border: 0;
