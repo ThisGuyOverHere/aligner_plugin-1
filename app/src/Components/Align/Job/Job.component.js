@@ -53,7 +53,7 @@ class JobComponent extends Component {
             },
             user: false,
             googleUserImage: '',
-            scrollToSegment: 0,
+            scrollToSegment: null,
             search: {},
             window: {
                 width: 0,
@@ -86,6 +86,14 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
         window.removeEventListener('resize', this.updateWindowDimensions);
 
+    }
+
+    componentDidUpdate(){
+        if(this.state.scrollToSegment !== null){
+            this.setState({
+                scrollToSegment: null
+            })
+        }
     }
 
     render() {
