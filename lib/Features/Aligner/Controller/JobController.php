@@ -106,7 +106,7 @@ class JobController extends AlignerController {
 
         return $this->response->json( [ 'phase' => $phase,
                                         'phase_name' => $status_analysis,
-                                        'progress' => 100,
+                                        'progress' => $progress,
                                         'source_segments' => $source_segments,
                                         'target_segments' => $target_segments ]
         );

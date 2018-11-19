@@ -27,12 +27,12 @@ class Aligner extends BaseFeature
         route( '/xliff_conversion', 'POST', 'Features\Aligner\Controller\UploadController', 'convert' );
         route( '/create_project', 'POST', 'Features\Aligner\Controller\CreateProjectController', 'create' );
 
+        route( '/job/[:id_job]/[:password]/check_progress', 'GET', 'Features\Aligner\Controller\JobController', 'checkProgress' );
+
         route( '/job/[:id_job]/[:password]/information', 'GET', 'Features\Aligner\Controller\JobController', 'information' );
 
         route( '/segments/[:id_job]/[:password]', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
-
-        route( '/job/[:id_job]/[:password]/check_progress', 'GET', 'Features\Aligner\Controller\ApiController', 'checkProgress' );
-
+        
         route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\ApiController', 'split' );
         route( '/job/[:id_job]/[:password]/segment/merge', 'POST', 'Features\Aligner\Controller\ApiController', 'merge' );
         route( '/job/[:id_job]/[:password]/segment/gap', 'POST', 'Features\Aligner\Controller\ApiController', 'addGap' );
