@@ -7,6 +7,7 @@ import Export from "./Export/Export.component";
 import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
 import ProjectStore from "../../../Stores/Project.store";
 import ProjectConstants from "../../../Constants/Project.constants";
+import ProjectActions from "../../../Actions/Project.actions";
 
 class HeaderComponent extends Component {
 
@@ -154,6 +155,7 @@ class HeaderComponent extends Component {
                             sourceLang: info.source_lang,
                             targetLang: info.target_lang,
                         });
+                        ProjectActions.setJobInfo(info);
                     }
                 }
             ).catch(
