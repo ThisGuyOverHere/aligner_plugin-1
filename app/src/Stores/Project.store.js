@@ -283,6 +283,9 @@ AppDispatcher.register(function (action) {
         case ProjectConstants.JOB_ERROR:
             ProjectStore.emitChange(ProjectConstants.JOB_ERROR, action.error);
             break;
+        case ProjectConstants.STORE_JOB_INFO:
+            ProjectStore.emitChange(ProjectConstants.STORE_JOB_INFO, action.info);
+            break;
         case ProjectConstants.EMPTY_STORE:
             ProjectStore.emitChange(ProjectConstants.EMPTY_STORE, action.status);
             ProjectStore.emptyStore();
