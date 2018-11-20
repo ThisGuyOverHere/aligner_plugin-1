@@ -16,7 +16,7 @@
          * @var \PHPTALWithAppend
          */
         public function decorate() {
-            $this->template->append( 'app_js', Routes::staticBuild( 'js/main.js' ) );
+            $this->template->append( 'app_js', Routes::staticBuild( 'js/main.min.js' ) );
             $this->template->append( 'app_css', Routes::staticBuild( 'css/style.css' ) );
         }
 

@@ -8,6 +8,11 @@ module.exports = function(grunt) {
     /*var reactPreset = require('babel-preset-react');*/
 
     grunt.initConfig( {
+        env: {
+            prod: {
+                NODE_ENV: 'production'
+            }
+        },
         watch: {
             css: {
                 files: [
@@ -50,6 +55,13 @@ module.exports = function(grunt) {
                 dest:  '../static/build/js/main.js'
             },
         },
+        uglify: {
+            dist: {
+                files: {
+                    '../static/build/js/main.min.js': ['../static/build/js/main.js']
+                }
+            }
+        },
         autoprefixer:{
             options: {
                 browsers: ['last 2 versions']
@@ -76,11 +88,12 @@ module.exports = function(grunt) {
     });
 
     // Define your tasks here
-    grunt.registerTask('default', ['browserify:dist','sass','autoprefixer']);
+    grunt.registerTask('default', ['env','browserify:dist','uglify:dist','sass','autoprefixer']);
     grunt.registerTask('dev', ['browserify:dev','sass','autoprefixer','watch']);
 
-
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-autoprefixer');
     grunt.loadNpmTasks('grunt-sass');
