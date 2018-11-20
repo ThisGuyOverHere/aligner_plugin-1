@@ -8,7 +8,7 @@ class LoginComponent extends Component {
 
     static propTypes = {
         googleLink: PropTypes.string,
-        showLogin: PropTypes.func
+        fromExport: PropTypes.bool
     };
 
     constructor(props) {
@@ -93,7 +93,7 @@ class LoginComponent extends Component {
     };
 
     openResetPasswordModal = () => {
-        SystemActions.setResetPasswordStatus(true);
+        SystemActions.setResetPasswordStatus(true, this.props.fromExport);
         //to avoid login close on export modal
         SystemActions.setExportModalStatus(false);
         this.onCloseLogin();
@@ -101,7 +101,7 @@ class LoginComponent extends Component {
 
     openRegistrationModal = () => {
         this.onCloseLogin();
-        SystemActions.setRegistrationStatus(true);
+        SystemActions.setRegistrationStatus(true, this.props.fromExport);
         //to avoid login close on export modal
         SystemActions.setExportModalStatus(false);
     };

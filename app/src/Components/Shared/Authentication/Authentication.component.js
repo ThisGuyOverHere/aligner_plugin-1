@@ -29,7 +29,8 @@ class Authentication extends Component {
             newUserEmail: '',
             googleLogInLink: '',
             googleDriveLink: '',
-            googleUserImage: ''
+            googleUserImage: '',
+            fromExport: false
         }
     }
 
@@ -55,8 +56,9 @@ class Authentication extends Component {
             <div className="AuthenticationLayout">
                 {this.state.statusRegistrationModal && <RegistrationComponent
                     googleLink={this.state.googleLogInLink}
+                    fromExport={this.state.fromExport}
                 />}
-                {this.state.statusResetPasswordModal && <ResetPasswordModal />}
+                {this.state.statusResetPasswordModal && <ResetPasswordModal fromExport={this.state.fromExport} />}
                 {this.state.statusChangePasswordModal && <ChangePasswordModal />}
                 {this.state.statusLogin && < LoginModalComponent googleLink={this.state.googleLogInLink} />}
                 {this.state.statusLogout && < LogoutComponent user = {this.props.user} image={this.props.image}/>}
@@ -70,15 +72,17 @@ class Authentication extends Component {
         })
     };
 
-    setStatusRegistration = (status) => {
+    setStatusRegistration = (status,fromExport) => {
         this.setState({
-            statusRegistrationModal: status
+            statusRegistrationModal: status,
+            fromExport: fromExport
         })
     };
 
-    setStatusResetPasswordModal = (status) => {
+    setStatusResetPasswordModal = (status, fromExport) => {
         this.setState({
-            statusResetPasswordModal: status
+            statusResetPasswordModal: status,
+            fromExport: fromExport
         })
     };
 
