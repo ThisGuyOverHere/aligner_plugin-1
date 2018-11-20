@@ -7,6 +7,7 @@ import {syncWithBackend} from "../../Helpers/SystemUtils.helper";
 import ProjectStore from "../../Stores/Project.store";
 import ProjectConstants from "../../Constants/Project.constants";
 import JobError from "./JobError/JobError.component";
+import AlignLoader from "./AlignerLoader/AlignLoader.component";
 
 class AlignComponent extends Component {
     static propTypes = {
@@ -54,6 +55,7 @@ class AlignComponent extends Component {
         return (
             <div id="Align">
                 <ToolbarComponent job={this.state.job}/>
+                {!(this.state.job.rows.length > 0 || this.state.jobError) && <AlignLoader/>}
                 {this.state.job.rows && <JobComponent inSync={this.state.inSync} job={this.state.job}/>}
                 {this.state.jobError && <JobError/>}
             </div>
