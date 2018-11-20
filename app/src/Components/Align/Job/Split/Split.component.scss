@@ -1,7 +1,6 @@
 @import "../../../../../assets/theme/variables";
 
 .splitContainer {
-  cursor: col-resize;
   z-index: 9999;
   position: fixed;
   margin: auto;
@@ -55,6 +54,7 @@
     padding: 0 24px 24px;
     #toSplit {
       border: 2px dotted #d5d5d5;
+      cursor: col-resize;
       padding: 16px;
       font-size: 14px;
       width: 100%;
