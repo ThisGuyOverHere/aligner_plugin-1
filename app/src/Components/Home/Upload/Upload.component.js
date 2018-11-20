@@ -174,7 +174,7 @@ class UploadComponent extends Component {
                     password: response.data.job.password
                 }
             });
-        },(error)=>{
+        }, (error) => {
             //todo: implement error UI
             console.log(error);
             this.setState({
@@ -183,7 +183,7 @@ class UploadComponent extends Component {
         });
 
         this.setState({
-           inAlign: true
+            inAlign: true
         });
     };
 
@@ -240,7 +240,7 @@ class UploadComponent extends Component {
             target: ['dropzone']
         };
         let startButton = ['ui', 'primary', 'button'];
-        if(this.state.inAlign){
+        if (this.state.inAlign) {
             startButton.push('loading');
         }
 
@@ -280,7 +280,7 @@ class UploadComponent extends Component {
                             </div>
                             <div className="">
                                 <div className={classes.source.join(' ')}>
-                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
+                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropSource}>
                                         {
                                             this.renderHtmlUpload(
                                                 this.state.uploadSource.status,
@@ -303,9 +303,10 @@ class UploadComponent extends Component {
                                           onChange={this.onTargetLanguageChange}
                                 />
                             </div>
+
                             <div className="">
                                 <div className={classes.target.join(' ')}>
-                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
+                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropTarget}>
                                         {
                                             this.renderHtmlUpload(
                                                 this.state.uploadTarget.status,
