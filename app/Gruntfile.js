@@ -39,7 +39,7 @@ module.exports = function(grunt) {
                     'src/*.js',
                     'src/**/*.js'
                 ],
-                dest:  '../static/build/js/main.js'
+                dest:  '../static/build/js/main.min.js'
             },
 
             dist: {
