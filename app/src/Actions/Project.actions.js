@@ -41,7 +41,7 @@ let ProjectActions = {
                     actionType: ProjectConstants.JOB_ERROR,
                     error: error.response.data.errors[0].message
                 });
-                console.log(error.response.data.errors[0].message);
+                console.error(error.response.data.errors[0].message);
             });
         },
 
@@ -215,7 +215,7 @@ let ProjectActions = {
                     })
                 });
             }
-            const sourceOrderList = selection.source.list.sort();
+            const sourceOrderList = selection.source.list.sort((a,b)=>{return a-b});
             const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0], 'source');
             const destination = getSegmentByIndex(firstSourceIndex, 'target').order;
             AppDispatcher.dispatch({
@@ -361,13 +361,6 @@ let ProjectActions = {
          * @param {string} type
          */
         mergeSegments: function (jobID, jobPassword, orders, type) {
-            /*console.log(orders);
-            httpMergeSegments(jobID, jobPassword, {
-                order: orders,
-                type: type
-            }).then((response) => {
-                console.log(response);
-            });*/
             const changes = this.getLogsForMergeSegments(orders, type);
 
             AppDispatcher.dispatch({

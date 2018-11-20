@@ -216,26 +216,22 @@ class ExportModalLogged extends Component {
             exporting: true
         });
         if(this.state.cloudCheckBox){
-            console.log("public");
             httpExportTmxCloud().then(response => {
                 this.setState({
                     exporting: false
                 });
                 this.props.setCompletedExport();
-                console.log(response)
             }, error => {
                 this.setState({
                     exporting: false
                 });
             })
         } else {
-            console.log("private");
             httpExportTmxPrivate(this.state.selected.key).then(response => {
                 this.setState({
                     exporting: false
                 });
                 this.props.setCompletedExport();
-                console.log(response)
             }, error => {
                 this.setState({
                     exporting: false

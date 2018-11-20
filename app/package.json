@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dist": "NODE_ENV=production grunt"
-
   },
   "author": "MateCat Team",
   "license": "LGPL",
@@ -44,7 +43,9 @@
     "grunt": "~1.0.3",
     "grunt-browserify": "^5.3.0",
     "grunt-contrib-concat": "~1.0.1",
+    "grunt-contrib-uglify": "^4.0.0",
     "grunt-contrib-watch": "~1.1.0",
+    "grunt-env": "^0.4.4",
     "grunt-sass": "~3.0.1",
     "grunt-string-replace": "~1.3.1",
     "grunt-strip": "^0.2.1",

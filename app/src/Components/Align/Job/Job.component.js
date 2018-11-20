@@ -56,6 +56,7 @@ class JobComponent extends Component {
             scrollToSegment: null,
             search: {},
             window: {
+                segmentContentWidth: "437px",
                 width: 0,
                 height: 0,
             }
@@ -124,14 +125,14 @@ class JobComponent extends Component {
                     itemSize={(index) => {
 
                         let source = document.createElement('p');
-                        source.style.width = "437px";
+                        source.style.width = this.state.window.segmentContentWidth;
                         source.style.fontSize = "16px";
                         source.innerHTML = this.props.job.rows[index].source.content_clean;
                         document.getElementById('hiddenHtml').appendChild(source);
                         const sourceHeight = source.getBoundingClientRect().height;
 
                         let target = document.createElement('p');
-                        target.style.width = "437px";
+                        target.style.width = this.state.window.segmentContentWidth;
                         target.style.fontSize = "16px";
                         target.innerHTML = this.props.job.rows[index].target.content_clean;
                         document.getElementById('hiddenHtml').appendChild(target);
@@ -165,6 +166,15 @@ class JobComponent extends Component {
     updateWindowDimensions = () => {
         let data = {};
 
+        if(window.innerWidth < 992){
+            data.segmentContentWidth = "235px";
+        }else if(window.innerWidth < 1200){
+            data.segmentContentWidth = "340px";
+        }else{
+            data.segmentContentWidth = "437px";
+        }
+
+
         data.width = window.innerWidth;
         data.height = window.innerHeight;
 
@@ -173,7 +183,6 @@ class JobComponent extends Component {
         })
     };
     setScrollToSegment = (index) => {
-        console.log(index);
         this.setState({
             scrollToSegment: index
         })

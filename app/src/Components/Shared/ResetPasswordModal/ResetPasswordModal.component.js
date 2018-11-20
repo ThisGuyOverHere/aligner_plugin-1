@@ -2,10 +2,13 @@ import React, {Component} from 'react';
 import SystemActions from "../../../Actions/System.actions";
 import ModalHeader from "../ModalHeader/ModalHeader.component";
 import {httpResetPassword} from "../../../HttpRequests/System.http";
+import PropTypes from "prop-types";
 
 class ResetPasswordModal extends Component {
 
-    static propTypes = {};
+    static propTypes = {
+        fromExport: PropTypes.bool,
+    };
 
     constructor(props) {
         super(props);
@@ -20,12 +23,17 @@ class ResetPasswordModal extends Component {
     }
 
     onCloseResetPassword = () => {
-        SystemActions.setResetPasswordStatus(false);
+        SystemActions.setResetPasswordStatus(false,false);
     };
 
     onBackToLoginClick = () => {
-        SystemActions.setResetPasswordStatus(false);
-        SystemActions.setLoginStatus(true);
+        if(this.props.fromExport){
+            SystemActions.setResetPasswordStatus(false,true);
+            SystemActions.setExportModalStatus(true);
+        }else{
+            SystemActions.setResetPasswordStatus(false,false);
+            SystemActions.setLoginStatus(true);
+        }
     };
 
     resetPassword = (event) => {

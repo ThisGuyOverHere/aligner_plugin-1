@@ -20,6 +20,7 @@ class SplitComponent extends Component {
         this.state = {
             splitModalStatus: false,
             segmentContent: this.props.segment.content_raw,
+            splitCount: 0,
             chars: this.props.segment.content_raw.split(""),
             splits: {},
             charDictionary: this.fillDictionaries().charDictionary,
@@ -55,7 +56,6 @@ class SplitComponent extends Component {
                result.push(x);
            }
         });
-        console.log(result);
 
         return result
 
@@ -70,6 +70,7 @@ class SplitComponent extends Component {
     }
 
     render = () => {
+        const {splitCount} = this.state;
         return (
             <div>
                 <div>
@@ -81,7 +82,7 @@ class SplitComponent extends Component {
                             <p id="toSplit" onMouseLeave={() => this.onCharHover(-1)}>
                                 {this.renderItems()}
                             </p>
-                            <button className="ui button primary splitBtn" onClick={this.onSave}>Split</button>
+                            <button className="ui button primary splitBtn" disabled={splitCount === 0} onClick={this.onSave}>Split</button>
                         </div>
                     </div>
                 </div>
@@ -118,14 +119,6 @@ class SplitComponent extends Component {
                     isIcon={true}
                     onClick={this.onCharClick}
                 />)
-            } else if (this.state.temporarySplitPosition === index) {
-                countSplittedItems++;
-                items.push(<SplitDivisor
-                    key={countSplittedItems}
-                    temporary={true}
-                    position={index}
-                    onClick={this.onCharClick}
-                />)
             }
         });
         return items;
@@ -140,11 +133,19 @@ class SplitComponent extends Component {
      * @param index
      */
     onCharClick = (index) => {
+        let splitCount = this.state.splitCount;
         if (index !== this.state.chars.length - 1) {
             let splits = this.state.splits;
-            splits[index] ? splits[index] = false : splits[index] = true;
+            if(splits[index]){
+                splits[index] = false;
+                splitCount--;
+            }else{
+                splits[index] = true
+                splitCount++;
+            }
             this.setState({
-                splits: splits
+                splits: splits,
+                splitCount: splitCount
             })
         }
     };

@@ -88,13 +88,12 @@ class HeaderComponent extends Component {
                             <div id="logo"></div>
                         </Link>
                     </li>
-                    <li></li>
                     <li>
                         <div id="final_title">
                             {this.state.projectTitle}
                         </div>
                     </li>
-
+                    <li/>
                     <li id={"source"}>
                         <span>{this.state.sourceLang}</span>
                     </li>
@@ -160,7 +159,7 @@ class HeaderComponent extends Component {
                 }
             ).catch(
             error => {
-                console.log(error);
+                console.error(error);
             }
         );
     }

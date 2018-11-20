@@ -8,7 +8,8 @@ import {httpMe, httpRegistration, httpResendConfirmationEmail} from "../../../Ht
 class RegistrationComponent extends Component {
 
     static propTypes = {
-        googleLink : PropTypes.string
+        googleLink : PropTypes.string,
+        fromExport: PropTypes.bool
     };
 
     constructor(props) {
@@ -161,11 +162,11 @@ class RegistrationComponent extends Component {
     };
 
     onCloseRegistration = () => {
-        SystemActions.setRegistrationStatus(false);
+        this.props.fromExport ? SystemActions.setRegistrationStatus(false,true) : SystemActions.setRegistrationStatus(false,false);
     };
 
     openLoginModal = () => {
-        SystemActions.setLoginStatus(true);
+        this.props.fromExport ? SystemActions.setExportModalStatus(true) : SystemActions.setLoginStatus(true);
         this.onCloseRegistration();
     };
 
@@ -202,7 +203,6 @@ class RegistrationComponent extends Component {
 
         httpRegistration(this.state.userData)
             .then(response => {
-                //console.log(response);
                 this.setState({
                     sendingRegistration: false,
                     registered: true
@@ -210,7 +210,6 @@ class RegistrationComponent extends Component {
             })
             .catch(error => {
                 const err = error.response.data.error.message;
-                //console.log(err);
                 this.setState({
                     sendingRegistration: false,
                     registered: false,

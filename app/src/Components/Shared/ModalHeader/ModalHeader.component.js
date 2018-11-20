@@ -8,7 +8,8 @@ class ModalHeader extends Component {
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
         image: PropTypes.string,
-        modalName: PropTypes.string
+        modalName: PropTypes.string.isRequired,
+        close: PropTypes.func
     };
 
     constructor(props) {
@@ -37,6 +38,9 @@ class ModalHeader extends Component {
                 break;
             case 'logout':
                 SystemActions.setLogoutStatus(false);
+                break;
+            case 'formats':
+                this.props.close();
                 break;
         }
     };

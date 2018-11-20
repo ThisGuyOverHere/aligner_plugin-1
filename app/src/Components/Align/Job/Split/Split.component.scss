@@ -24,7 +24,6 @@
       span {
         position: relative;
         bottom: 2px;
-        cursor: pointer;
         color: $headerText;
         font-size: 1.2rem;
         &:hover {
@@ -55,14 +54,12 @@
     padding: 0 24px 24px;
     #toSplit {
       border: 2px dotted #d5d5d5;
+      cursor: col-resize;
       padding: 16px;
       font-size: 14px;
       width: 100%;
       display: inline-block;
       margin: 24px 0;
-      > * {
-        cursor: pointer;
-      }
     }
     .splitBtn{
       background: $primary;

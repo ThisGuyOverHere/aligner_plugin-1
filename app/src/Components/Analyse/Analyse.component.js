@@ -87,7 +87,7 @@ class AnalyseComponent extends Component {
                 }
             ).catch(
                 error => {
-                    console.log(error);
+                    console.error(error);
                 }
         );
         //clear pulling interval
@@ -99,7 +99,7 @@ class AnalyseComponent extends Component {
     getInfo = (info) => {
         this.setState({
             sourceLang: info.source_lang,
-            sourceLangFileName: info.target_filename,
+            sourceLangFileName: info.source_filename,
             targetLang: info.target_lang,
             targetLangFileName: info.target_filename,
 
