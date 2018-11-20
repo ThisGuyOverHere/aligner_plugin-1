@@ -118,14 +118,6 @@ class SplitComponent extends Component {
                     isIcon={true}
                     onClick={this.onCharClick}
                 />)
-            } else if (this.state.temporarySplitPosition === index) {
-                countSplittedItems++;
-                items.push(<SplitDivisor
-                    key={countSplittedItems}
-                    temporary={true}
-                    position={index}
-                    onClick={this.onCharClick}
-                />)
             }
         });
         return items;

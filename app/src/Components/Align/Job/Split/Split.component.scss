@@ -1,6 +1,7 @@
 @import "../../../../../assets/theme/variables";
 
 .splitContainer {
+  cursor: col-resize;
   z-index: 9999;
   position: fixed;
   margin: auto;
@@ -24,7 +25,6 @@
       span {
         position: relative;
         bottom: 2px;
-        cursor: pointer;
         color: $headerText;
         font-size: 1.2rem;
         &:hover {
@@ -60,9 +60,6 @@
       width: 100%;
       display: inline-block;
       margin: 24px 0;
-      > * {
-        cursor: pointer;
-      }
     }
     .splitBtn{
       background: $primary;
