@@ -183,7 +183,6 @@ class JobComponent extends Component {
         })
     };
     setScrollToSegment = (index) => {
-        console.log(index);
         this.setState({
             scrollToSegment: index
         })

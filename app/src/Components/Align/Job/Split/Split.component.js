@@ -56,7 +56,6 @@ class SplitComponent extends Component {
                result.push(x);
            }
         });
-        console.log(result);
 
         return result
 

@@ -203,7 +203,6 @@ class RegistrationComponent extends Component {
 
         httpRegistration(this.state.userData)
             .then(response => {
-                //console.log(response);
                 this.setState({
                     sendingRegistration: false,
                     registered: true
@@ -211,7 +210,6 @@ class RegistrationComponent extends Component {
             })
             .catch(error => {
                 const err = error.response.data.error.message;
-                //console.log(err);
                 this.setState({
                     sendingRegistration: false,
                     registered: false,
