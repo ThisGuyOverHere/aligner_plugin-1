@@ -41,7 +41,7 @@
 
   .aligner-nav-log {
     display: grid;
-    grid-template-columns: 0.6fr 56px 0.7fr 0.5fr 0.1fr 0.5fr 0.7fr 0.6fr;
+    grid-template-columns: 0.5fr 1fr 56px 0.3fr 0.1fr 0.3fr 1.2fr 0.3fr;
     li {
       &:nth-child(2) {
         text-align: center;
