@@ -56,12 +56,9 @@ class TMXImportWorker extends AbstractWorker {
 
         $tmx_id = $response->id;
 
-        while ( 1 ) {
+        while ( empty($upload_status[ 'completed' ]) ) {
             sleep( 1 );
             $upload_status = $TMService->tmxUploadStatus();
-            if ( $upload_status[ 'completed' ] == true ) {
-                break;
-            }
         }
 
         $TMService->requestChunkTMXEmailDownload( $tmx_id, $options['email'], $options['first_name'], $options['last_name'] );
