@@ -215,7 +215,7 @@ let ProjectActions = {
                     })
                 });
             }
-            const sourceOrderList = selection.source.list.sort();
+            const sourceOrderList = selection.source.list.sort((a,b)=>{return a-b});
             const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0], 'source');
             const destination = getSegmentByIndex(firstSourceIndex, 'target').order;
             AppDispatcher.dispatch({
