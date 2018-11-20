@@ -26,21 +26,23 @@ class SegmentsController extends AlignerController {
         $this->appendValidator( $jobValidator );
     }
 
-    public function get(){
+    public function get() {
         $id_job = $this->job->id;
 
-        $target = Segments_SegmentDao::getTypeOrderedByJobId($id_job, 'target');
-        foreach ($target as $key => $segment){
-            $target[$key]->content_raw   = AlignUtils::_mark_xliff_tags($segment->content_raw);
-            $target[$key]->content_clean = htmlspecialchars_decode($segment->content_clean);
-        }
+        $order_segments = Segments_SegmentDao::getOrderedByJobId( $id_job );
+        $target         = [];
+        $source         = [];
 
-        $source = Segments_SegmentDao::getTypeOrderedByJobId($id_job, 'source');
-        foreach ($source as $key => $segment){
-            $source[$key]->content_raw   = AlignUtils::_mark_xliff_tags($segment->content_raw);
-            $source[$key]->content_clean = htmlspecialchars_decode($segment->content_clean);
+        foreach ( $order_segments as &$order_segment ) {
+            $order_segment->content_raw   = AlignUtils::_mark_xliff_tags( $order_segment->content_raw );
+            $order_segment->content_clean = htmlspecialchars_decode( $order_segment->content_clean );
+            if ( $order_segment->type == "source" ) {
+                $source[] = $order_segment;
+            } elseif ( $order_segment->type == "target" ) {
+                $target[] = $order_segment;
+            }
         }
-        $this->response->json(['target' => $target, 'source' => $source]);
+        $this->response->json( [ 'target' => $target, 'source' => $source ] );
 
     }
 }
