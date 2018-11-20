@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
+import ModalHeader from "../../../Shared/ModalHeader/ModalHeader.component";
 
 class FileFormatsModal extends Component {
     static propTypes = {
@@ -12,19 +13,9 @@ class FileFormatsModal extends Component {
     render = () => {
         return (
             <div>
-                <div className="overlay" onClick={this.props.formatModalState}></div>
+                <div className="overlay" onClick={this.props.formatModalState}/>
                 <div className="formatsContainer">
-                    <div className="header">
-                        <div className="sx-header">
-                            <img src="/public/img/logo-ico.png"></img>
-                            <h1>Supported file formats</h1>
-                        </div>
-                        <div className="dx-header">
-                            <span onClick={this.props.formatModalState}>
-                                <i className="icon window close"></i>
-                            </span>
-                        </div>
-                    </div>
+                    <ModalHeader modalName={"formats"} close={this.props.formatModalState}/>
                     <div className="content">
                         <div className="format-box">
                             <h3> Office </h3>

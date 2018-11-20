@@ -15,12 +15,11 @@ let SystemStore = assign({}, EventEmitter.prototype, {
     },
 });
 
-
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
     switch (action.actionType) {
         case SystemConstants.OPEN_REGISTRATION_MODAL:
-            SystemStore.emitChange(SystemConstants.OPEN_REGISTRATION_MODAL, action.status);
+            SystemStore.emitChange(SystemConstants.OPEN_REGISTRATION_MODAL, action.status, action.fromExport);
             break;
         case SystemConstants.OPEN_LOGIN:
             SystemStore.emitChange(SystemConstants.OPEN_LOGIN, action.status);
@@ -29,9 +28,9 @@ AppDispatcher.register(function (action) {
             SystemStore.emitChange(SystemConstants.OPEN_EXPORT_MODAL, action.status);
             break;
         case SystemConstants.OPEN_RESET_PASSWORD_MODAL:
-            SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL, action.status);
+            SystemStore.emitChange(SystemConstants.OPEN_RESET_PASSWORD_MODAL, action.status, action.fromExport);
             break;
-        case SystemConstants.  OPEN_CHANGE_PASSWORD_MODAL:
+        case SystemConstants.OPEN_CHANGE_PASSWORD_MODAL:
             SystemStore.emitChange(SystemConstants.  OPEN_CHANGE_PASSWORD_MODAL, action.status);
             break;
         case SystemConstants.USER_STATUS:

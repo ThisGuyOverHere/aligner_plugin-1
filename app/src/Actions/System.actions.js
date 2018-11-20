@@ -22,11 +22,13 @@ let SystemActions = {
     /**
      *
      * @param {Boolean} status The status of registration, true for open the modal and false for close
+     * @param {Boolean} fromExport, says if the user action cams from export modal
      */
-    setRegistrationStatus: function (status) {
+    setRegistrationStatus: function (status, fromExport) {
         AppDispatcher.dispatch({
             actionType: SystemConstants.OPEN_REGISTRATION_MODAL,
-            status: status
+            status: status,
+            fromExport: fromExport
         });
     },
 
@@ -43,12 +45,14 @@ let SystemActions = {
 
     /**
      *
-     * @param {Boolean} status The status of Reset Password Modal, true for open the modal and false for close
+     * @param {Boolean} status, The status of Reset Password Modal, true for open the modal and false for close
+     * @param {Boolean} fromExport, says if the user action cams from export modal
      */
-    setResetPasswordStatus: function (status) {
+    setResetPasswordStatus: function (status, fromExport) {
         AppDispatcher.dispatch({
             actionType: SystemConstants.OPEN_RESET_PASSWORD_MODAL,
-            status: status
+            status: status,
+            fromExport: fromExport
         });
     },
 
