@@ -787,12 +787,17 @@ class JobActionController extends AlignerController {
             $new_match_destination[ 'order' ]          = $new_match_order;
             $new_match_destination[ 'next' ]           = $referenceMatch['next'];
             $new_match_destination[ 'score' ]          = 100;
-            $new_match_destination[ 'segment_id' ]     = $referenceMatch[ 'id' ];
             $new_match_destination[ 'type' ]           = 'target';
             $new_match_destination[ 'id_job' ]         = $id_job;
-            $new_match_destination[ 'content_raw' ]    = $referenceMatch['content_raw'];
-            $new_match_destination[ 'content_clean' ]  = $referenceMatch['content_clean'];
-            $new_match_destination[ 'raw_word_count' ] = $referenceMatch['raw_word_count'];
+            
+            /* Checks if the destination segment has been already merged
+            so that it won't assign a segment id that no longer exists */
+            if(!in_array($destination_order, $targetOrders)){
+                $new_match_destination[ 'segment_id' ]     = $referenceMatch[ 'id' ];
+                $new_match_destination[ 'content_raw' ]    = $referenceMatch['content_raw'];
+                $new_match_destination[ 'content_clean' ]  = $referenceMatch['content_clean'];
+                $new_match_destination[ 'raw_word_count' ] = $referenceMatch['raw_word_count'];
+            }
 
             $inverseReference  = Segments_SegmentMatchDao::getSegmentMatch( $first_source['order'], $id_job, 'source' );
             if(!is_object($inverseReference)){
