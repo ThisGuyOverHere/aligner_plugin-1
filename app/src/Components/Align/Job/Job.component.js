@@ -105,8 +105,7 @@ class JobComponent extends Component {
         }
         return (
             <div className={classes.join(" ")}>
-                {this.state.statusExportModal &&
-                <ExportModal
+                {this.state.statusExportModal && <ExportModal
                     user={this.state.user}
                     image={this.state.googleUserImage}
                 />}
