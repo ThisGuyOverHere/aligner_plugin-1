@@ -5,7 +5,7 @@ const AlignLoader = () => (
             {[0,1,2].map( (index) => {
                 return   <div key={index} className='element'/>
             })}
-            <div className='loading'>Loading…</div>
+            <div className='align-loading'>Loading…</div>
             <div className='large-square'/>
         </div>
 );
