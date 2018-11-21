@@ -45,7 +45,7 @@ class JobActionController extends AlignerController {
         $type     = $this->params[ 'type' ];
 
 
-        sort( $orders );
+        sort( $orders, SORT_NUMERIC);
 
         foreach ($orders as $order) {
             $segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $type);
@@ -743,8 +743,8 @@ class JobActionController extends AlignerController {
             }
         }
 
-        sort($sourceOrders);
-        sort($targetOrders);
+        sort($sourceOrders, SORT_NUMERIC);
+        sort($targetOrders, SORT_NUMERIC);
 
         foreach ( $sourceOrders as $order ) {
             $source = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, 'source');
