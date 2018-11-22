@@ -64,7 +64,7 @@ class SearchComponent extends Component {
                         <input ref={(input) => {
                             this.searchInput = input;
                         }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
-                        {(active && occurrencesList.length > 0)  && <span>{featuredSearchResult + 1} / {occurrencesList.length - 1}</span>}
+                        {(active && occurrencesList.length > 0)  && <span>{featuredSearchResult + 1} / {occurrencesList.length}</span>}
                         {(active && occurrencesList.length === 0 )  && <span> 0 / 0</span>}
                     </Hotkeys>
                 </form>
@@ -181,7 +181,7 @@ class SearchComponent extends Component {
 
     setFeatured = (value) => {
         if (this.state.occurrencesList.length > 1) {
-            let module = this.state.occurrencesList.length - 1;
+            let module = this.state.occurrencesList.length;
             value = this.mod(value, module);
         } else {
             value = 0;
