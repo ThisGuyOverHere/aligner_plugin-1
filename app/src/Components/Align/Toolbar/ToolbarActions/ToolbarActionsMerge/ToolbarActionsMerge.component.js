@@ -49,7 +49,7 @@ class ToolbarActionsMergeComponent extends Component {
                 || (this.props.selection.target.count === 0 && this.props.selection.source.count > 1))
         ) {
             const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-            const orders = this.props.selection[type].list.sort();
+            const orders = this.props.selection[type].list.sort((a,b)=>{return a-b});
             ProjectActions.mergeSegments(this.props.jobConf.id, this.props.jobConf.password, orders, type);
             ProjectActions.addSegmentToSelection(-1);
             ProjectActions.onActionHover(null);

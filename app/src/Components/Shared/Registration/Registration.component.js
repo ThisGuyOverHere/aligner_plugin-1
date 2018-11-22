@@ -117,7 +117,7 @@ class RegistrationComponent extends Component {
                                             />
                                             <label className={!this.state.checkbox ? "error-check" : null}>
                                                 Accept <span> </span>
-                                                <a href="" target="_blank" className="forgot-password">
+                                                <a href="/terms" target="_blank" className="forgot-password">
                                                     Terms and conditions
                                                 </a>
                                             </label>
