@@ -135,14 +135,14 @@
       margin: 16px auto;
       width: 22px;
       height: 22px;
-      padding: 1px 2px;
       border-radius: 50%;
-      border: 1px solid #00AEE4;
-      i{
-        color: #00AEE4;
-        font-size: 16px;
-        margin: 0 auto;
-        text-align: left;
+      border: 1px solid $primary;
+      .fake-radio-clicked{
+        width: 16px;
+        height: 16px;
+        background: $primary;
+        border-radius: 50px;
+        margin: 2px;
       }
     }
     form{
@@ -255,18 +255,19 @@
   }
 
   input[type="radio"] + label{
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
     border: 1px solid #ccc;
     border-radius: 50%;
-    padding: 2px;
+    display: block;
+    cursor: pointer;
   }
 
   input[type="radio"] + label span{
     display: inline-block;
     width: 16px;
     height: 16px;
-    margin: 0px 0px -2px;
+    margin: 2px;
     cursor: pointer;
     border-radius: 50%;
   }
