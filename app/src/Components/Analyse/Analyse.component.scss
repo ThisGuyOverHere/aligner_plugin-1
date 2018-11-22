@@ -6,8 +6,16 @@
 }
 
 .analyse.container {
-  width: 800px;
+  display: grid;
+  grid-template-columns: 56px 1fr;
   margin: 10% auto;
+  .info-animation{
+	position: relative;
+	margin: 0 auto;
+	width: 800px;
+	height: 100vh;
+	overflow: hidden;
+  }
   .files-info, .process-info {
 	display: grid;
 	grid-template-columns: 1fr 1fr;

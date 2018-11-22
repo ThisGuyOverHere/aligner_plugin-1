@@ -47,25 +47,28 @@ class AnalyseComponent extends Component {
     render() {
         return (
             <div className="container analyse">
-                <div className="files-info">
-                    <SourceComponent
-                        sourceLang={this.state.sourceLang}
-                        sourceLangFileName={this.state.sourceLangFileName}
-                        totalSourceSegments={this.state.totalSourceSegments}
-                    />
-                    <TargetComponent
-                        targetLang={this.state.targetLang}
-                        targetLangFileName={this.state.targetLangFileName}
-                        totalTargetSegments={this.state.totalTargetSegments}
-                    />
-                </div>
+                <div className="gap"/>
+                <div className="info-animation">
+                    <div className="files-info">
+                        <SourceComponent
+                            sourceLang={this.state.sourceLang}
+                            sourceLangFileName={this.state.sourceLangFileName}
+                            totalSourceSegments={this.state.totalSourceSegments}
+                        />
+                        <TargetComponent
+                            targetLang={this.state.targetLang}
+                            targetLangFileName={this.state.targetLangFileName}
+                            totalTargetSegments={this.state.totalTargetSegments}
+                        />
+                    </div>
 
-                <PreAlignStatus jobId={this.state.job.id}
-                                jobPassword={this.props.match.params.password}
-                                actualPhase = {this.state.actualPhase}
-                                progress = {this.state.progress}
-                />
-                <Animation/>
+                    <PreAlignStatus jobId={this.state.job.id}
+                                    jobPassword={this.props.match.params.password}
+                                    actualPhase = {this.state.actualPhase}
+                                    progress = {this.state.progress}
+                    />
+                    <Animation/>
+                </div>
             </div>
         );
     }
