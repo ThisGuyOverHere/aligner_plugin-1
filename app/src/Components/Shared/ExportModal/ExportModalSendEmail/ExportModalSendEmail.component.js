@@ -60,7 +60,7 @@ class ExportModalSendEmail extends Component {
             cloudCheckBox: !this.state.cloudCheckBox,
         });
     };
-    
+
     exportTmx = () => {
         this.setState({
             sending: true
@@ -71,7 +71,6 @@ class ExportModalSendEmail extends Component {
                     sending: false
                 });
                 this.props.setCompletedExport();
-                console.log(response)
             }, error => {
                 this.setState({
                     sending: false

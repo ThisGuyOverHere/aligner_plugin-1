@@ -41,7 +41,7 @@ let ProjectActions = {
                     actionType: ProjectConstants.JOB_ERROR,
                     error: error.response.data.errors[0].message
                 });
-                console.log(error.response.data.errors[0].message);
+                console.error(error.response.data.errors[0].message);
             });
         },
 
@@ -361,13 +361,6 @@ let ProjectActions = {
          * @param {string} type
          */
         mergeSegments: function (jobID, jobPassword, orders, type) {
-            /*console.log(orders);
-            httpMergeSegments(jobID, jobPassword, {
-                order: orders,
-                type: type
-            }).then((response) => {
-                console.log(response);
-            });*/
             const changes = this.getLogsForMergeSegments(orders, type);
 
             AppDispatcher.dispatch({
