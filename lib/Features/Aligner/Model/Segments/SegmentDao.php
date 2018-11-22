@@ -226,7 +226,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
         $conn = NewDatabase::obtain()->getConnection();
 
 
-        $query = "SELECT s.id as id, s.`type`, sm.order, sm.next, s.content_clean, s.content_raw FROM segments as s
+        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ?
         ORDER by sm.order";
@@ -237,6 +237,24 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $queryParams );
     }
+
+    public static function getOrderedByJobId($id_job, $ttl = 0){
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+
+
+        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw FROM segments as s
+        RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
+        WHERE sm.id_job = ?
+        ORDER by sm.order";
+
+        $queryParams =  array( $id_job );
+
+        $stmt = $conn->prepare( $query );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $queryParams );
+    }
+
 
 
     public function countByJobId($id_job, $type, $ttl = 0){

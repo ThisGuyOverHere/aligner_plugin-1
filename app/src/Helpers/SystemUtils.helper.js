@@ -77,7 +77,7 @@ export const syncWithBackend = (method, callback) => {
             }).then((response) => {
                 callback()
             }, (error) => {
-                console.log(error);
+                console.error(error);
             });
             break;
         case 'merge_align':
@@ -85,7 +85,7 @@ export const syncWithBackend = (method, callback) => {
                 ProjectActions.requireDirectChangesToStore(response.data);
                 callback()
             }, (error) => {
-                console.log(error);
+                console.error(error);
             });
             break;
         case 'align':
@@ -97,21 +97,21 @@ export const syncWithBackend = (method, callback) => {
             }).then((response) => {
                 callback()
             }, (error) => {
-                console.log(error);
+                console.error(error);
             });
             break;
         case 'reverse':
             httpReverseSegments(method.data.jobID, method.data.jobPassword, method.data).then((response) => {
                 callback()
             }, (error) => {
-                console.log(error);
+                console.error(error);
             });
             break;
         case 'delete':
             httpDeleteSegments(method.data.jobID, method.data.jobPassword, method.data.matches).then((response) => {
                 callback()
             }, (error) => {
-                console.log(error);
+                console.error(error);
             });
             break;
     }
@@ -126,9 +126,7 @@ export const checkResultStore = (source, target) => {
             }
             console.log('[SOURCE: ' + +x + ']   ' + source[x].order + '       ' + source[x].next);
             console.log('[SOURCE: ' + parseInt(x + 1) + ']   ' + source[x + 1].order + '       ' + source[x + 1].next);
-            //console.log('Source index: ',x);
         }
-        //console.log('['+x+']   '+source[x].order+'       '+source[x].next);
     }
     console.log('\n\n')
     for (let x = 0; x < target.length - 1; x++) {
@@ -138,9 +136,7 @@ export const checkResultStore = (source, target) => {
             }
             console.log('[TARGET: ' + +x + ']   ' + target[x].order + '       ' + target[x].next);
             console.log('[TARGET: ' + parseInt(x + 1) + ']   ' + target[x + 1].order + '       ' + target[x + 1].next);
-            /*console.log('Target index: ',x);*/
         }
-        //console.log('['+x+']   '+target[x].order+'       '+target[x].next);
     }
     console.log('\n\n')
 }

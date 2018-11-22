@@ -176,7 +176,7 @@ class UploadComponent extends Component {
             });
         }, (error) => {
             //todo: implement error UI
-            console.log(error);
+            console.error(error);
             this.setState({
                 inAlign: false
             });
