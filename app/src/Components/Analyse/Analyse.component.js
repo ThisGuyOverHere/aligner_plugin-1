@@ -8,6 +8,7 @@ import env from "../../Constants/Env.constants";
 import ProjectConstants from "../../Constants/Project.constants";
 import ProjectStore from "../../Stores/Project.store";
 import {textEllipsisCenter} from "../../Helpers/SystemUtils.helper";
+import CompletedAnimation from "./CompletedAnimation/CompletedAnimation.component";
 
 class AnalyseComponent extends Component {
     static propTypes = {};
@@ -28,7 +29,9 @@ class AnalyseComponent extends Component {
             totalTargetSegments: '',
             actualPhase: 0,
             phaseName: '',
-            progress: 0
+            progress: 0,
+            completed: false,
+            redirect: false
         };
     };
 
@@ -46,55 +49,63 @@ class AnalyseComponent extends Component {
 
     render() {
         return (
-            <div className="container analyse">
-                <div className="gap"/>
-                <div className="info-animation">
-                    <div className="files-info">
-                        <SourceComponent
-                            sourceLang={this.state.sourceLang}
-                            sourceLangFileName={this.state.sourceLangFileName}
-                            totalSourceSegments={this.state.totalSourceSegments}
-                        />
-                        <TargetComponent
-                            targetLang={this.state.targetLang}
-                            targetLangFileName={this.state.targetLangFileName}
-                            totalTargetSegments={this.state.totalTargetSegments}
-                        />
-                    </div>
+            this.state.completed ?
+                <CompletedAnimation
+                    jobId={this.props.match.params.jobID}
+                    jobPassword={this.props.match.params.password}
+                />
+                :
+                <div className="container analyse">
+                    <div className="gap"/>
+                    <div className="info-animation">
+                        <div className="files-info">
+                            <SourceComponent
+                                sourceLang={this.state.sourceLang}
+                                sourceLangFileName={this.state.sourceLangFileName}
+                                totalSourceSegments={this.state.totalSourceSegments}
+                            />
+                            <TargetComponent
+                                targetLang={this.state.targetLang}
+                                targetLangFileName={this.state.targetLangFileName}
+                                totalTargetSegments={this.state.totalTargetSegments}
+                            />
+                        </div>
 
-                    <PreAlignStatus jobId={this.state.job.id}
-                                    jobPassword={this.props.match.params.password}
-                                    actualPhase = {this.state.actualPhase}
-                                    progress = {this.state.progress}
-                    />
-                    <Animation/>
+                        <PreAlignStatus jobId={this.state.job.id}
+                                        jobPassword={this.props.match.params.password}
+                                        actualPhase={this.state.actualPhase}
+                                        progress={this.state.progress}
+                        />
+                        <Animation/>
+                    </div>
                 </div>
-            </div>
         );
     }
 
     pullingInfo = () => {
+        let data = {};
         // call pulling info api
         httpGetPullingInfo(this.state.job.id, this.state.job.password)
             .then(
                 response => {
-                    const data = response.data;
+                    data = response.data;
                     // update info
                     this.setState({
                         actualPhase: data.phase,
                         totalSourceSegments: data.source_segments,
                         totalTargetSegments: data.target_segments,
                         phaseName: data.phase_name,
-                        progress: +data.progress
+                        progress: +data.progress,
+                        completed: (this.state.progress === 100)
                     });
                 }
             ).catch(
-                error => {
-                    console.error(error);
-                }
+            error => {
+                console.error(error);
+            }
         );
         //clear pulling interval
-        if(this.state.actualPhase === 7){
+        if (this.state.actualPhase === 7) {
             clearInterval(this.pullingId);
         }
     };

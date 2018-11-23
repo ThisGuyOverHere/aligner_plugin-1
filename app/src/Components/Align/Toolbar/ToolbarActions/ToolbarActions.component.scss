@@ -20,6 +20,7 @@
 		  border-radius: 2px;
 		  color: $white;
 		  cursor: pointer;
+		  opacity: 0.8;
 		  &:active, &:focus {
 			border: 1px solid $primary;
 			background-color: $primary;
@@ -31,6 +32,7 @@
 			border: 1px solid $primary;
 			background-color: $primary;
 			color: $white;
+			opacity: 1;
 		  }
 		  &:disabled {
 			cursor: not-allowed;
