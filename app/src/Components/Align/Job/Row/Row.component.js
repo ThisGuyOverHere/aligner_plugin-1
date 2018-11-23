@@ -103,7 +103,7 @@ class RowComponent extends Component {
             <div className={rowClass.join(' ')} ref={re => {
                 this.ref = re
             }}>
-                <div>{this.props.index}</div>
+                <div>{this.props.index+1}</div>
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
                                   search={this.props.search}

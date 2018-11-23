@@ -6,7 +6,7 @@ const PreAlignStatus = (props) => {
         return <Redirect to={'/job/' + props.jobId + '/' + props.jobPassword + '/align'}/>;
     } else {
         return <div>
-            <h3>Volume analysis... </h3>
+            <h3>Automatically Aligning... </h3>
             <div className="bar-container">
                 <div className='ui progress' data-percent={props.progress}>
                     <div className='bar' style={{width: props.progress + '%'}}>
