@@ -11,6 +11,7 @@ namespace Features\Aligner\Utils\AsyncTasks\Workers;
 include_once \INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use Exceptions\ValidationError;
+use Features\Aligner;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\NewDatabase;
@@ -219,6 +220,18 @@ class AlignJobWorker extends AbstractWorker {
             }
         }
 
+        $config = Aligner::getConfig();
+
+        $total_words = 0;
+        foreach ($segments as $segment) {
+            $total_words += $segment['raw_word_count'];
+        }
+
+        if ($total_words > $config["MAX_WORDS_PER_FILE"]){
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_8], $this->id_job, $this->job->password );
+            throw new ValidationError("File exceeded the word limit, job creation canceled");
+        }
+        
         return $segments;
     }
 
