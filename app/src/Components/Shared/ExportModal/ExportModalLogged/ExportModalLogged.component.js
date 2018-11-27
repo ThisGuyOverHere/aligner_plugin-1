@@ -18,7 +18,8 @@ class ExportModalLogged extends Component {
             oldKey: null,
             newTmx: null,
             txmInLoad: false,
-            exporting: false
+            exporting: false,
+            tmxCreation: false
         };
     }
 
@@ -51,9 +52,10 @@ class ExportModalLogged extends Component {
 
     render() {
         let exportBtn = ['export-btn', 'ui', 'button'];
-        if(this.state.exporting){
-            exportBtn.push('loading');
-        }
+        let newTmxBtn = ['ui', 'button','create'];
+        this.state.exporting ?  exportBtn.push('loading') : null;
+        this.state.tmxCreation ?  newTmxBtn.push('loading') : null;
+
         return (
             <div id="logged">
                 <h1>Export TMX in public cloud or private</h1>
@@ -79,11 +81,11 @@ class ExportModalLogged extends Component {
                         our collaborative translation algorithm.  </p>
                     :
                     <div>
-                        <button className="ui button create" onClick={this.createMemory}>Create new TMX</button>
+                        <button className={newTmxBtn.join(" ")} onClick={this.createMemory}>Create new TMX</button>
                         {this.state.newTmx ?
                             <div className="new-memory">
                                 <div className={"icon-container"}>
-                                    <i className={"icon circle"}/>
+                                    <div className={"fake-radio-clicked"}/>
                                 </div>
                                 <form onSubmit={this.saveMemory}>
                                     <div className="form-container">
@@ -164,6 +166,9 @@ class ExportModalLogged extends Component {
         }
     };
     createMemory = () => {
+        this.setState({
+            tmxCreation: true
+        });
         httpCreateTmx().then((response) => {
             const tmx = {
                 id: response.data.id,
@@ -175,6 +180,7 @@ class ExportModalLogged extends Component {
                 newTmx: tmx,
                 oldKey: this.state.selected,
                 selected: tmx,
+                tmxCreation: false
             });
         }, (error) => {
 
