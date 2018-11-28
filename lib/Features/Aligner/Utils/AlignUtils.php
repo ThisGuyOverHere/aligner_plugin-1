@@ -185,4 +185,22 @@ class AlignUtils
         return $aunion;
     }
 
+    public static function collectFlashMessages() {
+        $currentCookieParams = session_get_cookie_params();
+
+        $rootDomain = '.matecat.com';
+
+        session_set_cookie_params(
+            $currentCookieParams["lifetime"],
+            $currentCookieParams["path"],
+            $rootDomain,
+            $currentCookieParams["secure"],
+            $currentCookieParams["httponly"]
+        );
+
+        \Bootstrap::sessionStart();
+        $messages = \FlashMessage::flush() ;
+        return $messages ;
+    }
+
 }
