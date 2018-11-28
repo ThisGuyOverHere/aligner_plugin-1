@@ -199,21 +199,25 @@ class AlignJobWorker extends AbstractWorker {
                 continue;
             }
 
+            $total_words = 0;
             foreach ($xliff_file[ 'trans-units' ] as $trans_unit) {
 
                 // Extract only raw-content
-                $unit_segments = array_map(function ($item) {
+                $unit_items = array_map(function ($item) {
                     return $item['raw-content'];
                 }, $trans_unit[ 'seg-source' ]);
 
                 // Build an object with raw-content and clean-content
-                $unit_segments = array_map(function ($item) use ($lang) {
-                    return [
-                            'content_raw' => $item,
-                            'content_clean' => AlignUtils::_cleanSegment($item, $lang),
-                            'raw_word_count' => AlignUtils::_countWordsInSegment($item, $lang)
+                $unit_segments = [];
+                foreach ($unit_items as $item) {
+                    $unit_segment = [
+                        'content_raw' => $item,
+                        'content_clean' => AlignUtils::_cleanSegment($item, $lang),
+                        'raw_word_count' => AlignUtils::_countWordsInSegment($item, $lang)
                     ];
-                }, $unit_segments);
+                    $total_words += $unit_segment['raw_word_count'];
+                    $unit_segments[] = $unit_segment;
+                }
 
                 // Append to existing Segments
                 $segments = array_merge($segments, $unit_segments);
@@ -221,11 +225,6 @@ class AlignJobWorker extends AbstractWorker {
         }
 
         $config = Aligner::getConfig();
-
-        $total_words = 0;
-        foreach ($segments as $segment) {
-            $total_words += $segment['raw_word_count'];
-        }
 
         if ($total_words > $config["MAX_WORDS_PER_FILE"]){
             Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_8], $this->id_job, $this->job->password );
