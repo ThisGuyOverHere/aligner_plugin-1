@@ -188,7 +188,8 @@ class AlignUtils
     public static function collectFlashMessages() {
         $currentCookieParams = session_get_cookie_params();
 
-        $rootDomain = '.matecat.com';
+        $prefix = explode('.',$_SERVER['SERVER_NAME'])[0];
+        $rootDomain = explode($prefix, $_SERVER['SERVER_NAME'])[1];
 
         session_set_cookie_params(
             $currentCookieParams["lifetime"],
