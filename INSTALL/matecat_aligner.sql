@@ -29,7 +29,7 @@ CREATE TABLE `jobs` (
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` enum('active', 'archived', 'cancelled') NOT NULL DEFAULT 'active',
-  `status_analysis` enum('not_started', 'started', 'segments_created', 'fetching', 'translating', 'aligning', 'merging', 'complete') NOT NULL DEFAULT 'not_started',
+  `status_analysis` enum('not_started', 'started', 'segments_created', 'fetching', 'translating', 'aligning', 'merging', 'complete', 'words_limit_exceeded') NOT NULL DEFAULT 'not_started',
   `progress` int(2) NOT NULL DEFAULT 0,
   `subject` varchar(100) DEFAULT 'general',
   PRIMARY KEY (`id`),
