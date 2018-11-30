@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Controller;
 
+use Exceptions\ValidationError;
 use Features\Aligner\Controller\Validators\JobPasswordValidator;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Segments_SegmentDao;
@@ -86,6 +87,9 @@ class JobController extends AlignerController {
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_7:
                 $phase = 7;
+                break;
+            case ConstantsJobAnalysis::ALIGN_PHASE_8:
+                throw new ValidationError("Max words limit exceeded");
                 break;
         }
 

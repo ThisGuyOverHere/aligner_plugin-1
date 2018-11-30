@@ -34,9 +34,6 @@ class JobActionController extends AlignerController {
         $this->appendValidator( $jobValidator );
     }
 
-
-
-
     public function merge() {
 
         $id_job   = $this->job->id;
