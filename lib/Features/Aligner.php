@@ -8,6 +8,7 @@
 
 namespace Features;
 
+use Features\Aligner\Utils\AlignUtils;
 use Klein\Klein;
 use BasicFeatureStruct;
 use Features\Aligner\Controller\HomeController;
@@ -65,6 +66,8 @@ class Aligner extends BaseFeature
         $oauth_client = \OauthClient::getInstance()->getClient();
         $config[ 'authURL' ] = $oauth_client->createAuthUrl();
         $config[ 'gdriveAuthURL' ] = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        $message = AlignUtils::collectFlashMessages();
+        $config['forgot_password'] = isset($message['service'][0]['value']) && ($message['service'][0]['value'] == 'passwordReset');
         return $response->json( $config );
 
     }

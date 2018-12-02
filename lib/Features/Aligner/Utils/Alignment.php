@@ -247,6 +247,17 @@ class Alignment {
         $tc = count($target);
 
         $res = [];
+
+        // Devo gestire manualmente il caso in cui $target sia vuoto, che non è compatibile con l'algoritmo di sotto
+        if ($tc == 0) {
+            for ($i = 0; $i < $sc; $i++) {
+                $res[] = [[$i, 1], [0, 0], 0];
+            }
+
+            return $res;
+        }
+
+        // Main algorithm
         for ($si = 1; $si <= $sc; $si++) {
 
             $match = null;

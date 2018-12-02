@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import PreAlignStatus from "./PreAlignStatus/PreAlignStatus.component";
 import Animation from "./Animation/Animation.component";
-import {httpGetAlignmentInfo, httpGetPullingInfo} from "../../HttpRequests/Alignment.http";
+import {httpGetPullingInfo} from "../../HttpRequests/Alignment.http";
 import SourceComponent from "./Source/Source.component";
 import TargetComponent from "./Target/Trget.component";
+import AnalyseError from "./AnalyseError/AnalyseError.component"
 import env from "../../Constants/Env.constants";
 import ProjectConstants from "../../Constants/Project.constants";
 import ProjectStore from "../../Stores/Project.store";
-import {textEllipsisCenter} from "../../Helpers/SystemUtils.helper";
 import CompletedAnimation from "./CompletedAnimation/CompletedAnimation.component";
 
 class AnalyseComponent extends Component {
@@ -31,7 +31,8 @@ class AnalyseComponent extends Component {
             phaseName: '',
             progress: 0,
             completed: false,
-            redirect: false
+            redirect: false,
+            analyseError: false
         };
     };
 
@@ -49,36 +50,39 @@ class AnalyseComponent extends Component {
 
     render() {
         return (
-            this.state.completed ?
-                <CompletedAnimation
-                    jobId={this.props.match.params.jobID}
-                    jobPassword={this.props.match.params.password}
-                />
-                :
-                <div className="container analyse">
-                    <div className="gap"/>
-                    <div className="info-animation">
-                        <div className="files-info">
-                            <SourceComponent
-                                sourceLang={this.state.sourceLang}
-                                sourceLangFileName={this.state.sourceLangFileName}
-                                totalSourceSegments={this.state.totalSourceSegments}
-                            />
-                            <TargetComponent
-                                targetLang={this.state.targetLang}
-                                targetLangFileName={this.state.targetLangFileName}
-                                totalTargetSegments={this.state.totalTargetSegments}
-                            />
-                        </div>
+            !this.state.analyseError ?
+                this.state.completed ?
+                    <CompletedAnimation
+                        jobId={this.props.match.params.jobID}
+                        jobPassword={this.props.match.params.password}
+                    />
+                    :
+                    <div className="container analyse">
+                        <div className="gap"/>
+                        <div className="info-animation">
+                            <div className="files-info">
+                                <SourceComponent
+                                    sourceLang={this.state.sourceLang}
+                                    sourceLangFileName={this.state.sourceLangFileName}
+                                    totalSourceSegments={this.state.totalSourceSegments}
+                                />
+                                <TargetComponent
+                                    targetLang={this.state.targetLang}
+                                    targetLangFileName={this.state.targetLangFileName}
+                                    totalTargetSegments={this.state.totalTargetSegments}
+                                />
+                            </div>
 
-                        <PreAlignStatus jobId={this.state.job.id}
-                                        jobPassword={this.props.match.params.password}
-                                        actualPhase={this.state.actualPhase}
-                                        progress={this.state.progress}
-                        />
-                        <Animation/>
+                            <PreAlignStatus jobId={this.state.job.id}
+                                            jobPassword={this.props.match.params.password}
+                                            actualPhase={this.state.actualPhase}
+                                            progress={this.state.progress}
+                            />
+                            <Animation/>
+                        </div>
                     </div>
-                </div>
+                :
+                <AnalyseError/>
         );
     }
 
@@ -101,7 +105,10 @@ class AnalyseComponent extends Component {
                 }
             ).catch(
             error => {
-                console.error(error);
+                this.setState({
+                    analyseError: true,
+                });
+                clearInterval(this.pullingId);
             }
         );
         //clear pulling interval

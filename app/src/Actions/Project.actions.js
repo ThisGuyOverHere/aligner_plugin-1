@@ -3,15 +3,11 @@ import ProjectStore from "../Stores/Project.store";
 let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
 import {
-    httpAlignJob,
-    httpGetAlignmentInfo,
     httpGetSegments,
-    httpMergeSegments,
     httpSplitSegment
 } from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
 import {avgOrder, getSegmentByIndex, getSegmentByOrder, getSegmentIndexByOrder} from "../Helpers/SegmentUtils.helper";
-import {textEllipsisCenter} from "../Helpers/SystemUtils.helper";
 
 let ProjectActions = {
         /**

@@ -8,6 +8,7 @@ import {httpConfig, httpLogout} from "../../../HttpRequests/System.http";
 import LoginModalComponent from "../LoginModal/LoginModal.component";
 import PropTypes from "prop-types";
 import ChangePasswordModal from "../ResetPasswordModal/ChangePasswordModal.component";
+import SystemActions from "../../../Actions/System.actions";
 
 class Authentication extends Component {
 
@@ -98,7 +99,6 @@ class Authentication extends Component {
         })
     };
 
-    // to do: move on open of modals
     getConfigs = () => {
         httpConfig()
             .then(response => {
@@ -106,6 +106,9 @@ class Authentication extends Component {
                     googleLogInLink: response.data.authURL,
                     googleDriveLink: response.data.gdriveAuthURL,
                 });
+                if(response.data.forgot_password){
+                    SystemActions.setChangePasswordStatus(true);
+                }
             })
             .catch(error => {
                 console.error(error);
