@@ -6,6 +6,7 @@ import {
 } from "../HttpRequests/Alignment.http";
 import ProjectActions from "../Actions/Project.actions";
 import SystemActions from "../Actions/System.actions";
+import ReactGA from "react-ga";
 
 /**
  *
@@ -71,6 +72,11 @@ export const emailValidator = (email) => {
 export const syncWithBackend = (method, callback) => {
     switch (method.action) {
         case 'merge':
+            ReactGA.event({
+                category: 'Interactions',
+                action: method.data.jobID,
+                label: 'merge',
+            });
             httpMergeSegments(method.data.jobID, method.data.jobPassword, {
                 order: method.data.order,
                 type: method.data.type
@@ -81,6 +87,11 @@ export const syncWithBackend = (method, callback) => {
             });
             break;
         case 'merge_align':
+            ReactGA.event({
+                category: 'Interactions',
+                action: method.data.jobID,
+                label: 'merge and align',
+            });
             httpMergeAlignSegments(method.data.jobID, method.data.jobPassword, method.data.matches,method.data.destination).then((response) => {
                 ProjectActions.requireDirectChangesToStore(response.data);
                 callback()
@@ -89,6 +100,11 @@ export const syncWithBackend = (method, callback) => {
             });
             break;
         case 'align':
+            ReactGA.event({
+                category: 'Interactions',
+                action: method.data.jobID,
+                label: 'align',
+            });
             httpMoveSegments(method.data.jobID, method.data.jobPassword, {
                 order: method.data.order,
                 type: method.data.type,
@@ -101,6 +117,11 @@ export const syncWithBackend = (method, callback) => {
             });
             break;
         case 'reverse':
+            ReactGA.event({
+                category: 'Interactions',
+                action: method.data.jobID,
+                label: 'switch',
+            });
             httpReverseSegments(method.data.jobID, method.data.jobPassword, method.data).then((response) => {
                 callback()
             }, (error) => {

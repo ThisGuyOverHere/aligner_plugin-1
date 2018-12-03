@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import SplitCharComponent from "./SplitCharComponent/SplitCharComponent.component";
 import SplitDivisor from "./SplitDivisor/SplitDivisor.component";
 import ModalHeader from "../../../Shared/ModalHeader/ModalHeader.component";
+import ReactGA from "react-ga";
 
 class SplitComponent extends Component {
     static propTypes = {
@@ -252,6 +253,11 @@ class SplitComponent extends Component {
             inverseOrder: this.props.inverseSegmentOrder,
             positions: positions
         };
+        ReactGA.event({
+            category: 'Interactions',
+            action: this.props.jobConf.id,
+            label: 'split',
+        });
         ProjectActions.splitSegment(this.props.jobConf.id, this.props.jobConf.password,data);
         setTimeout(()=>{
             ProjectActions.openSegmentToSplit(false);
