@@ -166,7 +166,7 @@ const env = {
     },
     orderElevation: 1000000000,
     pullingCallInterval: 1000,
-    GA_UA: 'UA-130308349-1'
+    GA_UA: null
 };
 
 export default env;
