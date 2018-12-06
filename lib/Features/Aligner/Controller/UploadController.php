@@ -31,9 +31,11 @@ class UploadController extends AlignerController {
 
     public function convert() {
         if ( @count( $this->result[ 'errors' ] ) ) {
-            $this->response->json( $this->result );
+            //$this->response->json( $this->result );
+            //return;
+            throw new \Exception($this->result['errors'][0]['message']);
 
-            return;
+
         }
 
         $filterArgs = [
@@ -90,6 +92,9 @@ class UploadController extends AlignerController {
         $conversionHandler->doAction();
 
         $this->result = $conversionHandler->getResult();
+        if(@count($this->result['errors'])){
+            throw new \Exception($this->result['errors'][0]['message']);
+        }
         $this->response->json( $this->result );
     }
 
@@ -120,6 +125,13 @@ class UploadController extends AlignerController {
 
 
     public function upload(){
+
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            //$this->response->json( $this->result );
+            //return;
+            throw new \Exception($this->result['errors'][0]['message']);
+
+        }
 
 
         header('Pragma: no-cache');
