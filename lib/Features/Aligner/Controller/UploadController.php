@@ -30,12 +30,11 @@ class UploadController extends AlignerController {
     }
 
     public function convert() {
+
         if ( @count( $this->result[ 'errors' ] ) ) {
             //$this->response->json( $this->result );
             //return;
-            throw new \Exception($this->result['errors'][0]['message']);
-
-
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
 
         $filterArgs = [
@@ -92,33 +91,8 @@ class UploadController extends AlignerController {
         $conversionHandler->doAction();
 
         $this->result = $conversionHandler->getResult();
-        if(@count($this->result['errors'])){
-            throw new \Exception($this->result['errors'][0]['message']);
-        }
-        $this->response->json( $this->result );
-    }
-
-    public function upload_old() {
         if ( @count( $this->result[ 'errors' ] ) ) {
-            $this->response->json( $this->result );
-
-            return;
-        }
-
-        $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
-
-        try {
-            $this->result = $uploadFile->uploadFiles( $_FILES );
-
-            foreach ( $this->result as $key => $value ) {
-                unset( $this->result->$key->file_path );
-            }
-        } catch ( \Exception $e ) {
-            $this->result = [
-                    'errors' => [
-                            [ "code" => -1, "message" => $e->getMessage() ]
-                    ]
-            ];
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
         $this->response->json( $this->result );
     }
@@ -145,8 +119,13 @@ class UploadController extends AlignerController {
         $this->initUploadDir();
 
 
-        $upload_handler = new \UploadHandler();
-        $upload_handler->post();
+        $upload_handler  = new \UploadHandler();
+        $upload_response = $upload_handler->post( true );
+        if ( $upload_response[ 0 ]->error ) {
+            throw new \Exception( $upload_response[ 0 ]->error );
+        } else {
+            return $this->response->json( $upload_response );
+        }
     }
 
     private function setOrGetGuid() {
