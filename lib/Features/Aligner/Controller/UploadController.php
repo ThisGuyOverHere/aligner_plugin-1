@@ -23,6 +23,7 @@ class UploadController extends AlignerController {
     public $result;
 
     public function __construct( $request, $response, $service, $app ) {
+        $this->setOrGetGuid();
         if ( !isset( $_COOKIE[ 'upload_session' ] ) && empty( $_COOKIE[ 'upload_session' ] ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Cookie session is not set" ];
         }
@@ -97,8 +98,30 @@ class UploadController extends AlignerController {
         $this->response->json( $this->result );
     }
 
+    public function upload() {
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+        }
+        $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
+        try {
+            $this->result = $uploadFile->uploadFiles( $_FILES );
+            foreach ( $this->result as $key => $value ) {
+                unset( $this->result->$key->file_path );
+            }
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage() );
+        }
 
-    public function upload(){
+        $this->result = array_values((array)$this->result);
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+        }
+
+        $this->response->json( $this->result );
+    }
+
+
+    /*public function upload(){
 
         if ( @count( $this->result[ 'errors' ] ) ) {
             //$this->response->json( $this->result );
@@ -126,7 +149,7 @@ class UploadController extends AlignerController {
         } else {
             return $this->response->json( $upload_response );
         }
-    }
+    }*/
 
     private function setOrGetGuid() {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
