@@ -77,7 +77,7 @@ class AlignUtils
      * @return float|int
      */
     public static function _countWordsInSegment($segment, $lang) {
-        $wordCount = \CatUtils::segment_raw_wordcount( $segment, $lang );
+        $wordCount = \CatUtils::segment_raw_word_count( $segment, $lang );
 
         return $wordCount;
     }
