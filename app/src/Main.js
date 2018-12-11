@@ -1,16 +1,21 @@
 import "babel-polyfill"
-import React, {Component} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import {HashRouter} from 'react-router-dom'
 
 import HomeComponent from "./Components/Home/Home.component";
-import JobComponent from "./Components/Align/Job/Job.component";
+import ReactGA from 'react-ga';
+
 import NotFoundComponent from "./Components/Shared/NotFound/NotFound.component";
 import AnalyseComponent from "./Components/Analyse/Analyse.component";
 
 import {Switch} from "react-router";
 import Layout from "./Components/Shared/Layout/Layout.component";
 import AlignComponent from "./Components/Align/Align.component";
+import Env from "./Constants/Env.constants";
+
+
+Env.GA_UA ? ReactGA.initialize(Env.GA_UA, {debug: true}) : null;
 
 
 const e = React.createElement;

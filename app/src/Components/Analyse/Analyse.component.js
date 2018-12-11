@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import ReactGA from 'react-ga';
 import PreAlignStatus from "./PreAlignStatus/PreAlignStatus.component";
 import Animation from "./Animation/Animation.component";
 import {httpGetPullingInfo} from "../../HttpRequests/Alignment.http";
@@ -13,6 +14,7 @@ import CompletedAnimation from "./CompletedAnimation/CompletedAnimation.componen
 class AnalyseComponent extends Component {
     static propTypes = {};
     pullingId = null;
+    startAlign = null;
 
     constructor(props) {
         super(props);
@@ -39,6 +41,7 @@ class AnalyseComponent extends Component {
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.STORE_JOB_INFO, this.getInfo);
         // pulling
+        this.startAlign = new Date();
         this.pullingId = setInterval(this.pullingInfo, env.pullingCallInterval);
 
     };
@@ -93,6 +96,15 @@ class AnalyseComponent extends Component {
             .then(
                 response => {
                     data = response.data;
+                    if(this.state.progress === 100){
+                        ReactGA.event({
+                            category: 'Timing',
+                            action: 'Alignment Completed',
+                            label: this.state.job.id,
+                            nonInteraction: true,
+                            value: parseInt((new Date()-this.startAlign)/1000)
+                        });
+                    }
                     // update info
                     this.setState({
                         actualPhase: data.phase,

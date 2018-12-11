@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
 import {Route} from 'react-router-dom'
+import ReactGA from 'react-ga';
 import HeaderComponent from "../Header/Header.component";
 import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
 import SystemActions from "../../../Actions/System.actions";
 import Authentication from "../Authentication/Authentication.component";
+import Env from "../../../Constants/Env.constants";
 
 class Layout extends Component {
     constructor(props) {
@@ -16,12 +18,20 @@ class Layout extends Component {
     }
 
     componentDidMount() {
+        this.GAChangeRoute();
         SystemActions.checkUserStatus();
         SystemStore.addListener(SystemConstants.USER_STATUS, this.userStatus);
     }
 
     componentWillUnmount() {
         SystemStore.removeListener(SystemConstants.USER_STATUS, this.userStatus);
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        if(nextProps.location.pathname !== this.props.location.pathname){
+            this.GAChangeRoute(nextProps.location.pathname)
+        }
+        return true
     }
 
     render = () => {
@@ -55,6 +65,14 @@ class Layout extends Component {
             googleUserImage: image
         })
     };
+
+    GAChangeRoute = (pathname = null) =>{
+        pathname = pathname ? pathname :  this.props.location.pathname;
+        if(Env.GA_UA){
+            ReactGA.set({page: location.pathname+ pathname});
+            ReactGA.pageview(location.pathname+ pathname);
+        }
+    }
 }
 
 export default Layout;
