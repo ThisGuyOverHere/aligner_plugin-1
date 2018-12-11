@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Utils;
 
+use SubFiltering\Filter;
 use Features\Aligner\Model\Segments_SegmentDao;
 
 class TMSService extends \TMSService {
@@ -27,6 +28,8 @@ class TMSService extends \TMSService {
      *
      */
     public function exportJobAsTMX( $jid, $sourceLang, $targetLang ) {
+
+        $Filter = Filter::getInstance( $this->featureSet );
 
         $this->tmxFilePath = tempnam("/tmp", "TMX_");
         $tmxHandler = new \SplFileObject($this->tmxFilePath, "w");
@@ -57,12 +60,12 @@ class TMSService extends \TMSService {
             $tmx = '
     <tu tuid="'.$row['source_segment_id'].'-'.$row['target_segment_id'].'" datatype="plaintext" srclang="' . $sourceLang . '">
         <tuv xml:lang="' . $sourceLang . '">
-            <seg>' . \CatUtils::rawxliff2rawview( $row[ 'source' ] ) . '</seg>
+            <seg>' . $Filter->fromLayer0ToRawXliff( $row[ 'source' ] ) . '</seg>
         </tuv>';
 
             $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
-            <seg>' . \CatUtils::rawxliff2rawview( $row[ 'target' ] ) . '</seg>
+            <seg>' . $Filter->fromLayer0ToRawXliff( $row[ 'target' ] ) . '</seg>
         </tuv>';
 
 
