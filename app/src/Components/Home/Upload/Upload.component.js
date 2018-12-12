@@ -95,6 +95,13 @@ class UploadComponent extends Component {
                     file_name: response.data[0].name,
                     source_lang: this.state.sourceLang,
                     target_lang: this.state.targetLang
+                }).catch(error => {
+                    this.setState({
+                        uploadSource: {
+                            progress: 0,
+                            status: 'error'
+                        }
+                    });
                 });
                 this.setState({
                     uploadSource: {
@@ -132,12 +139,18 @@ class UploadComponent extends Component {
             })
         };
         httpUpload(files[0], onProgress).then(response => {
-
             if (!response.errors) {
                 httpConversion({
                     file_name: response.data[0].name,
                     source_lang: this.state.targetLang,
                     target_lang: this.state.sourceLang
+                }).catch(error => {
+                    this.setState({
+                        uploadTarget: {
+                            progress: 0,
+                            status: 'error'
+                        }
+                    });
                 });
                 this.setState({
                     uploadTarget: {
