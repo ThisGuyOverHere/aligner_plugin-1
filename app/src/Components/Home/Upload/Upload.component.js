@@ -48,29 +48,43 @@ class UploadComponent extends Component {
 
 
     onSourceLanguageChange = (e, value) => {
-        this.setState({
-            sourceLang: value.value
-        });
         if (this.state.uploadSource.name) {
             httpConversion({
                 file_name: this.state.uploadSource.name,
-                source_lang: this.state.targetLang,
-                target_lang: this.state.sourceLang
+                source_lang: value.value,
+                target_lang: this.state.targetLang,
+            }).catch(error => {
+                this.setState({
+                    uploadSource: {
+                        progress: 0,
+                        status: 'error'
+                    }
+                });
             });
         }
+        this.setState({
+            sourceLang: value.value
+        });
     };
 
     onTargetLanguageChange = (e, value) => {
+        if (this.state.uploadTarget.name) {
+            httpConversion({
+                file_name: this.state.uploadSource.name,
+                source_lang: this.state.sourceLang,
+                target_lang: value.value
+            }).catch(error => {
+                this.setState({
+                    uploadSource: {
+                        progress: 0,
+                        status: 'error'
+                    }
+                });
+            });
+        }
         this.setState({
             targetLang: value.value
         });
-        if (this.state.uploadTarget.name) {
-            httpConversion({
-                file_name: this.state.uploadTarget.name,
-                source_lang: this.state.targetLang,
-                target_lang: this.state.sourceLang
-            });
-        }
     };
 
     ProjectNameChange = (event) => {
