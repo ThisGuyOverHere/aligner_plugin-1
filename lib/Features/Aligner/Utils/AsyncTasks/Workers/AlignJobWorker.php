@@ -64,6 +64,7 @@ class AlignJobWorker extends AbstractWorker {
         $this->job    = $attributes->job;
 
         Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_1], $this->id_job, $this->job->password );
+        \Log::doLog('STARTED ALIGN FOR JOB: '.$this->id_job);
 
         /*$job          = Jobs_JobDao::getById( $this->id_job )[ 0 ];
         $source_file  = Files_FileDao::getByJobId( $this->id_job, "source" );
@@ -75,86 +76,93 @@ class AlignJobWorker extends AbstractWorker {
         $source_lang = $this->job->source;
         $target_lang = $this->job->target;
 
-        $source_segments = $this->_file2segments($source_file, $source_lang);
-        $target_segments = $this->_file2segments($target_file, $target_lang);
+        try {
+            $source_segments = $this->_file2segments($source_file, $source_lang);
+            $target_segments = $this->_file2segments($target_file, $target_lang);
 
-        $this->_storeSegments($source_segments, "source", $source_lang);
-        $this->_storeSegments($target_segments, "target", $target_lang);
-
-
-        Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2, 'progress' => 5 ], $this->id_job, $this->job->password );
+            $this->_storeSegments($source_segments, "source", $source_lang);
+            $this->_storeSegments($target_segments, "target", $target_lang);
 
 
-        $segmentsMatchDao = new Segments_SegmentMatchDao;
-        $segmentsMatchDao->deleteByJobId( $this->id_job );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2, 'progress' => 5 ], $this->id_job, $this->job->password );
 
 
-        Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_3, 'progress' => 10 ], $this->id_job, $this->job->password );
+            $segmentsMatchDao = new Segments_SegmentMatchDao;
+            $segmentsMatchDao->deleteByJobId( $this->id_job );
 
 
-        $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
-        $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
-
-        $alignment_class = new Alignment;
-
-        $alignment = $alignment_class->alignSegments(
-            $this->id_job,
-            $this->job->password,
-            $source_segments,
-            $target_segments,
-            $source_lang,
-            $target_lang
-        );
-
-        Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_6, 'progress' => 95 ], $this->id_job, $this->job->password );
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_3, 'progress' => 10 ], $this->id_job, $this->job->password );
 
 
-        $source_array = [];
-        $target_array = [];
-        foreach ( $alignment as $key => $value ) {
-            $source_element = [];
+            $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
+            $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
 
-            if ( !empty( $value[ 'source' ] ) ) {
-                //Check if $value['source'] is an array of segments otherwise it wouldn't have any numerical keys
-                if ( isset( $value[ 'source' ][ 0 ] ) ) {
-                    $value[ 'source' ] = $this->mergeSegments( $value[ 'source' ] );
+            $alignment_class = new Alignment;
+
+            $alignment = $alignment_class->alignSegments(
+                    $this->id_job,
+                    $this->job->password,
+                    $source_segments,
+                    $target_segments,
+                    $source_lang,
+                    $target_lang
+            );
+
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_6, 'progress' => 95 ], $this->id_job, $this->job->password );
+
+
+            $source_array = [];
+            $target_array = [];
+            foreach ( $alignment as $key => $value ) {
+                $source_element = [];
+
+                if ( !empty( $value[ 'source' ] ) ) {
+                    //Check if $value['source'] is an array of segments otherwise it wouldn't have any numerical keys
+                    if ( isset( $value[ 'source' ][ 0 ] ) ) {
+                        $value[ 'source' ] = $this->mergeSegments( $value[ 'source' ] );
+                    }
                 }
+
+                $source_element[ 'segment_id' ] = $value[ 'source' ][ 'id' ];
+                $source_element[ 'order' ]      = ( $key + 1 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
+                $source_element[ 'next' ]       = ( $key + 2 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
+                $source_element[ 'id_job' ]     = $this->id_job;
+                $source_element[ 'score' ]      = $value[ 'score' ];
+                $source_element[ 'type' ]       = "source";
+
+                $target_element = [];
+
+                if ( !empty( $value[ 'target' ] ) ) {
+                    //Check if $value['target'] is an array of segments otherwise it wouldn't have any numerical keys
+                    if ( isset( $value[ 'target' ][ 0 ] ) ) {
+                        $value[ 'target' ] = $this->mergeSegments( $value[ 'target' ] );
+                    }
+                }
+
+                $target_element[ 'segment_id' ] = $value[ 'target' ][ 'id' ];
+                $target_element[ 'order' ]      = ( $key + 1 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
+                $target_element[ 'next' ]       = ( $key + 2 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
+                $target_element[ 'score' ]      = $value[ 'score' ];
+                $target_element[ 'id_job' ]     = $this->id_job;
+                $target_element[ 'type' ]       = "target";
+
+                $source_array[] = $source_element;
+                $target_array[] = $target_element;
             }
 
-            $source_element[ 'segment_id' ] = $value[ 'source' ][ 'id' ];
-            $source_element[ 'order' ]      = ( $key + 1 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-            $source_element[ 'next' ]       = ( $key + 2 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-            $source_element[ 'id_job' ]     = $this->id_job;
-            $source_element[ 'score' ]      = $value[ 'score' ];
-            $source_element[ 'type' ]       = "source";
+            $source_array[ count( $source_array ) - 1 ][ 'next' ] = null;
+            $target_array[ count( $target_array ) - 1 ][ 'next' ] = null;
 
-            $target_element = [];
+            $segmentsMatchDao->createList( $source_array );
+            $segmentsMatchDao->createList( $target_array );
 
-            if ( !empty( $value[ 'target' ] ) ) {
-                //Check if $value['target'] is an array of segments otherwise it wouldn't have any numerical keys
-                if ( isset( $value[ 'target' ][ 0 ] ) ) {
-                    $value[ 'target' ] = $this->mergeSegments( $value[ 'target' ] );
-                }
-            }
-
-            $target_element[ 'segment_id' ] = $value[ 'target' ][ 'id' ];
-            $target_element[ 'order' ]      = ( $key + 1 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-            $target_element[ 'next' ]       = ( $key + 2 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-            $target_element[ 'score' ]      = $value[ 'score' ];
-            $target_element[ 'id_job' ]     = $this->id_job;
-            $target_element[ 'type' ]       = "target";
-
-            $source_array[] = $source_element;
-            $target_array[] = $target_element;
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_7, 'progress' => 100 ], $this->id_job, $this->job->password );
+        }catch (\Exception $e){
+            \Log::doLog($e->getMessage());
+            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_9, 'progress' => 0 ], $this->id_job, $this->job->password );
         }
 
-        $source_array[ count( $source_array ) - 1 ][ 'next' ] = null;
-        $target_array[ count( $target_array ) - 1 ][ 'next' ] = null;
 
-        $segmentsMatchDao->createList( $source_array );
-        $segmentsMatchDao->createList( $target_array );
-
-        Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_7, 'progress' => 100 ], $this->id_job, $this->job->password );
 
     }
 
@@ -171,22 +179,24 @@ class AlignJobWorker extends AbstractWorker {
         try {
             $fileStorage = new \FilesStorage;
             $xliff_file = $fileStorage->getXliffFromCache($sha1, $file->language_code);
+            \Log::doLog('Found xliff file ['.$xliff_file.']');
             $xliff_content = file_get_contents($xliff_file);
         } catch ( \Exception $e ) {
-            throw new \Exception( $file, $e->getCode(), $e );
+            throw new \Exception( "File xliff not found", $e->getCode(), $e );
         }
 
         // Parse xliff
         try {
             $parser = new \Xliff_Parser;
             $xliff = $parser->Xliff2Array($xliff_content);
+            \Log::doLog('Parsed xliff file ['.$xliff_file.']');
         } catch ( \Exception $e ) {
-            throw new \Exception( $file, $e->getCode(), $e );
+            throw new \Exception( "Error during xliff parsing", $e->getCode(), $e );
         }
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
-            throw new \Exception( $file, -4 );
+            throw new \Exception( "Parsing errors: ".json_encode($xliff[ 'parser-errors' ]), -4 );
         }
 
         // Creating the Segments
