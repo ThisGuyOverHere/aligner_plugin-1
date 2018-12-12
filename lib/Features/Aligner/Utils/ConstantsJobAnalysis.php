@@ -19,6 +19,5 @@ class ConstantsJobAnalysis
     const ALIGN_PHASE_6 = 'merging';
     const ALIGN_PHASE_7 = 'complete';
     const ALIGN_PHASE_8 = 'words_limit_exceeded';
-    const ALIGN_PHASE_9 = 'error';
 
 }

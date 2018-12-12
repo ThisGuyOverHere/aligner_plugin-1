@@ -91,9 +91,6 @@ class JobController extends AlignerController {
             case ConstantsJobAnalysis::ALIGN_PHASE_8:
                 throw new ValidationError("Max words limit exceeded");
                 break;
-            case ConstantsJobAnalysis::ALIGN_PHASE_9:
-                throw new ValidationError("Error during analysis, please retry");
-                break;
         }
 
         switch ( $status_analysis ) {
