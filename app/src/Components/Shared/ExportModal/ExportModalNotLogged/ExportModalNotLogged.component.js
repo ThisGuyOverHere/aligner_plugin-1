@@ -16,8 +16,8 @@ class ExportModalNotLogged extends Component {
     render() {
         return (
             <div>
-                <h1>Please login to the service</h1>
-                <h3>Use your credential or sign in with Google</h3>
+                <h1>Please login</h1>
+                <h3>Use your credentials or sign in with Google</h3>
                 <LoginComponent error={this.props.error} googleLink={this.props.googleLink} fromExport={true}/>
             </div>
         );

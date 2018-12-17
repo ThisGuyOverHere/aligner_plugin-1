@@ -51,7 +51,7 @@ class ExportModal extends Component {
                             <button
                                 onClick={this.sendEmailHandler}
                                 className="sendEmail">
-                                Do you want to download only the file?
+                                Just send me the TMX
                             </button>
                         </div>
                         }

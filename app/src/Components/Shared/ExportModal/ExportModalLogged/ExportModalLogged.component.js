@@ -58,8 +58,8 @@ class ExportModalLogged extends Component {
 
         return (
             <div id="logged">
-                <h1>Export TMX in public cloud or private</h1>
-                <h3>No empty segment or hidden row will be exported</h3>
+                <h1>Download TMX</h1>
+                <h3>Unaligned or hidden segments will not be exported</h3>
 
                 <div className="destinations">
                     <input type="radio" name="checkbox-option" id="checkbox-button-opt-two"
@@ -67,21 +67,21 @@ class ExportModalLogged extends Component {
                            checked={this.state.cloudCheckBox}
                            value={this.state.cloudCheckBox}
                            onChange={this.cloudHandler}/>
-                    <label htmlFor="checkbox-button-opt-two">Help to improve the public cloud</label>
+                    <label htmlFor="checkbox-button-opt-two">Send to collaborative TM</label>
 
                     <input type="radio" name="checkbox-option" id="checkbox-button-opt-three"
                            className="hide-checkbox"
                            value={this.state.cloudCheckBox}
                            onChange={this.cloudHandler}/>
-                    <label htmlFor="checkbox-button-opt-three">Send to private TMX</label>
+                    <label htmlFor="checkbox-button-opt-three">Send to private TM</label>
                 </div>
 
                 {this.state.cloudCheckBox ?
-                    <p> A copy of your TMX will be sent to our public memory helping us to improve
-                        our collaborative translation algorithm.  </p>
+                    <p> A copy of your TMX will be sent to our collaborative memory to
+                        improve our alignment algorithm.  </p>
                     :
                     <div>
-                        <button className={newTmxBtn.join(" ")} onClick={this.createMemory}>Create new TMX</button>
+                        <button className={newTmxBtn.join(" ")} onClick={this.createMemory}>Create new Resource</button>
                         {this.state.newTmx ?
                             <div className="new-memory">
                                 <div className={"icon-container"}>
@@ -90,7 +90,7 @@ class ExportModalLogged extends Component {
                                 <form onSubmit={this.saveMemory}>
                                     <div className="form-container">
                                         <input type="text" tabIndex="4" onChange={this.handleInput}
-                                               placeholder="Description of tmx"/>
+                                               placeholder="Description"/>
                                         <p>{this.state.newTmx.key}</p>
                                     </div>
                                     <div className="btn-container">
@@ -113,7 +113,7 @@ class ExportModalLogged extends Component {
                 }
 
                 <button className={exportBtn.join(" ")} tabIndex="6" disabled={!(this.state.tmxList.length > 0) && !this.state.cloudCheckBox} type="" onClick={this.exportTmx}>
-                    Export
+                    Download
                 </button>
             </div>
         );
