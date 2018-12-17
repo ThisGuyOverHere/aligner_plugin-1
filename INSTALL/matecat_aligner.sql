@@ -101,4 +101,12 @@ CREATE TABLE `segments_match` (
   KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `phinxlog`;
+CREATE TABLE `phinxlog` (
+  `version` bigint(20) NOT NULL,
+  `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`version`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
