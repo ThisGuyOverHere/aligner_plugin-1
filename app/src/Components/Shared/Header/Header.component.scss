@@ -27,11 +27,14 @@
     #logo{
       top: 4px;
       border: 0;
-      background: url("/public/img/logo.png") 0px 2px no-repeat;
+      /*background: url("/public/img/logo.png") 0px 2px no-repeat;*/
       width: 145px;
       height: 31px;
       background-size: 130px 26px;
       position: relative;
+      img{
+        max-width: 100%;
+      }
     }
   }
   .aligner-nav-nolog{

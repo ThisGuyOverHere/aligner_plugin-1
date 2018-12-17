@@ -40,6 +40,7 @@ class LoginComponent extends Component {
                         <li><i className="icon circle"></i>Manage your TMs, glossaries and MT engines</li>
                         <li><i className="icon circle"></i>Access the management panel</li>
                         <li><i className="icon circle"></i>Translate Google Drive files</li>
+                        <li><i className="icon circle"></i>Align your documents</li>
                     </ul>
                     <button onClick={this.openRegistrationModal} className="ui button primary">Sign up</button>
                 </div>
@@ -78,7 +79,7 @@ class LoginComponent extends Component {
                         </div>
                         <p onClick={this.openResetPasswordModal} className={"reset"}> Forgot Password? </p>
                         <button className={loginButton.join(" ")} tabIndex="3" type="submit"
-                                disabled={!this.state.isValid}> Login
+                                disabled={!this.state.isValid}> Sign in
                         </button>
                         <p className="error" hidden={!this.state.error}> Login failed </p>
                     </form>
