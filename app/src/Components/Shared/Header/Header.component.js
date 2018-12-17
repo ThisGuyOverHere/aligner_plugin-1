@@ -85,7 +85,7 @@ class HeaderComponent extends Component {
                 <ul className="aligner-nav-log" role="navigation">
                     <li>
                         <Link to="/">
-                            <div id="logo"></div>
+                            <div id="logo"><img src="./static/build/images/logo.png"/></div>
                         </Link>
                     </li>
                     <li>
@@ -124,7 +124,7 @@ class HeaderComponent extends Component {
             return <ul className="aligner-nav-nolog" role="navigation">
                 <li>
                     <Link to="/">
-                        <div id="logo"></div>
+                        <div id="logo"><img src="./static/build/images/logo.png"/></div>
                     </Link>
                 </li>
                 <li>
