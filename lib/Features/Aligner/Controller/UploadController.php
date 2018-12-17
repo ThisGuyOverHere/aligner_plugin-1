@@ -154,7 +154,7 @@ class UploadController extends AlignerController {
     private function setOrGetGuid() {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            $guid = \Utils::create_guid();
+            $guid = \Utils::createToken();
             setcookie( "upload_session", $guid, time() + 86400, '/' );
             $_COOKIE['upload_session'] = $guid;
         } else {
