@@ -43,8 +43,8 @@
       font-weight: 300;
       width: 180px;
       font-size: 16px;
-      color: #02c4f0;
-      background: #ffffff;
+      color: $white;
+      background: $primary;
       margin: 0 auto;
       cursor: pointer;
     }
@@ -55,7 +55,7 @@
     padding-left: 24px;
     .google-login {
       cursor: pointer;
-      background: transparent;
+      background: #478cf8;;
       box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.24);
       border-radius: 2px;
       margin-top: 56px;
@@ -63,10 +63,10 @@
       text-align: right;
       font-size: 16px;
       width: 196px;
-      color: $secondaryText;
+      color: $white;
       span {
         float: left;
-        color: $darkBlue;
+        color: $white;
       }
     }
 
@@ -125,8 +125,6 @@
       }
     }
     .login-btn {
-      background: $primary;
-      color: $white;
       width: 180px;
       margin: 16px auto;
       display: block;
@@ -138,6 +136,10 @@
       border-radius: 2px;
       text-align: center;
       border: none;
+      &:disabled{
+        background: $white;
+        color: $primary;
+      }
     }
   }
 }

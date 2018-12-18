@@ -41,7 +41,7 @@ class ExportModal extends Component {
                     <ModalHeader user={this.props.user}  image={this.props.image} modalName={"export"}/>
                     <div className="content">
                         { this.props.user &&
-                            <img id="cat" src={"http://dev.matecat.com/public/img/matecat_watch-left-border.png"}/>
+                            <img id="cat" src={"http://dev.matecat.com/public/img/master_matecat.png"}/>
                          }
 
                         {this.renderComponent()}
