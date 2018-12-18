@@ -41,9 +41,9 @@ class ToolbarRightHintComponent extends Component {
                     <div className="shortCutRow">
                         <h4>Align two segments</h4>
                         <ul>
-                            <li> - drag a segment over another</li>
-                            <li> - or select a Source and Target segment and press Align in the top bar</li>
-                            <li className="last"> - or select a Source and Target segment and press ALT+A
+                            <li> - drag a segment and release it over another segment </li>
+                            <li> - or select a source and a target segment and press the Align button in the top bar</li>
+                            <li className="last"> - or select a source and a target segment and press ALT+A
                                 <span>Alt</span>
                                 <span>A</span>
                             </li>
@@ -51,22 +51,10 @@ class ToolbarRightHintComponent extends Component {
                     </div>
 
                     <div className="shortCutRow">
-                        <h4> Merge two segments </h4>
+                        <h4> Merge two or more segments </h4>
                         <ul>
-                            <li> - drag a segment over another of the same type while holding down ALT</li>
-                            <li> - or select two segments of the same type and press Merge in the top bar</li>
-                            <li className="last"> - or select two segments of the same type and press ALT+M
-                                <span>Alt</span>
-                                <span>M</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="shortCutRow">
-                        <h4> Merge more two segments </h4>
-                        <ul>
-                            <li> - select segments of the same type and press Merge in the top bar</li>
-                            <li className="last"> - or select segments of the same type and press ALT+M
+                            <li> - select two or more segments and press the Merge button in the top bar</li>
+                            <li className="last"> - or select two or more segments and press ALT+M
                                 <span>Alt</span>
                                 <span>M</span>
                             </li>
@@ -76,9 +64,9 @@ class ToolbarRightHintComponent extends Component {
                     <div className="shortCutRow">
                         <h4> Split Segment </h4>
                         <ul>
-                            <li> - doublick on segment</li>
-                            <li> - or select segment and press Align in the top bar</li>
-                            <li className="last"> - or select segment and press ALT+S
+                            <li> - double click on a segment</li>
+                            <li> - or select a  segment and press the Split button in the top bar</li>
+                            <li className="last"> - or select a segment and press ALT+S
                                 <span>Alt</span>
                                 <span>S</span>
                             </li>
@@ -86,10 +74,10 @@ class ToolbarRightHintComponent extends Component {
                     </div>
 
                     <div className="shortCutRow">
-                        <h4> Reverse position of two segments </h4>
+                        <h4> Switch two segments </h4>
                         <ul>
-                            <li> - select two segments of the same type and press Reverse in the top bar</li>
-                            <li className="last"> - or select two segments of the same type and press ALT+R
+                            <li> - select two segments and press the Switch button in the top bar</li>
+                            <li className="last"> - or select two segments and press ALT+R
                                 <span>Alt</span>
                                 <span>R</span>
                             </li>
