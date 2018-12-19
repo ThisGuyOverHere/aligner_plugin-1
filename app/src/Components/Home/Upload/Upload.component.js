@@ -220,10 +220,10 @@ class UploadComponent extends Component {
         });
     };
 
-    renderHtmlUpload = (status, data) => {
+    renderHtmlUpload = (type,status, data) => {
         switch (status) {
             case 'start':
-                return <p><span>+ Add Target file</span> (or drop it here).</p>;
+                return <p><span>+ Add {type === 'target' ? "Target" : "Source"} file</span> (or drop it here).</p>;
 
             case 'progress':
                 return <div>
@@ -310,6 +310,7 @@ class UploadComponent extends Component {
                                     <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropSource}>
                                         {
                                             this.renderHtmlUpload(
+                                                "source",
                                                 this.state.uploadSource.status,
                                                 {
                                                     filename: this.state.uploadSource.name,
@@ -336,6 +337,7 @@ class UploadComponent extends Component {
                                     <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropTarget}>
                                         {
                                             this.renderHtmlUpload(
+                                                "target",
                                                 this.state.uploadTarget.status,
                                                 {
                                                     filename: this.state.uploadTarget.name,
