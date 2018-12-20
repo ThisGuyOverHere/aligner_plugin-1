@@ -17,7 +17,8 @@ const ProjectConstants = keyMirror({
     MERGE_ALIGN: null,
     EMPTY_STORE: null,
     SEARCH_RESULTS: null,
-    STORE_JOB_INFO: null
+    STORE_JOB_INFO: null,
+    HIDE_SEGMENTS: null
 });
 
 export default ProjectConstants;
