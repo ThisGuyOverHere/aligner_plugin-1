@@ -78,6 +78,28 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         return $segmentMatches;
     }
 
+    public static function hideByOrderAndType( $order, $id_job, $type){
+        $thisDao = new self();
+        $sql = "UPDATE segments_match SET hidden = 1 WHERE `order` = ? AND id_job = ? AND `type` = ?";
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $params = [$order, $id_job, $type];
+
+        $segmentMatches = $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
+        return $segmentMatches;
+    }
+
+    public static function showByOrderAndType( $order, $id_job, $type){
+        $thisDao = new self();
+        $sql = "UPDATE segments_match SET hidden = 0 WHERE `order` = ? AND id_job = ? AND `type` = ?";
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $params = [$order, $id_job, $type];
+
+        $segmentMatches = $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
+        return $segmentMatches;
+    }
+
     public function createList( Array $obj_arr ) {
 
         $obj_arr = array_chunk( $obj_arr, 100 );
