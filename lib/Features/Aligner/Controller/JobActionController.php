@@ -964,15 +964,21 @@ class JobActionController extends AlignerController {
                 if ( $opposite_to_hide->segment_id != null ) {
                     $to_hide = Segments_SegmentDao::getFromOrderJobIdAndType( $match[$match['to_hide']], $id_job, $match['to_hide'] );
 
-                    /*$prev_opposite_to_hide = Segments_SegmentMatchDao::getPreviousSegmentMatch($match[$type_opposite_to_hide], $id_job, $type_opposite_to_hide);
-                    $prev_to_hide = Segments_SegmentMatchDao::getPreviousSegmentMatch($match[$match['to_hide']], $id_job, $match['to_hide']);*/
+                    $prev_opposite_to_hide = Segments_SegmentMatchDao::getPreviousSegmentMatch($match[$type_opposite_to_hide], $id_job, $type_opposite_to_hide);
+                    $prev_to_hide = Segments_SegmentMatchDao::getPreviousSegmentMatch($match[$match['to_hide']], $id_job, $match['to_hide']);
+
+
 
                     $new_match_order = AlignUtils::_getNewOrderValue( $to_hide['order'], $to_hide['next'] );
                     $new_match_order_opposite = AlignUtils::_getNewOrderValue( $opposite_to_hide['order'], $opposite_to_hide['next'] );
 
+                    $prev_to_hide['next'] = $new_match_order;
+                    $prev_opposite_to_hide['next'] = $new_match_order_opposite;
+
                     $new_match_opposite = $opposite_to_hide;
                     $new_match_opposite['order'] = $new_match_order_opposite;
                     $new_match_opposite['next'] = $opposite_to_hide['order'];
+                    $new_match_opposite['score'] = 100;
 
 
                     $new_match_null = [];
@@ -1003,9 +1009,28 @@ class JobActionController extends AlignerController {
                     $this->pushOperation( [
                             'type'      => $type_opposite_to_hide,
                             'action'    => 'update',
+                            'rif_order' => $prev_opposite_to_hide['order'],
+                            'data'      => $prev_opposite_to_hide
+                    ] );
+
+                    $this->pushOperation( [
+                            'type'      => $match['to_hide'],
+                            'action'    => 'update',
+                            'rif_order' => $prev_to_hide['order'],
+                            'data'      => $prev_to_hide
+                    ] );
+
+                    $this->pushOperation( [
+                            'type'      => $type_opposite_to_hide,
+                            'action'    => 'update',
                             'rif_order' => $match[$type_opposite_to_hide],
                             'data'      => null
                     ] );
+
+                    Segments_SegmentMatchDao::updateFields(['next' => $prev_to_hide['next']], $prev_to_hide['order'], $id_job, $match['to_hide']);
+                    Segments_SegmentMatchDao::updateFields(['next' => $prev_opposite_to_hide['next']], $prev_opposite_to_hide['order'], $id_job, $type_opposite_to_hide);
+                    //create new matches
+                    //update old order with null
                 }
 
                 Segments_SegmentMatchDao::hideByOrderAndType( $match[ $match[ 'to_hide' ] ], $id_job, $match[ 'to_hide' ] );
