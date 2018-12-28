@@ -1118,10 +1118,30 @@ class JobActionController extends AlignerController {
     }
 
     public function show(){
-        $id_job   = $this->job->id;
+        $id_job = $this->job->id;
 
-        $matches           = $this->params[ 'matches' ];
+        $matches = $this->params[ 'matches' ];
 
+        foreach ($matches as $match) {
+
+            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'source' ], $id_job, "source" );
+            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'target' ], $id_job, "target" );
+
+            $this->pushOperation( [
+                'type'      => 'source',
+                'action'    => 'show',
+                'rif_order' => $match[ 'source' ],
+            ] );
+
+            $this->pushOperation( [
+                'type'      => 'target',
+                'action'    => 'show',
+                'rif_order' => $match[ 'target' ],
+            ] );
+
+        }
+
+        return $this->getOperations();
     }
     
     private function pushOperation( $operation ) {
