@@ -85,8 +85,7 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
         $params = [$order, $id_job, $type];
 
-        $segmentMatches = $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
-        return $segmentMatches;
+        $stmt->execute($params);
     }
 
     public static function showByOrderAndType( $order, $id_job, $type){
@@ -96,8 +95,7 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
         $params = [$order, $id_job, $type];
 
-        $segmentMatches = $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
-        return $segmentMatches;
+        $stmt->execute($params);
     }
 
     public function createList( Array $obj_arr ) {

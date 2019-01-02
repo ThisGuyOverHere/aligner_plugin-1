@@ -938,15 +938,28 @@ class JobActionController extends AlignerController {
         return $this->getOperations();
     }
 
+
     public function hide() {
         $id_job = $this->job->id;
 
         $matches = $this->params[ 'matches' ];
 
+        $conn = NewDatabase::obtain()->getConnection();
+
         foreach ( $matches as $match ) {
+
             if ( $match[ 'to_hide' ] == "both" ) {
-                Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'source' ], $id_job, "source" );
-                Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'target' ], $id_job, "target" );
+
+                try{
+                    $conn->beginTransaction();
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'source' ], $id_job, "source" );
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'target' ], $id_job, "target" );
+                    $conn->commit();
+                } catch ( \PDOException $e){
+                    $conn->rollBack();
+                    throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+                }
+
                 $this->pushOperation( [
                         'type'      => 'source',
                         'action'    => 'hide',
@@ -958,107 +971,177 @@ class JobActionController extends AlignerController {
                         'action'    => 'hide',
                         'rif_order' => $match[ 'target' ],
                 ] );
+
             } else {
-                $type_opposite_to_hide = ( $match[ 'to_hide' ] == "source" ) ? "target" : "source";
-                $opposite_to_hide      = Segments_SegmentDao::getFromOrderJobIdAndType( $type_opposite_to_hide, $id_job . $match[ $type_opposite_to_hide ] );
-                if ( $opposite_to_hide->segment_id != null ) {
-                    $to_hide = Segments_SegmentDao::getFromOrderJobIdAndType( $match[$match['to_hide']], $id_job, $match['to_hide'] );
 
-                    $prev_opposite_to_hide = Segments_SegmentMatchDao::getPreviousSegmentMatch($match[$type_opposite_to_hide], $id_job, $type_opposite_to_hide);
-                    $prev_to_hide = Segments_SegmentMatchDao::getPreviousSegmentMatch($match[$match['to_hide']], $id_job, $match['to_hide']);
+                $type_hide         = $match['to_hide'];
+                $type_inverse_hide = ( $type_hide == "source" ) ? "target" : "source";
+                $inverse_hide      = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match[$type_inverse_hide],
+                    $id_job , $type_inverse_hide );
+                $inverse_hide = $inverse_hide->toArray();
 
+                if ( $inverse_hide['id'] != null ) {
 
+                    //Gets the segment matches to change their 'next' pointer to the non-hidden match
+                    $to_hide = Segments_SegmentDao::getFromOrderJobIdAndType( $match[ $type_hide ], $id_job, $type_hide );
+                    $to_hide = $to_hide->toArray();
 
-                    $new_match_order = AlignUtils::_getNewOrderValue( $to_hide['order'], $to_hide['next'] );
-                    $new_match_order_opposite = AlignUtils::_getNewOrderValue( $opposite_to_hide['order'], $opposite_to_hide['next'] );
+                    $prev_inverse_hide = Segments_SegmentDao::getPreviousFromOrderJobIdAndType($match[ $type_inverse_hide ], $id_job, $type_inverse_hide);
+                    $prev_to_hide      = Segments_SegmentDao::getPreviousFromOrderJobIdAndType($match[ $type_hide ], $id_job, $type_hide);
 
-                    $prev_to_hide['next'] = $new_match_order;
-                    $prev_opposite_to_hide['next'] = $new_match_order_opposite;
+                    $prev_inverse_hide = $prev_inverse_hide->toArray();
+                    $prev_to_hide      = $prev_to_hide->toArray();
 
-                    $new_match_opposite = $opposite_to_hide;
-                    $new_match_opposite['order'] = $new_match_order_opposite;
-                    $new_match_opposite['next'] = $opposite_to_hide['order'];
-                    $new_match_opposite['score'] = 100;
+                    if(count($prev_to_hide) != 0){
+                        $new_match_order = AlignUtils::_getNewOrderValue( $prev_to_hide['order'], $prev_to_hide['next'] );
+                        $prev_to_hide['next'] = $new_match_order;
+                    } else {
+                        $new_match_order = AlignUtils::_getNewOrderValue( 0, $to_hide['order'] );
+                    }
 
+                    if(count($prev_inverse_hide) != 0){
+                        $new_match_order_inverse = AlignUtils::_getNewOrderValue( $prev_inverse_hide['order'], $prev_inverse_hide['next'] );
+                        $prev_inverse_hide['next'] = $new_match_order_inverse;
+                    } else {
+                        $new_match_order_inverse = AlignUtils::_getNewOrderValue( 0, $inverse_hide['order'] );
+                    }
+
+                    //Creates a new non-hidden match
+
+                    $new_inverse_match               = $inverse_hide;
+                    $new_inverse_match['segment_id'] = $inverse_hide['id'];
+                    $new_inverse_match['order']      = $new_match_order_inverse;
+                    $new_inverse_match['next']       = $inverse_hide['order'];
+                    $new_inverse_match['score']      = 100;
+
+                    $inverse_hide[ 'score' ]          = 100;
+                    $inverse_hide[ 'segment_id' ]     = null;
+                    $inverse_hide[ 'content_raw' ]    = null;
+                    $inverse_hide[ 'content_clean' ]  = null;
+                    $inverse_hide[ 'raw_word_count' ] = null;
 
                     $new_match_null = [];
                     $new_match_null[ 'order' ]          = $new_match_order;
                     $new_match_null[ 'next' ]           = $to_hide['order'];
                     $new_match_null[ 'score' ]          = 100;
                     $new_match_null[ 'segment_id' ]     = null;
-                    $new_match_null[ 'type' ]           = $match['to_hide'];
+                    $new_match_null[ 'type' ]           = $type_hide;
                     $new_match_null[ 'id_job' ]         = $id_job;
                     $new_match_null[ 'content_raw' ]    = null;
                     $new_match_null[ 'content_clean' ]  = null;
                     $new_match_null[ 'raw_word_count' ] = null;
 
                     $this->pushOperation( [
-                            'type'      => $type_opposite_to_hide,
+                            'type'      => $type_inverse_hide,
                             'action'    => 'create',
-                            'rif_order' => $new_match_order_opposite,
-                            'data'      => $new_match_opposite
+                            'rif_order' => $new_inverse_match['next'],
+                            'data'      => $new_inverse_match
                     ] );
 
                     $this->pushOperation( [
-                            'type'      => $match['to_hide'],
+                            'type'      => $type_hide,
                             'action'    => 'create',
-                            'rif_order' => $new_match_order,
+                            'rif_order' => $new_match_null['next'],
                             'data'      => $new_match_null
                     ] );
 
-                    $this->pushOperation( [
-                            'type'      => $type_opposite_to_hide,
+                    if(count($prev_inverse_hide) != 0){
+                        $this->pushOperation( [
+                            'type'      => $type_inverse_hide,
                             'action'    => 'update',
-                            'rif_order' => $prev_opposite_to_hide['order'],
-                            'data'      => $prev_opposite_to_hide
-                    ] );
+                            'rif_order' => $prev_inverse_hide['order'],
+                            'data'      => $prev_inverse_hide
+                        ] );
+                    }
 
-                    $this->pushOperation( [
-                            'type'      => $match['to_hide'],
+                    if(count($prev_to_hide) != 0){
+                        $this->pushOperation( [
+                            'type'      => $type_hide,
                             'action'    => 'update',
                             'rif_order' => $prev_to_hide['order'],
                             'data'      => $prev_to_hide
-                    ] );
+                        ] );
+                    }
 
                     $this->pushOperation( [
-                            'type'      => $type_opposite_to_hide,
+                            'type'      => $type_inverse_hide,
                             'action'    => 'update',
-                            'rif_order' => $match[$type_opposite_to_hide],
-                            'data'      => null
+                            'rif_order' => $match[$type_inverse_hide],
+                            'data'      => $inverse_hide
                     ] );
 
-                    Segments_SegmentMatchDao::updateFields(['next' => $prev_to_hide['next']], $prev_to_hide['order'], $id_job, $match['to_hide']);
-                    Segments_SegmentMatchDao::updateFields(['next' => $prev_opposite_to_hide['next']], $prev_opposite_to_hide['order'], $id_job, $type_opposite_to_hide);
-                    //create new matches
-                    //update old order with null
+                    try{
+                        $conn->beginTransaction();
+                        $segmentsMatchDao = new Segments_SegmentMatchDao;
+                        $segmentsMatchDao->createList( [ $new_inverse_match, $new_match_null ] );
+                        Segments_SegmentMatchDao::nullifySegmentsInMatches( [$inverse_hide['order']], $id_job, $type_inverse_hide );
+                        if(count($prev_to_hide) != 0){
+                            Segments_SegmentMatchDao::updateFields(['next' => $prev_to_hide['next']], $prev_to_hide['order'], $id_job, $type_hide);
+                        }
+                        if(count($prev_inverse_hide) != 0){
+                            Segments_SegmentMatchDao::updateFields(['next' => $prev_inverse_hide['next']], $prev_inverse_hide['order'], $id_job, $type_inverse_hide);
+                        }
+                        $conn->commit();
+                    } catch (\PDOException $e) {
+                        $conn->rollBack();
+                        throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+                    }
                 }
 
-                Segments_SegmentMatchDao::hideByOrderAndType( $match[ $match[ 'to_hide' ] ], $id_job, $match[ 'to_hide' ] );
-                Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_opposite_to_hide ], $id_job, $type_opposite_to_hide );
+                try{
+                    $conn->beginTransaction();
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_hide ], $id_job, $type_hide );
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_inverse_hide ], $id_job, $type_inverse_hide );
+                    $conn->commit();
+                } catch(\PDOException $e){
+                    $conn->rollBack();
+                    throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+                }
+
                 $this->pushOperation( [
-                        'type'      => $match[ 'to_hide' ],
+                        'type'      => $type_hide,
                         'action'    => 'hide',
-                        'rif_order' => $match[ $match[ 'to_hide' ] ],
+                        'rif_order' => $match[ $type_hide ],
                 ] );
 
                 $this->pushOperation( [
-                        'type'      => $type_opposite_to_hide,
+                        'type'      => $type_inverse_hide,
                         'action'    => 'hide',
-                        'rif_order' => $match[ $type_opposite_to_hide ],
+                        'rif_order' => $match[ $type_inverse_hide ],
                 ] );
             }
         }
 
         return $this->getOperations();
-
-
+        
     }
 
     public function show(){
-        $id_job   = $this->job->id;
+        $id_job = $this->job->id;
 
-        $matches           = $this->params[ 'matches' ];
+        $matches = $this->params[ 'matches' ];
 
+        foreach ($matches as $match) {
+
+            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'source' ], $id_job, "source" );
+            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'target' ], $id_job, "target" );
+
+            $this->pushOperation( [
+                'type'      => 'source',
+                'action'    => 'show',
+                'rif_order' => $match[ 'source' ],
+            ] );
+
+            $this->pushOperation( [
+                'type'      => 'target',
+                'action'    => 'show',
+                'rif_order' => $match[ 'target' ],
+            ] );
+
+        }
+
+        return $this->getOperations();
     }
     
     private function pushOperation( $operation ) {
