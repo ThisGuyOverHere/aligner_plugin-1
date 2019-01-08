@@ -317,6 +317,9 @@ AppDispatcher.register(function (action) {
                 target: ProjectStore.job.target.toJS()
             }, syncAPI);
             break;
+        case ProjectConstants.HIDE_SEGMENTS:
+            ProjectStore.emitChange(ProjectConstants.HIDE_SEGMENTS, action.changes);
+            break;
         case ProjectConstants.ADD_SEGMENT_TO_SELECTION:
             ProjectStore.addSegmentToSelection(action.order, action.type);
             ProjectStore.emitChange(ProjectConstants.ADD_SEGMENT_TO_SELECTION, ProjectStore.selection);

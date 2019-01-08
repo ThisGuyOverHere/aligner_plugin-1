@@ -4,6 +4,7 @@ import ToolbarActionsMergeComponent from "./ToolbarActionsMerge/ToolbarActionsMe
 import ToolbarActionsSwitchComponent from "./ToolbarActionsSwitch/ToolbarActionsSwitch.component";
 import ToolbarActionsSplitComponent from "./ToolbarActionsSplit/ToolbarActionsSplit.component";
 import ToolbarActionsAlignWrapperComponent from "./ToolbarActionsAlignWrapper/ToolbarActionsAlignWrapper.component";
+import ToolbarActionsHide from "./ToolbarActionsHide/ToolbarActionsHide.component";
 
 class ToolbarActionsComponent extends Component {
 
@@ -44,6 +45,9 @@ class ToolbarActionsComponent extends Component {
                     </li>
                     <li>
                         <ToolbarActionsSwitchComponent selection={this.props.selection}/>
+                    </li>
+                    <li>
+                        <ToolbarActionsHide selection={this.props.selection}/>
                     </li>
                     {/*<li>
                         <i
