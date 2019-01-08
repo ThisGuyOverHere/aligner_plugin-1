@@ -960,16 +960,26 @@ class JobActionController extends AlignerController {
                     throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
                 }
 
+                $source = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match [ 'source' ],
+                    $id_job , 'source' );
+                
+                $target = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match [ 'target' ],
+                    $id_job , 'target' );
+
                 $this->pushOperation( [
                         'type'      => 'source',
-                        'action'    => 'hide',
+                        'action'    => 'update',
                         'rif_order' => $match[ 'source' ],
+                        'data'      => $source->toArray()
                 ] );
 
                 $this->pushOperation( [
                         'type'      => 'target',
-                        'action'    => 'hide',
+                        'action'    => 'update',
                         'rif_order' => $match[ 'target' ],
+                        'data'      => $target->toArray()
                 ] );
 
             } else {
@@ -1014,12 +1024,14 @@ class JobActionController extends AlignerController {
                     $new_inverse_match['order']      = $new_match_order_inverse;
                     $new_inverse_match['next']       = $inverse_hide['order'];
                     $new_inverse_match['score']      = 100;
+                    $new_inverse_match['hidden']     = 1;
 
                     $inverse_hide[ 'score' ]          = 100;
                     $inverse_hide[ 'segment_id' ]     = null;
                     $inverse_hide[ 'content_raw' ]    = null;
                     $inverse_hide[ 'content_clean' ]  = null;
                     $inverse_hide[ 'raw_word_count' ] = null;
+
 
                     $new_match_null = [];
                     $new_match_null[ 'order' ]          = $new_match_order;
@@ -1031,6 +1043,7 @@ class JobActionController extends AlignerController {
                     $new_match_null[ 'content_raw' ]    = null;
                     $new_match_null[ 'content_clean' ]  = null;
                     $new_match_null[ 'raw_word_count' ] = null;
+                    $new_match_null[ 'hidden' ]         = 1;
 
                     $this->pushOperation( [
                             'type'      => $type_inverse_hide,
@@ -1099,17 +1112,6 @@ class JobActionController extends AlignerController {
                     throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
                 }
 
-                $this->pushOperation( [
-                        'type'      => $type_hide,
-                        'action'    => 'hide',
-                        'rif_order' => $match[ $type_hide ],
-                ] );
-
-                $this->pushOperation( [
-                        'type'      => $type_inverse_hide,
-                        'action'    => 'hide',
-                        'rif_order' => $match[ $type_inverse_hide ],
-                ] );
             }
         }
 
@@ -1127,16 +1129,26 @@ class JobActionController extends AlignerController {
             Segments_SegmentMatchDao::showByOrderAndType( $match[ 'source' ], $id_job, "source" );
             Segments_SegmentMatchDao::showByOrderAndType( $match[ 'target' ], $id_job, "target" );
 
+            $source = Segments_SegmentDao::getFromOrderJobIdAndType(
+                $match [ 'source' ],
+                $id_job , 'source' );
+
+            $target = Segments_SegmentDao::getFromOrderJobIdAndType(
+                $match [ 'target' ],
+                $id_job , 'target' );
+
             $this->pushOperation( [
                 'type'      => 'source',
-                'action'    => 'show',
+                'action'    => 'update',
                 'rif_order' => $match[ 'source' ],
+                'data'      => $source->toArray()
             ] );
 
             $this->pushOperation( [
                 'type'      => 'target',
-                'action'    => 'show',
+                'action'    => 'update',
                 'rif_order' => $match[ 'target' ],
+                'data'      => $target->toArray()
             ] );
 
         }
