@@ -12,6 +12,7 @@ import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
+import HideComponent from "./HideRow/HideRow.component";
 
 
 class JobComponent extends Component {
@@ -213,13 +214,23 @@ class JobComponent extends Component {
                     target: !!this.state.selection.target.map[row.target.order],
                     count: this.state.selection.count
                 };
-                values.push(<RowWrapperComponent
-                    search={this.state.search}
-                    key={index}
-                    index={index}
-                    enableDrag={enableDrag}
-                    selection={selection}
-                    row={row}/>);
+                if(+row.source.hidden === 1 || +row.target.hidden === 1){
+                    values.push(<HideComponent
+                        key={index}
+                        index={index}
+                        enableDrag={enableDrag}
+                        selection={selection}
+                        row={row}
+                    />)
+                }else{
+                    values.push(<RowWrapperComponent
+                        search={this.state.search}
+                        key={index}
+                        index={index}
+                        enableDrag={enableDrag}
+                        selection={selection}
+                        row={row}/>);
+                }
                 return row;
             });
         }
