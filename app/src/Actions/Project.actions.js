@@ -211,7 +211,9 @@ let ProjectActions = {
                     })
                 });
             }
-            const sourceOrderList = selection.source.list.sort((a,b)=>{return a-b});
+            const sourceOrderList = selection.source.list.sort((a, b) => {
+                return a - b
+            });
             const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0], 'source');
             const destination = getSegmentByIndex(firstSourceIndex, 'target').order;
             AppDispatcher.dispatch({
@@ -602,6 +604,18 @@ let ProjectActions = {
                 info: info
             })
         },
+
+        /**
+         *
+         */
+        hideSegments: function () {
+            AppDispatcher.dispatch({
+                    actionType: ProjectConstants.HIDE_SEGMENTS,
+                    changes: changes,
+                }
+            )
+        },
+
     }
 ;
 
