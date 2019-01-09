@@ -950,8 +950,9 @@ class JobActionController extends AlignerController {
 
             if ( $match[ 'to_hide' ] == "both" ) {
 
+                $conn->beginTransaction();
                 try{
-                    $conn->beginTransaction();
+
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'source' ], $id_job, "source" );
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'target' ], $id_job, "target" );
                     $conn->commit();
@@ -991,11 +992,11 @@ class JobActionController extends AlignerController {
                     $id_job , $type_inverse_hide );
                 $inverse_hide = $inverse_hide->toArray();
 
-                if ( $inverse_hide['id'] != null ) {
+                //Gets the segment matches to change their 'next' pointer to the non-hidden match
+                $to_hide = Segments_SegmentDao::getFromOrderJobIdAndType( $match[ $type_hide ], $id_job, $type_hide );
+                $to_hide = $to_hide->toArray();
 
-                    //Gets the segment matches to change their 'next' pointer to the non-hidden match
-                    $to_hide = Segments_SegmentDao::getFromOrderJobIdAndType( $match[ $type_hide ], $id_job, $type_hide );
-                    $to_hide = $to_hide->toArray();
+                if ( $inverse_hide['id'] != null ) {
 
                     $prev_inverse_hide = Segments_SegmentDao::getPreviousFromOrderJobIdAndType($match[ $type_inverse_hide ], $id_job, $type_inverse_hide);
                     $prev_to_hide      = Segments_SegmentDao::getPreviousFromOrderJobIdAndType($match[ $type_hide ], $id_job, $type_hide);
@@ -1030,9 +1031,6 @@ class JobActionController extends AlignerController {
                     $inverse_hide[ 'content_raw' ]    = null;
                     $inverse_hide[ 'content_clean' ]  = null;
                     $inverse_hide[ 'raw_word_count' ] = null;
-                    $inverse_hide[ 'hidden' ]         = 1;
-
-                    $to_hide[ 'hidden' ] = 1;
 
                     $new_match_null = [];
                     $new_match_null[ 'order' ]          = $new_match_order;
@@ -1077,22 +1075,9 @@ class JobActionController extends AlignerController {
                         ] );
                     }
 
-                    $this->pushOperation( [
-                            'type'      => $type_inverse_hide,
-                            'action'    => 'update',
-                            'rif_order' => $match[$type_inverse_hide],
-                            'data'      => $inverse_hide
-                    ] );
 
-                    $this->pushOperation( [
-                            'type'      => $type_hide,
-                            'action'    => 'update',
-                            'rif_order' => $match[$type_hide],
-                            'data'      => $to_hide
-                    ] );
-
+                    $conn->beginTransaction();
                     try{
-                        $conn->beginTransaction();
                         $segmentsMatchDao = new Segments_SegmentMatchDao;
                         $segmentsMatchDao->createList( [ $new_inverse_match, $new_match_null ] );
                         Segments_SegmentMatchDao::nullifySegmentsInMatches( [$inverse_hide['order']], $id_job, $type_inverse_hide );
@@ -1109,8 +1094,26 @@ class JobActionController extends AlignerController {
                     }
                 }
 
+
+                $inverse_hide[ 'hidden' ] = 1;
+                $to_hide['hidden'] = 1;
+                $this->pushOperation( [
+                        'type'      => $type_inverse_hide,
+                        'action'    => 'update',
+                        'rif_order' => $match[$type_inverse_hide],
+                        'data'      => $inverse_hide
+                ] );
+
+                $this->pushOperation( [
+                        'type'      => $type_hide,
+                        'action'    => 'update',
+                        'rif_order' => $match[$type_hide],
+                        'data'      => $to_hide
+                ] );
+
+                $conn->beginTransaction();
                 try{
-                    $conn->beginTransaction();
+
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_hide ], $id_job, $type_hide );
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_inverse_hide ], $id_job, $type_inverse_hide );
                     $conn->commit();
