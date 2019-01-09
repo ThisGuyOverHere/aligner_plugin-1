@@ -1003,14 +1003,14 @@ class JobActionController extends AlignerController {
                     $prev_inverse_hide = (isset($prev_inverse_hide)) ? $prev_inverse_hide->toArray() : null;
                     $prev_to_hide      = (isset($prev_to_hide)) ? $prev_to_hide->toArray() : null;
 
-                    if($prev_to_hide == null){
+                    if($prev_to_hide != null){
                         $new_match_order = AlignUtils::_getNewOrderValue( $prev_to_hide['order'], $prev_to_hide['next'] );
                         $prev_to_hide['next'] = $new_match_order;
                     } else {
                         $new_match_order = AlignUtils::_getNewOrderValue( 0, $to_hide['order'] );
                     }
 
-                    if($prev_inverse_hide == null){
+                    if($prev_inverse_hide != null){
                         $new_match_order_inverse = AlignUtils::_getNewOrderValue( $prev_inverse_hide['order'], $prev_inverse_hide['next'] );
                         $prev_inverse_hide['next'] = $new_match_order_inverse;
                     } else {
@@ -1059,7 +1059,7 @@ class JobActionController extends AlignerController {
                             'data'      => $new_match_null
                     ] );
 
-                    if($prev_inverse_hide == null){
+                    if($prev_inverse_hide != null){
                         $this->pushOperation( [
                             'type'      => $type_inverse_hide,
                             'action'    => 'update',
@@ -1068,7 +1068,7 @@ class JobActionController extends AlignerController {
                         ] );
                     }
 
-                    if($prev_to_hide == null){
+                    if($prev_to_hide != null){
                         $this->pushOperation( [
                             'type'      => $type_hide,
                             'action'    => 'update',
@@ -1096,10 +1096,10 @@ class JobActionController extends AlignerController {
                         $segmentsMatchDao = new Segments_SegmentMatchDao;
                         $segmentsMatchDao->createList( [ $new_inverse_match, $new_match_null ] );
                         Segments_SegmentMatchDao::nullifySegmentsInMatches( [$inverse_hide['order']], $id_job, $type_inverse_hide );
-                        if($prev_to_hide == null){
+                        if($prev_to_hide != null){
                             Segments_SegmentMatchDao::updateFields(['next' => $prev_to_hide['next']], $prev_to_hide['order'], $id_job, $type_hide);
                         }
-                        if($prev_inverse_hide == null){
+                        if($prev_inverse_hide != null){
                             Segments_SegmentMatchDao::updateFields(['next' => $prev_inverse_hide['next']], $prev_inverse_hide['order'], $id_job, $type_inverse_hide);
                         }
                         $conn->commit();
