@@ -18,9 +18,6 @@ class HideComponent extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-
-        };
     }
 
 
@@ -37,11 +34,12 @@ class HideComponent extends Component {
     }
 
     render() {
-        return <div className="container ui hide-row-container">
-            Hide
+        return <div className="container ui" id="hide-row-container">
+            <div className="index">{this.props.index+1}</div>
             <div className="show-toggle" onClick={this.showRow}>
-                Show
+              <i aria-hidden='true' className='unhide icon'/>
             </div>
+            <div className="row-collapsed-line"/>
         </div>
     }
 
@@ -50,9 +48,8 @@ class HideComponent extends Component {
             source: this.props.row.source.order,
             target: this.props.row.target.order
         }];
-
         ProjectActions.showSegments(matches);
-    }
+    };
 
 }
 

@@ -68,8 +68,10 @@ class ToolbarActionsHide extends Component {
             if (item.source === item.target) {
                 item.to_hide = 'both';
             } else if (item.source) {
+                item.target = item.source;
                 item.to_hide = 'source';
             } else {
+                item.source = item.target;
                 item.to_hide = 'target';
             }
         });

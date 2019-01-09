@@ -545,7 +545,7 @@ let ProjectActions = {
          */
         requireDirectChangesToStore: function (changes) {
             //todo: call backend for propagate;
-            console.log(changes);
+            //console.log(changes);
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
                 changes: changes

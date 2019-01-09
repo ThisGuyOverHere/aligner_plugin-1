@@ -1,0 +1,28 @@
+@import "../../../../../assets/theme/variables";
+
+#hide-row-container {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 16px 16px 1fr;
+  column-gap: 16px;
+  align-items: center;
+  .index {
+
+  }
+  .show-toggle {
+	cursor: pointer;
+	i {
+	  color: #cccccc;
+	  &:hover {
+		transform: scale(1.1);
+		color: $primary;
+	  }
+	}
+  }
+  .row-collapsed-line {
+	background-color: $sectionGrey;
+	height: 4px;
+	margin: 8px;
+	border-radius: 50px;
+  }
+}

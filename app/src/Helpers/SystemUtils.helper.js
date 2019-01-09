@@ -119,7 +119,7 @@ export const syncWithBackend = (method, callback) => {
         case 'hide':
             httpHideSegments(method.data.jobID, method.data.jobPassword, method.data.matches)
                 .then((response) => {
-                    console.log(response);
+                    //console.log(response);
                     ProjectActions.requireDirectChangesToStore(response.data);
                     callback()
                 }, (error) => {
@@ -129,7 +129,7 @@ export const syncWithBackend = (method, callback) => {
         case 'show':
             httpShowSegments(method.data.jobID, method.data.jobPassword, method.data.matches)
                 .then((response) => {
-                    console.log(response);
+                    //console.log(response);
                     ProjectActions.requireDirectChangesToStore(response.data);
                     callback()
                 }, (error) => {
