@@ -25,10 +25,10 @@ class ToolbarActionsHide extends Component {
     }
 
     render() {
-        console.log(this.props.selection.source);
-        console.log(this.props.selection.target);
+        //console.log(this.props.selection.source);
+        //console.log(this.props.selection.target);
         let disabled = false;
-        if ( !(this.props.selection.source.count > 0 || this.props.selection.target.count > 0) ) {
+        if (!(this.props.selection.source.count > 0 || this.props.selection.target.count > 0)) {
             disabled = true;
         }
         return <Hotkeys
@@ -44,7 +44,7 @@ class ToolbarActionsHide extends Component {
 
     onHideClick = () => {
         let matches = [];
-        this.props.selection.source.list.map( (item , index) => {
+        this.props.selection.source.list.map((item, index) => {
             matches.push({
                 source: item,
                 target: '',
@@ -52,10 +52,10 @@ class ToolbarActionsHide extends Component {
             })
         });
 
-        this.props.selection.target.list.map( (item, index) => {
-            if(matches[index]){
+        this.props.selection.target.list.map((item, index) => {
+            if (matches[index]) {
                 matches[index].target = item;
-            }else{
+            } else {
                 matches.push({
                     source: '',
                     target: item,
@@ -64,29 +64,27 @@ class ToolbarActionsHide extends Component {
             }
         });
 
-        matches.map( (item, index) => {
-            if(item.source === item.target){
+        matches.map((item, index) => {
+            if (item.source === item.target) {
                 item.to_hide = 'both';
             } else if (item.source) {
+                item.target = item.source;
                 item.to_hide = 'source';
-            }else{
+            } else {
+                item.source = item.target;
                 item.to_hide = 'target';
             }
         });
 
-        console.log(matches);
+        /*const type = this.props.selection.source.count > 0 ? 'source' : 'target';
+        const orders = this.props.selection[type].list.sort((a, b) => {
+            return a - b
+        });*/
 
-        /*if (
-            ((this.props.selection.source.count === 0 && this.props.selection.target.count > 1)
-                || (this.props.selection.target.count === 0 && this.props.selection.source.count > 1))
-        ) {
-            const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-            const orders = this.props.selection[type].list.sort((a,b)=>{return a-b});
-            ProjectActions.mergeSegments(this.props.jobConf.id, this.props.jobConf.password, orders, type);
-            ProjectActions.addSegmentToSelection(-1);
-            ProjectActions.onActionHover(null);
-        }*/
-    };
+        ProjectActions.hideSegments(matches);
+        ProjectActions.addSegmentToSelection(-1);
+        ProjectActions.onActionHover(null);
+    }
 }
 
 export default ToolbarActionsHide;
