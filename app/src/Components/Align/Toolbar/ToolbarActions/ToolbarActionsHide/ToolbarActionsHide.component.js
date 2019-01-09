@@ -42,20 +42,44 @@ class ToolbarActionsHide extends Component {
         </Hotkeys>;
     }
 
+    // segments list sorting
+    segmentsSelectedSorting = (segmentsSelected) => {
+        segmentsSelected.source.list.sort((a, b) => {
+            return a - b
+        });
+
+        segmentsSelected.target.list.sort((a, b) => {
+            return a - b
+        });
+
+        return segmentsSelected
+    };
+
     onHideClick = () => {
+        // init matches array to send
         let matches = [];
-        this.props.selection.source.list.map((item, index) => {
+        // sort segments list
+        let segmentsSelected = this.segmentsSelectedSorting(this.props.selection);
+        // create match and fill source field
+        segmentsSelected.source.list.map((item, index) => {
             matches.push({
                 source: item,
                 target: '',
                 to_hide: ''
             })
         });
-
-        this.props.selection.target.list.map((item, index) => {
-            if (matches[index]) {
-                matches[index].target = item;
-            } else {
+        // create target or fill existing target field
+        segmentsSelected.target.list.map((item, index) => {
+            let matched = false;
+            matches.map((match, matchIndex) => {
+                if(match.source === item){
+                    match.target = item;
+                    matched = true;
+                }
+            });
+            if(matched){
+                matched = !matched
+            }else{
                 matches.push({
                     source: '',
                     target: item,
@@ -63,7 +87,7 @@ class ToolbarActionsHide extends Component {
                 })
             }
         });
-
+        // analyse amtches and fill to_hide field with right action
         matches.map((item, index) => {
             if (item.source === item.target) {
                 item.to_hide = 'both';
@@ -75,12 +99,7 @@ class ToolbarActionsHide extends Component {
                 item.to_hide = 'target';
             }
         });
-
-        /*const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-        const orders = this.props.selection[type].list.sort((a, b) => {
-            return a - b
-        });*/
-
+        // call hide action and collateral actions
         ProjectActions.hideSegments(matches);
         ProjectActions.addSegmentToSelection(-1);
         ProjectActions.onActionHover(null);

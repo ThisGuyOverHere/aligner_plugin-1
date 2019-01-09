@@ -90,8 +90,8 @@ class JobComponent extends Component {
 
     }
 
-    componentDidUpdate(){
-        if(this.state.scrollToSegment !== null){
+    componentDidUpdate() {
+        if (this.state.scrollToSegment !== null) {
             this.setState({
                 scrollToSegment: null
             })
@@ -123,8 +123,11 @@ class JobComponent extends Component {
                     estimatedItemSize={80}
                     scrollToAlignment="center"
                     itemSize={(index) => {
-                        let itemHeigth = 52;
-                        if(+this.props.job.rows[index].source.hidden === 0 && +this.props.job.rows[index].target.hidden === 0 ){
+                        let itemHeigth = 0;
+                        if (+this.props.job.rows[index].source.hidden === 1 || +this.props.job.rows[index].target.hidden === 1) {
+                            document.getElementById('hiddenHtml').innerHTML = "";
+                            itemHeigth = 52
+                        } else {
                             let source = document.createElement('p');
                             source.style.width = this.state.window.segmentContentWidth;
                             source.style.fontSize = "16px";
@@ -169,11 +172,11 @@ class JobComponent extends Component {
     updateWindowDimensions = () => {
         let data = {};
 
-        if(window.innerWidth < 992){
+        if (window.innerWidth < 992) {
             data.segmentContentWidth = "235px";
-        }else if(window.innerWidth < 1200){
+        } else if (window.innerWidth < 1200) {
             data.segmentContentWidth = "340px";
-        }else{
+        } else {
             data.segmentContentWidth = "437px";
         }
 
@@ -217,7 +220,7 @@ class JobComponent extends Component {
                     target: !!this.state.selection.target.map[row.target.order],
                     count: this.state.selection.count
                 };
-                if(+row.source.hidden === 1 || +row.target.hidden === 1){
+                if (+row.source.hidden === 1 || +row.target.hidden === 1) {
                     values.push(<HideComponent
                         key={index}
                         index={index}
@@ -225,7 +228,7 @@ class JobComponent extends Component {
                         selection={selection}
                         row={row}
                     />)
-                }else{
+                } else {
                     values.push(<RowWrapperComponent
                         search={this.state.search}
                         key={index}
@@ -256,10 +259,10 @@ class JobComponent extends Component {
 
     onSearchEvent = (search) => {
         const scrollToSegment = search.occurrencesList.length > 0 ? search.occurrencesList[search.featuredSearchResult].index : null;
-            this.setState({
-                search: search,
-                scrollToSegment: scrollToSegment
-            });
+        this.setState({
+            search: search,
+            scrollToSegment: scrollToSegment
+        });
     }
 }
 
