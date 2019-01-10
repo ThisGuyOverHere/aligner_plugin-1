@@ -604,9 +604,7 @@ class JobActionController extends AlignerController {
     public function delete() {
 
         $id_job   = $this->job->id;
-
         $matches = $this->params[ 'matches' ];
-        $id_job  = $this->params[ 'id_job' ];
 
         $sources = [];
         $targets = [];
@@ -641,13 +639,20 @@ class JobActionController extends AlignerController {
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
+
             if ( !empty( $sources ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $sources, $id_job, 'source' );
-                Segments_SegmentMatchDao::deleteMatches( $sources, $id_job, 'source' );
+                foreach($sources as $source){
+                    Segments_SegmentMatchDao::updateMatchBeforeDeletion( $source, $id_job, 'source' );
+                    Segments_SegmentMatchDao::deleteMatch( $source, $id_job, 'source' );
+                }
+
             }
             if ( !empty( $targets ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $targets, $id_job, 'target' );
-                Segments_SegmentMatchDao::deleteMatches( $targets, $id_job, 'target' );
+                foreach($targets as $target){
+                    Segments_SegmentMatchDao::updateMatchBeforeDeletion( $target, $id_job, 'target' );
+                    Segments_SegmentMatchDao::deleteMatch( $target, $id_job, 'target' );
+                }
+
             }
             $conn->commit();
         } catch ( \PDOException $e ) {
@@ -950,9 +955,9 @@ class JobActionController extends AlignerController {
 
             if ( $match[ 'to_hide' ] == "both" ) {
 
-                $conn->beginTransaction();
-                try{
 
+                try{
+                    $conn->beginTransaction();
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'source' ], $id_job, "source" );
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'target' ], $id_job, "target" );
                     $conn->commit();
@@ -1076,8 +1081,9 @@ class JobActionController extends AlignerController {
                     }
 
 
-                    $conn->beginTransaction();
+
                     try{
+                        $conn->beginTransaction();
                         $segmentsMatchDao = new Segments_SegmentMatchDao;
                         $segmentsMatchDao->createList( [ $new_inverse_match, $new_match_null ] );
                         Segments_SegmentMatchDao::nullifySegmentsInMatches( [$inverse_hide['order']], $id_job, $type_inverse_hide );
@@ -1111,9 +1117,9 @@ class JobActionController extends AlignerController {
                         'data'      => $to_hide
                 ] );
 
-                $conn->beginTransaction();
-                try{
 
+                try{
+                    $conn->beginTransaction();
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_hide ], $id_job, $type_hide );
                     Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_inverse_hide ], $id_job, $type_inverse_hide );
                     $conn->commit();
