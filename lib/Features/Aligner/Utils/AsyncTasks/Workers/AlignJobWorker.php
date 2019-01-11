@@ -226,8 +226,11 @@ class AlignJobWorker extends AbstractWorker {
                         'content_clean' => AlignUtils::_cleanSegment($item, $lang),
                         'raw_word_count' => AlignUtils::_countWordsInSegment($item, $lang)
                     ];
-                    $total_words += $unit_segment['raw_word_count'];
-                    $unit_segments[] = $unit_segment;
+
+                    if ($unit_segment['raw_word_count'] > 0) {
+                        $total_words += $unit_segment['raw_word_count'];
+                        $unit_segments[] = $unit_segment;
+                    }
                 }
 
                 // Append to existing Segments

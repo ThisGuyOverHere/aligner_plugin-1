@@ -1,8 +1,8 @@
 import {
-    httpDeleteSegments, httpMergeAlignSegments,
+    httpDeleteSegments, httpHideSegments, httpMergeAlignSegments,
     httpMergeSegments,
     httpMoveSegments,
-    httpReverseSegments
+    httpReverseSegments, httpShowSegments
 } from "../HttpRequests/Alignment.http";
 import ProjectActions from "../Actions/Project.actions";
 import SystemActions from "../Actions/System.actions";
@@ -92,7 +92,7 @@ export const syncWithBackend = (method, callback) => {
                 action: method.data.jobID,
                 label: 'merge and align',
             });
-            httpMergeAlignSegments(method.data.jobID, method.data.jobPassword, method.data.matches,method.data.destination).then((response) => {
+            httpMergeAlignSegments(method.data.jobID, method.data.jobPassword, method.data.matches, method.data.destination).then((response) => {
                 ProjectActions.requireDirectChangesToStore(response.data);
                 callback()
             }, (error) => {
@@ -115,6 +115,26 @@ export const syncWithBackend = (method, callback) => {
             }, (error) => {
                 console.error(error);
             });
+            break;
+        case 'hide':
+            httpHideSegments(method.data.jobID, method.data.jobPassword, method.data.matches)
+                .then((response) => {
+                    //console.log(response);
+                    ProjectActions.requireDirectChangesToStore(response.data);
+                    callback()
+                }, (error) => {
+                    console.error(error);
+                });
+            break;
+        case 'show':
+            httpShowSegments(method.data.jobID, method.data.jobPassword, method.data.matches)
+                .then((response) => {
+                    //console.log(response);
+                    ProjectActions.requireDirectChangesToStore(response.data);
+                    callback()
+                }, (error) => {
+                    console.error(error);
+                });
             break;
         case 'reverse':
             ReactGA.event({

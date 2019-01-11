@@ -83,7 +83,7 @@ class JobActionController extends AlignerController {
             foreach ( $deleted_orders as $order ) {
                 $this->pushOperation( [
                     'type'      => $type,
-                    'action'    => 'delete',
+                    'action'    => 'update',
                     'rif_order' => $order
                 ] );
             }
@@ -285,7 +285,7 @@ class JobActionController extends AlignerController {
         return $this->getOperations();
     }
 
-    public function moveInEmpty($referenceMatch){
+    protected function moveInEmpty($referenceMatch){
 
         $id_job   = $this->job->id;
 
@@ -345,7 +345,7 @@ class JobActionController extends AlignerController {
 
     }
 
-    public function moveInFill($referenceMatch){
+    protected function moveInFill($referenceMatch){
 
         $id_job   = $this->job->id;
 
@@ -604,9 +604,7 @@ class JobActionController extends AlignerController {
     public function delete() {
 
         $id_job   = $this->job->id;
-
         $matches = $this->params[ 'matches' ];
-        $id_job  = $this->params[ 'id_job' ];
 
         $sources = [];
         $targets = [];
@@ -638,22 +636,69 @@ class JobActionController extends AlignerController {
             }
         }
 
+        foreach ( $sourceMatches as $sourceMatch ) {
+            $this->pushOperation( [
+                    'type'      => "source",
+                    'action'    => "delete",
+                    'rif_order' => $sourceMatch['order'],
+            ] );
+
+            //query to take previous match
+            $previousSourceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($sourceMatch['order'], $id_job, "source")->toArray();
+            $previousSourceMatch['next'] = $sourceMatch['next'];
+
+            $this->pushOperation( [
+                    'type'      => "source",
+                    'action'    => "update",
+                    'rif_order' => $previousSourceMatch['order'],
+                    'data'      => $previousSourceMatch
+            ] );
+        }
+
+        foreach ( $targetMatches as $targetMatch ) {
+            $this->pushOperation( [
+                    'type'      => "target",
+                    'action'    => "delete",
+                    'rif_order' => $targetMatch['order']
+            ] );
+
+            //query to take previous match
+            $previousTargetMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($targetMatch['order'], $id_job, "source")->toArray();
+            $previousTargetMatch['next'] = $targetMatch['next'];
+
+            $this->pushOperation( [
+                    'type'      => "source",
+                    'action'    => "update",
+                    'rif_order' => $previousTargetMatch['order'],
+                    'data'      => $previousTargetMatch
+            ] );
+        }
+
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
+
             if ( !empty( $sources ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $sources, $id_job, 'source' );
-                Segments_SegmentMatchDao::deleteMatches( $sources, $id_job, 'source' );
+                foreach($sources as $source){
+                    Segments_SegmentMatchDao::updateMatchBeforeDeletion( $source, $id_job, 'source' );
+                    Segments_SegmentMatchDao::deleteMatch( $source, $id_job, 'source' );
+                }
+
             }
             if ( !empty( $targets ) ) {
-                Segments_SegmentMatchDao::updateMatchesBeforeDeletion( $targets, $id_job, 'target' );
-                Segments_SegmentMatchDao::deleteMatches( $targets, $id_job, 'target' );
+                foreach($targets as $target){
+                    Segments_SegmentMatchDao::updateMatchBeforeDeletion( $target, $id_job, 'target' );
+                    Segments_SegmentMatchDao::deleteMatch( $target, $id_job, 'target' );
+                }
+
             }
             $conn->commit();
         } catch ( \PDOException $e ) {
             $conn->rollBack();
             throw new \PDOException( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
+
+        return $this->getOperations();
 
     }
 
@@ -935,6 +980,235 @@ class JobActionController extends AlignerController {
         } catch ( ValidationError $e ) {
             throw new ValidationError( $e->getMessage(), -2 );
         }
+        return $this->getOperations();
+    }
+
+
+    public function hide() {
+        $id_job = $this->job->id;
+
+        $matches = $this->params[ 'matches' ];
+
+        $conn = NewDatabase::obtain()->getConnection();
+
+        foreach ( $matches as $match ) {
+
+            if ( $match[ 'to_hide' ] == "both" ) {
+
+
+                try{
+                    $conn->beginTransaction();
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'source' ], $id_job, "source" );
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'target' ], $id_job, "target" );
+                    $conn->commit();
+                } catch ( \PDOException $e){
+                    $conn->rollBack();
+                    throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+                }
+
+                $source = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match [ 'source' ],
+                    $id_job , 'source' );
+                
+                $target = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match [ 'target' ],
+                    $id_job , 'target' );
+
+                $this->pushOperation( [
+                        'type'      => 'source',
+                        'action'    => 'update',
+                        'rif_order' => $match[ 'source' ],
+                        'data'      => $source->toArray()
+                ] );
+
+                $this->pushOperation( [
+                        'type'      => 'target',
+                        'action'    => 'update',
+                        'rif_order' => $match[ 'target' ],
+                        'data'      => $target->toArray()
+                ] );
+
+            } else {
+
+                $type_hide         = $match['to_hide'];
+                $type_inverse_hide = ( $type_hide == "source" ) ? "target" : "source";
+                $inverse_hide      = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match[$type_inverse_hide],
+                    $id_job , $type_inverse_hide );
+                $inverse_hide = $inverse_hide->toArray();
+
+                //Gets the segment matches to change their 'next' pointer to the non-hidden match
+                $to_hide = Segments_SegmentDao::getFromOrderJobIdAndType( $match[ $type_hide ], $id_job, $type_hide );
+                $to_hide = $to_hide->toArray();
+
+                if ( $inverse_hide['id'] != null ) {
+
+                    $prev_inverse_hide = Segments_SegmentDao::getPreviousFromOrderJobIdAndType($match[ $type_inverse_hide ], $id_job, $type_inverse_hide);
+                    $prev_to_hide      = Segments_SegmentDao::getPreviousFromOrderJobIdAndType($match[ $type_hide ], $id_job, $type_hide);
+
+                    $prev_inverse_hide = (isset($prev_inverse_hide)) ? $prev_inverse_hide->toArray() : null;
+                    $prev_to_hide      = (isset($prev_to_hide)) ? $prev_to_hide->toArray() : null;
+
+                    if($prev_to_hide != null){
+                        $new_match_order = AlignUtils::_getNewOrderValue( $prev_to_hide['order'], $prev_to_hide['next'] );
+                        $prev_to_hide['next'] = $new_match_order;
+                    } else {
+                        $new_match_order = AlignUtils::_getNewOrderValue( 0, $to_hide['order'] );
+                    }
+
+                    if($prev_inverse_hide != null){
+                        $new_match_order_inverse = AlignUtils::_getNewOrderValue( $prev_inverse_hide['order'], $prev_inverse_hide['next'] );
+                        $prev_inverse_hide['next'] = $new_match_order_inverse;
+                    } else {
+                        $new_match_order_inverse = AlignUtils::_getNewOrderValue( 0, $inverse_hide['order'] );
+                    }
+
+                    //Creates a new non-hidden match
+
+                    $new_inverse_match               = $inverse_hide;
+                    $new_inverse_match['segment_id'] = $inverse_hide['id'];
+                    $new_inverse_match['order']      = $new_match_order_inverse;
+                    $new_inverse_match['next']       = $inverse_hide['order'];
+                    $new_inverse_match['score']      = 100;
+
+                    $inverse_hide[ 'score' ]          = 100;
+                    $inverse_hide[ 'segment_id' ]     = null;
+                    $inverse_hide[ 'content_raw' ]    = null;
+                    $inverse_hide[ 'content_clean' ]  = null;
+                    $inverse_hide[ 'raw_word_count' ] = null;
+
+                    $new_match_null = [];
+                    $new_match_null[ 'order' ]          = $new_match_order;
+                    $new_match_null[ 'next' ]           = $to_hide['order'];
+                    $new_match_null[ 'score' ]          = 100;
+                    $new_match_null[ 'segment_id' ]     = null;
+                    $new_match_null[ 'type' ]           = $type_hide;
+                    $new_match_null[ 'id_job' ]         = $id_job;
+                    $new_match_null[ 'content_raw' ]    = null;
+                    $new_match_null[ 'content_clean' ]  = null;
+                    $new_match_null[ 'raw_word_count' ] = null;
+
+                    $this->pushOperation( [
+                            'type'      => $type_inverse_hide,
+                            'action'    => 'create',
+                            'rif_order' => $new_inverse_match['next'],
+                            'data'      => $new_inverse_match
+                    ] );
+
+                    $this->pushOperation( [
+                            'type'      => $type_hide,
+                            'action'    => 'create',
+                            'rif_order' => $new_match_null['next'],
+                            'data'      => $new_match_null
+                    ] );
+
+                    if($prev_inverse_hide != null){
+                        $this->pushOperation( [
+                            'type'      => $type_inverse_hide,
+                            'action'    => 'update',
+                            'rif_order' => $prev_inverse_hide['order'],
+                            'data'      => $prev_inverse_hide
+                        ] );
+                    }
+
+                    if($prev_to_hide != null){
+                        $this->pushOperation( [
+                            'type'      => $type_hide,
+                            'action'    => 'update',
+                            'rif_order' => $prev_to_hide['order'],
+                            'data'      => $prev_to_hide
+                        ] );
+                    }
+
+
+
+                    try{
+                        $conn->beginTransaction();
+                        $segmentsMatchDao = new Segments_SegmentMatchDao;
+                        $segmentsMatchDao->createList( [ $new_inverse_match, $new_match_null ] );
+                        Segments_SegmentMatchDao::nullifySegmentsInMatches( [$inverse_hide['order']], $id_job, $type_inverse_hide );
+                        if($prev_to_hide != null){
+                            Segments_SegmentMatchDao::updateFields(['next' => $prev_to_hide['next']], $prev_to_hide['order'], $id_job, $type_hide);
+                        }
+                        if($prev_inverse_hide != null){
+                            Segments_SegmentMatchDao::updateFields(['next' => $prev_inverse_hide['next']], $prev_inverse_hide['order'], $id_job, $type_inverse_hide);
+                        }
+                        $conn->commit();
+                    } catch (\PDOException $e) {
+                        $conn->rollBack();
+                        throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+                    }
+                }
+
+
+                $inverse_hide[ 'hidden' ] = 1;
+                $to_hide['hidden'] = 1;
+                $this->pushOperation( [
+                        'type'      => $type_inverse_hide,
+                        'action'    => 'update',
+                        'rif_order' => $match[$type_inverse_hide],
+                        'data'      => $inverse_hide
+                ] );
+
+                $this->pushOperation( [
+                        'type'      => $type_hide,
+                        'action'    => 'update',
+                        'rif_order' => $match[$type_hide],
+                        'data'      => $to_hide
+                ] );
+
+
+                try{
+                    $conn->beginTransaction();
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_hide ], $id_job, $type_hide );
+                    Segments_SegmentMatchDao::hideByOrderAndType( $match[ $type_inverse_hide ], $id_job, $type_inverse_hide );
+                    $conn->commit();
+                } catch(\PDOException $e){
+                    $conn->rollBack();
+                    throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+                }
+
+            }
+        }
+
+        return $this->getOperations();
+        
+    }
+
+    public function show(){
+        $id_job = $this->job->id;
+
+        $matches = $this->params[ 'matches' ];
+
+        foreach ($matches as $match) {
+
+            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'source' ], $id_job, "source" );
+            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'target' ], $id_job, "target" );
+
+            $source = Segments_SegmentDao::getFromOrderJobIdAndType(
+                $match [ 'source' ],
+                $id_job , 'source' );
+
+            $target = Segments_SegmentDao::getFromOrderJobIdAndType(
+                $match [ 'target' ],
+                $id_job , 'target' );
+
+            $this->pushOperation( [
+                'type'      => 'source',
+                'action'    => 'update',
+                'rif_order' => $match[ 'source' ],
+                'data'      => $source->toArray()
+            ] );
+
+            $this->pushOperation( [
+                'type'      => 'target',
+                'action'    => 'update',
+                'rif_order' => $match[ 'target' ],
+                'data'      => $target->toArray()
+            ] );
+
+        }
+
         return $this->getOperations();
     }
     

@@ -70,6 +70,18 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getPreviousFromOrderJobIdAndType($order, $id_job, $type, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match ON segment_id = segments.id
+        WHERE segments_match.next = ? AND segments_match.id_job = ? AND segments_match.type = ? ORDER BY id ASC" );
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [$order, $id_job , $type] )[0];
+
+    }
+
     public static function getFromOrderJobIdAndType($order, $id_job, $type, $ttl = 0 ) {
 
         $thisDao = new self();
@@ -243,7 +255,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
         $conn = NewDatabase::obtain()->getConnection();
 
 
-        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw FROM segments as s
+        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw, sm.hidden FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ?
         ORDER by sm.order";

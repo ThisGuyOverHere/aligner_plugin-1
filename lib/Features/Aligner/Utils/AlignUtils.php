@@ -42,8 +42,12 @@ class AlignUtils
         ];
 
         foreach ($tagsRegex as $regex) {
-            $segment = preg_replace($regex, '', $segment);
+            $segment = preg_replace($regex, ' ', $segment);
         }
+
+        // Trim and remove multiple spaces
+        $segment = trim($segment);
+        $segment = preg_replace('/\s+/', ' ', $segment);
 
         return $segment;
     }

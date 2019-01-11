@@ -40,6 +40,8 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\JobActionController', 'delete' );
         route( '/job/[:id_job]/[:password]/segment/switch', 'POST', 'Features\Aligner\Controller\JobActionController', 'switchAction' );
         route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\JobActionController', 'mergeAndAlign' );
+        route( '/job/[:id_job]/[:password]/segment/hide', 'POST', 'Features\Aligner\Controller\JobActionController', 'hide' );
+        route( '/job/[:id_job]/[:password]/segment/show', 'POST', 'Features\Aligner\Controller\JobActionController', 'show' );
 
         route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TmController', 'getUserTM' );
         route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TmController', 'createTmKey' );

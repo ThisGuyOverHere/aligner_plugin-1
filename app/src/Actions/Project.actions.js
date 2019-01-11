@@ -211,7 +211,9 @@ let ProjectActions = {
                     })
                 });
             }
-            const sourceOrderList = selection.source.list.sort((a,b)=>{return a-b});
+            const sourceOrderList = selection.source.list.sort((a, b) => {
+                return a - b
+            });
             const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0], 'source');
             const destination = getSegmentByIndex(firstSourceIndex, 'target').order;
             AppDispatcher.dispatch({
@@ -543,7 +545,7 @@ let ProjectActions = {
          */
         requireDirectChangesToStore: function (changes) {
             //todo: call backend for propagate;
-            console.log(changes);
+            //console.log(changes);
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
                 changes: changes
@@ -602,6 +604,45 @@ let ProjectActions = {
                 info: info
             })
         },
+
+        /**
+         * hide selected segments rows
+         */
+        hideSegments: function (matches) {
+            AppDispatcher.dispatch({
+                    actionType: ProjectConstants.HIDE_SEGMENTS,
+                    changes: matches,
+                    syncAPI: {
+                        action: 'hide',
+                        data: {
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
+                            matches: matches
+                        }
+                    }
+                }
+            )
+        },
+
+        /**
+         * show clicked row
+         */
+        showSegments: function (matches) {
+            AppDispatcher.dispatch({
+                    actionType: ProjectConstants.SHOW_SEGMENTS,
+                    changes: matches,
+                    syncAPI: {
+                        action: 'show',
+                        data: {
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
+                            matches: matches
+                        }
+                    }
+                }
+            )
+        },
+
     }
 ;
 

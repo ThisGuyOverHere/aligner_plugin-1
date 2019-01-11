@@ -37,12 +37,13 @@ class Alignment {
         $time_end = microtime(true);
         Log::doLog('Completed pre-translation: source ['.count($source).'] in '.($time_end-$time_start).' seconds');
 
+        $original_clean = $this->cleanSegments($source);
         $source_clean = $this->cleanSegments($source_translated);
         $target_clean = $this->cleanSegments($target);
 
         $time_start = microtime(true);
 
-        $indexes = $this->align($source_clean, $target_clean);
+        $indexes = $this->align($original_clean, $source_clean, $target_clean);
         $alignment = $this->mapAlignment($source, $target, $indexes);
 
         $time_end = microtime(true);
@@ -127,13 +128,13 @@ class Alignment {
     }
 
     // Perform alignment
-    function align($source, $target) {
+    function align($original, $source, $target) {
 
         // Progress - align updates from 50 to 90
         $progress = 50;
         Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5, 'progress' => $progress], $this->id_job, $this->password);
 
-        $matches = $this->find100x100Matches($source, $target);
+        $matches = $this->find100x100Matches($original, $source, $target);
 
         Log::doLog('Found '.count($matches).' 100% matches');
 
@@ -185,8 +186,12 @@ class Alignment {
     }
 
     // 100% matches
-    function find100x100Matches($source, $target) {
+    function find100x100Matches($original, $source, $target) {
         // Try to find a 100% match (equal strings) and split align work in multiple sub-works (divide et impera)
+
+        $original = array_map(function ($item) {
+            return implode('', $item);
+        }, $original);
 
         $source = array_map(function ($item) {
             return implode('', $item);
@@ -195,6 +200,16 @@ class Alignment {
         $target = array_map(function ($item) {
             return implode('', $item);
         }, $target);
+
+        // 1. Find 100% matches from $original to $target, to find untranslatable matches
+
+        $commonOT = array_intersect($original, $target);
+
+        foreach ($commonOT as $key => $value) {  // Put these $original matches into $source, to force next run to find $source <> $target match
+            $source[$key] = $value;
+        }
+
+        // 2. Find 100% matches from $source to $target, to find translatable matches
 
         // We need to perform it twice to have both indexes
         $commonST = array_intersect($source, $target);
