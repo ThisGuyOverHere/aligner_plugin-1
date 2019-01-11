@@ -83,7 +83,7 @@ class JobActionController extends AlignerController {
             foreach ( $deleted_orders as $order ) {
                 $this->pushOperation( [
                     'type'      => $type,
-                    'action'    => 'delete',
+                    'action'    => 'update',
                     'rif_order' => $order
                 ] );
             }
@@ -285,7 +285,7 @@ class JobActionController extends AlignerController {
         return $this->getOperations();
     }
 
-    public function moveInEmpty($referenceMatch){
+    protected function moveInEmpty($referenceMatch){
 
         $id_job   = $this->job->id;
 
@@ -345,7 +345,7 @@ class JobActionController extends AlignerController {
 
     }
 
-    public function moveInFill($referenceMatch){
+    protected function moveInFill($referenceMatch){
 
         $id_job   = $this->job->id;
 
@@ -636,6 +636,44 @@ class JobActionController extends AlignerController {
             }
         }
 
+        foreach ( $sourceMatches as $sourceMatch ) {
+            $this->pushOperation( [
+                    'type'      => "source",
+                    'action'    => "delete",
+                    'rif_order' => $sourceMatch['order'],
+            ] );
+
+            //query to take previous match
+            $previousSourceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($sourceMatch['order'], $id_job, "source")->toArray();
+            $previousSourceMatch['next'] = $sourceMatch['next'];
+
+            $this->pushOperation( [
+                    'type'      => "source",
+                    'action'    => "update",
+                    'rif_order' => $previousSourceMatch['order'],
+                    'data'      => $previousSourceMatch
+            ] );
+        }
+
+        foreach ( $targetMatches as $targetMatch ) {
+            $this->pushOperation( [
+                    'type'      => "target",
+                    'action'    => "delete",
+                    'rif_order' => $targetMatch['order']
+            ] );
+
+            //query to take previous match
+            $previousTargetMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($targetMatch['order'], $id_job, "source")->toArray();
+            $previousTargetMatch['next'] = $targetMatch['next'];
+
+            $this->pushOperation( [
+                    'type'      => "source",
+                    'action'    => "update",
+                    'rif_order' => $previousTargetMatch['order'],
+                    'data'      => $previousTargetMatch
+            ] );
+        }
+
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
@@ -659,6 +697,8 @@ class JobActionController extends AlignerController {
             $conn->rollBack();
             throw new \PDOException( "Segment update - DB Error: " . $e->getMessage(), -2 );
         }
+
+        return $this->getOperations();
 
     }
 
