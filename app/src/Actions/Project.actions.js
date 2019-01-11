@@ -545,7 +545,7 @@ let ProjectActions = {
          */
         requireDirectChangesToStore: function (changes) {
             //todo: call backend for propagate;
-            console.log(changes);
+            //console.log(changes);
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
                 changes: changes
@@ -606,12 +606,39 @@ let ProjectActions = {
         },
 
         /**
-         *
+         * hide selected segments rows
          */
-        hideSegments: function () {
+        hideSegments: function (matches) {
             AppDispatcher.dispatch({
                     actionType: ProjectConstants.HIDE_SEGMENTS,
-                    changes: changes,
+                    changes: matches,
+                    syncAPI: {
+                        action: 'hide',
+                        data: {
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
+                            matches: matches
+                        }
+                    }
+                }
+            )
+        },
+
+        /**
+         * show clicked row
+         */
+        showSegments: function (matches) {
+            AppDispatcher.dispatch({
+                    actionType: ProjectConstants.SHOW_SEGMENTS,
+                    changes: matches,
+                    syncAPI: {
+                        action: 'show',
+                        data: {
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
+                            matches: matches
+                        }
+                    }
                 }
             )
         },

@@ -25,10 +25,10 @@ class ToolbarActionsHide extends Component {
     }
 
     render() {
-        console.log(this.props.selection.source);
-        console.log(this.props.selection.target);
+        //console.log(this.props.selection.source);
+        //console.log(this.props.selection.target);
         let disabled = false;
-        if ( !(this.props.selection.source.count > 0 || this.props.selection.target.count > 0) ) {
+        if (!(this.props.selection.source.count > 0 || this.props.selection.target.count > 0)) {
             disabled = true;
         }
         return <Hotkeys
@@ -42,19 +42,43 @@ class ToolbarActionsHide extends Component {
         </Hotkeys>;
     }
 
+    // segments list sorting
+    segmentsSelectedSorting = (segmentsSelected) => {
+        segmentsSelected.source.list.sort((a, b) => {
+            return a - b
+        });
+
+        segmentsSelected.target.list.sort((a, b) => {
+            return a - b
+        });
+
+        return segmentsSelected
+    };
+
     onHideClick = () => {
+        // init matches array to send
         let matches = [];
-        this.props.selection.source.list.map( (item , index) => {
+        // sort segments list
+        let segmentsSelected = this.segmentsSelectedSorting(this.props.selection);
+        // create match and fill source field
+        segmentsSelected.source.list.map((item, index) => {
             matches.push({
                 source: item,
                 target: '',
                 to_hide: ''
             })
         });
-
-        this.props.selection.target.list.map( (item, index) => {
-            if(matches[index]){
-                matches[index].target = item;
+        // create target or fill existing target field
+        segmentsSelected.target.list.map((item, index) => {
+            let matched = false;
+            matches.map((match, matchIndex) => {
+                if(match.source === item){
+                    match.target = item;
+                    matched = true;
+                }
+            });
+            if(matched){
+                matched = !matched
             }else{
                 matches.push({
                     source: '',
@@ -63,30 +87,23 @@ class ToolbarActionsHide extends Component {
                 })
             }
         });
-
-        matches.map( (item, index) => {
-            if(item.source === item.target){
+        // analyse amtches and fill to_hide field with right action
+        matches.map((item, index) => {
+            if (item.source === item.target) {
                 item.to_hide = 'both';
             } else if (item.source) {
+                item.target = item.source;
                 item.to_hide = 'source';
-            }else{
+            } else {
+                item.source = item.target;
                 item.to_hide = 'target';
             }
         });
-
-        console.log(matches);
-
-        /*if (
-            ((this.props.selection.source.count === 0 && this.props.selection.target.count > 1)
-                || (this.props.selection.target.count === 0 && this.props.selection.source.count > 1))
-        ) {
-            const type = this.props.selection.source.count > 0 ? 'source' : 'target';
-            const orders = this.props.selection[type].list.sort((a,b)=>{return a-b});
-            ProjectActions.mergeSegments(this.props.jobConf.id, this.props.jobConf.password, orders, type);
-            ProjectActions.addSegmentToSelection(-1);
-            ProjectActions.onActionHover(null);
-        }*/
-    };
+        // call hide action and collateral actions
+        ProjectActions.hideSegments(matches);
+        ProjectActions.addSegmentToSelection(-1);
+        ProjectActions.onActionHover(null);
+    }
 }
 
 export default ToolbarActionsHide;

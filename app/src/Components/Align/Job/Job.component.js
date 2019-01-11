@@ -12,6 +12,7 @@ import SystemConstants from "../../../Constants/System.constants";
 import SystemStore from "../../../Stores/System.store";
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
+import HideComponent from "./HideRow/HideRow.component";
 
 
 class JobComponent extends Component {
@@ -89,8 +90,8 @@ class JobComponent extends Component {
 
     }
 
-    componentDidUpdate(){
-        if(this.state.scrollToSegment !== null){
+    componentDidUpdate() {
+        if (this.state.scrollToSegment !== null) {
             this.setState({
                 scrollToSegment: null
             })
@@ -122,23 +123,29 @@ class JobComponent extends Component {
                     estimatedItemSize={80}
                     scrollToAlignment="center"
                     itemSize={(index) => {
+                        let itemHeigth = 0;
+                        if (+this.props.job.rows[index].source.hidden === 1 || +this.props.job.rows[index].target.hidden === 1) {
+                            document.getElementById('hiddenHtml').innerHTML = "";
+                            itemHeigth = 52
+                        } else {
+                            let source = document.createElement('p');
+                            source.style.width = this.state.window.segmentContentWidth;
+                            source.style.fontSize = "16px";
+                            source.innerHTML = this.props.job.rows[index].source.content_clean;
+                            document.getElementById('hiddenHtml').appendChild(source);
+                            const sourceHeight = source.getBoundingClientRect().height;
 
-                        let source = document.createElement('p');
-                        source.style.width = this.state.window.segmentContentWidth;
-                        source.style.fontSize = "16px";
-                        source.innerHTML = this.props.job.rows[index].source.content_clean;
-                        document.getElementById('hiddenHtml').appendChild(source);
-                        const sourceHeight = source.getBoundingClientRect().height;
+                            let target = document.createElement('p');
+                            target.style.width = this.state.window.segmentContentWidth;
+                            target.style.fontSize = "16px";
+                            target.innerHTML = this.props.job.rows[index].target.content_clean;
+                            document.getElementById('hiddenHtml').appendChild(target);
+                            const targetHeight = target.getBoundingClientRect().height;
 
-                        let target = document.createElement('p');
-                        target.style.width = this.state.window.segmentContentWidth;
-                        target.style.fontSize = "16px";
-                        target.innerHTML = this.props.job.rows[index].target.content_clean;
-                        document.getElementById('hiddenHtml').appendChild(target);
-                        const targetHeight = target.getBoundingClientRect().height;
-
-                        document.getElementById('hiddenHtml').innerHTML = "";
-                        return Math.max(sourceHeight, targetHeight) + 64
+                            document.getElementById('hiddenHtml').innerHTML = "";
+                            itemHeigth = Math.max(sourceHeight, targetHeight) + 64
+                        }
+                        return itemHeigth;
                     }}
                     renderItem={({index, style}) =>
                         <div key={index} style={style} ref={(el) => {
@@ -165,11 +172,11 @@ class JobComponent extends Component {
     updateWindowDimensions = () => {
         let data = {};
 
-        if(window.innerWidth < 992){
+        if (window.innerWidth < 992) {
             data.segmentContentWidth = "235px";
-        }else if(window.innerWidth < 1200){
+        } else if (window.innerWidth < 1200) {
             data.segmentContentWidth = "340px";
-        }else{
+        } else {
             data.segmentContentWidth = "437px";
         }
 
@@ -213,13 +220,23 @@ class JobComponent extends Component {
                     target: !!this.state.selection.target.map[row.target.order],
                     count: this.state.selection.count
                 };
-                values.push(<RowWrapperComponent
-                    search={this.state.search}
-                    key={index}
-                    index={index}
-                    enableDrag={enableDrag}
-                    selection={selection}
-                    row={row}/>);
+                if (+row.source.hidden === 1 || +row.target.hidden === 1) {
+                    values.push(<HideComponent
+                        key={index}
+                        index={index}
+                        enableDrag={enableDrag}
+                        selection={selection}
+                        row={row}
+                    />)
+                } else {
+                    values.push(<RowWrapperComponent
+                        search={this.state.search}
+                        key={index}
+                        index={index}
+                        enableDrag={enableDrag}
+                        selection={selection}
+                        row={row}/>);
+                }
                 return row;
             });
         }
@@ -242,10 +259,10 @@ class JobComponent extends Component {
 
     onSearchEvent = (search) => {
         const scrollToSegment = search.occurrencesList.length > 0 ? search.occurrencesList[search.featuredSearchResult].index : null;
-            this.setState({
-                search: search,
-                scrollToSegment: scrollToSegment
-            });
+        this.setState({
+            search: search,
+            scrollToSegment: scrollToSegment
+        });
     }
 }
 

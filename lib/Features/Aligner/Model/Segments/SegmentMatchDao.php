@@ -203,15 +203,14 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function updateMatchesBeforeDeletion(Array $orders, $id_job, $type){
-        $qMarks = str_repeat( '?,', count( $orders ) - 1 ) . '?';
+    public static function updateMatchBeforeDeletion($order, $id_job, $type){
 
         $query  = "UPDATE segments_match AS sm1, segments_match AS sm2
             SET sm1.next = sm2.next
-            WHERE sm1.next IN ($qMarks) AND sm2.order IN ($qMarks)
+            WHERE sm1.next = ?  AND sm2.order = ?
             AND sm1.type = ? AND sm2.type = ?
             AND sm1.id_job = ? AND sm2.id_job = ?";
-        $params = array_merge( $orders, $orders, [ $type, $type, $id_job, $id_job ] );
+        $params = [$order, $order, $type, $type, $id_job, $id_job ];
 
         $conn = NewDatabase::obtain()->getConnection();
         $stm = $conn->prepare( $query );
@@ -219,13 +218,12 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function deleteMatches(Array $orders, $id_job, $type){
-        $qMarks = str_repeat( '?,', count( $orders ) - 1 ) . '?';
+    public static function deleteMatch($order, $id_job, $type){
         $query  = "DELETE FROM segments_match
-            WHERE `order` IN ($qMarks)
+            WHERE `order` = ?
             AND `type` = ?
             AND id_job = ?";
-        $params = array_merge( $orders, [ $type, $id_job ] );
+        $params = [ $order, $type, $id_job ];
 
         $conn = NewDatabase::obtain()->getConnection();
         $stm = $conn->prepare( $query );

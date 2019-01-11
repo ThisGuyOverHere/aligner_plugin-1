@@ -107,6 +107,16 @@ export const httpMoveSegments = (jobID, jobPassword, data) => {
     return post(url, qs.stringify(data));
 };
 
+export const httpHideSegments = (jobID, jobPassword, data ) => {
+    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/hide';
+    return post(url, qs.stringify({matches:data}));
+};
+
+export const httpShowSegments = (jobID, jobPassword, data ) => {
+    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/show';
+    return post(url, qs.stringify({matches:data}));
+};
+
 export const httpDeleteSegments = (jobID, jobPassword, data) => {
     const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/delete';
     return post(url, qs.stringify({matches: data}));

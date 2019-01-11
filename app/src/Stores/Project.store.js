@@ -266,6 +266,10 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
                 count: 0
             };
         }
+    },
+
+    hideSelectedSegments: function (matches) {
+        console.log(matches);
     }
 
 });
@@ -318,7 +322,16 @@ AppDispatcher.register(function (action) {
             }, syncAPI);
             break;
         case ProjectConstants.HIDE_SEGMENTS:
-            ProjectStore.emitChange(ProjectConstants.HIDE_SEGMENTS, action.changes);
+            ProjectStore.emitChange(ProjectConstants.RENDER_ROWS,  {
+                source: ProjectStore.job.source.toJS(),
+                target: ProjectStore.job.target.toJS()
+            } ,syncAPI);
+            break;
+        case ProjectConstants.SHOW_SEGMENTS:
+            ProjectStore.emitChange(ProjectConstants.RENDER_ROWS,  {
+                source: ProjectStore.job.source.toJS(),
+                target: ProjectStore.job.target.toJS()
+            } ,syncAPI);
             break;
         case ProjectConstants.ADD_SEGMENT_TO_SELECTION:
             ProjectStore.addSegmentToSelection(action.order, action.type);
