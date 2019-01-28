@@ -103,6 +103,11 @@ class UploadController extends AlignerController {
             throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
         $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
+        setlocale(LC_ALL, "en_US.utf8");
+        foreach($_FILES as $key => $file){
+            $_FILES[$key]['name'] = iconv('UTF-8', 'ASCII//TRANSLIT', $_FILES[$key]['name']);
+        }
+
         try {
             $this->result = $uploadFile->uploadFiles( $_FILES );
             foreach ( $this->result as $key => $value ) {

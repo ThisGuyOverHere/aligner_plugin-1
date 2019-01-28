@@ -9,6 +9,7 @@
 namespace Features\Aligner\Controller;
 include_once \INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
+use Exceptions\ValidationError;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Files_FileStruct;
 use Features\Aligner\Model\Projects_ProjectDao;
@@ -95,9 +96,8 @@ class ProjectController extends AlignerController {
     }
 
     public function create() {
-
         if ( count( @$this->result[ 'errors' ] ) ) {
-            return $this->response->json( $this->result );
+            throw new ValidationError( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
 
         $default_project_name = "ALIGNER-" . date( 'Y-m-d H:i:s' );
