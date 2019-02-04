@@ -60,6 +60,7 @@ class UploadComponent extends Component {
                         status: 'error'
                     }
                 });
+                __insp.push(['tagSession', {error: "file_conversion"}]);
             });
         }
         this.setState({
@@ -80,6 +81,7 @@ class UploadComponent extends Component {
                         status: 'error'
                     }
                 });
+                __insp.push(['tagSession', {error: "file_conversion"}]);
             });
         }
         this.setState({
@@ -116,6 +118,7 @@ class UploadComponent extends Component {
                             status: 'error'
                         }
                     });
+                    __insp.push(['tagSession', {error: "file_conversion"}]);
                 });
                 this.setState({
                     uploadSource: {
@@ -134,6 +137,7 @@ class UploadComponent extends Component {
                     status: 'error'
                 }
             });
+            __insp.push(['tagSession', {error: "file_upload"}]);
         });
 
 
@@ -165,6 +169,7 @@ class UploadComponent extends Component {
                             status: 'error'
                         }
                     });
+                    __insp.push(['tagSession', {error: "file_conversion"}]);
                 });
                 this.setState({
                     uploadTarget: {
@@ -184,6 +189,7 @@ class UploadComponent extends Component {
                     status: 'error'
                 }
             });
+            __insp.push(['tagSession', {error: "file_upload"}]);
         });
     };
 
@@ -207,6 +213,7 @@ class UploadComponent extends Component {
             this.setState({
                 inAlign: false
             });
+            __insp.push(['tagSession', {error: "create_project"}]);
         });
 
         this.setState({

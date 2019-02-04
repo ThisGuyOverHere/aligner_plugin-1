@@ -160,6 +160,7 @@ export const syncWithBackend = (method, callback) => {
 
 
 export const checkResultStore = (source, target) => {
+    console.log("Check Result");
     for (let x = 0; x < source.length - 1; x++) {
         if (source[x].next !== source[x + 1].order) {
             if (source[x - 1]) {
@@ -167,6 +168,7 @@ export const checkResultStore = (source, target) => {
             }
             console.log('[SOURCE: ' + +x + ']   ' + source[x].order + '       ' + source[x].next);
             console.log('[SOURCE: ' + parseInt(x + 1) + ']   ' + source[x + 1].order + '       ' + source[x + 1].next);
+            __insp.push(['tagSession', {error: "miss_align"}]);
         }
     }
     console.log('\n\n')
@@ -177,6 +179,7 @@ export const checkResultStore = (source, target) => {
             }
             console.log('[TARGET: ' + +x + ']   ' + target[x].order + '       ' + target[x].next);
             console.log('[TARGET: ' + parseInt(x + 1) + ']   ' + target[x + 1].order + '       ' + target[x + 1].next);
+            __insp.push(['tagSession', {error: "miss_align"}]);
         }
     }
     console.log('\n\n')

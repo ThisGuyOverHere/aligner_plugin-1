@@ -8,7 +8,12 @@ nbproject/
 # NodeJs stuff
 nodejs/*.log
 node_modules
-static/build
+static
+static/build/
+
+# MAC OSX
+*.DS_Store
+
 
 # Development env config files
 .agignore
