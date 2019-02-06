@@ -116,16 +116,16 @@ class RegistrationComponent extends Component {
                                                    onChange={this.handleCheckChange}
                                             />
                                             <label className={!this.state.checkbox ? "error-check" : null}>
-                                                Accept <span> </span>
+                                                I accept the <span> </span>
                                                 <a href="/terms" target="_blank" className="forgot-password">
-                                                    Terms and conditions
+                                                    Terms and Conditions
                                                 </a>
                                             </label>
                                         </div>
                                         <div className="btn-container">
                                             <button className="back-to-login ui button"
                                                     onClick={this.openLoginModal}>
-                                                Already registred? Login
+                                                Already registered? Log in
                                             </button>
                                             <button className={registrationButton.join(" ")} tabIndex="3"
                                                     type="submit">
@@ -144,8 +144,7 @@ class RegistrationComponent extends Component {
                         <ModalHeader modalName={"registration"}/>
                         <div className="content-confirm">
                             <p>
-                                To complete your registration please follow the instructions in the email we sent
-                                you <b>{this.state.email}</b>
+                    To complete your registration, please follow the instructions in the email we sent you <b>{this.state.email}</b>
                             </p>
                             <div className={"btn-container"}>
                                 <button className={resendButton.join(" ")} onClick={this.resendConfirmationEmail} > Resend email </button>

@@ -103,7 +103,7 @@ class ChangePasswordModal extends Component {
                         <div className="content">
                             <div className="resetPasswordCompleted">
                                 <p>
-                                   Password has been changed successfully!
+                                        Your password has been changed successfully!
                                 </p>
                             </div>
                         </div>

@@ -34,7 +34,7 @@ class ExportModalSendEmail extends Component {
                     <p className={"description"}>A copy of your TMX will be sent to our collaborative memory to
                         improve our alignment algorithm</p>
                     <div className={"btn-container"}>
-                        <input type="email" tabIndex="0" placeholder="insert an email"
+                        <input type="email" tabIndex="0" placeholder="Enter your email address"
                                value={this.state.email}
                                onChange={this.inputHandler}/>
                         <button className={sendBtn.join(" ")} disabled={!validEmail} tabIndex="3" type="button"
@@ -42,7 +42,7 @@ class ExportModalSendEmail extends Component {
                             Download
                         </button>
                     </div>
-                    <p className={"small"}> We'll send you an e-mail when the download link is ready </p>
+                    <p className={"small"}> We’ll send you an email when the download link is ready </p>
                 </div>
 
             </div>

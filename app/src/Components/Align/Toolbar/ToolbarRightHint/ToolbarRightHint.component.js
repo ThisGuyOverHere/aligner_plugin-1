@@ -36,7 +36,7 @@ class ToolbarRightHintComponent extends Component {
                 </div>
 
                 <div className="hintModal-body">
-                    <h1>Functions & Keyboard shortcut</h1>
+                    <h1>Functions & keyboard shortcuts</h1>
 
                     <div className="shortCutRow">
                         <h4>Align two segments</h4>
@@ -62,7 +62,7 @@ class ToolbarRightHintComponent extends Component {
                     </div>
 
                     <div className="shortCutRow">
-                        <h4> Split Segment </h4>
+                        <h4> Split segment </h4>
                         <ul>
                             <li> - double click on a segment</li>
                             <li> - or select a  segment and press the Split button in the top bar</li>

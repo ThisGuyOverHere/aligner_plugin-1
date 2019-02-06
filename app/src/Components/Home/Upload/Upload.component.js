@@ -370,7 +370,7 @@ class UploadComponent extends Component {
                         <div className="four wide column">
                             <button className={startButton.join(" ")} onClick={this.startAlignment}
                                     disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name || this.state.inAlign}
-                            >Start alignment
+                            >START ALIGNING
                             </button>
                         </div>
                     </div>

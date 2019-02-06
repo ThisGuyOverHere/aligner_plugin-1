@@ -21,7 +21,7 @@ class HomeComponent extends Component {
                                 <h1>Matecat Aligner</h1>
                             </div>
                             <div className="ui grid">
-                                <h2>Best way to create TMX from your files</h2>
+                                <h2>The best way to create a TMX from your files</h2>
                             </div>
                         </div>
                     </div>

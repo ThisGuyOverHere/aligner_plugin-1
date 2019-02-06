@@ -36,7 +36,7 @@ class LogoutComponent extends Component {
                     </div>
                     <div className="link">
                         <button className={"reset-btn"} onClick={this.openChangePasswordModal}>Change Password</button>
-                        <button className={"logout-btn"} onClick={this.logout}>Logout</button>
+                        <button className={"logout-btn"} onClick={this.logout}>Log out</button>
                     </div>
                 </div>
             </div>
