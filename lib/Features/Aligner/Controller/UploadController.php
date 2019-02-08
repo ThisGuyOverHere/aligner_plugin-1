@@ -127,15 +127,11 @@ class UploadController extends AlignerController {
 
     public function delete(){
 
-        if( $_SERVER['REQUEST_METHOD'] !== 'DELETE' ){
-            throw new \Exception('Wrong request type');
-        }
-
         $file = $this->params[ 'file' ];
         $type = $this->params[ 'type' ];
         $size = $this->params[ 'size' ];
 
-        if( !isset($file) || !isset($type) || !isset($size) ){
+        if( empty($file) || empty($type) || empty($size) ){
             throw new \Exception( "Invalid request object" );
         }
 
