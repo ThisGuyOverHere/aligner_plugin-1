@@ -125,6 +125,64 @@ class UploadController extends AlignerController {
         $this->response->json( $this->result );
     }
 
+    public function delete(){
+
+        if( $_SERVER['REQUEST_METHOD'] !== 'DELETE' ){
+            throw new \Exception('Wrong request type');
+        }
+
+        $file = $this->params[ 'file' ];
+        $type = $this->params[ 'type' ];
+        $size = $this->params[ 'size' ];
+
+        if( !isset($file) || !isset($type) || !isset($size) ){
+            throw new \Exception( "Invalid request object" );
+        }
+
+        $uploadSession = $_COOKIE['upload_session'];
+        $upload = new \Upload($uploadSession);
+
+        $path = $upload->getUploadPath();
+        $file = $this->_sanitizeFileName($file);
+
+        $filePath = $path . DIRECTORY_SEPARATOR . $file;
+
+        $filetype = mime_content_type($filePath);
+        $filesize = filesize($filePath);
+
+        if (($filetype === false || $filesize === false) ||
+            ($filetype !== $type || $filesize !== $size)){
+            throw new \Exception( "Invalid request object" );
+        }
+
+        @unlink($filePath);
+
+        return $this->response->json( [ "success" => true ] );
+    }
+
+    protected function _sanitizeFileName( $filename ){
+
+        $upload  = new \Upload();
+
+        $filename = str_replace('/','',$filename);
+
+        try{
+            $filename = $upload->fixFileName( $filename );
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage() );
+        }
+
+        $contains_separator = strpos('/', $filename) !== false ||
+        strpos('&#47;', $filename) !== false ||
+        strpos('%2F', $filename) !== false;
+
+        if($contains_separator){
+            throw new \Exception('Invalid file input');
+        }
+
+        return $filename;
+
+    }
 
     /*public function upload(){
 
