@@ -18,12 +18,13 @@
       }
     }
   }
-  .aligner-nav-log , .aligner-nav-nolog{
+  .aligner-nav-log , .aligner-nav-nolog {
     background: $headerBlack;
     display: -ms-flexbox;
     list-style: none;
     margin: 0;
     padding: 8px 12px;
+
     #logo{
       top: 4px;
       border: 0;
@@ -38,8 +39,25 @@
     }
   }
   .aligner-nav-nolog{
-    justify-content: space-between;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 200px 100px;
+    align-items: center;
+    .return-to-matecat {
+      text-align: right;
+      a {
+        color: #fff;
+        text-decoration: none;
+        -webkit-font-smoothing: antialiased;
+        line-height: 22px;
+        padding: 10px 15px;
+        font-weight: 200;
+        font-size: 18px;
+
+        &:hover {
+          color: #3aa9dd;
+        }
+      }
+    }
   }
 
   .aligner-nav-log {
