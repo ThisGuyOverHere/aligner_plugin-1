@@ -2,10 +2,18 @@ module.exports = function (grunt) {
     const es2015Preset = require('babel-preset-es2015');
     const reactPreset = require('babel-preset-react');
     const babelstage2 = require('babel-preset-stage-2');
+    const fs = require('fs');
+    const ini = require('ini');
     const sass = require('node-sass');
 
     /*var es2015Preset = require('babel-preset-es2015');*/
     /*var reactPreset = require('babel-preset-react');*/
+
+
+    //get version of release
+    const config = ini.parse(fs.readFileSync('../config.ini', 'utf-8'))
+    console.log(config);
+
 
     grunt.initConfig({
         env: {
@@ -39,7 +47,7 @@ module.exports = function (grunt) {
                     'src/*.js',
                     'src/**/*.js'
                 ],
-                dest: '../static/build/js/main.min.js'
+                dest: `../static/build/js/main.${config.RELEASE_VERSION}.min.js`
             },
 
             dist: {
@@ -52,13 +60,13 @@ module.exports = function (grunt) {
                     'src/*.js',
                     'src/**/*.js'
                 ],
-                dest: '../static/build/js/main.js'
+                dest: `../static/build/js/main.${config.RELEASE_VERSION}.js`
             },
         },
         uglify: {
             dist: {
                 files: {
-                    '../static/build/js/main.min.js': ['../static/build/js/main.js']
+                    [`../static/build/js/main.${config.RELEASE_VERSION}.min.js`]: [`../static/build/js/main.${config.RELEASE_VERSION}.js`]
                 }
             }
         },
@@ -68,7 +76,7 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: {
-                    '../static/build/css/style.css': '../static/build/css/style.css'
+                    [`../static/build/css/style.${config.RELEASE_VERSION}.css`]: [`../static/build/css/style.${config.RELEASE_VERSION}.css`]
                 }
             }
         },
@@ -90,14 +98,20 @@ module.exports = function (grunt) {
                 src: [
                     'src/Main.scss'
                 ],
-                dest: '../static/build/css/style.css'
+                dest: `../static/build/css/style.${config.RELEASE_VERSION}.css`
             },
+        },
+        clean: {
+            options: {
+                force: true
+            },
+            build: ['../static/build/']
         }
     });
 
     // Define your tasks here
-    grunt.registerTask('default', ['env', 'copy', 'browserify:dist', 'uglify:dist', 'sass', 'autoprefixer']);
-    grunt.registerTask('dev', ['copy', 'browserify:dev', 'sass', 'autoprefixer', 'watch']);
+    grunt.registerTask('default', ['clean:build','env', 'copy', 'browserify:dist', 'uglify:dist', 'sass', 'autoprefixer']);
+    grunt.registerTask('dev', ['clean:build','copy', 'browserify:dev', 'sass', 'autoprefixer', 'watch']);
 
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-copy');
@@ -106,6 +120,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-autoprefixer');
     grunt.loadNpmTasks('grunt-sass');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+
 
 };
 

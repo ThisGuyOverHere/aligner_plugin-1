@@ -1,3 +1,4 @@
+RELEASE_VERSION = "0.0.1"
 DB_SERVER = "mysql"
 DB_DATABASE = "matecat_aligner"
 DB_USER = "admin"
