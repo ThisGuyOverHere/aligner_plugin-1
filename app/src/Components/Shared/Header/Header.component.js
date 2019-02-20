@@ -127,6 +127,9 @@ class HeaderComponent extends Component {
                         <div id="logo"><img src="./static/build/images/logo.png"/></div>
                     </Link>
                 </li>
+                <li className="return-to-matecat">
+                    <a href="/">Go to matecat</a>
+                </li>
                 <li>
                     <User image={this.props.image} user={this.props.user}/>
                 </li>
