@@ -36,12 +36,17 @@ class JobController extends AlignerController {
         $source_file = Files_FileDao::getByJobId( $this->job->id, "source" );
         $target_file = Files_FileDao::getByJobId( $this->job->id, "target" );
 
+        $language = \Langs_Languages::getInstance();
+
+
         $information = [
                 'job_name'        => $this->project->name,
                 'source_lang'     => $this->job->source,
                 'target_lang'     => $this->job->target,
                 'source_filename' => $source_file->filename,
-                'target_filename' => $target_file->filename
+                'target_filename' => $target_file->filename,
+                'target_is_rtl' => $language->isRTL($this->job->target),
+                'source_is_rtl' => $language->isRTL($this->job->source)
         ];
 
 
