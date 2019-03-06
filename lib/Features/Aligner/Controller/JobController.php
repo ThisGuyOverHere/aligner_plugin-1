@@ -45,8 +45,8 @@ class JobController extends AlignerController {
                 'target_lang'     => $this->job->target,
                 'source_filename' => $source_file->filename,
                 'target_filename' => $target_file->filename,
-                'target_is_rtl' => $language->isRTL($this->job->target),
-                'source_is_rtl' => $language->isRTL($this->job->source)
+                'target_is_rtl'   => $language->isRTL( $this->job->target ),
+                'source_is_rtl'   => $language->isRTL( $this->job->source )
         ];
 
 
@@ -59,16 +59,16 @@ class JobController extends AlignerController {
         $id_job = $this->job->id;
         $job    = $this->job;
 
-        $status_analysis = ( !empty($job) ) ? $job['status_analysis'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+        $status_analysis = ( !empty( $job ) ) ? $job[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
-        $progress = ( !empty($job) ) ? $job['progress'] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+        $progress = ( !empty( $job ) ) ? $job[ 'progress' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
         $segmentDao = new Segments_SegmentDao;
 
         $source_segments = null;
         $target_segments = null;
 
-        switch ( $status_analysis ){
+        switch ( $status_analysis ) {
             case ConstantsJobAnalysis::ALIGN_PHASE_0:
                 $phase = 0;
                 break;
@@ -94,10 +94,10 @@ class JobController extends AlignerController {
                 $phase = 7;
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_8:
-                throw new ValidationError("Max words limit exceeded");
+                throw new ValidationError( "Max words limit exceeded" );
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_9:
-                throw new ValidationError("Error during analysis, please retry");
+                throw new ValidationError( "Error during analysis, please retry" );
                 break;
         }
 
@@ -108,19 +108,21 @@ class JobController extends AlignerController {
             case ConstantsJobAnalysis::ALIGN_PHASE_5:
             case ConstantsJobAnalysis::ALIGN_PHASE_6:
             case ConstantsJobAnalysis::ALIGN_PHASE_7:
-                $source_segments = $segmentDao->countByJobId($id_job, 'source', 3600);
-                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[0]['amount'] : null;
-                $target_segments = $segmentDao->countByJobId($id_job, 'target', 3600);
-                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[0]['amount'] : null;
+                $source_segments = $segmentDao->countByJobId( $id_job, 'source', 3600 );
+                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[ 0 ][ 'amount' ] : null;
+                $target_segments = $segmentDao->countByJobId( $id_job, 'target', 3600 );
+                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[ 0 ][ 'amount' ] : null;
                 break;
         }
 
 
-        return $this->response->json( [ 'phase' => $phase,
-                                        'phase_name' => $status_analysis,
-                                        'progress' => $progress,
-                                        'source_segments' => $source_segments,
-                                        'target_segments' => $target_segments ]
+        return $this->response->json( [
+                        'phase'           => $phase,
+                        'phase_name'      => $status_analysis,
+                        'progress'        => $progress,
+                        'source_segments' => $source_segments,
+                        'target_segments' => $target_segments
+                ]
         );
     }
 }
