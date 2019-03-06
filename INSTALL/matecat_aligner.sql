@@ -93,6 +93,7 @@ CREATE TABLE `segments_match` (
   `score` integer(11) NOT NULL default '0',
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `hidden` tinyint(4) NOT NULL default '0',
   UNIQUE KEY `primary_job_order` (`id_job`,`order`,`type`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `order` (`order`),

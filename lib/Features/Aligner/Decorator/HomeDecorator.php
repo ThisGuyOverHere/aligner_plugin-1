@@ -21,6 +21,7 @@
 
             $this->template->append( 'app_js', Routes::staticBuild( 'js/main.'.$config['RELEASE_VERSION'].'.min.js' ) );
             $this->template->append( 'app_css', Routes::staticBuild( 'css/style.'.$config['RELEASE_VERSION'].'.css' ) );
+            $this->template->append("inspectlet_website_id", $config['INSPECTLET_ID']);
         }
 
 
