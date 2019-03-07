@@ -9,12 +9,10 @@ CREATE TABLE `projects` (
   `name` varchar(200) DEFAULT 'project',
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `status_analysis` enum('not_ready_to_analisis', 'ready_to_analisis', 'in_analisis', 'empty', 'done') NOT NULL DEFAULT 'not_ready_to_analisis',
   `due_date` DATE DEFAULT NULL,
   `remote_ip_address` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
-  KEY `status_analysis` (`status_analysis`),
   KEY `remote_ip_address` (`remote_ip_address`),
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
