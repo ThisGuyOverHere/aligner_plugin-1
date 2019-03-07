@@ -127,6 +127,7 @@ class ProjectController extends AlignerController {
         $jobStruct->source     = $this->postInput[ 'source_lang' ];
         $jobStruct->target     = $this->postInput[ 'target_lang' ];
         $jobStruct->id_project = $this->project->id;
+        $jobStruct->create_date = date('Y-m-d H:i:s');
 
         $this->job = Jobs_JobDao::createFromStruct( $jobStruct );
 
