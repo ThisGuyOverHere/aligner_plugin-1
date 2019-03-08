@@ -179,7 +179,7 @@ class AlignJobWorker extends AbstractWorker {
         // Get file content
         try {
             $fileStorage = new \FilesStorage;
-            $xliff_file = $fileStorage->getXliffFromCache($sha1, $file->language_code);
+            $xliff_file = $fileStorage->getXliffFromCache($sha1, $lang);
             \Log::doLog('Found xliff file ['.$xliff_file.']');
             $xliff_content = file_get_contents($xliff_file);
         } catch ( \Exception $e ) {

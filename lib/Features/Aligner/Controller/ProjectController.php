@@ -132,10 +132,10 @@ class ProjectController extends AlignerController {
         $this->job = Jobs_JobDao::createFromStruct( $jobStruct );
 
         $sha1_source_file = sha1_file( $this->fileSourcePath );
-        $source_file = $this->_insertFile( $this->postInput[ 'file_name_source' ], $sha1_source_file, $this->postInput[ 'source_lang' ], "source" );
+        $source_file = $this->_insertFile( $this->postInput[ 'file_name_source' ], $sha1_source_file, "source" );
 
         $sha1_target_file = sha1_file( $this->fileTargetPath );
-        $target_file      = $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, $this->postInput[ 'target_lang' ], "target" );
+        $target_file      = $this->_insertFile( $this->postInput[ 'file_name_target' ], $sha1_target_file, "target" );
 
         $params = [
                 'id_job'      => $this->job->id,
@@ -169,7 +169,7 @@ class ProjectController extends AlignerController {
         $this->response->json( $this->result );
     }
 
-    protected function _insertFile( $filename, $sha1, $language, $type ) {
+    protected function _insertFile( $filename, $sha1, $type ) {
 
         $yearMonthPath    = date_create( $this->project->create_date )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1;
@@ -182,7 +182,6 @@ class ProjectController extends AlignerController {
         $fileStruct->id_job             = $this->job->id;
         $fileStruct->filename           = $filename;
         $fileStruct->type               = $type;
-        $fileStruct->language_code      = $language;
         $fileStruct->extension          = $extension;
         $fileStruct->sha1_original_file = $fileDateSha1Path;
 
