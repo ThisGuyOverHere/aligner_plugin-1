@@ -14,6 +14,7 @@ use Exceptions\ValidationError;
 use Features\Aligner;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
+use Features\Aligner\Model\Projects_ProjectDao;
 use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
@@ -27,6 +28,7 @@ class AlignJobWorker extends AbstractWorker {
 
     private $id_job;
     private $job;
+    private $project;
 
     public function process( \TaskRunner\Commons\AbstractElement $queueElement ) {
 
@@ -62,8 +64,10 @@ class AlignJobWorker extends AbstractWorker {
 
         $this->id_job = $attributes->id_job;
         $this->job    = $attributes->job;
+        $this->project = $attributes->project;
 
-        Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_1], $this->id_job, $this->job->password );
+        //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_1], $this->id_job, $this->job->password );
+        Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_1);
         \Log::doLog('STARTED ALIGN FOR JOB: '.$this->id_job);
 
         /*$job          = Jobs_JobDao::getById( $this->id_job )[ 0 ];
@@ -84,14 +88,16 @@ class AlignJobWorker extends AbstractWorker {
             $this->_storeSegments($target_segments, "target");
 
 
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2, 'progress' => 5 ], $this->id_job, $this->job->password );
+            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2, 'progress' => 5 ], $this->id_job, $this->job->password );
+            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_2);
 
 
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->deleteByJobId( $this->id_job );
 
 
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_3, 'progress' => 10 ], $this->id_job, $this->job->password );
+            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_3, 'progress' => 10 ], $this->id_job, $this->job->password );
+            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
 
 
             $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
@@ -101,15 +107,15 @@ class AlignJobWorker extends AbstractWorker {
 
 
             $alignment = $alignment_class->alignSegments(
-                    $this->id_job,
-                    $this->job->password,
+                    $this->project,
                     $source_segments,
                     $target_segments,
                     $source_lang,
                     $target_lang
             );
 
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_6, 'progress' => 95 ], $this->id_job, $this->job->password );
+            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_6, 'progress' => 95 ], $this->id_job, $this->job->password );
+            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_6);
 
 
             $source_array = [];
@@ -157,10 +163,12 @@ class AlignJobWorker extends AbstractWorker {
             $segmentsMatchDao->createList( $source_array );
             $segmentsMatchDao->createList( $target_array );
 
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_7, 'progress' => 100 ], $this->id_job, $this->job->password );
+            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_7, 'progress' => 100 ], $this->id_job, $this->job->password );
+            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_7);
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_9, 'progress' => 0 ], $this->id_job, $this->job->password );
+            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_9, 'progress' => 0 ], $this->id_job, $this->job->password );
+            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_9);
         }
 
 
@@ -241,7 +249,8 @@ class AlignJobWorker extends AbstractWorker {
         $config = Aligner::getConfig();
 
         if ($total_words > $config["MAX_WORDS_PER_FILE"]){
-            Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_8], $this->id_job, $this->job->password );
+            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_8], $this->id_job, $this->job->password );
+            Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_8);
             throw new ValidationError("File exceeded the word limit, job creation canceled");
         }
         

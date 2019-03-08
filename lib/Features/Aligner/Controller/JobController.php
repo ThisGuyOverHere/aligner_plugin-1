@@ -11,12 +11,17 @@ namespace Features\Aligner\Controller;
 use Exceptions\ValidationError;
 use Features\Aligner\Controller\Validators\JobPasswordValidator;
 use Features\Aligner\Model\Files_FileDao;
+use Features\Aligner\Model\Jobs_JobDao;
+use Features\Aligner\Model\Jobs_JobStruct;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 
 
 class JobController extends AlignerController {
 
+    /**
+     * @var $job Jobs_JobStruct
+     */
     protected $job;
     protected $project;
 
@@ -58,8 +63,9 @@ class JobController extends AlignerController {
 
         $id_job = $this->job->id;
         $job    = $this->job;
+        $project = $this->job->getProject()->toArray();
 
-        $status_analysis = ( !empty( $job ) ) ? $job[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+        $status_analysis = ( !empty( $project ) ) ? $project[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
         $progress = ( !empty( $job ) ) ? $job[ 'progress' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
@@ -99,27 +105,23 @@ class JobController extends AlignerController {
             case ConstantsJobAnalysis::ALIGN_PHASE_9:
                 throw new ValidationError( "Error during analysis, please retry" );
                 break;
+            default:
+                $phase = 1;
+                break;
         }
 
-        switch ( $status_analysis ) {
-            case ConstantsJobAnalysis::ALIGN_PHASE_2:
-            case ConstantsJobAnalysis::ALIGN_PHASE_3:
-            case ConstantsJobAnalysis::ALIGN_PHASE_4:
-            case ConstantsJobAnalysis::ALIGN_PHASE_5:
-            case ConstantsJobAnalysis::ALIGN_PHASE_6:
-            case ConstantsJobAnalysis::ALIGN_PHASE_7:
-                $source_segments = $segmentDao->countByJobId( $id_job, 'source', 3600 );
-                $source_segments = ( !empty( $source_segments ) ) ? $source_segments[ 0 ][ 'amount' ] : null;
-                $target_segments = $segmentDao->countByJobId( $id_job, 'target', 3600 );
-                $target_segments = ( !empty( $target_segments ) ) ? $target_segments[ 0 ][ 'amount' ] : null;
-                break;
+        if(in_array($phase, [2,3,4,5,6,7])){
+            $source_segments = $segmentDao->countByJobId( $id_job, 'source', 3600 );
+            $source_segments = ( !empty( $source_segments ) ) ? $source_segments[ 0 ][ 'amount' ] : null;
+            $target_segments = $segmentDao->countByJobId( $id_job, 'target', 3600 );
+            $target_segments = ( !empty( $target_segments ) ) ? $target_segments[ 0 ][ 'amount' ] : null;
         }
 
 
         return $this->response->json( [
                         'phase'           => $phase,
                         'phase_name'      => $status_analysis,
-                        'progress'        => $progress,
+                        'progress'        => ($phase == 7)?100:0,
                         'source_segments' => $source_segments,
                         'target_segments' => $target_segments
                 ]
