@@ -80,8 +80,8 @@ class AlignJobWorker extends AbstractWorker {
             $source_segments = $this->_file2segments($source_file, $source_lang);
             $target_segments = $this->_file2segments($target_file, $target_lang);
 
-            $this->_storeSegments($source_segments, "source", $source_lang);
-            $this->_storeSegments($target_segments, "target", $target_lang);
+            $this->_storeSegments($source_segments, "source");
+            $this->_storeSegments($target_segments, "target");
 
 
             Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2, 'progress' => 5 ], $this->id_job, $this->job->password );
@@ -249,13 +249,12 @@ class AlignJobWorker extends AbstractWorker {
     }
 
 
-    private function _storeSegments($segments, $type, $lang){
+    private function _storeSegments($segments, $type){
 
         $sequenceIds = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $segments ) );
         foreach($sequenceIds as $key => $sequenceId){
             $segments[$key]['id'] = $sequenceId;
             $segments[$key]['type'] = $type;
-            $segments[$key]['language_code'] = $lang;
             $segments[$key]['id_job'] = $this->job->id;
             $segments[$key]['content_hash'] = md5($segments[$key]['content_raw']);
         }

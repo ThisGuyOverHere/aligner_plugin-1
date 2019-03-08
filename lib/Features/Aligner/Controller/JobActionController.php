@@ -143,8 +143,8 @@ class JobActionController extends AlignerController {
 
         $first_raw   = array_shift( $raw_contents );
         $first_hash  = md5( $first_raw );
-        $first_clean = AlignUtils::_cleanSegment( $first_raw, $split_segment[ 'language_code' ] );
-        $first_count = AlignUtils::_countWordsInSegment( $first_raw, $split_segment[ 'language_code' ] );
+        $first_clean = AlignUtils::_cleanSegment( $first_raw, $this->job->{$split_segment['type']}  ); //
+        $first_count = AlignUtils::_countWordsInSegment( $first_raw, $this->job->{$split_segment['type']} );
 
         $new_segment = $split_segment;
         $new_match   = $split_segment;
@@ -176,9 +176,9 @@ class JobActionController extends AlignerController {
             //create new segments
             $new_segment[ 'id' ]             = $id;
             $new_segment[ 'content_raw' ]    = array_shift( $raw_contents );
-            $new_segment[ 'content_clean' ]  = AlignUtils::_cleanSegment( $new_segment[ 'content_raw' ], $new_segment[ 'language_code' ] );
+            $new_segment[ 'content_clean' ]  = AlignUtils::_cleanSegment( $new_segment[ 'content_raw' ], $this->job->{$new_segment[ 'type' ]} );
             $new_segment[ 'content_hash' ]   = md5( $new_segment[ 'content_raw' ] );
-            $new_segment[ 'raw_word_count' ] = AlignUtils::_countWordsInSegment( $new_segment[ 'content_raw' ], $new_segment[ 'language_code' ] );
+            $new_segment[ 'raw_word_count' ] = AlignUtils::_countWordsInSegment( $new_segment[ 'content_raw' ], $this->job->{$new_segment[ 'type' ]}  );
 
             //create new matches
             $new_match[ 'segment_id' ] = $id;

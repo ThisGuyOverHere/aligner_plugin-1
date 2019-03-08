@@ -70,7 +70,6 @@ CREATE TABLE `segments` (
   `content_clean` text,
   `content_raw` text,
   `content_hash` varchar(45) NOT NULL,
-  `language_code` varchar(45) DEFAULT NULL,
   `raw_word_count` double(20,2) DEFAULT NULL,
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
