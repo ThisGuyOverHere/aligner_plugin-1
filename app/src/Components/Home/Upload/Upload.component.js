@@ -221,7 +221,7 @@ class UploadComponent extends Component {
             this.setState({
                 creationError: {
                     error: true,
-                    message: error.response.data.errors[0].message
+                    message:  error.response.data.errors ? error.response.data.errors[0].message : 'An error occurred! retry or contact us.'
                 },
                 inAlign: false
             });
