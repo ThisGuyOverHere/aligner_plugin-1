@@ -174,7 +174,7 @@ class ProjectController extends AlignerController {
         $yearMonthPath    = date_create( $this->project->create_date )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1;
 
-        $mimeType = \FilesStorage::pathinfo_fix( $filename, PATHINFO_EXTENSION );
+        $extension = \FilesStorage::pathinfo_fix( $filename, PATHINFO_EXTENSION );
 
         $fileStruct = new Files_FileStruct();
 
@@ -183,7 +183,7 @@ class ProjectController extends AlignerController {
         $fileStruct->filename           = $filename;
         $fileStruct->type               = $type;
         $fileStruct->language_code      = $language;
-        $fileStruct->mime_type          = $mimeType;
+        $fileStruct->extension          = $extension;
         $fileStruct->sha1_original_file = $fileDateSha1Path;
 
         $file = Files_FileDao::createFromStruct( $fileStruct );

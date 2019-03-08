@@ -49,7 +49,7 @@ CREATE TABLE `files` (
   `filename` varchar(255) DEFAULT NULL,
   `type` enum('source', 'target') NOT NULL,
   `language_code` varchar(45) NOT NULL,
-  `mime_type` varchar(45) DEFAULT NULL,
+  `extension` varchar(45) DEFAULT NULL,
   `sha1_original_file` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),

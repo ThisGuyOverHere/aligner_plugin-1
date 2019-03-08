@@ -15,7 +15,7 @@ class Files_FileStruct extends \DataAccess_AbstractDaoSilentStruct implements \D
     public $filename ;
     public $type ;
     public $language_code ;
-    public $mime_type ;
+    public $extension ;
     public $sha1_original_file ;
 
     public function getSegmentsCount() {
