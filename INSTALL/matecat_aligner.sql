@@ -28,7 +28,6 @@ CREATE TABLE `jobs` (
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` enum('active', 'archived', 'cancelled') NOT NULL DEFAULT 'active',
-  `progress` int(2) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_project` (`id_project`) USING BTREE,
