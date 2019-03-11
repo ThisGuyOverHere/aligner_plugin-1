@@ -25,6 +25,7 @@ use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 
 class AlignJobWorker extends AbstractWorker {
+    use Aligner\Utils\ProjectProgress;
 
     private $id_job;
     private $job;
@@ -37,6 +38,7 @@ class AlignJobWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
         $this->_checkDatabaseConnection();
+        $this->setRedisClient($this->_queueHandler->getRedisClient());
         $this->_Align( $queueElement );
     }
 
@@ -66,8 +68,9 @@ class AlignJobWorker extends AbstractWorker {
         $this->job    = $attributes->job;
         $this->project = $attributes->project;
 
-        //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_1], $this->id_job, $this->job->password );
         Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_1);
+
+
         \Log::doLog('STARTED ALIGN FOR JOB: '.$this->id_job);
 
         /*$job          = Jobs_JobDao::getById( $this->id_job )[ 0 ];
@@ -88,7 +91,8 @@ class AlignJobWorker extends AbstractWorker {
             $this->_storeSegments($target_segments, "target");
 
 
-            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_2, 'progress' => 5 ], $this->id_job, $this->job->password );
+            $this->updateProgress($this->project->id, 5);
+
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_2);
 
 
@@ -96,8 +100,8 @@ class AlignJobWorker extends AbstractWorker {
             $segmentsMatchDao->deleteByJobId( $this->id_job );
 
 
-            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_3, 'progress' => 10 ], $this->id_job, $this->job->password );
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
+            $this->updateProgress($this->project->id, 10);
 
 
             $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
@@ -114,8 +118,8 @@ class AlignJobWorker extends AbstractWorker {
                     $target_lang
             );
 
-            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_6, 'progress' => 95 ], $this->id_job, $this->job->password );
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_6);
+            $this->updateProgress($this->project->id, 95);
 
 
             $source_array = [];
@@ -163,12 +167,12 @@ class AlignJobWorker extends AbstractWorker {
             $segmentsMatchDao->createList( $source_array );
             $segmentsMatchDao->createList( $target_array );
 
-            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_7, 'progress' => 100 ], $this->id_job, $this->job->password );
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_7);
+            $this->updateProgress($this->project->id, 100);
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
-            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_9, 'progress' => 0 ], $this->id_job, $this->job->password );
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_9);
+            $this->updateProgress($this->project->id, 0);
         }
 
 
@@ -249,7 +253,6 @@ class AlignJobWorker extends AbstractWorker {
         $config = Aligner::getConfig();
 
         if ($total_words > $config["MAX_WORDS_PER_FILE"]){
-            //Jobs_JobDao::updateFields( [ 'status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_8], $this->id_job, $this->job->password );
             Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_8);
             throw new ValidationError("File exceeded the word limit, job creation canceled");
         }

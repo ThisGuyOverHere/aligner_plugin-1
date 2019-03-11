@@ -15,6 +15,8 @@ use Log;
 
 class Alignment {
 
+    use ProjectProgress;
+
     public $zero = 0;
     public $native = 0;
     public $approximated = 0;
@@ -80,8 +82,8 @@ class Alignment {
 
         // Progress - translate updates from 10 to 50
         $progress = 10;
-        //Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_4, 'progress' => $progress], $this->id_job, $this->password);
         Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_4);
+        $this->updateProgress($this->project->id, $progress);
 
         $input_segments = array();
 
@@ -98,7 +100,7 @@ class Alignment {
 
             // Progress
             $progress = $progress + 40 * count($translation) / count($segments);
-            //Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
+            $this->updateProgress($this->project->id, $progress);
         }
 
         foreach ($segments as $key => $segment){
@@ -131,7 +133,6 @@ class Alignment {
 
         // Progress - align updates from 50 to 90
         $progress = 50;
-        //Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5, 'progress' => $progress], $this->id_job, $this->password);
         Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_5);
 
         $matches = $this->find100x100Matches($original, $source, $target);
@@ -167,7 +168,7 @@ class Alignment {
 
                 // Progress
                 $progress = $progress + 40 * count($subSource) / count($source);
-                //Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
+                $this->updateProgress($this->project->id, $progress);
             }
 
             // Align last part of documents, after last exact match
@@ -180,7 +181,7 @@ class Alignment {
         }
 
         // Progress
-        //Jobs_JobDao::updateFields(['progress' => 90], $this->id_job, $this->password);
+        $this->updateProgress($this->project->id, 90);
 
         return $alignment;
     }

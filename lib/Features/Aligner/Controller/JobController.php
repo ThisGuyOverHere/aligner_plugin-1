@@ -15,10 +15,12 @@ use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Jobs_JobStruct;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
+use Features\Aligner\Utils\ProjectProgress;
 
 
 class JobController extends AlignerController {
 
+    use ProjectProgress;
     /**
      * @var $job Jobs_JobStruct
      */
@@ -62,12 +64,12 @@ class JobController extends AlignerController {
     public function checkProgress() {
 
         $id_job = $this->job->id;
-        $job    = $this->job;
         $project = $this->job->getProject()->toArray();
 
         $status_analysis = ( !empty( $project ) ) ? $project[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
-        $progress = ( !empty( $job ) ) ? $job[ 'progress' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
+        $this->setRedisClient((new \RedisHandler())->getConnection());
+        $progress = $this->getProgress($project['id']);
 
         $segmentDao = new Segments_SegmentDao;
 
@@ -121,7 +123,7 @@ class JobController extends AlignerController {
         return $this->response->json( [
                         'phase'           => $phase,
                         'phase_name'      => $status_analysis,
-                        'progress'        => ($phase == 7)?100:0,
+                        'progress'        => (int)$progress,
                         'source_segments' => $source_segments,
                         'target_segments' => $target_segments
                 ]
