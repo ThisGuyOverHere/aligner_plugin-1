@@ -9,7 +9,6 @@ CREATE TABLE `projects` (
   `name` varchar(200) DEFAULT 'project',
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `due_date` DATE DEFAULT NULL,
   `status_analysis` enum('not_started', 'started', 'segments_created', 'fetching', 'translating', 'aligning', 'merging', 'complete', 'words_limit_exceeded', 'error') NOT NULL DEFAULT 'not_started',
   `remote_ip_address` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),

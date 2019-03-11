@@ -16,7 +16,6 @@ class Projects_ProjectStruct extends \DataAccess_AbstractDaoSilentStruct impleme
     public $create_date ;
     public $status_analysis;
     public $remote_ip_address ;
-    public $due_date;
 
     /**
      * @param int $ttl
