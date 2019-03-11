@@ -87,6 +87,7 @@ CREATE TABLE `segments_match` (
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `hidden` tinyint(4) NOT NULL default '0',
   UNIQUE KEY `primary_job_order` (`id_job`,`order`,`type`),
+  KEY `id_job_type` (`id_job`, `type` ),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `segment_id` (`segment_id`),
   KEY `create_date_idx` (`create_date`)
