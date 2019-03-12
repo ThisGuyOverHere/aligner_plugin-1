@@ -75,18 +75,7 @@ class AlignUtils
         }
         return $subject;
     }
-
-    /**
-     * @param $segment
-     * @param $lang
-     * @return float|int
-     */
-    public static function _countWordsInSegment($segment, $lang) {
-        $wordCount = \CatUtils::segment_raw_word_count( $segment, $lang );
-
-        return $wordCount;
-    }
-
+    
 
     public static function _getNewOrderValue($first_order, $next_order){
         if($first_order && $next_order){
