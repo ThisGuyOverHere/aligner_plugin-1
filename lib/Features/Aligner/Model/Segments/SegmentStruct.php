@@ -22,7 +22,6 @@ class Segments_SegmentStruct extends \DataAccess_AbstractDaoSilentStruct impleme
     public $content_clean ;
     public $content_raw ;
     public $content_hash ;
-    public $language_code ;
     public $raw_word_count;
     public $score;
     public $hidden;

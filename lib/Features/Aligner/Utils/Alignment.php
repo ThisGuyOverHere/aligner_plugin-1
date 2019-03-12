@@ -10,10 +10,12 @@ namespace Features\Aligner\Utils;
 
 use Exceptions\ValidationError;
 use Features\Aligner;
-use Features\Aligner\Model\Jobs_JobDao;
+use Features\Aligner\Model\Projects_ProjectDao;
 use Log;
 
 class Alignment {
+
+    use ProjectProgress;
 
     public $zero = 0;
     public $native = 0;
@@ -21,13 +23,11 @@ class Alignment {
     public $lessCommon = 0;
     public $long = 0;
 
-    private $id_job = null;
-    private $password = null;
+    private $project = null;
 
-    public function alignSegments($id_job, $password, $source, $target, $source_lang, $target_lang) {
-        // Save job data used later to update Progress
-        $this->id_job = $id_job;
-        $this->password = $password;
+    public function alignSegments($project, $source, $target, $source_lang, $target_lang) {
+        // Save project data used later to update Progress
+        $this->project = $project;
 
         // Variant on Church and Gale algorithm with Levenshtein distance
         $time_start = microtime(true);
@@ -82,7 +82,8 @@ class Alignment {
 
         // Progress - translate updates from 10 to 50
         $progress = 10;
-        Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_4, 'progress' => $progress], $this->id_job, $this->password);
+        Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_4);
+        $this->updateProgress($this->project->id, $progress);
 
         $input_segments = array();
 
@@ -99,7 +100,7 @@ class Alignment {
 
             // Progress
             $progress = $progress + 40 * count($translation) / count($segments);
-            Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
+            $this->updateProgress($this->project->id, $progress);
         }
 
         foreach ($segments as $key => $segment){
@@ -132,7 +133,7 @@ class Alignment {
 
         // Progress - align updates from 50 to 90
         $progress = 50;
-        Jobs_JobDao::updateFields(['status_analysis' => ConstantsJobAnalysis::ALIGN_PHASE_5, 'progress' => $progress], $this->id_job, $this->password);
+        Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_5);
 
         $matches = $this->find100x100Matches($original, $source, $target);
 
@@ -167,7 +168,7 @@ class Alignment {
 
                 // Progress
                 $progress = $progress + 40 * count($subSource) / count($source);
-                Jobs_JobDao::updateFields(['progress' => $progress], $this->id_job, $this->password);
+                $this->updateProgress($this->project->id, $progress);
             }
 
             // Align last part of documents, after last exact match
@@ -180,7 +181,7 @@ class Alignment {
         }
 
         // Progress
-        Jobs_JobDao::updateFields(['progress' => 90], $this->id_job, $this->password);
+        $this->updateProgress($this->project->id, 90);
 
         return $alignment;
     }

@@ -288,12 +288,11 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
                             content_clean, 
                             content_raw,
                             content_hash, 
-                            raw_word_count, 
-                            language_code
+                            raw_word_count
                             ) VALUES ";
 
 
-        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 8 ), ", " ) . " )";
+        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 7 ), ", " ) . " )";
 
         foreach ( $obj_arr as $i => $chunk ) {
 
@@ -309,8 +308,6 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
                 $values[] = $segStruct['content_raw'];
                 $values[] = $segStruct['content_hash'];
                 $values[] = $segStruct['raw_word_count'];
-                $values[] = $segStruct['language_code'];
-
             }
 
             try {

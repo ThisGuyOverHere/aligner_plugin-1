@@ -9,7 +9,8 @@ CREATE TABLE `projects` (
   `name` varchar(200) DEFAULT 'project',
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `due_date` DATE DEFAULT NULL,
+  `status_analysis` enum('not_started', 'started', 'segments_created', 'fetching', 'translating', 'aligning', 'merging', 'complete', 'words_limit_exceeded', 'error') NOT NULL DEFAULT 'not_started',
+  `subject` varchar(100) DEFAULT 'general',
   `remote_ip_address` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
@@ -27,17 +28,12 @@ CREATE TABLE `jobs` (
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` enum('active', 'archived', 'cancelled') NOT NULL DEFAULT 'active',
-  `status_analysis` enum('not_started', 'started', 'segments_created', 'fetching', 'translating', 'aligning', 'merging', 'complete', 'words_limit_exceeded', 'error') NOT NULL DEFAULT 'not_started',
-  `progress` int(2) NOT NULL DEFAULT 0,
-  `subject` varchar(100) DEFAULT 'general',
   PRIMARY KEY (`id`),
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_project` (`id_project`) USING BTREE,
-  KEY `id` (`id`) USING BTREE,
   KEY `password` (`password`),
   KEY `source` (`source`),
   KEY `target` (`target`),
-  KEY `status_idx` (`status`),
   KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -70,7 +66,6 @@ CREATE TABLE `segments` (
   `content_clean` text,
   `content_raw` text,
   `content_hash` varchar(45) NOT NULL,
-  `language_code` varchar(45) DEFAULT NULL,
   `raw_word_count` double(20,2) DEFAULT NULL,
   `create_date` datetime NOT NULL,
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -92,9 +87,8 @@ CREATE TABLE `segments_match` (
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `hidden` tinyint(4) NOT NULL default '0',
   UNIQUE KEY `primary_job_order` (`id_job`,`order`,`type`),
+  KEY `id_job_type` (`id_job`, `type` ),
   KEY `id_job` (`id_job`) USING BTREE,
-  KEY `order` (`order`),
-  KEY `type` (`type`),
   KEY `segment_id` (`segment_id`),
   KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
