@@ -94,8 +94,7 @@ class AlignJobWorker extends AbstractWorker {
             $this->updateProgress($this->project->id, 5);
 
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_2);
-
-
+            
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->deleteByJobId( $this->id_job );
 
@@ -103,9 +102,10 @@ class AlignJobWorker extends AbstractWorker {
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
             $this->updateProgress($this->project->id, 10);
 
-
+            NewDatabase::obtain()->begin();
             $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
             $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
+            NewDatabase::obtain()->commit();
 
             $alignment_class = new Alignment;
 
