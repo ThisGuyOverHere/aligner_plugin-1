@@ -214,6 +214,7 @@ class AlignJobWorker extends AbstractWorker {
 
         // Creating the Segments
         $segments = array();
+        $total_words = 0;
 
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
 
@@ -222,7 +223,6 @@ class AlignJobWorker extends AbstractWorker {
                 continue;
             }
 
-            $total_words = 0;
             foreach ($xliff_file[ 'trans-units' ] as $trans_unit) {
 
                 // Extract only raw-content
