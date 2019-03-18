@@ -221,7 +221,7 @@ class UploadComponent extends Component {
             this.setState({
                 creationError: {
                     error: true,
-                    message:  error.response.data.errors ? error.response.data.errors[0].message : 'An error occurred! retry or contact us.'
+                    message: error.response.data.errors ? error.response.data.errors[0].message : 'An error occurred! retry or contact us.'
                 },
                 inAlign: false
             });
@@ -377,7 +377,7 @@ class UploadComponent extends Component {
 
                         <div className="four wide column">
                             <button className={startButton.join(" ")} onClick={this.startAlignment}
-                                disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name || this.state.inAlign}
+                                    disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name || this.state.inAlign}
                             >START ALIGNING
                             </button>
                             {creationError.error &&
