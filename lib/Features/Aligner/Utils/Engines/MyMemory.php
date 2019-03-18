@@ -10,7 +10,9 @@ namespace Features\Aligner\Utils;
 
 use Features\Aligner;
 
+
 class Engines_MyMemory extends \Engines_MyMemory {
+    protected $config;
 
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
