@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import ProjectActions from "../../../../Actions/Project.actions";
 import PropTypes from "prop-types";
-import SplitCharComponent from "./SplitCharComponent/SplitCharComponent.component";
-import SplitDivisor from "./SplitDivisor/SplitDivisor.component";
+import SplitCharComponent from "../SplitAlternative/SplitCharComponent/SplitCharComponent.component";
+import SplitDivisor from "../SplitAlternative/SplitDivisor/SplitDivisor.component";
 import ModalHeader from "../../../Shared/ModalHeader/ModalHeader.component";
 import ReactGA from "react-ga";
 
