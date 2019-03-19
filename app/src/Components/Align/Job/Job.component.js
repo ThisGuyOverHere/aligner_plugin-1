@@ -3,8 +3,6 @@ import ProjectStore from "../../../Stores/Project.store";
 import ProjectConstants from "../../../Constants/Project.constants"
 import {DragDropContext} from 'react-dnd';
 import RowWrapperComponent from "./Row/RowWrapper.component";
-import SplitComponent from "./Split/Split.component";
-import AdvancedDragLayer from "./DragLayer/AdvancedDragLayer.component.js";
 import HTML5Backend from 'react-dnd-html5-backend';
 import VirtualList from 'react-tiny-virtual-list';
 import ExportModal from "../../Shared/ExportModal/ExportModal.component";
@@ -13,7 +11,7 @@ import SystemStore from "../../../Stores/System.store";
 import SystemActions from "../../../Actions/System.actions";
 import PropTypes from "prop-types";
 import HideComponent from "./HideRow/HideRow.component";
-
+import SplitAlternative from "./SplitAlternative/SplitAlternative.component"
 
 class JobComponent extends Component {
     static propTypes = {
@@ -158,8 +156,9 @@ class JobComponent extends Component {
                 />}
                 {/*<AdvancedDragLayer/>*/}
                 {this.state.splitModalStatus &&
-                <SplitComponent segment={this.state.segmentToSplit} jobConf={this.props.job.config}
-                                inverseSegmentOrder={this.props.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>}
+                    <SplitAlternative segment={this.state.segmentToSplit} jobConf={this.props.job.config}
+                                             inverseSegmentOrder={this.props.job.rowsDictionary[this.state.segmentToSplit.type][this.state.segmentToSplit.order]}/>
+                }
             </div>
         );
     }

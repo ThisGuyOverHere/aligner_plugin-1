@@ -41,7 +41,11 @@ class UploadComponent extends Component {
             inAlign: false,
             sourceLang: 'en-US',
             targetLang: 'it-IT',
-            formatsModalOpen: false
+            formatsModalOpen: false,
+            creationError: {
+                error: false,
+                message: null
+            }
         }
     }
 
@@ -101,7 +105,7 @@ class UploadComponent extends Component {
                     status: 'progress',
                     size: Math.floor((progressEvent.total) / 1000),
                     name: files[0].name
-                }
+                },
             });
         };
         httpUpload(files[0], onProgress).then(response => {
@@ -125,8 +129,7 @@ class UploadComponent extends Component {
                         progress: 0,
                         name: response.data[0].name,
                         size: Math.floor((files[0].size) / 1000)
-                    }
-
+                    },
                 });
             }
         }, (error) => {
@@ -152,7 +155,7 @@ class UploadComponent extends Component {
                     status: 'progress',
                     size: Math.floor((progressEvent.total) / 1000),
                     name: files[0].name
-                }
+                },
             })
         };
         httpUpload(files[0], onProgress).then(response => {
@@ -178,7 +181,6 @@ class UploadComponent extends Component {
                         name: response.data[0].name,
                         size: Math.floor((files[0].size) / 1000),
                     },
-
                 });
             }
         }, (error) => {
@@ -193,6 +195,9 @@ class UploadComponent extends Component {
     };
 
     startAlignment = () => {
+        this.setState({
+            inAlign: true
+        });
         httpCreateProject({
             project_name: this.state.pName,
             file_name_source: this.state.uploadSource.name,
@@ -204,19 +209,22 @@ class UploadComponent extends Component {
                 job: {
                     id: response.data.job.id,
                     password: response.data.job.password
-                }
+                },
+                creationError: {
+                    error: false,
+                    message: null
+                },
+                inAlign: false
             });
         }, (error) => {
-            //todo: implement error UI
-            console.error(error);
             this.setState({
+                creationError: {
+                    error: true,
+                    message: error.response.data.errors ? error.response.data.errors[0].message : 'An error occurred! retry or contact us.'
+                },
                 inAlign: false
             });
             __insp.push(['tagSession', {error: "create_project"}]);
-        });
-
-        this.setState({
-            inAlign: true
         });
     };
 
@@ -226,7 +234,7 @@ class UploadComponent extends Component {
         });
     };
 
-    renderHtmlUpload = (type,status, data) => {
+    renderHtmlUpload = (type, status, data) => {
         switch (status) {
             case 'start':
                 return <p><span>+ Add {type === 'target' ? "Target" : "Source"} file</span> (or drop it here).</p>;
@@ -266,7 +274,7 @@ class UploadComponent extends Component {
     };
 
     render() {
-
+        const {creationError} = this.state;
         const uploadAreaStyle = {};
         let classes = {
             source: ['dropzone'],
@@ -371,6 +379,11 @@ class UploadComponent extends Component {
                                     disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name || this.state.inAlign}
                             >START ALIGNING
                             </button>
+                            {creationError.error &&
+                            <div className={"creation-error"}>
+                                <span> {creationError.message} </span>
+                            </div>
+                            }
                         </div>
                     </div>
                 </div>

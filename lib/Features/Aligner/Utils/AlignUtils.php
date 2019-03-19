@@ -9,6 +9,7 @@
 namespace Features\Aligner\Utils;
 
 use Exceptions\ValidationError;
+use SubFiltering\Filters\PlaceHoldXliffTags;
 
 class AlignUtils
 {
@@ -74,18 +75,7 @@ class AlignUtils
         }
         return $subject;
     }
-
-    /**
-     * @param $segment
-     * @param $lang
-     * @return float|int
-     */
-    public static function _countWordsInSegment($segment, $lang) {
-        $wordCount = \CatUtils::segment_raw_word_count( $segment, $lang );
-
-        return $wordCount;
-    }
-
+    
 
     public static function _getNewOrderValue($first_order, $next_order){
         if($first_order && $next_order){
@@ -100,42 +90,10 @@ class AlignUtils
 
     public static function _mark_xliff_tags($segment) {
 
-        //remove not existent </x> tags
-        $segment = preg_replace('|(</x>)|si', "", $segment);
-
-        //$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
-        $segment = preg_replace('|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-
-        $segment = preg_replace('|<(/g)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-
-        $segment = preg_replace('|<(x .*?/?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('#<(bx[ ]{0,}/?|bx .*?/?)>#si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('#<(ex[ ]{0,}/?|ex .*?/?)>#si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(bpt\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/bpt)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(ept\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/ept)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(ph .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/ph)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(it .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/it)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(mrk\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(/mrk)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment);
-
-        $segment = self::__encode_tag_attributes( $segment );
+        $xliff_replacer = new PlaceHoldXliffTags();
+        $segment = $xliff_replacer->transform( $segment );
 
         return htmlspecialchars_decode( $segment );
-    }
-
-    public static function __encode_tag_attributes( $segment ){
-
-        return preg_replace_callback( '/' . Constants::LTPLACEHOLDER . '(.*?)' . Constants::GTPLACEHOLDER . '/u'
-            , function ( $matches ) {
-                return Constants::LTPLACEHOLDER . base64_encode( $matches[1] ) . Constants::GTPLACEHOLDER;
-            }
-            , $segment
-        ); //base64 of the tag content to avoid unwanted manipulation
-
     }
 
     private static function __decode_tag_attributes( $segment ){
