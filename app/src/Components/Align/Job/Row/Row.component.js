@@ -37,6 +37,7 @@ function collect(connect, monitor) {
 class RowComponent extends Component {
 
     static propTypes = {
+        jobInfo: PropTypes.object,
         index: PropTypes.number.isRequired,
         animate: PropTypes.bool,
         setAnimatedRow: PropTypes.func,
@@ -89,7 +90,7 @@ class RowComponent extends Component {
 
     render() {
         let rowClass = ['project-row'];
-        const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag} = this.props;
+        const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag, jobInfo} = this.props;
 
         const dragElType = dragEl ? dragEl.type : undefined;
         if (isOver && dragElType && canDrop) {
@@ -106,6 +107,7 @@ class RowComponent extends Component {
                 <div>{this.props.index+1}</div>
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
+                                  rtl={jobInfo.source_is_rtl}
                                   search={this.props.search}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.source}
@@ -113,6 +115,7 @@ class RowComponent extends Component {
                 <SegmentComponent type="target"
                                   search={this.props.search}
                                   dropHover={isOver && canDrop && dragElType === 'target'}
+                                  rtl={jobInfo.target_is_rtl}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.target}
                                   segment={this.props.row.target}/>

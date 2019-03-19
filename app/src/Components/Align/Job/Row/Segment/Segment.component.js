@@ -30,6 +30,7 @@ function collect(connect, monitor) {
 
 class SegmentComponent extends Component {
     static propTypes = {
+        rtl: PropTypes.bool,
         type: PropTypes.string.isRequired,
         dropHover: PropTypes.bool.isRequired,
         selected: PropTypes.bool,
@@ -89,7 +90,7 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl} = this.props;
+        const {connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl, rtl} = this.props;
 
         let segmentClasses = ['segmentBox'];
         if (!segment.content_clean) {
@@ -115,7 +116,7 @@ class SegmentComponent extends Component {
             >
                 {dropHover && <span className="dropAlignArea"> </span>}
                 <i className="icon check circle outline"></i>
-                <div className="segmentBox-content">
+                <div className="segmentBox-content" style={{textAlign: rtl ? 'right': 'left'}}>
                     <SegmentContentComponent search={this.props.search} content={segment.content_clean} id={segment.id}/>
                 </div>
 
@@ -137,7 +138,9 @@ class SegmentComponent extends Component {
 
     openSplitModal = () => {
         if(this.props.segment.content_clean){
-            ProjectActions.openSegmentToSplit(this.props.segment);
+            let segment = this.props.segment;
+            segment.rtl = this.props.rtl;
+            ProjectActions.openSegmentToSplit(segment);
         }
 
     };

@@ -16,6 +16,7 @@ EventEmitter.prototype.setMaxListeners(0);
 let ProjectStore = assign({}, EventEmitter.prototype, {
     jobID: null,
     jobPassword: null,
+    info: null,
     job: {
         source: List(),
         target: List(),
@@ -46,6 +47,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
     emptyStore: function (){
         this.jobID = null;
         this.jobPassword = null;
+        this.info = null;
         this.job.source = List();
         this.job.target = List();
         this.job.size = 0;
@@ -287,7 +289,11 @@ AppDispatcher.register(function (action) {
             ProjectStore.emitChange(ProjectConstants.JOB_ERROR, action.error);
             break;
         case ProjectConstants.STORE_JOB_INFO:
+            ProjectStore.info = action.info;
             ProjectStore.emitChange(ProjectConstants.STORE_JOB_INFO, action.info);
+            break;
+        case ProjectConstants.GET_JOB_INFO:
+            ProjectStore.emitChange(ProjectConstants.STORE_JOB_INFO, ProjectStore.info);
             break;
         case ProjectConstants.EMPTY_STORE:
             ProjectStore.emitChange(ProjectConstants.EMPTY_STORE, action.status);

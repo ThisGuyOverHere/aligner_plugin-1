@@ -15,6 +15,7 @@ import SplitAlternative from "./SplitAlternative/SplitAlternative.component"
 
 class JobComponent extends Component {
     static propTypes = {
+        jobInfo: PropTypes.object,
         job: PropTypes.shape({
             config: PropTypes.shape({
                 password: PropTypes.any,
@@ -232,6 +233,7 @@ class JobComponent extends Component {
                         search={this.state.search}
                         key={index}
                         index={index}
+                        jobInfo={this.props.jobInfo}
                         enableDrag={enableDrag}
                         selection={selection}
                         row={row}/>);

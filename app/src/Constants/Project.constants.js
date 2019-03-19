@@ -18,6 +18,7 @@ const ProjectConstants = keyMirror({
     EMPTY_STORE: null,
     SEARCH_RESULTS: null,
     STORE_JOB_INFO: null,
+    GET_JOB_INFO: null,
     HIDE_SEGMENTS: null,
     SHOW_SEGMENTS: null,
 });

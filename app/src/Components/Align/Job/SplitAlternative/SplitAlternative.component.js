@@ -55,8 +55,10 @@ class SplitAlternative extends Component {
      */
     renderItems = () => {
         const {calculatedToSplit} = this.state;
+        const {segment} = this.props;
+        console.log(segment)
 
-        return <p id="toSplit">
+        return <p id="toSplit"  style={{textAlign: segment.rtl ? 'right': 'left'}}>
             {calculatedToSplit.map((item, index) => {
                 return <span key={index}>
                          <span onClick={() => this.onSplit(index)}> {item} </span>

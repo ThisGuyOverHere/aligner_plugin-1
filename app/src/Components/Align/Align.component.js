@@ -22,6 +22,7 @@ class AlignComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            jobInfo: {},
             job: {
                 config: {
                     password: this.props.match.params.password,
@@ -41,22 +42,26 @@ class AlignComponent extends Component {
 
 
     componentDidMount() {
+        ProjectActions.getJobInfo();
         ProjectStore.addListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.addListener(ProjectConstants.JOB_ERROR, this.getJobError);
+        ProjectStore.addListener(ProjectConstants.STORE_JOB_INFO, this.onGetJobInfo);
         ProjectActions.getSegments(this.props.match.params.jobID, this.props.match.params.password);
     }
 
     componentWillUnmount() {
         ProjectStore.removeListener(ProjectConstants.RENDER_ROWS, this.setRows);
         ProjectStore.removeListener(ProjectConstants.JOB_ERROR, this.getJobError);
+        ProjectStore.removeListener(ProjectConstants.STORE_JOB_INFO, this.onGetJobInfo);
     }
 
     render() {
+        const {jobInfo} = this.state;
         return (
             <div id="Align">
                 <ToolbarComponent job={this.state.job}/>
                 {!(this.state.job.rows.length > 0 || this.state.jobError) && <AlignLoader/>}
-                {this.state.job.rows && <JobComponent inSync={this.state.inSync} job={this.state.job}/>}
+                {this.state.job.rows && <JobComponent inSync={this.state.inSync} job={this.state.job} jobInfo={jobInfo}/>}
                 {this.state.jobError && <JobError/>}
             </div>
         );
@@ -131,6 +136,12 @@ class AlignComponent extends Component {
             inSync: inSync
         })
     };
+
+    onGetJobInfo = (info) =>{
+        this.setState({
+            jobInfo: info
+        })
+    }
 
 }
 
