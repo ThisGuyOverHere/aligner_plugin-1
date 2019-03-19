@@ -83,7 +83,24 @@ class AlignJobWorker extends AbstractWorker {
         $source_lang = $this->job->source;
         $target_lang = $this->job->target;
 
+        $fileStorage = new \FilesStorage();
+
         try {
+
+            $fileStorage->moveFromCacheToFileDir(
+                    $source_file->sha1_original_file,
+                    $this->job->source,
+                    $source_file->id,
+                    $source_file->filename
+            );
+
+            $fileStorage->moveFromCacheToFileDir(
+                    $target_file->sha1_original_file,
+                    $this->job->target,
+                    $target_file->id,
+                    $target_file->filename
+            );
+
             $source_segments = $this->_file2segments($source_file, $source_lang);
             $target_segments = $this->_file2segments($target_file, $target_lang);
 

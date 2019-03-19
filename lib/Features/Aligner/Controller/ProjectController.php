@@ -142,7 +142,8 @@ class ProjectController extends AlignerController {
                 'job'         => $this->job,
                 'project'     => $this->project,
                 'source_file' => $source_file,
-                'target_file' => $target_file
+                'target_file' => $target_file,
+                'upload_session' => $_COOKIE['upload_session']
         ];
 
         try {
