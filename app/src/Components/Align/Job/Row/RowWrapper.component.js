@@ -6,6 +6,7 @@ import ActionsBetweenLines from "./ActionsBetweenLines/ActionsBetweenLines.compo
 class RowWrapperComponent extends Component {
 
     static propTypes = {
+        jobInfo: PropTypes.object,
         index: PropTypes.number.isRequired,
         animate: PropTypes.bool,
         setAnimatedRow: PropTypes.func,

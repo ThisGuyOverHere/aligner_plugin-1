@@ -8,7 +8,16 @@
 
 namespace Features\Aligner\Utils;
 
+use Features\Aligner;
+
+
 class Engines_MyMemory extends \Engines_MyMemory {
+    protected $config;
+
+    public function __construct( $engineRecord ) {
+        parent::__construct( $engineRecord );
+        $this->config = Aligner::getConfig();
+    }
 
 
     /**
@@ -57,7 +66,7 @@ class Engines_MyMemory extends \Engines_MyMemory {
             if ( $this->client_secret != '' && $this->client_secret != null ) {
                 $parameters[ 'key' ] = $this->client_secret;
             }
-            $parameters['de'] = "matecat-aligner-2018@translated.net";
+            $parameters['de'] = $this->config['MYMEMORY_EMAIL'];
             $parameters['mtonly'] = 1;
             $parameters['q'] = $this->_preserveSpecialStrings($_config['segment']);
             $parameters['langpair'] = $this->_fixLangCode( $_config['source'] ) . '|' . $this->_fixLangCode( $_config['target'] );

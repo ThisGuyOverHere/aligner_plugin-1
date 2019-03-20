@@ -470,7 +470,7 @@ let ProjectActions = {
         openSegmentToSplit: function (segment) {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.SEGMENT_TO_SPLIT,
-                segment: segment,
+                segment: segment
             });
         },
 
@@ -602,6 +602,12 @@ let ProjectActions = {
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.STORE_JOB_INFO,
                 info: info
+            })
+        },
+
+        getJobInfo: function () {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.GET_JOB_INFO
             })
         },
 

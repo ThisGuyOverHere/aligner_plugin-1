@@ -64,7 +64,7 @@ class JobController extends AlignerController {
     public function checkProgress() {
 
         $id_job = $this->job->id;
-        $project = $this->job->getProject()->toArray();
+        $project = $this->job->getProject(0)->toArray();
 
         $status_analysis = ( !empty( $project ) ) ? $project[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 

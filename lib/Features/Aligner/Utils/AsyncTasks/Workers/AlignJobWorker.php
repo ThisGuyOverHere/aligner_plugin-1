@@ -112,7 +112,6 @@ class AlignJobWorker extends AbstractWorker {
 
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_2);
 
-
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->deleteByJobId( $this->id_job );
 
@@ -120,9 +119,10 @@ class AlignJobWorker extends AbstractWorker {
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
             $this->updateProgress($this->project->id, 10);
 
-
+            NewDatabase::obtain()->begin();
             $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
             $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
+            NewDatabase::obtain()->commit();
 
             $alignment_class = new Alignment;
 
@@ -147,7 +147,7 @@ class AlignJobWorker extends AbstractWorker {
                 if ( !empty( $value[ 'source' ] ) ) {
                     //Check if $value['source'] is an array of segments otherwise it wouldn't have any numerical keys
                     if ( isset( $value[ 'source' ][ 0 ] ) ) {
-                        $value[ 'source' ] = $this->mergeSegments( $value[ 'source' ] );
+                        $value[ 'source' ] = Segments_SegmentDao::mergeSegments( $value[ 'source' ] );
                     }
                 }
 
@@ -163,7 +163,7 @@ class AlignJobWorker extends AbstractWorker {
                 if ( !empty( $value[ 'target' ] ) ) {
                     //Check if $value['target'] is an array of segments otherwise it wouldn't have any numerical keys
                     if ( isset( $value[ 'target' ][ 0 ] ) ) {
-                        $value[ 'target' ] = $this->mergeSegments( $value[ 'target' ] );
+                        $value[ 'target' ] = Segments_SegmentDao::mergeSegments( $value[ 'target' ] );
                     }
                 }
 
@@ -231,6 +231,7 @@ class AlignJobWorker extends AbstractWorker {
 
         // Creating the Segments
         $segments = array();
+        $total_words = 0;
 
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
 
@@ -239,7 +240,6 @@ class AlignJobWorker extends AbstractWorker {
                 continue;
             }
 
-            $total_words = 0;
             foreach ($xliff_file[ 'trans-units' ] as $trans_unit) {
 
                 // Extract only raw-content
@@ -291,19 +291,6 @@ class AlignJobWorker extends AbstractWorker {
         $segmentsDao = new Segments_SegmentDao;
         $segmentsDao->createList( $segments );
 
-    }
-
-
-    protected function mergeSegments( Array $segments ) {
-        $new_segment                    = [];
-        $new_segment[ 'id' ]            = $segments[ 0 ][ 'id' ];
-        $new_segment[ 'content_clean' ] = '';
-        foreach ( $segments as $segment ) {
-            $new_segment[ 'content_clean' ] .= ' ' . $segment[ 'content_clean' ];
-        }
-        Segments_SegmentDao::mergeSegments( $segments );
-
-        return $new_segment;
     }
 
 }

@@ -108,11 +108,12 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
                             `order`,
                             score,
                             segment_id,
-                            `next`
+                            `next`,
+                            create_date
                             ) VALUES ";
 
 
-        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 6 ), ", " ) . " )";
+        $tuple_marks = "( " . str_repeat( "?, ", 6 ) . "NOW() )";
 
         foreach ( $obj_arr as $i => $chunk ) {
 

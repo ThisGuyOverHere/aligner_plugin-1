@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {Dropdown} from 'semantic-ui-react'
 import Dropzone from 'react-dropzone'
-import env from '../../../Constants/Env.constants'
 import {httpUpload} from '../../../HttpRequests/Upload.http';
 import {httpConversion, httpCreateProject} from "../../../HttpRequests/Alignment.http";
 import {Redirect} from "react-router"
@@ -14,10 +13,10 @@ class UploadComponent extends Component {
     constructor() {
         super();
         let languages = [];
-        env.languages.map(e => {
+        window.configs.languages.map(e => {
             languages.push({
                 key: e.code,
-                text: e.value,
+                text: e.name,
                 value: e.code
             })
         });

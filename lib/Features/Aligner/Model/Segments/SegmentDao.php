@@ -322,11 +322,12 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
                             content_clean, 
                             content_raw,
                             content_hash, 
-                            raw_word_count
+                            raw_word_count,
+                            create_date
                             ) VALUES ";
 
 
-        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 7 ), ", " ) . " )";
+        $tuple_marks = "( " . str_repeat( "?, ", 7 ) . " NOW() )";
 
         foreach ( $obj_arr as $i => $chunk ) {
 

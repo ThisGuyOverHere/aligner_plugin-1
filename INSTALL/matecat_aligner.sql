@@ -101,4 +101,4 @@ CREATE TABLE `phinxlog` (
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
+GRANT SELECT, INSERT, UPDATE,DELETE, EXECUTE, SHOW VIEW ON `matecat_aligner`.* TO 'matecat'@'%'  IDENTIFIED BY 'matecat01';

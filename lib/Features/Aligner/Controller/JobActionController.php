@@ -1167,33 +1167,44 @@ class JobActionController extends AlignerController {
 
         $matches = $this->params[ 'matches' ];
 
-        foreach ($matches as $match) {
+        $conn = NewDatabase::obtain()->getConnection();
+        try {
+            $conn->beginTransaction();
 
-            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'source' ], $id_job, "source" );
-            Segments_SegmentMatchDao::showByOrderAndType( $match[ 'target' ], $id_job, "target" );
+            foreach ($matches as $match) {
 
-            $source = Segments_SegmentDao::getFromOrderJobIdAndType(
-                $match [ 'source' ],
-                $id_job , 'source' );
+                Segments_SegmentMatchDao::showByOrderAndType($match['source'], $id_job, "source");
+                Segments_SegmentMatchDao::showByOrderAndType($match['target'], $id_job, "target");
 
-            $target = Segments_SegmentDao::getFromOrderJobIdAndType(
-                $match [ 'target' ],
-                $id_job , 'target' );
+                $source = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match ['source'],
+                    $id_job, 'source');
 
-            $this->pushOperation( [
-                'type'      => 'source',
-                'action'    => 'update',
-                'rif_order' => $match[ 'source' ],
-                'data'      => $source->toArray()
-            ] );
+                $target = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match ['target'],
+                    $id_job, 'target');
 
-            $this->pushOperation( [
-                'type'      => 'target',
-                'action'    => 'update',
-                'rif_order' => $match[ 'target' ],
-                'data'      => $target->toArray()
-            ] );
+                $this->pushOperation([
+                    'type' => 'source',
+                    'action' => 'update',
+                    'rif_order' => $match['source'],
+                    'data' => $source->toArray()
+                ]);
 
+                $this->pushOperation([
+                    'type' => 'target',
+                    'action' => 'update',
+                    'rif_order' => $match['target'],
+                    'data' => $target->toArray()
+                ]);
+
+            }
+            $conn->commit();
+        } catch ( \PDOException $e){
+            $conn->rollBack();
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Show  ", -2 );
+        } catch (ValidationError $e ){
+            throw new ValidationError( "Segment update - DB Error: " . $e->getMessage() . " - Show  ", -2 );
         }
 
         return $this->getOperations();

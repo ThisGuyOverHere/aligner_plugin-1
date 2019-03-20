@@ -55,8 +55,9 @@ class SplitAlternative extends Component {
      */
     renderItems = () => {
         const {calculatedToSplit} = this.state;
+        const {segment} = this.props;
 
-        return <p id="toSplit">
+        return <p id="toSplit"  style={{textAlign: segment.rtl ? 'right': 'left', direction: segment.rtl ? 'rtl': 'ltr'}}>
             {calculatedToSplit.map((item, index) => {
                 return <span key={index}>
                          <span onClick={() => this.onSplit(index)}> {item} </span>
@@ -80,9 +81,6 @@ class SplitAlternative extends Component {
         const targetSentences = calculatedToSplit[clickedSegment][0];
 
         if ((splitAtChar !== 0 && (splitAtChar !== targetSentences.length)) && targetSentences.length > 1) {
-            console.log(targetSentences);
-            console.log(splitAtChar);
-            console.log(targetSentences.length);
             // properly split clicked string in two items
             let splittedItems = {
                 leftSplit: [targetSentences.substr(0, splitAtChar)],
