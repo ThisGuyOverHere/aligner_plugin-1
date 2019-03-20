@@ -116,7 +116,7 @@ class SegmentComponent extends Component {
             >
                 {dropHover && <span className="dropAlignArea"> </span>}
                 <i className="icon check circle outline"></i>
-                <div className="segmentBox-content" style={{textAlign: rtl ? 'right': 'left'}}>
+                <div className="segmentBox-content" style={{textAlign: rtl ? 'right': 'left', direction: rtl ? 'rtl': 'ltr'}}>
                     <SegmentContentComponent search={this.props.search} content={segment.content_clean} id={segment.id}/>
                 </div>
 
