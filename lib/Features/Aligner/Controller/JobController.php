@@ -13,6 +13,7 @@ use Features\Aligner\Controller\Validators\JobPasswordValidator;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Jobs_JobStruct;
+use Features\Aligner\Model\Projects_ProjectDao;
 use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\ProjectProgress;
@@ -64,7 +65,7 @@ class JobController extends AlignerController {
     public function checkProgress() {
 
         $id_job = $this->job->id;
-        $project = $this->job->getProject(0)->toArray();
+        $project = Projects_ProjectDao::findById( $this->job->id_project )->toArray();
 
         $status_analysis = ( !empty( $project ) ) ? $project[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
