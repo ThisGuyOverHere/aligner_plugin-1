@@ -20,8 +20,11 @@ use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use CatUtils;
 use Features\Aligner\Utils\AlignUtils;
+use Features\Aligner\Utils\ProjectProgress;
 
 class ProjectController extends AlignerController {
+
+    use ProjectProgress;
 
     protected $postInput;
 
@@ -145,6 +148,8 @@ class ProjectController extends AlignerController {
                 'target_file' => $target_file,
                 'upload_session' => $_COOKIE['upload_session']
         ];
+
+        $this->pushJobInQueue($this->job->id);
 
         try {
             \WorkerClient::init( new \AMQHandler() );

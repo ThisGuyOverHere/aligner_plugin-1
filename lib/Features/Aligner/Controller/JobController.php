@@ -83,7 +83,9 @@ class JobController extends AlignerController {
         switch ( $status_analysis ) {
             case ConstantsJobAnalysis::ALIGN_PHASE_0:
                 $phase  = 0;
-                $previous_project_number = \AMQHandler::getQueueLength( 'aligner_align_job' );
+                //$previous_project_number = \AMQHandler::getQueueLength( 'aligner_align_job' );
+                $jobs_in_queue = $this->getJobsInQueue();
+                $previous_project_number = $this->getNumbersOfPreviousQueues($this->job->id, $jobs_in_queue);
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_1:
                 $phase = 1;
@@ -135,4 +137,15 @@ class JobController extends AlignerController {
                 ]
         );
     }
+
+    protected function getNumbersOfPreviousQueues($job_id, $jobs_in_queue){
+    $previous_queues = 0;
+    foreach($jobs_in_queue as $job_in_queue){
+        $previous_queues++;
+        if($job_in_queue == $job_id){
+            break;
+        }
+    }
+    return $previous_queues;
+}
 }
