@@ -148,7 +148,7 @@ class ProjectController extends AlignerController {
 
         try {
             \WorkerClient::init( new \AMQHandler() );
-            \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $params ), [
+            \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB', 'Features\Aligner\Utils\AsyncTasks\Workers\SegmentWorker', json_encode( $params ), [
                     'persistent' => \WorkerClient::$_HANDLER->persistent
             ] );
         } catch ( \Exception $e ) {

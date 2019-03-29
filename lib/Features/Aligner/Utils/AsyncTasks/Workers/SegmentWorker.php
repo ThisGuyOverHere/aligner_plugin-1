@@ -1,9 +1,9 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: vincenzoruffa
- * Date: 26/10/2018
- * Time: 11:24
+ * User: matteopulcrano
+ * Date: 28/03/2019
+ * Time: 16:41
  */
 
 namespace Features\Aligner\Utils\AsyncTasks\Workers;
@@ -24,7 +24,7 @@ use Features\Aligner\Utils\Constants;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 
-class AlignJobWorker extends AbstractWorker {
+class SegmentWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
 
     private $id_job;
@@ -39,7 +39,7 @@ class AlignJobWorker extends AbstractWorker {
         $this->_checkForReQueueEnd( $queueElement );
         $this->_checkDatabaseConnection();
         $this->setRedisClient($this->_queueHandler->getRedisClient());
-        $this->_Align( $queueElement );
+        $this->_createSegments( $queueElement );
     }
 
     protected function _checkForReQueueEnd( \TaskRunner\Commons\QueueElement $queueElement ) {
@@ -61,7 +61,7 @@ class AlignJobWorker extends AbstractWorker {
 
     }
 
-    protected function _Align( \TaskRunner\Commons\QueueElement $queueElement ) {
+    protected function _createSegments( \TaskRunner\Commons\QueueElement $queueElement ) {
         $attributes = json_decode( $queueElement->params );
 
         $this->id_job = $attributes->id_job;
@@ -77,94 +77,57 @@ class AlignJobWorker extends AbstractWorker {
         $source_file  = Files_FileDao::getByJobId( $this->id_job, "source" );
         $target_file  = Files_FileDao::getByJobId( $this->id_job, "target" );*/
 
+        $source_file  = $attributes->source_file;
+        $target_file  = $attributes->target_file;
+
         $source_lang = $this->job->source;
         $target_lang = $this->job->target;
 
+        $fileStorage = new \FilesStorage();
+
         try {
 
-            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_2);
-
-            $segmentsMatchDao = new Segments_SegmentMatchDao;
-            $segmentsMatchDao->deleteByJobId( $this->id_job );
-
-
-            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
-            $this->updateProgress($this->project->id, 10);
-
-            NewDatabase::obtain()->begin();
-            $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
-            $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
-            NewDatabase::obtain()->commit();
-
-            $alignment_class = new Alignment;
-
-
-            $alignment = $alignment_class->alignSegments(
-                    $this->project,
-                    $source_segments,
-                    $target_segments,
-                    $source_lang,
-                    $target_lang
+            $fileStorage->moveFromCacheToFileDir(
+                $source_file->sha1_original_file,
+                $this->job->source,
+                $source_file->id,
+                $source_file->filename
             );
 
-            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_6);
-            $this->updateProgress($this->project->id, 95);
+            $fileStorage->moveFromCacheToFileDir(
+                $target_file->sha1_original_file,
+                $this->job->target,
+                $target_file->id,
+                $target_file->filename
+            );
 
+            $source_segments = $this->_file2segments($source_file, $source_lang);
+            $target_segments = $this->_file2segments($target_file, $target_lang);
 
-            $source_array = [];
-            $target_array = [];
-            foreach ( $alignment as $key => $value ) {
-                $source_element = [];
+            $this->_storeSegments($source_segments, "source");
+            $this->_storeSegments($target_segments, "target");
 
-                if ( !empty( $value[ 'source' ] ) ) {
-                    //Check if $value['source'] is an array of segments otherwise it wouldn't have any numerical keys
-                    if ( isset( $value[ 'source' ][ 0 ] ) ) {
-                        $value[ 'source' ] = Segments_SegmentDao::mergeSegments( $value[ 'source' ] );
-                    }
-                }
-
-                $source_element[ 'segment_id' ] = $value[ 'source' ][ 'id' ];
-                $source_element[ 'order' ]      = ( $key + 1 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-                $source_element[ 'next' ]       = ( $key + 2 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-                $source_element[ 'id_job' ]     = $this->id_job;
-                $source_element[ 'score' ]      = $value[ 'score' ];
-                $source_element[ 'type' ]       = "source";
-
-                $target_element = [];
-
-                if ( !empty( $value[ 'target' ] ) ) {
-                    //Check if $value['target'] is an array of segments otherwise it wouldn't have any numerical keys
-                    if ( isset( $value[ 'target' ][ 0 ] ) ) {
-                        $value[ 'target' ] = Segments_SegmentDao::mergeSegments( $value[ 'target' ] );
-                    }
-                }
-
-                $target_element[ 'segment_id' ] = $value[ 'target' ][ 'id' ];
-                $target_element[ 'order' ]      = ( $key + 1 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-                $target_element[ 'next' ]       = ( $key + 2 ) * Constants::DISTANCE_INT_BETWEEN_MATCHES;
-                $target_element[ 'score' ]      = $value[ 'score' ];
-                $target_element[ 'id_job' ]     = $this->id_job;
-                $target_element[ 'type' ]       = "target";
-
-                $source_array[] = $source_element;
-                $target_array[] = $target_element;
-            }
-
-            $source_array[ count( $source_array ) - 1 ][ 'next' ] = null;
-            $target_array[ count( $target_array ) - 1 ][ 'next' ] = null;
-
-            $segmentsMatchDao->createList( $source_array );
-            $segmentsMatchDao->createList( $target_array );
-
-            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_7);
-            $this->updateProgress($this->project->id, 100);
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_9);
             $this->updateProgress($this->project->id, 0);
         }
 
+        try {
+            \WorkerClient::init( new \AMQHandler() );
+            \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
+                'persistent' => \WorkerClient::$_HANDLER->persistent
+            ] );
+        } catch ( \Exception $e ) {
 
+            # Handle the error, logging, ...
+            $output = "**** Align Job Enqueue failed. AMQ Connection Error. ****\n\t";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $attributes, true );
+            \Log::doLog( $output );
+            throw $e;
+
+        }
 
     }
 
@@ -245,7 +208,7 @@ class AlignJobWorker extends AbstractWorker {
             Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_8);
             throw new ValidationError("File exceeded the word limit, job creation canceled");
         }
-        
+
         return $segments;
     }
 
