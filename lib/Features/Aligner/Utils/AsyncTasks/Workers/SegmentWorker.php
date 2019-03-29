@@ -104,6 +104,9 @@ class SegmentWorker extends AbstractWorker {
             $source_segments = $this->_file2segments($source_file, $source_lang);
             $target_segments = $this->_file2segments($target_file, $target_lang);
 
+            $this->_saveSegmentsAsJson($source_file->sha1_original_file, $source_segments, 'source', $source_file->id, $this->project->name);
+            $this->_saveSegmentsAsJson($target_file->sha1_original_file, $target_segments, 'target', $target_file->id, $this->project->name);
+
             $this->_storeSegments($source_segments, "source");
             $this->_storeSegments($target_segments, "target");
 
@@ -225,6 +228,41 @@ class SegmentWorker extends AbstractWorker {
 
         $segmentsDao = new Segments_SegmentDao;
         $segmentsDao->createList( $segments );
+
+    }
+
+    private function _saveSegmentsAsJson( $dateHashPath, $segments ,$type, $idFile, $newFileName ){
+
+        $json_segments = json_encode($segments);
+
+        $fileStorage = new \FilesStorage();
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, $fileStorage->composeCachePath( $hash ) );
+
+        //destination dir
+        $fileDir  = \INIT::$FILES_REPOSITORY. DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR .
+            $idFile . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . $cacheTree . "|" . $type ;
+
+        $json_path = $fileDir . DIRECTORY_SEPARATOR . $newFileName . '.json';
+
+        \Log::doLog( $fileDir );
+
+        $res = true;
+
+        if ( !is_dir( $fileDir ) ) {
+            $res &= mkdir( $fileDir, 0755, true );
+        }
+
+        if (!$res){
+            $message = "Couldn't create directory, process halted";
+            \Log::doLog($message);
+            throw new \Exception($message);
+        }
+
+        file_put_contents($json_path, $json_segments);
+
+        return;
 
     }
 
