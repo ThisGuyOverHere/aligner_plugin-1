@@ -87,6 +87,8 @@ class AnalyseComponent extends Component {
                                             jobPassword={this.props.match.params.password}
                                             actualPhase={this.state.actualPhase}
                                             progress={this.state.progress}
+                                            actualPhaseName={this.state.phaseName}
+                                            stopped={this.state.prev_job > 0}
                             />
                             <Animation/>
                         </div>
