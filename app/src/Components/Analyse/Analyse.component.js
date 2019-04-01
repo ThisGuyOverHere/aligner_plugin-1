@@ -78,8 +78,8 @@ class AnalyseComponent extends Component {
                             </div>
 
                             {(this.state.prev_job > 0) && <div className="prev-job ">
-                                <h4> Sorry, but we're a bit backed up right now </h4>
-                                <h4><span> {this.state.prev_job} jobs are ahead of you</span> </h4>
+                                <h4> Sorry, but we're a bit backed up right now. </h4>
+                                <h4><span> {this.state.prev_job} jobs are ahead of you</span>, please hold on.</h4>
                             </div>}
 
                             <PreAlignStatus jobId={this.state.job.id}
