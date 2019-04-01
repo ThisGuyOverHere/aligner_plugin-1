@@ -32,6 +32,7 @@ class AnalyseComponent extends Component {
             actualPhase: 0,
             phaseName: '',
             progress: 0,
+            prev_job: null,
             completed: false,
             redirect: false,
             analyseError: false
@@ -76,6 +77,12 @@ class AnalyseComponent extends Component {
                                 />
                             </div>
 
+                            {(this.state.prev_job > 0) && <div className="prev-job ">
+                                <h4> Someone else is trying to process some files right now. Yours have been put in the
+                                    queue. </h4>
+                                <h4>There are <span> {this.state.prev_job} jobs before</span> yours. </h4>
+                            </div>}
+
                             <PreAlignStatus jobId={this.state.job.id}
                                             jobPassword={this.props.match.params.password}
                                             actualPhase={this.state.actualPhase}
@@ -96,13 +103,13 @@ class AnalyseComponent extends Component {
             .then(
                 response => {
                     data = response.data;
-                    if(this.state.progress === 100){
+                    if (this.state.progress === 100) {
                         ReactGA.event({
                             category: 'Timing',
                             action: 'Alignment Completed',
                             label: this.state.job.id,
                             nonInteraction: true,
-                            value: parseInt((new Date()-this.startAlign)/1000)
+                            value: parseInt((new Date() - this.startAlign) / 1000)
                         });
                     }
                     // update info
@@ -112,6 +119,7 @@ class AnalyseComponent extends Component {
                         totalTargetSegments: data.target_segments,
                         phaseName: data.phase_name,
                         progress: +data.progress,
+                        prev_job: data.previous_project_number,
                         completed: (this.state.progress === 100)
                     });
                 }

@@ -9,7 +9,7 @@
   display: grid;
   grid-template-columns: 56px 1fr;
   margin: 10% auto;
-  .info-animation{
+  .info-animation {
 	position: relative;
 	margin: 0 auto;
 	width: 800px;
@@ -45,6 +45,22 @@
 		margin: 24px 0 0;
 		font-size: 26px;
 		color: $secondaryText;
+	  }
+	}
+  }
+
+  .prev-job {
+	padding: 16px;
+	width: 100%;
+	border-radius: 4px;
+	margin-bottom: 24px;
+	background-color: #fdf8ce;
+	color: #908105;
+	h4 {
+	  font-weight: 300;
+	  margin: 0;
+	  span {
+		font-weight: 600;
 	  }
 	}
   }
