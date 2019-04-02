@@ -104,11 +104,11 @@ class SegmentWorker extends AbstractWorker {
             $source_segments = $this->_file2segments($source_file, $source_lang);
             $target_segments = $this->_file2segments($target_file, $target_lang);
 
+            $source_segments = $this->_storeSegments($source_segments, "source");
+            $target_segments = $this->_storeSegments($target_segments, "target");
+
             $this->_saveSegmentsAsJson($source_file->sha1_original_file, $source_segments, 'source', $source_file->id, $this->project->name);
             $this->_saveSegmentsAsJson($target_file->sha1_original_file, $target_segments, 'target', $target_file->id, $this->project->name);
-
-            $this->_storeSegments($source_segments, "source");
-            $this->_storeSegments($target_segments, "target");
 
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
@@ -228,6 +228,8 @@ class SegmentWorker extends AbstractWorker {
 
         $segmentsDao = new Segments_SegmentDao;
         $segmentsDao->createList( $segments );
+
+        return $segments;
 
     }
 

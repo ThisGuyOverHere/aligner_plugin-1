@@ -68,6 +68,9 @@ class AlignJobWorker extends AbstractWorker {
         $this->job    = $attributes->job;
         $this->project = $attributes->project;
 
+        $source_file  = $attributes->source_file;
+        $target_file  = $attributes->target_file;
+
         Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_1);
 
 
@@ -91,10 +94,8 @@ class AlignJobWorker extends AbstractWorker {
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
             $this->updateProgress($this->project->id, 10);
 
-            NewDatabase::obtain()->begin();
-            $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
-            $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
-            NewDatabase::obtain()->commit();
+            $source_segments = $this->_getSegmentsFromJson($source_file->sha1_original_file, 'source', $source_file->id, $this->project->name);
+            $target_segments = $this->_getSegmentsFromJson($target_file->sha1_original_file, 'target', $target_file->id, $this->project->name);
 
             $alignment_class = new Alignment;
 
@@ -165,6 +166,31 @@ class AlignJobWorker extends AbstractWorker {
         }
 
 
+    }
+
+
+
+    protected function _getSegmentsFromJson($dateHashPath, $type, $idFile, $newFileName){
+        $fileStorage = new \FilesStorage();
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, $fileStorage->composeCachePath( $hash ) );
+
+        //destination dir
+        $fileDir  = \INIT::$FILES_REPOSITORY. DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR .
+            $idFile . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . $cacheTree . "|" . $type ;
+
+        $json_path = $fileDir . DIRECTORY_SEPARATOR . $newFileName . '.json';
+
+        $segments = file_get_contents($json_path);
+
+        if($segments === false){
+            throw new \Exception("Error: no json file found");
+        }
+
+        $segments = json_decode($segments, true);
+
+        return $segments;
 
     }
 
