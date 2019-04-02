@@ -85,7 +85,7 @@ class AlignJobWorker extends AbstractWorker {
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_2);
 
             $segmentsMatchDao = new Segments_SegmentMatchDao;
-            $segmentsMatchDao->deleteByJobId( $this->id_job );
+            //$segmentsMatchDao->deleteByJobId( $this->id_job );
 
 
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
