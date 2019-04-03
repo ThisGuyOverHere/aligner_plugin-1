@@ -104,6 +104,8 @@ class SegmentWorker extends AbstractWorker {
             $source_segments = $this->_file2segments($source_file, $source_lang);
             $target_segments = $this->_file2segments($target_file, $target_lang);
 
+            $segment_count = count($source_segments) + count($target_segments);
+
             $source_segments = $this->_storeSegments($source_segments, "source");
             $target_segments = $this->_storeSegments($target_segments, "target");
 
@@ -116,11 +118,27 @@ class SegmentWorker extends AbstractWorker {
             $this->updateProgress($this->project->id, 0);
         }
 
+        $config = Aligner::getConfig();
+
         try {
-            \WorkerClient::init( new \AMQHandler() );
-            \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
-                'persistent' => \WorkerClient::$_HANDLER->persistent
-            ] );
+
+            if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
+                \WorkerClient::init( new \AMQHandler() );
+                \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_SMALL', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
+                    'persistent' => \WorkerClient::$_HANDLER->persistent
+                ] );
+            } else if ($segment_count < $config['HIGH_LIMIT_QUEUE_SIZE']){
+                \WorkerClient::init( new \AMQHandler() );
+                \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_MEDIUM', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
+                    'persistent' => \WorkerClient::$_HANDLER->persistent
+                ] );
+            } else {
+                \WorkerClient::init( new \AMQHandler() );
+                \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_BIG', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
+                    'persistent' => \WorkerClient::$_HANDLER->persistent
+                ] );
+            }
+
         } catch ( \Exception $e ) {
 
             # Handle the error, logging, ...
