@@ -64,22 +64,28 @@ class JobController extends AlignerController {
 
     public function checkProgress() {
 
-        $id_job = $this->job->id;
+
+        $id_job  = $this->job->id;
         $project = Projects_ProjectDao::findById( $this->job->id_project )->toArray();
 
         $status_analysis = ( !empty( $project ) ) ? $project[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
-        $this->setRedisClient((new \RedisHandler())->getConnection());
-        $progress = $this->getProgress($project['id']);
+        $this->setRedisClient( ( new \RedisHandler() )->getConnection() );
+        $progress = $this->getProgress( $project[ 'id' ] );
 
         $segmentDao = new Segments_SegmentDao;
 
         $source_segments = null;
         $target_segments = null;
 
+        $previous_project_number = null;
+
         switch ( $status_analysis ) {
             case ConstantsJobAnalysis::ALIGN_PHASE_0:
-                $phase = 0;
+                $phase  = 0;
+                //$previous_project_number = \AMQHandler::getQueueLength( 'aligner_align_job' );
+                $jobs_in_queue = $this->getJobsInQueue();
+                $previous_project_number = $this->getNumbersOfPreviousQueues($this->job->id, $jobs_in_queue);
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_1:
                 $phase = 1;
@@ -113,7 +119,7 @@ class JobController extends AlignerController {
                 break;
         }
 
-        if(in_array($phase, [2,3,4,5,6,7])){
+        if ( in_array( $phase, [ 2, 3, 4, 5, 6, 7 ] ) ) {
             $source_segments = $segmentDao->countByJobId( $id_job, 'source', 3600 );
             $source_segments = ( !empty( $source_segments ) ) ? $source_segments[ 0 ][ 'amount' ] : null;
             $target_segments = $segmentDao->countByJobId( $id_job, 'target', 3600 );
@@ -122,12 +128,24 @@ class JobController extends AlignerController {
 
 
         return $this->response->json( [
-                        'phase'           => $phase,
-                        'phase_name'      => $status_analysis,
-                        'progress'        => (int)$progress,
-                        'source_segments' => $source_segments,
-                        'target_segments' => $target_segments
+                        'previous_project_number' => (is_numeric($previous_project_number))?$previous_project_number-1:$previous_project_number,
+                        'phase'                   => $phase,
+                        'phase_name'              => $status_analysis,
+                        'progress'                => (int)$progress,
+                        'source_segments'         => $source_segments,
+                        'target_segments'         => $target_segments
                 ]
         );
     }
+
+    protected function getNumbersOfPreviousQueues($job_id, $jobs_in_queue){
+    $previous_queues = 0;
+    foreach($jobs_in_queue as $job_in_queue){
+        $previous_queues++;
+        if($job_in_queue == $job_id){
+            break;
+        }
+    }
+    return $previous_queues;
+}
 }

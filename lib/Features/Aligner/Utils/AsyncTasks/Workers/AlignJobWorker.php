@@ -62,6 +62,7 @@ class AlignJobWorker extends AbstractWorker {
     }
 
     protected function _Align( \TaskRunner\Commons\QueueElement $queueElement ) {
+
         $attributes = json_decode( $queueElement->params );
 
         $this->id_job = $attributes->id_job;
@@ -70,6 +71,8 @@ class AlignJobWorker extends AbstractWorker {
 
         $source_file  = $attributes->source_file;
         $target_file  = $attributes->target_file;
+
+        $this->popJobInQueue($this->id_job);
 
         Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_1);
 
