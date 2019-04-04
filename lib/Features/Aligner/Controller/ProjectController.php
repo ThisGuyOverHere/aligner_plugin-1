@@ -149,7 +149,7 @@ class ProjectController extends AlignerController {
                 'upload_session' => $_COOKIE['upload_session']
         ];
 
-        $this->pushJobInQueue($this->job->id);
+        $this->pushJobInQueue($this->job->id, 'ALIGNER_SEGMENT_CREATE');
 
         try {
             \WorkerClient::init( new \AMQHandler() );

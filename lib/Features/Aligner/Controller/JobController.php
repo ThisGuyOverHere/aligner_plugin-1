@@ -9,6 +9,7 @@
 namespace Features\Aligner\Controller;
 
 use Exceptions\ValidationError;
+use Features\Aligner;
 use Features\Aligner\Controller\Validators\JobPasswordValidator;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
@@ -73,6 +74,17 @@ class JobController extends AlignerController {
         $this->setRedisClient( ( new \RedisHandler() )->getConnection() );
         $progress = $this->getProgress( $project[ 'id' ] );
 
+        $segment_count = $this->getSegmentCount($project['id']);
+        $config = Aligner::getConfig();
+
+        if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
+            $queue = 'align_job_small_list';
+        } else if ($segment_count < $config['HIGH_LIMIT_QUEUE_SIZE']){
+            $queue = 'align_job_medium_list';
+        } else {
+            $queue = 'align_job_big_list';
+        }
+
         $segmentDao = new Segments_SegmentDao;
 
         $source_segments = null;
@@ -84,10 +96,10 @@ class JobController extends AlignerController {
             case ConstantsJobAnalysis::ALIGN_PHASE_0:
                 $phase  = 0;
                 //$previous_project_number = \AMQHandler::getQueueLength( 'aligner_align_job' );
-                $jobs_in_queue = $this->getJobsInQueue();
-                $previous_project_number = $this->getNumbersOfPreviousQueues($this->job->id, $jobs_in_queue);
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_1:
+                $jobs_in_queue = $this->getJobsInQueue($queue);
+                $previous_project_number = $this->getNumbersOfPreviousQueues($this->job->id, $jobs_in_queue);
                 $phase = 1;
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_2:
@@ -133,7 +145,7 @@ class JobController extends AlignerController {
                         'phase_name'              => $status_analysis,
                         'progress'                => (int)$progress,
                         'source_segments'         => $source_segments,
-                        'target_segments'         => $target_segments
+                        'target_segments'         => $target_segments,
                 ]
         );
     }
