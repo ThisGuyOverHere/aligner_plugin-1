@@ -74,7 +74,7 @@ class JobController extends AlignerController {
         $this->setRedisClient( ( new \RedisHandler() )->getConnection() );
         $progress = $this->getProgress( $project[ 'id' ] );
 
-        $segment_count = $this->getSegmentCount($project['id']);
+        $segment_count = $this->getSegmentCount($this->project->id);
         $config = Aligner::getConfig();
 
         if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
@@ -87,6 +87,8 @@ class JobController extends AlignerController {
 
         $segmentDao = new Segments_SegmentDao;
 
+        $config = Aligner::getConfig();
+
         $source_segments = null;
         $target_segments = null;
 
@@ -98,8 +100,24 @@ class JobController extends AlignerController {
                 //$previous_project_number = \AMQHandler::getQueueLength( 'aligner_align_job' );
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_1:
-                $jobs_in_queue = $this->getJobsInQueue($queue);
-                $previous_project_number = $this->getNumbersOfPreviousQueues($this->job->id, $jobs_in_queue);
+                $projects_in_queue = $this->getProjectsInQueue($queue);
+                $previous_project_number = $this->getNumbersOfPreviousQueues($this->job->id, $projects_in_queue);
+                $minutes_estimate = 0;
+                foreach ($projects_in_queue as $project){
+                    if($project != $this->project->id){
+                        //Minutes passed indicates the percentage of minutes passed in the elaboration of the previous job
+                        $minutes_passed = floor(
+                            ($this->getSegmentCount($project)/$config['SEGMENTS_PER_MINUTE']) * ($this->getProgress($project) * 0.01)
+                        );
+                        $minutes_estimate += ceil(
+                            (
+                                ($this->getSegmentCount($project)/$config['SEGMENTS_PER_MINUTE']) -$minutes_passed
+                            )
+                        );
+                    } else {
+                        break;
+                    }
+                }
                 $phase = 1;
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_2:
@@ -146,6 +164,7 @@ class JobController extends AlignerController {
                         'progress'                => (int)$progress,
                         'source_segments'         => $source_segments,
                         'target_segments'         => $target_segments,
+                        'minutes_estimate'        => $minutes_estimate
                 ]
         );
     }

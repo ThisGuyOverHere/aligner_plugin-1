@@ -164,12 +164,12 @@ class AlignJobWorker extends AbstractWorker {
 
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_7);
             $this->updateProgress($this->project->id, 100);
-            $this->popJobInQueue($this->id_job, $queue);
+            $this->popProjectInQueue($this->project->id, $queue);
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_9);
             $this->updateProgress($this->project->id, 0);
-            $this->popJobInQueue($this->id_job, $queue);
+            $this->popProjectInQueue($this->project->id, $queue);
         }
 
     }

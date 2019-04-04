@@ -28,16 +28,16 @@ trait ProjectProgress {
         $this->redisClient = $redisClient;
     }
 
-    public function getJobsInQueue($queue){
+    public function getProjectsInQueue($queue){
         return $this->getRedisClient()->lrange($queue, 0, $this->getRedisClient()->llen($queue)-1);
     }
 
-    public function pushJobInQueue($job_id, $queue){
-        $this->getRedisClient()->rpush($queue, $job_id);
+    public function pushProjectInQueue($project_id, $queue){
+        $this->getRedisClient()->rpush($queue, $project_id);
     }
 
-    public function popJobInQueue($job_id, $queue){
-        $this->getRedisClient()->lrem($queue, 0, $job_id);
+    public function popProjectInQueue($project_id, $queue){
+        $this->getRedisClient()->lrem($queue, 0, $project_id);
     }
 
     public function updateProgress($project_id, $progress){

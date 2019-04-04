@@ -67,7 +67,7 @@ class SegmentWorker extends AbstractWorker {
         $this->id_job = $attributes->id_job;
         $this->job    = $attributes->job;
         $this->project = $attributes->project;
-        $this->popJobInQueue($this->id_job, 'ALIGNER_SEGMENT_CREATE');
+        $this->popProjectInQueue($this->id_job, 'ALIGNER_SEGMENT_CREATE');
 
         Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_1);
 
@@ -127,21 +127,21 @@ class SegmentWorker extends AbstractWorker {
 
             if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
                 $attributes->queue = 'align_job_small_list';
-                $this->pushJobInQueue($this->id_job, $attributes->queue);
+                $this->pushProjectInQueue($this->id_job, $attributes->queue);
                 \WorkerClient::init( new \AMQHandler() );
                 \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_SMALL', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
                     'persistent' => \WorkerClient::$_HANDLER->persistent
                 ] );
             } else if ($segment_count < $config['HIGH_LIMIT_QUEUE_SIZE']){
                 $attributes->queue = 'align_job_medium_list';
-                $this->pushJobInQueue($this->id_job, $attributes->queue);
+                $this->pushProjectInQueue($this->id_job, $attributes->queue);
                 \WorkerClient::init( new \AMQHandler() );
                 \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_MEDIUM', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
                     'persistent' => \WorkerClient::$_HANDLER->persistent
                 ] );
             } else {
                 $attributes->queue = 'align_job_big_list';
-                $this->pushJobInQueue($this->id_job, $attributes->queue);
+                $this->pushProjectInQueue($this->id_job, $attributes->queue);
                 \WorkerClient::init( new \AMQHandler() );
                 \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_BIG', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
                     'persistent' => \WorkerClient::$_HANDLER->persistent
