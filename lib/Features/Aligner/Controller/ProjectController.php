@@ -20,8 +20,11 @@ use Features\Aligner\Model\NewDatabase;
 use Features\Aligner\Model\Segments_SegmentDao;
 use CatUtils;
 use Features\Aligner\Utils\AlignUtils;
+use Features\Aligner\Utils\ProjectProgress;
 
 class ProjectController extends AlignerController {
+
+    use ProjectProgress;
 
     protected $postInput;
 
@@ -146,9 +149,11 @@ class ProjectController extends AlignerController {
                 'upload_session' => $_COOKIE['upload_session']
         ];
 
+        $this->pushProjectInQueue($this->project->id, 'ALIGNER_SEGMENT_CREATE');
+
         try {
             \WorkerClient::init( new \AMQHandler() );
-            \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $params ), [
+            \WorkerClient::enqueue( 'ALIGNER_SEGMENT_CREATE', 'Features\Aligner\Utils\AsyncTasks\Workers\SegmentWorker', json_encode( $params ), [
                     'persistent' => \WorkerClient::$_HANDLER->persistent
             ] );
         } catch ( \Exception $e ) {

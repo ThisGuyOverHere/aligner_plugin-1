@@ -9,6 +9,7 @@
 namespace Features\Aligner\Controller;
 
 use Exceptions\ValidationError;
+use Features\Aligner;
 use Features\Aligner\Controller\Validators\JobPasswordValidator;
 use Features\Aligner\Model\Files_FileDao;
 use Features\Aligner\Model\Jobs_JobDao;
@@ -64,24 +65,59 @@ class JobController extends AlignerController {
 
     public function checkProgress() {
 
-        $id_job = $this->job->id;
+
+        $id_job  = $this->job->id;
         $project = Projects_ProjectDao::findById( $this->job->id_project )->toArray();
 
         $status_analysis = ( !empty( $project ) ) ? $project[ 'status_analysis' ] : ConstantsJobAnalysis::ALIGN_PHASE_0;
 
-        $this->setRedisClient((new \RedisHandler())->getConnection());
-        $progress = $this->getProgress($project['id']);
+        $this->setRedisClient( ( new \RedisHandler() )->getConnection() );
+        $progress = $this->getProgress( $project[ 'id' ] );
+
+        $segment_count = $this->getSegmentCount($this->project->id);
+        $config = Aligner::getConfig();
+
+        if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
+            $queue = 'align_job_small_list';
+        } else if ($segment_count < $config['HIGH_LIMIT_QUEUE_SIZE']){
+            $queue = 'align_job_medium_list';
+        } else {
+            $queue = 'align_job_big_list';
+        }
 
         $segmentDao = new Segments_SegmentDao;
+
+        $config = Aligner::getConfig();
 
         $source_segments = null;
         $target_segments = null;
 
+        $previous_project_number = null;
+
         switch ( $status_analysis ) {
             case ConstantsJobAnalysis::ALIGN_PHASE_0:
-                $phase = 0;
+                $phase  = 0;
+                //$previous_project_number = \AMQHandler::getQueueLength( 'aligner_align_job' );
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_1:
+                $projects_in_queue = $this->getProjectsInQueue($queue);
+                $previous_project_number = $this->getNumbersOfPreviousQueues($this->job->id, $projects_in_queue);
+                $minutes_estimate = 0;
+                foreach ($projects_in_queue as $project){
+                    if($project != $this->project->id){
+                        //Minutes passed indicates the percentage of minutes passed in the elaboration of the previous job
+                        $minutes_passed = floor(
+                            ($this->getSegmentCount($project)/$config['SEGMENTS_PER_MINUTE']) * ($this->getProgress($project) * 0.01)
+                        );
+                        $minutes_estimate += ceil(
+                            (
+                                ($this->getSegmentCount($project)/$config['SEGMENTS_PER_MINUTE']) -$minutes_passed
+                            )
+                        );
+                    } else {
+                        break;
+                    }
+                }
                 $phase = 1;
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_2:
@@ -113,7 +149,7 @@ class JobController extends AlignerController {
                 break;
         }
 
-        if(in_array($phase, [2,3,4,5,6,7])){
+        if ( in_array( $phase, [ 2, 3, 4, 5, 6, 7 ] ) ) {
             $source_segments = $segmentDao->countByJobId( $id_job, 'source', 3600 );
             $source_segments = ( !empty( $source_segments ) ) ? $source_segments[ 0 ][ 'amount' ] : null;
             $target_segments = $segmentDao->countByJobId( $id_job, 'target', 3600 );
@@ -122,12 +158,25 @@ class JobController extends AlignerController {
 
 
         return $this->response->json( [
-                        'phase'           => $phase,
-                        'phase_name'      => $status_analysis,
-                        'progress'        => (int)$progress,
-                        'source_segments' => $source_segments,
-                        'target_segments' => $target_segments
+                        'previous_project_number' => (is_numeric($previous_project_number))?$previous_project_number-1:$previous_project_number,
+                        'phase'                   => $phase,
+                        'phase_name'              => $status_analysis,
+                        'progress'                => (int)$progress,
+                        'source_segments'         => $source_segments,
+                        'target_segments'         => $target_segments,
+                        'minutes_estimate'        => $minutes_estimate
                 ]
         );
     }
+
+    protected function getNumbersOfPreviousQueues($job_id, $jobs_in_queue){
+    $previous_queues = 0;
+    foreach($jobs_in_queue as $job_in_queue){
+        $previous_queues++;
+        if($job_in_queue == $job_id){
+            break;
+        }
+    }
+    return $previous_queues;
+}
 }

@@ -62,11 +62,19 @@ class AlignJobWorker extends AbstractWorker {
     }
 
     protected function _Align( \TaskRunner\Commons\QueueElement $queueElement ) {
+
         $attributes = json_decode( $queueElement->params );
 
         $this->id_job = $attributes->id_job;
         $this->job    = $attributes->job;
         $this->project = $attributes->project;
+
+        $source_file  = $attributes->source_file;
+        $target_file  = $attributes->target_file;
+
+        $queue = $attributes->queue;
+
+        \Log::doLog('/-------/ This job is in the following queue: '.$queue.' /--------/');
 
         Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_1);
 
@@ -77,52 +85,22 @@ class AlignJobWorker extends AbstractWorker {
         $source_file  = Files_FileDao::getByJobId( $this->id_job, "source" );
         $target_file  = Files_FileDao::getByJobId( $this->id_job, "target" );*/
 
-        $source_file  = $attributes->source_file;
-        $target_file  = $attributes->target_file;
-
         $source_lang = $this->job->source;
         $target_lang = $this->job->target;
 
-        $fileStorage = new \FilesStorage();
-
         try {
-
-            $fileStorage->moveFromCacheToFileDir(
-                    $source_file->sha1_original_file,
-                    $this->job->source,
-                    $source_file->id,
-                    $source_file->filename
-            );
-
-            $fileStorage->moveFromCacheToFileDir(
-                    $target_file->sha1_original_file,
-                    $this->job->target,
-                    $target_file->id,
-                    $target_file->filename
-            );
-
-            $source_segments = $this->_file2segments($source_file, $source_lang);
-            $target_segments = $this->_file2segments($target_file, $target_lang);
-
-            $this->_storeSegments($source_segments, "source");
-            $this->_storeSegments($target_segments, "target");
-
-
-            $this->updateProgress($this->project->id, 5);
 
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_2);
 
             $segmentsMatchDao = new Segments_SegmentMatchDao;
-            $segmentsMatchDao->deleteByJobId( $this->id_job );
+            //$segmentsMatchDao->deleteByJobId( $this->id_job );
 
 
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_3);
             $this->updateProgress($this->project->id, 10);
 
-            NewDatabase::obtain()->begin();
-            $source_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "source" );
-            $target_segments = Segments_SegmentDao::getDataForAlignment( $this->id_job, "target" );
-            NewDatabase::obtain()->commit();
+            $source_segments = $this->_getSegmentsFromJson($source_file->sha1_original_file, 'source', $source_file->id, $this->project->name);
+            $target_segments = $this->_getSegmentsFromJson($target_file->sha1_original_file, 'target', $target_file->id, $this->project->name);
 
             $alignment_class = new Alignment;
 
@@ -186,110 +164,39 @@ class AlignJobWorker extends AbstractWorker {
 
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_7);
             $this->updateProgress($this->project->id, 100);
+            $this->popProjectInQueue($this->project->id, $queue);
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
             Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_9);
             $this->updateProgress($this->project->id, 0);
+            $this->popProjectInQueue($this->project->id, $queue);
         }
-
-
 
     }
 
-    /**
-     * @param $file
-     * @param $lang
-     * @return array
-     * @throws Exception
-     */
-    protected function _file2segments($file, $lang) {
-        list($date, $sha1) = explode("/", $file->sha1_original_file);
 
-        // Get file content
-        try {
-            $fileStorage = new \FilesStorage;
-            $xliff_file = $fileStorage->getXliffFromCache($sha1, $lang);
-            \Log::doLog('Found xliff file ['.$xliff_file.']');
-            $xliff_content = file_get_contents($xliff_file);
-        } catch ( \Exception $e ) {
-            throw new \Exception( "File xliff not found", $e->getCode(), $e );
+
+    protected function _getSegmentsFromJson($dateHashPath, $type, $idFile, $newFileName){
+        $fileStorage = new \FilesStorage();
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, $fileStorage->composeCachePath( $hash ) );
+
+        //destination dir
+        $fileDir  = \INIT::$FILES_REPOSITORY. DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR .
+            $idFile . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . $cacheTree . "|" . $type ;
+
+        $json_path = $fileDir . DIRECTORY_SEPARATOR . $newFileName . '.json';
+
+        $segments = file_get_contents($json_path);
+
+        if($segments === false){
+            throw new \Exception("Error: no json file found");
         }
 
-        // Parse xliff
-        try {
-            $parser = new \Xliff_Parser;
-            $xliff = $parser->Xliff2Array($xliff_content);
-            \Log::doLog('Parsed xliff file ['.$xliff_file.']');
-        } catch ( \Exception $e ) {
-            throw new \Exception( "Error during xliff parsing", $e->getCode(), $e );
-        }
+        $segments = json_decode($segments, true);
 
-        // Checking that parsing went well
-        if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
-            throw new \Exception( "Parsing errors: ".json_encode($xliff[ 'parser-errors' ]), -4 );
-        }
-
-        // Creating the Segments
-        $segments = array();
-        $total_words = 0;
-
-        foreach ( $xliff[ 'files' ] as $xliff_file ) {
-
-            // An xliff can contains multiple files (docx has style, settings, ...) but only some with useful trans-units
-            if ( !array_key_exists( 'trans-units', $xliff_file ) ) {
-                continue;
-            }
-
-            foreach ($xliff_file[ 'trans-units' ] as $trans_unit) {
-
-                // Extract only raw-content
-                $unit_items = array_map(function ($item) {
-                    return $item['raw-content'];
-                }, $trans_unit[ 'seg-source' ]);
-
-                // Build an object with raw-content and clean-content
-                $unit_segments = [];
-                foreach ($unit_items as $item) {
-                    $unit_segment = [
-                        'content_raw' => $item,
-                        'content_clean' => AlignUtils::_cleanSegment($item, $lang),
-                        'raw_word_count' => \CatUtils::segment_raw_word_count($item, $lang)
-                    ];
-
-                    if ($unit_segment['raw_word_count'] > 0) {
-                        $total_words += $unit_segment['raw_word_count'];
-                        $unit_segments[] = $unit_segment;
-                    }
-                }
-
-                // Append to existing Segments
-                $segments = array_merge($segments, $unit_segments);
-            }
-        }
-
-        $config = Aligner::getConfig();
-
-        if ($total_words > $config["MAX_WORDS_PER_FILE"]){
-            Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_8);
-            throw new ValidationError("File exceeded the word limit, job creation canceled");
-        }
-        
         return $segments;
-    }
-
-
-    private function _storeSegments($segments, $type){
-
-        $sequenceIds = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $segments ) );
-        foreach($sequenceIds as $key => $sequenceId){
-            $segments[$key]['id'] = $sequenceId;
-            $segments[$key]['type'] = $type;
-            $segments[$key]['id_job'] = $this->job->id;
-            $segments[$key]['content_hash'] = md5($segments[$key]['content_raw']);
-        }
-
-        $segmentsDao = new Segments_SegmentDao;
-        $segmentsDao->createList( $segments );
 
     }
 
