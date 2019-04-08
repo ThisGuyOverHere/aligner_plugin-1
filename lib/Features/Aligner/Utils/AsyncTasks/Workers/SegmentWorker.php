@@ -67,16 +67,11 @@ class SegmentWorker extends AbstractWorker {
         $this->id_job = $attributes->id_job;
         $this->job    = $attributes->job;
         $this->project = $attributes->project;
-        $this->popProjectInQueue($this->id_job, 'ALIGNER_SEGMENT_CREATE');
-
-        Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_1);
+        $this->popProjectInQueue($this->project->id, 'ALIGNER_SEGMENT_CREATE');
 
 
         \Log::doLog('STARTED ALIGN FOR JOB: '.$this->id_job);
 
-        /*$job          = Jobs_JobDao::getById( $this->id_job )[ 0 ];
-        $source_file  = Files_FileDao::getByJobId( $this->id_job, "source" );
-        $target_file  = Files_FileDao::getByJobId( $this->id_job, "target" );*/
 
         $source_file  = $attributes->source_file;
         $target_file  = $attributes->target_file;
@@ -107,7 +102,7 @@ class SegmentWorker extends AbstractWorker {
 
             $segment_count = count($source_segments) + count($target_segments);
 
-            $this->updateSegmentCount($this->project->id, $segment_count);
+            $this->updateSegmentsCount($this->project->id, $segment_count);
 
             $source_segments = $this->_storeSegments($source_segments, "source");
             $target_segments = $this->_storeSegments($target_segments, "target");
@@ -127,26 +122,13 @@ class SegmentWorker extends AbstractWorker {
 
             if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
                 $attributes->queue = 'align_job_small_list';
-                $this->pushProjectInQueue($this->id_job, $attributes->queue);
-                \WorkerClient::init( new \AMQHandler() );
-                \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_SMALL', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
-                    'persistent' => \WorkerClient::$_HANDLER->persistent
-                ] );
             } else if ($segment_count < $config['HIGH_LIMIT_QUEUE_SIZE']){
                 $attributes->queue = 'align_job_medium_list';
-                $this->pushProjectInQueue($this->id_job, $attributes->queue);
-                \WorkerClient::init( new \AMQHandler() );
-                \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_MEDIUM', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
-                    'persistent' => \WorkerClient::$_HANDLER->persistent
-                ] );
             } else {
                 $attributes->queue = 'align_job_big_list';
-                $this->pushProjectInQueue($this->id_job, $attributes->queue);
-                \WorkerClient::init( new \AMQHandler() );
-                \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_BIG', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
-                    'persistent' => \WorkerClient::$_HANDLER->persistent
-                ] );
             }
+
+            $this->sendInQueue($attributes);
 
         } catch ( \Exception $e ) {
 
@@ -293,6 +275,14 @@ class SegmentWorker extends AbstractWorker {
 
         return;
 
+    }
+
+    private function sendInQueue($attributes){
+        $this->pushProjectInQueue($this->project->id, $attributes->queue);
+        \WorkerClient::init( new \AMQHandler() );
+        \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_BIG', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
+                'persistent' => \WorkerClient::$_HANDLER->persistent
+        ] );
     }
 
 }
