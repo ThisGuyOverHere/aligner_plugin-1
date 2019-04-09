@@ -83,20 +83,6 @@ class SegmentWorker extends AbstractWorker {
 
         try {
 
-            $fileStorage->moveFromCacheToFileDir(
-                $source_file->sha1_original_file,
-                $this->job->source,
-                $source_file->id,
-                $source_file->filename
-            );
-
-            $fileStorage->moveFromCacheToFileDir(
-                $target_file->sha1_original_file,
-                $this->job->target,
-                $target_file->id,
-                $target_file->filename
-            );
-
             $source_segments = $this->_file2segments($source_file, $source_lang);
             $target_segments = $this->_file2segments($target_file, $target_lang);
 
@@ -104,11 +90,42 @@ class SegmentWorker extends AbstractWorker {
 
             $this->updateSegmentsCount($this->project->id, $segment_count);
 
+            $config = Aligner::getConfig();
+
+            if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
+                $attributes->queue = 'align_job_small_list';
+                $queue = "ALIGNER_ALIGN_JOB_SMALL";
+            } else if ($segment_count < $config['HIGH_LIMIT_QUEUE_SIZE']){
+                $attributes->queue = 'align_job_medium_list';
+                $queue = "ALIGNER_ALIGN_JOB_MEDIUM";
+            } else {
+                $attributes->queue = 'align_job_big_list';
+                $queue = "ALIGNER_ALIGN_JOB_BIG";
+            }
+
+            $this->pushProjectInQueue($this->project->id, $attributes->queue);
+
             $source_segments = $this->_storeSegments($source_segments, "source");
             $target_segments = $this->_storeSegments($target_segments, "target");
 
+            $fileStorage->moveFromCacheToFileDir(
+                    $source_file->sha1_original_file,
+                    $this->job->source,
+                    $source_file->id,
+                    $source_file->filename
+            );
+
+            $fileStorage->moveFromCacheToFileDir(
+                    $target_file->sha1_original_file,
+                    $this->job->target,
+                    $target_file->id,
+                    $target_file->filename
+            );
+
             $this->_saveSegmentsAsJson($source_file->sha1_original_file, $source_segments, 'source', $source_file->id, $this->project->name);
             $this->_saveSegmentsAsJson($target_file->sha1_original_file, $target_segments, 'target', $target_file->id, $this->project->name);
+
+            $this->sendInQueue($attributes, $queue);
 
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
@@ -116,30 +133,6 @@ class SegmentWorker extends AbstractWorker {
             $this->updateProgress($this->project->id, 0);
         }
 
-        $config = Aligner::getConfig();
-
-        try {
-
-            if($segment_count < $config['LOW_LIMIT_QUEUE_SIZE']){
-                $attributes->queue = 'align_job_small_list';
-            } else if ($segment_count < $config['HIGH_LIMIT_QUEUE_SIZE']){
-                $attributes->queue = 'align_job_medium_list';
-            } else {
-                $attributes->queue = 'align_job_big_list';
-            }
-
-            $this->sendInQueue($attributes);
-
-        } catch ( \Exception $e ) {
-
-            # Handle the error, logging, ...
-            $output = "**** Align Job Enqueue failed. AMQ Connection Error. ****\n\t";
-            $output .= "{$e->getMessage()}";
-            $output .= var_export( $attributes, true );
-            \Log::doLog( $output );
-            throw $e;
-
-        }
 
     }
 
@@ -277,10 +270,9 @@ class SegmentWorker extends AbstractWorker {
 
     }
 
-    private function sendInQueue($attributes){
-        $this->pushProjectInQueue($this->project->id, $attributes->queue);
+    private function sendInQueue($attributes, $queue){
         \WorkerClient::init( new \AMQHandler() );
-        \WorkerClient::enqueue( 'ALIGNER_ALIGN_JOB_BIG', 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
+        \WorkerClient::enqueue( $queue, 'Features\Aligner\Utils\AsyncTasks\Workers\AlignJobWorker', json_encode( $attributes ), [
                 'persistent' => \WorkerClient::$_HANDLER->persistent
         ] );
     }

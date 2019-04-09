@@ -87,8 +87,6 @@ class JobController extends AlignerController {
 
         $segmentDao = new Segments_SegmentDao;
 
-        $config = Aligner::getConfig();
-
         $source_segments = null;
         $target_segments = null;
 
@@ -96,25 +94,29 @@ class JobController extends AlignerController {
 
         switch ( $status_analysis ) {
             case ConstantsJobAnalysis::ALIGN_PHASE_0:
+
                 $phase  = 0;
-                $projects_in_queue = $this->getProjectsInQueue($queue);
-                $previous_project_number = $this->getNumbersOfPreviousQueues($this->project->id, $projects_in_queue);
-                $minutes_estimate = 0;
-                foreach ($projects_in_queue as $project){
-                    if($project != $this->project->id){
-                        //Minutes passed indicates the percentage of minutes passed in the elaboration of the previous job
-                        $minutes_passed = floor(
-                                ($this->getSegmentsCount($project)/$config['SEGMENTS_PER_MINUTE']) * ($this->getProgress($project) * 0.01)
-                        );
-                        $minutes_estimate += ceil(
-                                (
-                                        ($this->getSegmentsCount($project)/$config['SEGMENTS_PER_MINUTE']) -$minutes_passed
-                                )
-                        );
-                    } else {
-                        break;
+                if($segment_count != null){
+                    $projects_in_queue = $this->getProjectsInQueue($queue);
+                    $previous_project_number = $this->getNumbersOfPreviousQueues($this->project->id, $projects_in_queue);
+                    $minutes_estimate = 0;
+                    foreach ($projects_in_queue as $project){
+                        if($project != $this->project->id){
+                            //Minutes passed indicates the percentage of minutes passed in the elaboration of the previous job
+                            $minutes_passed = floor(
+                                    ($this->getSegmentsCount($project)/$config['SEGMENTS_PER_MINUTE']) * ($this->getProgress($project) * 0.01)
+                            );
+                            $minutes_estimate += ceil(
+                                    (
+                                            ($this->getSegmentsCount($project)/$config['SEGMENTS_PER_MINUTE']) -$minutes_passed
+                                    )
+                            );
+                        } else {
+                            break;
+                        }
                     }
                 }
+
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_1:
                 $phase = 1;
