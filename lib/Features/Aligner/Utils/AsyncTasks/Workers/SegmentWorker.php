@@ -70,7 +70,7 @@ class SegmentWorker extends AbstractWorker {
         $this->popProjectInQueue($this->project->id, 'ALIGNER_SEGMENT_CREATE');
 
 
-        \Log::doLog('STARTED ALIGN FOR JOB: '.$this->id_job);
+        \Log::doLog('/-------/ START to extract segments for JOB #'.$this->id_job.' /--------/');
 
 
         $source_file  = $attributes->source_file;
@@ -82,9 +82,13 @@ class SegmentWorker extends AbstractWorker {
         $fileStorage = new \FilesStorage();
 
         try {
-
+            \Log::doLog('/-------/ Convert xliff file to array for source /--------/');
             $source_segments = $this->_file2segments($source_file, $source_lang);
+
+            \Log::doLog('/-------/ Convert xliff file to array for target /--------/');
             $target_segments = $this->_file2segments($target_file, $target_lang);
+
+            \Log::doLog('/-------/ Converted xliff files to array  /--------/');
 
             $segment_count = count($source_segments) + count($target_segments);
 
@@ -133,6 +137,8 @@ class SegmentWorker extends AbstractWorker {
             $this->updateProgress($this->project->id, 0);
         }
 
+        \Log::doLog('/-------/ FINISH to extract segments for JOB #'.$this->id_job.' /--------/');
+
 
     }
 
@@ -170,7 +176,7 @@ class SegmentWorker extends AbstractWorker {
         }
 
         // Creating the Segments
-        $segments = array();
+        $segments = [];
         $total_words = 0;
 
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
@@ -190,16 +196,20 @@ class SegmentWorker extends AbstractWorker {
                 // Build an object with raw-content and clean-content
                 $unit_segments = [];
                 foreach ($unit_items as $item) {
+                    $raw_word_count = \CatUtils::segment_raw_word_count($item, $lang);
+                    if ( $raw_word_count <= 0 ) {
+                        continue;
+                    }
+
+
                     $unit_segment = [
                         'content_raw' => $item,
                         'content_clean' => AlignUtils::_cleanSegment($item, $lang),
-                        'raw_word_count' => \CatUtils::segment_raw_word_count($item, $lang)
+                        'raw_word_count' => $raw_word_count
                     ];
 
-                    if ($unit_segment['raw_word_count'] > 0) {
-                        $total_words += $unit_segment['raw_word_count'];
-                        $unit_segments[] = $unit_segment;
-                    }
+                    $total_words += $unit_segment['raw_word_count'];
+                    $unit_segments[] = $unit_segment;
                 }
 
                 // Append to existing Segments
@@ -213,6 +223,8 @@ class SegmentWorker extends AbstractWorker {
             Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_8);
             throw new ValidationError("File exceeded the word limit, job creation canceled");
         }
+
+
 
         return $segments;
     }
