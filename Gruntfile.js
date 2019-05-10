@@ -11,7 +11,7 @@ module.exports = function (grunt) {
 
 
 	//get version of release
-	const config = ini.parse(fs.readFileSync('../config.ini', 'utf-8'))
+	const config = ini.parse(fs.readFileSync('config.ini', 'utf-8'))
 	console.log(config);
 
 
@@ -24,8 +24,8 @@ module.exports = function (grunt) {
 		watch: {
 			css: {
 				files: [
-					'src/**/*.scss',
-					'assets/**/*.scss'
+					'app/src/**/*.scss',
+					'app/assets/**/*.scss'
 				],
 				tasks: ['sass', 'autoprefixer'],
 			}
@@ -33,7 +33,7 @@ module.exports = function (grunt) {
 		'string-replace': {
 			dist: {
 				files: {
-					'./src/Constants/Env.constants.js': './src/Constants/Env.constants.template.js'
+					'./app/src/Constants/Env.constants.js': './app/src/Constants/Env.constants.template.js'
 				},
 				options: {
 					replacements: [{
@@ -57,10 +57,10 @@ module.exports = function (grunt) {
 					//keepAlive : true, // watchify will exit unless task is kept alive
 				},
 				src: [
-					'src/*.js',
-					'src/**/*.js'
+					'app/src/*.js',
+					'app/src/**/*.js'
 				],
-				dest: `../static/build/js/main.${config.RELEASE_VERSION}.min.js`
+				dest: `./static/build/js/main.${config.RELEASE_VERSION}.min.js`
 			},
 
 			dist: {
@@ -70,16 +70,16 @@ module.exports = function (grunt) {
 					],
 				},
 				src: [
-					'src/*.js',
-					'src/**/*.js'
+					'app/src/*.js',
+					'app/src/**/*.js'
 				],
-				dest: `../static/build/js/main.${config.RELEASE_VERSION}.js`
+				dest: `./static/build/js/main.${config.RELEASE_VERSION}.js`
 			},
 		},
 		uglify: {
 			dist: {
 				files: {
-					[`../static/build/js/main.${config.RELEASE_VERSION}.min.js`]: [`../static/build/js/main.${config.RELEASE_VERSION}.js`]
+					[`./static/build/js/main.${config.RELEASE_VERSION}.min.js`]: [`./static/build/js/main.${config.RELEASE_VERSION}.js`]
 				}
 			}
 		},
@@ -89,7 +89,7 @@ module.exports = function (grunt) {
 			},
 			dist: {
 				files: {
-					[`../static/build/css/style.${config.RELEASE_VERSION}.css`]: [`../static/build/css/style.${config.RELEASE_VERSION}.css`]
+					[`./static/build/css/style.${config.RELEASE_VERSION}.css`]: [`./static/build/css/style.${config.RELEASE_VERSION}.css`]
 				}
 			}
 		},
@@ -97,7 +97,7 @@ module.exports = function (grunt) {
 			images: {
 				files: [
 					// includes files within path and its sub-directories
-					{expand: true, cwd: 'assets', src: 'images/**', dest: '../static/build/'},
+					{expand: true, cwd: 'app/assets', src: 'images/**', dest: './static/build/'},
 				],
 			},
 		},
@@ -105,20 +105,20 @@ module.exports = function (grunt) {
 			options: {
 				sourceMap: false,
 				implementation: sass,
-				includePaths: ['src', 'assets']
+				includePaths: ['app']
 			},
 			dist: {
 				src: [
-					'src/Main.scss'
+					'app/src/Main.scss'
 				],
-				dest: `../static/build/css/style.${config.RELEASE_VERSION}.css`
+				dest: `./static/build/css/style.${config.RELEASE_VERSION}.css`
 			},
 		},
 		clean: {
 			options: {
 				force: true
 			},
-			build: ['../static/build/']
+			build: ['./static/build/']
 		}
 	});
 
