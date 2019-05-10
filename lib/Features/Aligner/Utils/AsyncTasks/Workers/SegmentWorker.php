@@ -23,6 +23,7 @@ use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
+use Features\Aligner\Model\Exceptions\FileWordLimit;
 
 class SegmentWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
@@ -133,7 +134,13 @@ class SegmentWorker extends AbstractWorker {
 
         }catch (\Exception $e){
             \Log::doLog($e->getMessage());
-            Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_9);
+            if($e instanceof FileWordLimit){
+                Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_8);
+            }
+            else {
+                Projects_ProjectDao::updateField($this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_9);
+            }
+
             $this->updateProgress($this->project->id, 0);
         }
 
@@ -220,11 +227,8 @@ class SegmentWorker extends AbstractWorker {
         $config = Aligner::getConfig();
 
         if ($total_words > $config["MAX_WORDS_PER_FILE"]){
-            Projects_ProjectDao::updateField( $this->project, 'status_analysis', ConstantsJobAnalysis::ALIGN_PHASE_8);
-            throw new ValidationError("File exceeded the word limit, job creation canceled");
+            throw new FileWordLimit("File exceeded the word limit, job creation canceled");
         }
-
-
 
         return $segments;
     }
