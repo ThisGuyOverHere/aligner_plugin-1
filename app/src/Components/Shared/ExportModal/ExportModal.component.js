@@ -46,7 +46,7 @@ class ExportModal extends Component {
 
                         {this.renderComponent()}
 
-                        {(!this.state.sendEmail && !this.state.completed) &&
+                        {(!this.state.sendEmail && !this.state.completed && !this.props.user) &&
                         <div className={"send-email"}>
                             <button
                                 onClick={this.sendEmailHandler}

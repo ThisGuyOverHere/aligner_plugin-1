@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
-import {httpCreateTmx, httpSaveTmx, httpExportTmxCloud, httpExportTmxPrivate} from "../../../../HttpRequests/Tmx.http";
+import {httpCreateTmx, httpExportTmxCloud, httpExportTmxPrivate, httpSaveTmx} from "../../../../HttpRequests/Tmx.http";
 
 class ExportModalLogged extends Component {
 
@@ -52,9 +52,9 @@ class ExportModalLogged extends Component {
 
     render() {
         let exportBtn = ['export-btn', 'ui', 'button'];
-        let newTmxBtn = ['ui', 'button','create'];
-        this.state.exporting ?  exportBtn.push('loading') : null;
-        this.state.tmxCreation ?  newTmxBtn.push('loading') : null;
+        let newTmxBtn = ['ui', 'button', 'create'];
+        this.state.exporting ? exportBtn.push('loading') : null;
+        this.state.tmxCreation ? newTmxBtn.push('loading') : null;
 
         return (
             <div id="logged">
@@ -77,8 +77,8 @@ class ExportModalLogged extends Component {
                 </div>
 
                 {this.state.cloudCheckBox ?
-                    <p> A copy of your TMX will be sent to our collaborative memory to
-                        improve our alignment algorithm.  </p>
+                    <p> A copy of your TMX will be sent to our collaborative memory shared with all MateCat users to
+                        improve our alignment algorithm </p>
                     :
                     <div>
                         <button className={newTmxBtn.join(" ")} onClick={this.createMemory}>Create new Resource</button>
@@ -98,7 +98,9 @@ class ExportModalLogged extends Component {
                                             <button type="submit" className="save ui button">Save</button>
                                         </div>
                                         <div>
-                                            <button type="" className="cancel ui button" onClick={this.reverseAdd}>Cancel</button>
+                                            <button type="" className="cancel ui button"
+                                                    onClick={this.reverseAdd}>Cancel
+                                            </button>
                                         </div>
                                     </div>
                                 </form>
@@ -112,7 +114,9 @@ class ExportModalLogged extends Component {
                     </div>
                 }
 
-                <button className={exportBtn.join(" ")} tabIndex="6" disabled={!(this.state.tmxList.length > 0) && !this.state.cloudCheckBox} type="" onClick={this.exportTmx}>
+                <button className={exportBtn.join(" ")} tabIndex="6"
+                        disabled={!(this.state.tmxList.length > 0) && !this.state.cloudCheckBox} type=""
+                        onClick={this.exportTmx}>
                     Download
                 </button>
             </div>
@@ -139,7 +143,7 @@ class ExportModalLogged extends Component {
                 <div className="radio-container">
                     <input type="radio" className="hidden" name="memory"
                            checked={element.key === this.state.selected.key}
-                           onChange={ () => this.handleCheckRadio(index)}
+                           onChange={() => this.handleCheckRadio(index)}
                            value={index} tabIndex={index}/>
                     <label onClick={() => this.handleCheckRadio(index)} htmlFor="memory"><span></span></label>
                 </div>
@@ -154,12 +158,12 @@ class ExportModalLogged extends Component {
         return memories;
     };
     handleCheckRadio = (index) => {
-        if(this.state.newTmx){
-           this.reverseAdd();
+        if (this.state.newTmx) {
+            this.reverseAdd();
             this.setState({
                 selected: this.state.tmxList[index]
             });
-        }else{
+        } else {
             this.setState({
                 selected: this.state.tmxList[index]
             });
@@ -221,7 +225,7 @@ class ExportModalLogged extends Component {
         this.setState({
             exporting: true
         });
-        if(this.state.cloudCheckBox){
+        if (this.state.cloudCheckBox) {
             httpExportTmxCloud().then(response => {
                 this.setState({
                     exporting: false
