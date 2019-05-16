@@ -1,10 +1,10 @@
 import React from 'react';
 
-const AnalyseError = () => (
+const AnalyseError = (props) => (
    <div id={"job-error"}>
        <img className={"logo"} src={"/public/img/logoblack.png"}/>
        <div className={"title"}>
-           <h1> Sorry, the analysing phase failed. </h1>
+           <h2> {props.message} </h2>
        </div>
        <img className={"image-not-found"} src={"/public/img/jobnotfound.png"}/>
        <div className="suggestions">

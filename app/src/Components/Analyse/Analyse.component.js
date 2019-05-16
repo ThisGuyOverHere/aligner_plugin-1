@@ -36,7 +36,8 @@ class AnalyseComponent extends Component {
             completed: false,
             redirect: false,
             analyseError: false,
-            minutes: null
+            analyseErrorMessage: null,
+            minutes: null,
         };
     };
 
@@ -95,7 +96,7 @@ class AnalyseComponent extends Component {
                         </div>
                     </div>
                 :
-                <AnalyseError/>
+                <AnalyseError message={this.state.analyseErrorMessage} />
         );
     }
 
@@ -129,6 +130,9 @@ class AnalyseComponent extends Component {
                 }
             ).catch(
             error => {
+                if(error.response.data.errors[0]){
+                    this.state.analyseErrorMessage = error.response.data.errors[0].message;
+                }
                 this.setState( {
                     analyseError: true,
                 } );

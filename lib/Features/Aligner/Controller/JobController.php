@@ -140,7 +140,7 @@ class JobController extends AlignerController {
                 $phase = 7;
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_8:
-                throw new ValidationError( "Max words limit exceeded" );
+                throw new ValidationError( "Max words limit exceeded, please send us the files via email" );
                 break;
             case ConstantsJobAnalysis::ALIGN_PHASE_9:
                 throw new ValidationError( "Error during analysis, please retry" );
