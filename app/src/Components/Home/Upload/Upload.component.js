@@ -29,14 +29,16 @@ class UploadComponent extends Component {
                 start: false,
                 status: 'start',
                 name: null,
-                size: 0
+                size: 0,
+                disabled: false
             },
             uploadTarget: {
                 progress: 0,
                 start: false,
                 status: 'start',
                 name: null,
-                size: 0
+                size: 0,
+                disabled: false
             },
             inAlign: false,
             sourceLang: 'en-US',
@@ -128,7 +130,8 @@ class UploadComponent extends Component {
                         status: 'finish',
                         progress: 0,
                         name: response.data[0].name,
-                        size: Math.floor((files[0].size) / 1000)
+                        size: Math.floor((files[0].size) / 1000),
+                        disabled: true
                     },
                 });
             }
@@ -180,6 +183,7 @@ class UploadComponent extends Component {
                         progress: 0,
                         name: response.data[0].name,
                         size: Math.floor((files[0].size) / 1000),
+                        disabled: true
                     },
                 });
             }
@@ -234,6 +238,37 @@ class UploadComponent extends Component {
         });
     };
 
+    onDeleteFile = (type) => {
+        switch (type) {
+            case 'source':
+                this.setState({
+                    uploadSource: {
+                        progress: 0,
+                        start: false,
+                        status: 'start',
+                        name: null,
+                        size: 0,
+                        disabled: false,
+                    },
+                });
+                break;
+            case 'target':
+                this.setState({
+                    uploadTarget: {
+                        progress: 0,
+                        start: false,
+                        status: 'start',
+                        name: null,
+                        size: 0,
+                        disabled: false,
+                    },
+                });
+                break;
+            default:
+                break;
+        }
+    };
+
     renderHtmlUpload = (type, status, data) => {
         switch (status) {
             case 'start':
@@ -258,7 +293,7 @@ class UploadComponent extends Component {
                     <i id="file-icon" aria-hidden='true' className='file icon'/>
                     <span className="fileInfo">{data.filename}</span>
                     <span id="fileSize"> {data.filesize} kb </span>
-                    <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
+                    <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon' onClick={() => this.onDeleteFile(type)}/>
                 </p>;
 
             case 'error':
@@ -321,7 +356,7 @@ class UploadComponent extends Component {
                             </div>
                             <div className="">
                                 <div className={classes.source.join(' ')}>
-                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropSource}>
+                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropSource} disabled={this.state.uploadSource.disabled}>
                                         {
                                             this.renderHtmlUpload(
                                                 "source",
@@ -348,7 +383,7 @@ class UploadComponent extends Component {
 
                             <div className="">
                                 <div className={classes.target.join(' ')}>
-                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropTarget}>
+                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropTarget} disabled={this.state.uploadTarget.disabled}>
                                         {
                                             this.renderHtmlUpload(
                                                 "target",
