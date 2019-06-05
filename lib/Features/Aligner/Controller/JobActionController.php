@@ -253,7 +253,7 @@ class JobActionController extends AlignerController {
 
                 $this->pushOperation( [
                     'type'      => 'source',
-                    'action'    => 'create',
+                    'action'    => ($source_end !== null) ? 'create': 'push',
                     'rif_order' => $source_end,
                     'data'      => $sourceSegment
                 ] );
@@ -271,7 +271,7 @@ class JobActionController extends AlignerController {
 
                 $this->pushOperation( [
                     'type'      => 'target',
-                    'action'    => 'create',
+                    'action'    => ($target_end !== null) ? 'create' : 'push',
                     'rif_order' => $target_end,
                     'data'      => $targetSegment
                 ] );
