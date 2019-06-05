@@ -21,7 +21,7 @@ class SplitAlternative extends Component {
 			segmentContent: this.props.segment.content_clean,
 			calculatedToSplit: [[this.props.segment.content_clean]],
 			clearIndexes: [],
-			segmentIndexesMap: this.getClearIndexesMatch()
+			/*segmentIndexesMap: this.getClearIndexesMatch()*/
 		};
 	}
 
@@ -82,7 +82,9 @@ class SplitAlternative extends Component {
 		let newCalculatedToSplit = calculatedToSplit;
 		let splitAtChar = window.getSelection().focusOffset;
 		const targetSentences = calculatedToSplit[clickedSegment][0];
-		console.log(splitAtChar)
+		console.log("newCalculatedToSplit : ", newCalculatedToSplit);
+		console.log("splitAtChar : ", splitAtChar);
+		console.log("targetSentences : ", targetSentences);
 
 		if ((splitAtChar !== 0 && (splitAtChar !== targetSentences.length)) && targetSentences.length > 1) {
 			// properly split clicked string in two items
@@ -108,7 +110,7 @@ class SplitAlternative extends Component {
 	};
 
 	/**
-	 * this. method take in separatori index and reverse split's effects.
+	 * this. method take in separator index and reverse split's effects.
 	 * @param clickedSeparator
 	 */
 	onReverseSplit = (clickedSeparator) => {
@@ -174,7 +176,7 @@ class SplitAlternative extends Component {
 				}
 			});
 			content_clean.split('').map((e,i)=>{
-				console.log(e,this.props.segment.content_raw[cleanIndexMatch[i]]);
+				//console.log(e,this.props.segment.content_raw[cleanIndexMatch[i]]);
 				if(e !== this.props.segment.content_raw[cleanIndexMatch[i]]) console.log('error', i);
 			});
 			return cleanIndexMatch
@@ -188,14 +190,15 @@ class SplitAlternative extends Component {
 	};
 
 	onSave = async () => {
-		let positions = [];
-		if (this.state.segmentIndexesMap) {
+		/*let positions = [];*/
+		/*if (this.state.segmentIndexesMap) {
 			this.state.clearIndexes.map(item => {
 				positions.push(this.state.segmentIndexesMap[item] -1);
 			});
 		} else {
 			positions = this.state.clearIndexes;
-		}
+		}*/
+		let positions = this.state.clearIndexes;
 
 		const data = {
 			type: this.props.segment.type,
@@ -203,8 +206,8 @@ class SplitAlternative extends Component {
 			inverseOrder: this.props.inverseSegmentOrder,
 			positions: positions
 		};
-		console.log(data)
-		console.log(this.props.segment.content_raw.substr(0,positions[0]))
+		console.log("data to send : ", data);
+		/*console.log(this.props.segment.content_raw.substr(0,positions[0]))
 		ReactGA.event({
 			category: 'Interactions',
 			action: this.props.jobConf.id,
@@ -213,7 +216,7 @@ class SplitAlternative extends Component {
 		ProjectActions.splitSegment(this.props.jobConf.id, this.props.jobConf.password, data);
 		setTimeout(() => {
 			ProjectActions.openSegmentToSplit(false);
-		}, 0)
+		}, 0)*/
 	}
 }
 
