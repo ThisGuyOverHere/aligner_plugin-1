@@ -222,8 +222,17 @@ class Alignment {
         // Indexes array are same size
         $commonSegments = [];
 
-        foreach ($sourceIndexes as $key => $value) {
-            $commonSegments[] = [$value, $targetIndexes[$key]];  // Build pairs with source,target index of exact matches
+        $lastTargetIndex = -1;
+        foreach ($sourceIndexes as $si) {
+            foreach ($targetIndexes as $ti) {
+                // Matches could be in different order, so we need to search the real match index
+                // We cannot shuffle segments, so we check only for next indexes
+                if ($source[$si] == $target[$ti] && $ti > $lastTargetIndex) {
+                    $lastTargetIndex = $ti;
+                    $commonSegments[] = [$si, $ti];  // Build pairs with source,target index of exact matches
+                    break;
+                }
+            }
         }
 
         return $commonSegments;
