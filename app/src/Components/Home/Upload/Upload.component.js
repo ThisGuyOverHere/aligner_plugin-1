@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {Dropdown} from 'semantic-ui-react'
 import Dropzone from 'react-dropzone'
-import env from '../../../Constants/Env.constants'
 import {httpUpload} from '../../../HttpRequests/Upload.http';
 import {httpConversion, httpCreateProject} from "../../../HttpRequests/Alignment.http";
 import {Redirect} from "react-router"
@@ -14,10 +13,10 @@ class UploadComponent extends Component {
     constructor() {
         super();
         let languages = [];
-        env.languages.map(e => {
+        window.configs.languages.map(e => {
             languages.push({
                 key: e.code,
-                text: e.value,
+                text: e.name,
                 value: e.code
             })
         });
@@ -30,46 +29,69 @@ class UploadComponent extends Component {
                 start: false,
                 status: 'start',
                 name: null,
-                size: 0
+                size: 0,
+                disabled: false
             },
             uploadTarget: {
                 progress: 0,
                 start: false,
                 status: 'start',
                 name: null,
-                size: 0
+                size: 0,
+                disabled: false
             },
+            inAlign: false,
             sourceLang: 'en-US',
             targetLang: 'it-IT',
-            formatsModalOpen: false
+            formatsModalOpen: false,
+            creationError: {
+                error: false,
+                message: null
+            }
         }
     }
 
 
     onSourceLanguageChange = (e, value) => {
+        if (this.state.uploadSource.name) {
+            httpConversion({
+                file_name: this.state.uploadSource.name,
+                source_lang: value.value,
+                target_lang: this.state.targetLang,
+            }).catch(error => {
+                this.setState({
+                    uploadSource: {
+                        progress: 0,
+                        status: 'error'
+                    }
+                });
+                __insp.push(['tagSession', {error: "file_conversion"}]);
+            });
+        }
         this.setState({
             sourceLang: value.value
         });
-        if(this.state.uploadSource.name){
-            httpConversion({
-                file_name: this.state.uploadSource.name,
-                source_lang: this.state.targetLang,
-                target_lang: this.state.sourceLang
-            });
-        }
     };
 
     onTargetLanguageChange = (e, value) => {
+        if (this.state.uploadTarget.name) {
+            httpConversion({
+                file_name: this.state.uploadSource.name,
+                source_lang: this.state.sourceLang,
+                target_lang: value.value
+            }).catch(error => {
+                this.setState({
+                    uploadSource: {
+                        progress: 0,
+                        status: 'error'
+                    }
+                });
+                __insp.push(['tagSession', {error: "file_conversion"}]);
+            });
+        }
         this.setState({
             targetLang: value.value
         });
-        if(this.state.uploadTarget.name){
-            httpConversion({
-                file_name: this.state.uploadTarget.name,
-                source_lang: this.state.targetLang,
-                target_lang: this.state.sourceLang
-            });
-        }
     };
 
     ProjectNameChange = (event) => {
@@ -85,7 +107,7 @@ class UploadComponent extends Component {
                     status: 'progress',
                     size: Math.floor((progressEvent.total) / 1000),
                     name: files[0].name
-                }
+                },
             });
         };
         httpUpload(files[0], onProgress).then(response => {
@@ -94,15 +116,23 @@ class UploadComponent extends Component {
                     file_name: response.data[0].name,
                     source_lang: this.state.sourceLang,
                     target_lang: this.state.targetLang
+                }).catch(error => {
+                    this.setState({
+                        uploadSource: {
+                            progress: 0,
+                            status: 'error'
+                        }
+                    });
+                    __insp.push(['tagSession', {error: "file_conversion"}]);
                 });
                 this.setState({
                     uploadSource: {
                         status: 'finish',
                         progress: 0,
                         name: response.data[0].name,
-                        size: Math.floor((files[0].size) / 1000)
-                    }
-
+                        size: Math.floor((files[0].size) / 1000),
+                        disabled: true
+                    },
                 });
             }
         }, (error) => {
@@ -112,6 +142,7 @@ class UploadComponent extends Component {
                     status: 'error'
                 }
             });
+            __insp.push(['tagSession', {error: "file_upload"}]);
         });
 
 
@@ -127,16 +158,23 @@ class UploadComponent extends Component {
                     status: 'progress',
                     size: Math.floor((progressEvent.total) / 1000),
                     name: files[0].name
-                }
+                },
             })
         };
         httpUpload(files[0], onProgress).then(response => {
-
             if (!response.errors) {
                 httpConversion({
                     file_name: response.data[0].name,
                     source_lang: this.state.targetLang,
                     target_lang: this.state.sourceLang
+                }).catch(error => {
+                    this.setState({
+                        uploadTarget: {
+                            progress: 0,
+                            status: 'error'
+                        }
+                    });
+                    __insp.push(['tagSession', {error: "file_conversion"}]);
                 });
                 this.setState({
                     uploadTarget: {
@@ -145,8 +183,8 @@ class UploadComponent extends Component {
                         progress: 0,
                         name: response.data[0].name,
                         size: Math.floor((files[0].size) / 1000),
+                        disabled: true
                     },
-
                 });
             }
         }, (error) => {
@@ -156,10 +194,14 @@ class UploadComponent extends Component {
                     status: 'error'
                 }
             });
+            __insp.push(['tagSession', {error: "file_upload"}]);
         });
     };
 
     startAlignment = () => {
+        this.setState({
+            inAlign: true
+        });
         httpCreateProject({
             project_name: this.state.pName,
             file_name_source: this.state.uploadSource.name,
@@ -171,16 +213,23 @@ class UploadComponent extends Component {
                 job: {
                     id: response.data.job.id,
                     password: response.data.job.password
-                }
+                },
+                creationError: {
+                    error: false,
+                    message: null
+                },
+                inAlign: false
             });
-
-            /* httpAlignJob(response.data.job.id).then(response => {
-                 if(response.data){
-
-                 }
-                 console.log(response)
-             })*/
-        })
+        }, (error) => {
+            this.setState({
+                creationError: {
+                    error: true,
+                    message: error.response.data.errors ? error.response.data.errors[0].message : 'An error occurred! retry or contact us.'
+                },
+                inAlign: false
+            });
+            __insp.push(['tagSession', {error: "create_project"}]);
+        });
     };
 
     onFormatsModalClick = () => {
@@ -189,10 +238,41 @@ class UploadComponent extends Component {
         });
     };
 
-    renderHtmlUpload = (status, data) => {
+    onDeleteFile = (type) => {
+        switch (type) {
+            case 'source':
+                this.setState({
+                    uploadSource: {
+                        progress: 0,
+                        start: false,
+                        status: 'start',
+                        name: null,
+                        size: 0,
+                        disabled: false,
+                    },
+                });
+                break;
+            case 'target':
+                this.setState({
+                    uploadTarget: {
+                        progress: 0,
+                        start: false,
+                        status: 'start',
+                        name: null,
+                        size: 0,
+                        disabled: false,
+                    },
+                });
+                break;
+            default:
+                break;
+        }
+    };
+
+    renderHtmlUpload = (type, status, data) => {
         switch (status) {
             case 'start':
-                return <p><span>+ Add Target file</span> (or drop it here).</p>;
+                return <p><span>+ Add {type === 'target' ? "Target" : "Source"} file</span> (or drop it here).</p>;
 
             case 'progress':
                 return <div>
@@ -213,7 +293,7 @@ class UploadComponent extends Component {
                     <i id="file-icon" aria-hidden='true' className='file icon'/>
                     <span className="fileInfo">{data.filename}</span>
                     <span id="fileSize"> {data.filesize} kb </span>
-                    <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon'/>
+                    <i id="delete-icon" aria-hidden='true' className='trash alternate outline icon' onClick={() => this.onDeleteFile(type)}/>
                 </p>;
 
             case 'error':
@@ -229,12 +309,17 @@ class UploadComponent extends Component {
     };
 
     render() {
-
+        const {creationError} = this.state;
         const uploadAreaStyle = {};
         let classes = {
             source: ['dropzone'],
             target: ['dropzone']
         };
+        let startButton = ['ui', 'primary', 'button'];
+        if (this.state.inAlign) {
+            startButton.push('loading');
+        }
+
 
         classes.source.push(this.state.uploadSource.status);
         classes.target.push(this.state.uploadTarget.status);
@@ -253,7 +338,8 @@ class UploadComponent extends Component {
                     <div className="row" id="projectNameInput">
                         <div className="five wide column">
                             <div className="ui input">
-                                <input id="project-name" className="form-control" name="pname" type="text" value={this.state.pName}
+                                <input id="project-name" className="form-control" name="pname" type="text"
+                                       value={this.state.pName}
                                        onChange={this.ProjectNameChange}/>
                             </div>
                         </div>
@@ -270,9 +356,10 @@ class UploadComponent extends Component {
                             </div>
                             <div className="">
                                 <div className={classes.source.join(' ')}>
-                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropSource}>
+                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropSource} disabled={this.state.uploadSource.disabled}>
                                         {
                                             this.renderHtmlUpload(
+                                                "source",
                                                 this.state.uploadSource.status,
                                                 {
                                                     filename: this.state.uploadSource.name,
@@ -293,11 +380,13 @@ class UploadComponent extends Component {
                                           onChange={this.onTargetLanguageChange}
                                 />
                             </div>
+
                             <div className="">
                                 <div className={classes.target.join(' ')}>
-                                    <Dropzone style={uploadAreaStyle} onDrop={this.onDropTarget}>
+                                    <Dropzone style={uploadAreaStyle} multiple={false} onDrop={this.onDropTarget} disabled={this.state.uploadTarget.disabled}>
                                         {
                                             this.renderHtmlUpload(
+                                                "target",
                                                 this.state.uploadTarget.status,
                                                 {
                                                     filename: this.state.uploadTarget.name,
@@ -321,10 +410,15 @@ class UploadComponent extends Component {
 
 
                         <div className="four wide column">
-                            <button className="ui primary button" onClick={this.startAlignment}
-                                    disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name}
-                            >Start alignment
+                            <button className={startButton.join(" ")} onClick={this.startAlignment}
+                                    disabled={!this.state.uploadSource.name || !this.state.uploadTarget.name || this.state.inAlign}
+                            >START ALIGNING
                             </button>
+                            {creationError.error &&
+                            <div className={"creation-error"}>
+                                <span> {creationError.message} </span>
+                            </div>
+                            }
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,52 @@
+@import "../../../../assets/theme/variables";
+
+.loginContainer{
+  background: #ffffff;
+  z-index: 9999;
+  position: fixed;
+  margin: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  -webkit-animation-name: animatetop;
+  -webkit-animation-duration: 0.4s;
+  animation-name: animatetop;
+  animation-duration: 0.4s;
+  text-align: center;
+  box-shadow: 0 1px 20px #6f6e6e;
+  width: 800px;
+  overflow: hidden;
+  .header{
+    background-color: $headerBlack;
+    height: 48px;
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 10px 7px 23px;
+    border-radius: 4px 4px 0 0;
+    .dx-header{
+      span{
+        position: relative;
+        bottom: 2px;
+        cursor: pointer;
+        color: $headerText;
+        font-size: 1.2rem;
+        &:hover{
+          color: $red;
+        }
+      }
+    }
+    .sx-header{
+      img{
+        height: 22px;
+      }
+    }
+  }
+  .content{
+    max-height: 90vh;
+    border-radius: 0px 0px 4px 4px;
+    background-color: $white;
+    overflow: auto;
+    padding: 0 24px 24px;
+  }
+}

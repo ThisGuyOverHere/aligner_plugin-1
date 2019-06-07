@@ -8,29 +8,41 @@
 
 namespace Features\Aligner\Controller;
 
-use Features\Aligner;
+use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Model\Segments_SegmentDao;
+use Features\Aligner\Controller\Validators\JobPasswordValidator;
 
 class SegmentsController extends AlignerController {
 
-    public function get(){
+    protected $job;
 
-        $id_job = $this->params['id_job'];
-        $where  = $this->request->param( 'where' );
-        $order_source  = $this->request->param( 'order_source' );
-        $order_target  = $this->request->param( 'order_target' );
-        $amount = $this->request->param( 'amount' );
+    public function afterConstruct() {
+        $jobValidator = ( new JobPasswordValidator( $this ) );
 
-        $config = Aligner::getConfig();
+        $jobValidator->onSuccess( function () use ( $jobValidator ) {
+            $this->job     = $jobValidator->getJob();
+        } );
 
-        if(empty($where)){$where = 'after';}
-        if(empty($order_source)){$order_source = 0;}
-        if(empty($order_target)){$order_target = 0;}
-        if(empty($amount)){$amount = $config['SEGMENT_AMOUNT_PER_PAGE'];}
+        $this->appendValidator( $jobValidator );
+    }
 
-        $target = Segments_SegmentDao::getTargetOrdered($id_job, $where, $order_target, $amount);
-        $source = Segments_SegmentDao::getSourceOrdered($id_job, $where, $order_source, $amount);
-        $this->response->json(['target' => $target, 'source' => $source]);
+    public function get() {
+        $id_job = $this->job->id;
+
+        $order_segments = Segments_SegmentDao::getOrderedByJobId( $id_job );
+        $target         = [];
+        $source         = [];
+
+        foreach ( $order_segments as &$order_segment ) {
+            $order_segment->content_raw   = AlignUtils::_mark_xliff_tags( $order_segment->content_raw );
+            $order_segment->content_clean = htmlspecialchars_decode( $order_segment->content_clean );
+            if ( $order_segment->type == "source" ) {
+                $source[] = $order_segment;
+            } elseif ( $order_segment->type == "target" ) {
+                $target[] = $order_segment;
+            }
+        }
+        $this->response->json( [ 'target' => $target, 'source' => $source ] );
 
     }
 }

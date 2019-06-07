@@ -18,4 +18,11 @@ class Routes {
         return $host . "/aligner/static/build/$file";
     }
 
+
+    public static function downloadTMX( $job_id, $job_password, $options = array() ) {
+        $host = \Routes::pluginsBase( $options );
+
+        return "$host/aligner/job/$job_id/$job_password/download_tmx";
+    }
+
 }

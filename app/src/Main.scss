@@ -3,33 +3,46 @@
 @import "Components/Home/Upload/Upload.component";
 @import "Components/Home/Upload/FileFormatsModal/FileFormatsModal.component";
 
-@import "Components/Project/Job.component";
-@import "Components/Project/Row/Row.component";
-@import "Components/Project/Row/RowWrapper.component";
-@import "Components/Project/Row/ActionsBetweenLines/ActionsbetweenLines.component";
-@import "Components/Project/Row/Segment/Segment.component";
-@import "Components/Project/DragLayer/AdvancedDragLayer.component";
-@import "Components/Project/Split/Split.component";
-@import "Components/Project/Split/SplitCharComponent/SplitCharComponent.component";
-@import "Components/Project/Split/SplitDivisor/SplitDivisor.component";
+@import "Components/Align/Job/Job.component";
+@import "Components/Align/Job/Row/Row.component";
+@import "Components/Align/Job/HideRow/HideRow.component";
+@import "Components/Align/Job/Row/RowWrapper.component";
+@import "Components/Align/Job/Row/ActionsBetweenLines/ActionsbetweenLines.component";
+@import "Components/Align/Job/Row/Segment/Segment.component";
+@import "Components/Align/Job/Row/Segment/SegmentContent/SegmentContent.component";
+@import "Components/Align/Job/DragLayer/AdvancedDragLayer.component";
+@import "Components/Align/Job/SplitAlternative/SplitAlternative.component";
+@import "Components/Align/Job/SplitAlternative/SplitCharComponent/SplitCharComponent.component";
+@import "Components/Align/Job/SplitAlternative/SplitDivisor/SplitDivisor.component";
+@import "Components/Align/Align.component";
 
 @import "Components/Shared/NotFound/NotFound.component";
 @import "Components/Shared/Header/Header.component";
 @import "Components/Shared/Header/Export/Export.component";
-@import "Components/Shared/Header/User/User.component.scss";
+@import "Components/Shared/ExportModal/ExportModal.component";
+@import "Components/Shared/ExportModal/ExportModalLogged/ExportModalLogged.component";
+@import "Components/Shared/ExportModal/ExportModalCompleted/ExportModalCompleted.component";
+@import "Components/Shared/ExportModal/ExportModalNotLogged/ExportModalNotLogged.component";
+@import "Components/Shared/ExportModal/ExportModalSendEmail/ExportModalSendEmail.component";
 @import "Components/Shared/Header/User/UserLogged/UserLogged.component";
 @import "Components/Shared/Header/User/UserNotLogged/UserNotLogged.component";
 @import "Components/Shared/Header/Mismatch/Mismatch.component.scss";
-@import "Components/Shared/Footer/Footer.component";
+@import "Components/Shared/LoginModal/LoginModal.component";
 @import "Components/Shared/Login/Login.component";
 @import "Components/Shared/Logout/Logout.component";
-@import "Components/Shared/ExportModal/ExportModal.component";
 @import "Components/Shared/ResetPasswordModal/ResetPasswordModal.component";
-@import "Components/Project/Toolbar/Toolbar.component";
-@import "Components/Project/Toolbar/ToolbarActions/ToolbarActions.component";
-@import "Components/Project/Toolbar/ToolbarSelection/ToolbarSelection.component";
-@import "Components/Project/Toolbar/ToolbarContextualNavigation/ToolbarContextualNavigation";
+@import "Components/Shared/Registration/Registration.component.scss";
+@import "Components/Shared/ModalHeader/ModalHeader.component.scss";
+
+@import "Components/Align/Toolbar/Toolbar.component";
+@import "Components/Align/Toolbar/Search/Search.component";
+@import "Components/Align/Toolbar/ToolbarActions/ToolbarActions.component";
+@import "Components/Align/Toolbar/ToolbarRightHint/ToolbarRightHint.component";
+@import "Components/Align/Toolbar/ToolbarSelection/ToolbarSelection.component";
 
 @import "Components/Analyse/Analyse.component";
 @import "Components/Analyse/Animation/Animation.component";
 @import "Components/Analyse/PreAlignStatus/PreAlignStatus.component";
+@import "Components/Analyse/CompletedAnimation/CompletedAnimation.component";
+
+@import "Components/Align/JobError/JobError.component";

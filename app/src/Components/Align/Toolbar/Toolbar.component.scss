@@ -1,0 +1,30 @@
+@import "../../../../assets/theme/variables";
+
+#toolbar {
+  position: relative;
+  padding: 0 32px;
+  z-index: 20;
+  height: 56px;
+  background-color: $white;
+  color: $midGregy;
+  width: 100%;
+  top: 56px;
+  left: 0;
+  display: grid;
+  grid-template-columns: 56px 1fr 2.6fr 1fr;
+  align-items: center;
+  box-shadow: 0 5px 10px 0 rgba(198, 198, 198, 0.50);
+  >:first-child{
+    grid-column-end: span 2;
+  }
+  .hint, .search-ico{
+    font-size: 24px;
+    cursor: pointer;
+    float: right;
+    margin: 0 0 0 24px;
+    color: #8c8d90;
+  }
+  .search-ico{
+    font-size: 20px;
+  }
+}

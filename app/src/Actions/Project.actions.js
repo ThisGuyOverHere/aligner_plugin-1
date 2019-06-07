@@ -2,450 +2,655 @@ import ProjectStore from "../Stores/Project.store";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
-import {httpAlignJob, httpGetSegments} from "../HttpRequests/Alignment.http";
+import {
+    httpGetSegments,
+    httpSplitSegment
+} from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
-import {avgOrder} from "../Helpers/SegmentUtils.helper";
-
+import {avgOrder, getSegmentByIndex, getSegmentByOrder, getSegmentIndexByOrder} from "../Helpers/SegmentUtils.helper";
 
 let ProjectActions = {
-    /**
-     *
-     * @param {Number} jobID The Job ID of current project
-     */
-    setJobID: function (jobID) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.SET_JOB_ID,
-            jobID: jobID
-        });
-    },
-    /**
-     *
-     * @param {Number} jobID The Job ID of current project
-     * @param {String} jobPassword The password of current Job ID
-     */
-    getSegments: function (jobID, jobPassword) {
-        httpGetSegments(jobID).then(response => {
+        /**
+         *
+         * @param {Number} jobID The Job ID of current project
+         */
+        setJobID: function (jobID, jobPassword) {
             AppDispatcher.dispatch({
-                actionType: ProjectConstants.STORE_SEGMENTS,
-                segments: response.data
-            })
-        });
-    },
-
-
-    /**
-     *
-     * @param {Object} log A log of move action from frontend
-     * @param {String} log.type The type of segment: source or target
-     * @param {Number} log.from The row's order of Drag action
-     * @param {Number} log.to The row's order of Drop action
-     */
-    changeSegmentPosition: function (log) {
-
-
-        let tmpJob = ProjectStore.job,
-            changeData,
-            changes = [],
-            fromIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.from),
-            toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to),
-            mockFrom = Object.assign({}, env.segmentModel),
-            mockToInverse = Object.assign({}, env.segmentModel);
-
-        const inverse = {
-                source: 'target',
-                target: 'source'
-            },
-            toOrder = tmpJob[log.type].getIn([toIndex, 'order']),
-            toNextOrder = tmpJob[log.type].getIn([+toIndex + 1, 'order']),
-            toInverseOrder = tmpJob[inverse[log.type]].getIn([toIndex, 'order']),
-            toNextInverseOrder = tmpJob[inverse[log.type]].getIn([+toIndex + 1, 'order']),
-            fromOrder = tmpJob[log.type].getIn([fromIndex, 'order']),
-            fromNextOrder = tmpJob[log.type].getIn([+fromIndex + 1, 'order']),
-            fromInverseOrder = tmpJob[inverse[log.type]].getIn([fromIndex, 'order']),
-            fromNextInverseOrder = tmpJob[inverse[log.type]].getIn([+fromIndex + 1, 'order']);
-
-
-        /*
-        * 1. Creo elemento successivo all'arrivo con il contenuto di quello di arrivo (prima dello spostamento)
-        * 2. Creo elemento in corrispondenza del type opposto del punto 1
-        * 3. Cambio il next dell'elemento precedente al punto 2
-        * 4. Aggiorno elemento di arrivo mettendoci il segmento draggato
-        * 5. Aggiorno elemento di partenza creando un buco
-        * (se c'è un buco dall'altra parte non lo creo, ma cancello entrambi i segmenti)
-        * */
-
-
-        /******
-         *  1 *
-         ******/
-
-        changeData = tmpJob[log.type].get(toIndex).toJS();
-
-        //controllo se l'elemento in toIndex non sia vuoto, nel caso sia vuoto salto il punto 1 e 2 e 3
-        //lo salto perchè quando si rimpiazza un buco non bisogna spostare l'elemento in posizione toIndex (i buchi si rimpiazzano e basta)
-        if (changeData.content_clean !== null) {
-
-            changeData.order = avgOrder(toOrder, toNextOrder);
-            changeData.next = toNextOrder;
-            changes.push({
-                type: log.type,
-                action: 'create',
-                rif_order: toNextOrder,
-                data: changeData
+                actionType: ProjectConstants.SET_JOB_ID,
+                jobID: jobID,
+                jobPassword: jobPassword
             });
-
-            /******
-             *  2 *
-             ******/
-            // creo un buco in corrispondenza dell'elemento spostato
-            mockFrom.order = avgOrder(toInverseOrder, toNextInverseOrder);
-            mockFrom.next = toNextInverseOrder;
-            changes.push({
-                type: inverse[log.type],
-                action: 'create',
-                rif_order: toNextInverseOrder,
-                data: mockFrom
+        },
+        /**
+         *
+         * @param {Number} jobID The Job ID of current project
+         * @param {String} jobPassword The password of current Job ID
+         */
+        getSegments: function (jobID, jobPassword) {
+            httpGetSegments(jobID, jobPassword).then(response => {
+                AppDispatcher.dispatch({
+                    actionType: ProjectConstants.STORE_SEGMENTS,
+                    segments: response.data
+                })
+            }, error => {
+                AppDispatcher.dispatch({
+                    actionType: ProjectConstants.JOB_ERROR,
+                    error: error.response.data.errors[0].message
+                });
+                console.error(error.response.data.errors[0].message);
             });
-
-            /******
-             *  3 *
-             ******/
-            //cambio il next dell'elemento precedente al buco creato al punto 2
-            changeData = tmpJob[inverse[log.type]].get(toIndex).toJS();
-            changeData.next = mockFrom.order;
-            changes.push({
-                type: inverse[log.type],
-                action: 'update',
-                rif_order: toInverseOrder,
-                data: changeData
-            });
-        }
+        },
 
 
-        /******
-         *  4 *
-         ******/
-        // sostituisco l'elemento draggato (fromIndex) con quello nella posizione toIndex
-        changeData = tmpJob[log.type].get(fromIndex).toJS();
-        changeData.order = toOrder;
-        changeData.next = tmpJob[log.type].getIn([toIndex, 'next']);
-
-        //se l'elemento del punto 1 è stato creato, il punto due avrà un next diverso
-        //se invece c'era un buco nel punto 1 non cambia nulla, poichè non abbiamo creato nuovi elementi successivi
-        if (changes.length > 0) {
-            changeData.next = changes[0].data.order
-        }
-        changes.push({
-            type: log.type,
-            action: 'update',
-            rif_order: toOrder,
-            data: changeData
-        });
-
-        /******
-         *  5 *
-         ******/
-        //se l'elemento opposto al fromIndex non è vuoto creo il buco altrimenti cancello entrambi gli elementi
-        // buco / buco si annulla
-        if (tmpJob[inverse[log.type]].getIn([fromIndex, 'content_clean'])) {
-            mockToInverse.order = fromOrder;
-            mockToInverse.next = tmpJob[log.type].getIn([fromIndex, 'next']);
-            mockToInverse.type = log.type
+        /**
+         *
+         * @param {Object} log A log of move action from frontend
+         * @param {String} log.type The type of segment: source or target
+         * @param {Number} log.from The row's order of Drag action
+         * @param {Number} log.to The row's order of Drop action
+         */
+        changeSegmentPosition: function (log) {
 
 
-            changes.push({
-                type: log.type,
-                action: 'update',
-                rif_order: fromOrder,
-                data: mockToInverse
-            });
-        } else {
-            changes.push({
-                type: log.type,
-                action: 'delete',
-                rif_order: fromOrder
-            });
-            changes.push({
-                type: inverse[log.type],
-                action: 'delete',
-                rif_order: fromInverseOrder
-            });
-        }
+            let tmpJob = ProjectStore.job,
+                changeData,
+                changes = [],
+                fromIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.from),
+                toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to),
+                mockFrom = Object.assign({}, env.segmentModel),
+                mockToInverse = Object.assign({}, env.segmentModel);
 
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-            changes: changes
-        });
-    },
-
-    /**
-     *
-     * @param {Object} log A log of position and type of action
-     * @param {Number} log.order The position where create a space
-     * @param {String} log.type The type of segment: source or target
-     */
-    createSpaceSegment: function (log) {
-        const tmpJob = ProjectStore.job,
-            index = tmpJob[log.type].findIndex(i => i.get('order') === log.order),
-            prevOrder = tmpJob[log.type].getIn([+index - 1, 'order']),
-            inverse = {
+            const inverse = {
                 source: 'target',
                 target: 'source'
             };
-        let changes = [],
-            mock = Object.assign({}, env.segmentModel);
 
-        //aggiungo il buco
-        mock.order = avgOrder(prevOrder, log.order);
-        mock.next = log.order;
-        mock.type = log.type;
-        changes.push({
-            type: log.type,
-            action: 'create',
-            rif_order: log.order,
-            data: mock
-        });
+            /*
+            * 1. creo un buco in corrispondenza della partenza
+            * 2. sostituisco l'elemento in posizione di arrivo
+            * 3. creo un elemento sotto la posizione di arrivo nella posizione opposta ed un buco nella stessa posizione
+            *
+            * */
 
-        //cambio il next dell'elemento precedente al buco
-        let changeData = tmpJob[log.type].get(+index - 1).toJS();
-        changeData.next = mock.order;
-        changes.push({
-            type: log.type,
-            action: 'update',
-            rif_order: changeData.order,
-            data: changeData
-        });
+            //1
+            changes.push({
+                type: log.type,
+                action: 'update',
+                isEmptySegment: true,
+                rif_order: log.from
+            });
 
-        //aggiungo un buco a fine lista inversa
-        let lastMock = Object.assign({}, env.segmentModel),
-            lastSegment = tmpJob[inverse[log.type]].get(-1).toJS();
+            let segmentToPosition = tmpJob[log.type].get(toIndex).toJS();
+            let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1);
+            segmentNextToPosition = segmentNextToPosition ? segmentNextToPosition.toJS() : null;
+            let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
+            let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1);
+            inverseSegmentToPosition = inverseSegmentToPosition ? inverseSegmentToPosition.toJS() : null;
+            let inverseSegmentToPositionBE = tmpJob[inverse[log.type]].get(toIndex).toJS().order;
 
-        lastMock.order = +lastSegment.order + env.orderElevation;
-        lastMock.type = inverse[log.type];
-        lastSegment.next = lastMock.order;
-        changes.push({
-            type: inverse[log.type],
-            action: 'update',
-            rif_order: lastSegment.order,
-            data: lastSegment
-        });
-        changes.push({
-            type: inverse[log.type],
-            action: 'push',
-            data: lastMock
-        });
+            segmentfromPosition.order = segmentToPosition.order;
+            segmentfromPosition.next = segmentToPosition.next;
 
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-            changes: changes
-        });
+            //2
+            changes.push({
+                type: log.type,
+                action: 'update',
+                rif_order: log.to,
+                data: segmentfromPosition
+            });
 
-    },
 
-    /**
-     *
-     * @param {Object} log A log of position and type of action
-     * @param {Number} log.order The position where create a space
-     * @param {String} log.type The type of segment: source or target
-     */
-    removeSpaceSegment: function (log) {
-        let changes = [];
-
-        //rimuovo il buco
-        changes.push({
-            type: log.type,
-            action: 'complex_delete',
-            rif_order: log.order
-        });
-
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-            changes: changes
-        });
-
-    },
-    setMergeStatus: function (status) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.MERGE_STATUS,
-            status: status
-        });
-    },
-
-    scrollToSegment: function (ref, y = false) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.SCROLL_TO_SEGMENT,
-            data: {ref: ref, y: y}
-        });
-    },
-
-    /**
-     * @param {Array} fromArray
-     * @param {Object} fromArray[]
-     * @param {string} fromArray[].content_clean
-     * @param {string} fromArray[].content_raw
-     * @param {number} fromArray[].order
-     * @param {Object} to
-     * @param {string} to.content_clean
-     * @param {string} to.content_raw
-     * @param {number} to.order
-     */
-    mergeSegments: function (fromArray, to) {
-        let changes = [];
-        const tmpJob = ProjectStore.job;
-        const inverse = {
-            source: 'target',
-            target: 'source'
-        };
-
-        fromArray.map(from => {
-            const fromIndex = tmpJob[from.type].findIndex(i => i.get('order') === from.order);
-            const fromInverse = tmpJob[inverse[from.type]].get(fromIndex).toJS();
-
-            to.content_clean += " ";
-            to.content_clean += from.content_clean;
-            to.content_raw += " ";
-            to.content_raw += from.content_raw;
-
-            if (!fromInverse.content_clean) {
+            if (segmentToPosition.content_clean) {
+                //3
+                segmentToPosition.order = segmentNextToPosition ? avgOrder(segmentToPosition.order, segmentToPosition.next) : null;
+                segmentToPosition.next = segmentNextToPosition ? segmentNextToPosition.order : null;
                 changes.push({
-                    type: from.type,
-                    action: 'complex_delete',
-                    rif_order: from.order
-                });
-                changes.push({
-                    type: fromInverse.type,
-                    action: 'complex_delete',
-                    rif_order: fromInverse.order
+                    type: log.type,
+                    action: segmentNextToPosition ? 'create' : 'push',
+                    rif_order: segmentNextToPosition ? segmentNextToPosition.order : null,
+                    data: segmentToPosition
                 });
 
-            } else {
-                from.content_clean = null;
-                from.content_raw = null;
                 changes.push({
-                    type: from.type,
-                    action: 'update',
-                    rif_order: from.order,
-                    data: from
+                    type: inverse[log.type],
+                    action: inverseSegmentToPosition ? 'create' : 'push',
+                    rif_order: inverseSegmentToPosition ? inverseSegmentToPosition.order : null,
+                    isEmptySegment: true
                 });
             }
 
 
-        });
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                changes: changes,
+                syncAPI: {
+                    action: 'align',
+                    data: {
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        order: log.from,
+                        destination: log.to,
+                        inverse_destination: inverseSegmentToPositionBE,
+                        type: log.type
+                    }
+                }
+            });
+        },
 
-        changes.push({
-            type: to.type,
-            action: 'update',
-            rif_order: to.order,
-            data: to
-        });
+        /**
+         *
+         * @param {Object} log A log of position and type of action
+         * @param {Number} log.order The position where create a space
+         * @param {String} log.type The type of segment: source or target
+         */
+        createSpaceSegment: function (log) {
 
-
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-            changes: changes
-        });
-    },
-
-    /**
-     *
-     * @param {Object} segment1
-     * @param {String} segment1.type
-     * @param {String} segment1.content_clean
-     * @param {String} segment1.content_raw
-     * @param {Number} segment1.order
-     * @param {Number} segment1.next
-     * @param {Object} segment2
-     * @param {String} segment2.content_clean
-     * @param {String} segment2.content_raw
-     * @param {Number} segment2.order
-     * @param {Number} segment2.next
-     * @param {String} segment2.type
-     */
-    reverseTwoSegments: function (segment1, segment2) {
-
-        let tmpSegment1 = Object.assign({}, segment1);
-        let tmpSegment2 = Object.assign({}, segment2);
-
-        tmpSegment1.content_clean = segment2.content_clean;
-        tmpSegment1.content_raw = segment2.content_raw;
-
-        tmpSegment2.content_clean = segment1.content_clean;
-        tmpSegment2.content_raw = segment1.content_raw;
-
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-            changes: [
-                {
-                    type: tmpSegment1.type,
-                    action: 'update',
-                    rif_order: tmpSegment1.order,
-                    data: tmpSegment1
-                },
-                {
-                    type: tmpSegment2.type,
-                    action: 'update',
-                    rif_order: tmpSegment2.order,
-                    data: tmpSegment2
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                changes: [{
+                    type: log.type,
+                    action: 'create',
+                    rif_order: log.order,
+                    isEmptySegment: true
                 }]
-        });
-    },
+            });
 
-    /**
-     *
-     * @param type
-     * @param order
-     * @param position
-     * @param rec
-     */
-    animateChangeRowPosition: function (type, order, position, rec) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.ANIMATE_ROW_POSITION,
-            data: {
-                type: type,
-                order: order,
-                position: position,
-                rec: rec
+        },
+
+        /**
+         *
+         * @param {Object} log A log of position and type of action
+         * @param {Number} log.order The position where create a space
+         * @param {String} log.type The type of segment: source or target
+         */
+        removeSpaceSegment: function (log) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                changes: [{
+                    type: log.type,
+                    action: 'delete',
+                    rif_order: log.order
+                }]
+            });
+
+        },
+
+        /**
+         *
+         * @param {Number} index of target segments for scroll
+         */
+        scrollToSegment: function (index) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.SCROLL_TO_SEGMENT,
+                data: index
+            });
+        },
+        /**
+         *
+         * @param {Object} selection a map with source and target lists
+         * @param {Array} selection.source.list
+         * @param {Number} selection.source.list[] the order of segment
+         * @param {Array} selection.target.list
+         * @param {Number} selection.target.list[] the order of segment
+         */
+        mergeAndAlignSegments: function (selection) {
+            let matches = [];
+            if (selection.source.count > 0) {
+                selection.source.list.map((e) => {
+                    matches.push({
+                        type: 'source',
+                        order: e
+                    })
+                });
             }
-        });
-    },
-    /**
-     *
-     * @param {Number} order Send -1 for remove all selection
-     * @param {String} type
-     */
-    addSegmentToSelection: function (order, type = null) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.ADD_SEGMENT_TO_SELECTION,
-            order: order,
-            type: type
-        });
-    },
+            if (selection.target.count > 0) {
+                selection.target.list.map((e) => {
+                    matches.push({
+                        type: 'target',
+                        order: e
+                    })
+                });
+            }
+            const sourceOrderList = selection.source.list.sort((a, b) => {
+                return a - b
+            });
+            const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0], 'source');
+            const destination = getSegmentByIndex(firstSourceIndex, 'target').order;
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.MERGE_ALIGN,
+                syncAPI: {
+                    action: 'merge_align',
+                    data: {
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        matches: matches,
+                        destination: destination
+                    }
+                }
+            });
 
-    /**
-     *
-     * @param {Object} segment Segment to open, use false for close modal split
-     */
-    openSegmentToSplit: function (segment) {
-        AppDispatcher.dispatch({
-            actionType: ProjectConstants.SEGMENT_TO_SPLIT,
-            segment: segment,
-        });
-    },
+        },
 
-    /**
-     * @param {Object} segment The segment to split
-     * @param {Array} positions An array of chars positions where split segment string content
-     * @param {Number} positions[] the position
-     */
+        //todo: move to utilis
+        getLogsForMergeSegments: function (segments, type) {
+            let changes = [];
+            const inverse = {
+                source: 'target',
+                target: 'source'
+            };
 
-    splitSegment: function (segment, positions) {
-        positions.push(segment.content_raw.length);
-        let contentSegments = [];
-        positions.map((e, index) => {
-            contentSegments.push(segment.content_raw.substring((+positions[index - 1] + 1 || 0), +e + 1))
-        });
+            let toMergeSegment = getSegmentByOrder(segments[0], type);
+
+            for (let x = 1; x < segments.length; x++) {
+                const segment = getSegmentByOrder(segments[x], type);
+
+                const fromIndex = getSegmentIndexByOrder(segments[x], type);
+                const fromInverse = getSegmentByIndex(fromIndex, inverse[type]);
+
+                toMergeSegment.content_clean += " ";
+                toMergeSegment.content_clean += segment.content_clean;
+                toMergeSegment.content_raw += " ";
+                toMergeSegment.content_raw += segment.content_raw;
+
+                segment.content_clean = null;
+                segment.content_raw = null;
+                changes.push({
+                    type: segment.type,
+                    action: 'update',
+                    rif_order: segment.order,
+                    isEmptySegment: true
+                });
+
+            }
+            changes.push({
+                type: toMergeSegment.type,
+                action: 'update',
+                rif_order: toMergeSegment.order,
+                data: toMergeSegment
+            });
+
+            return changes;
+        },
+
+
+        /**
+         *
+         * @param {Object} log A log of move action from frontend
+         * @param {String} log.type The type of segment: source or target
+         * @param {Number} log.from The row's order of Drag action
+         * @param {Number} log.to The row's order of Drop action
+         */
+        getChangeSegmentPosition: function (log) { //todo: move to utilis
+
+
+            let tmpJob = ProjectStore.job,
+                changeData,
+                changes = [],
+                fromIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.from),
+                toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to),
+                mockFrom = Object.assign({}, env.segmentModel),
+                mockToInverse = Object.assign({}, env.segmentModel);
+
+            const inverse = {
+                source: 'target',
+                target: 'source'
+            };
+
+            /*
+            * 1. creo un buco in corrispondenza della partenza
+            * 2. sostituisco l'elemento in posizione di arrivo
+            * 3. creo un elemento sotto la posizione di arrivo nella posizione opposta ed un buco nella stessa posizione
+            *
+            * */
+
+            //1
+            changes.push({
+                type: log.type,
+                action: 'update',
+                isEmptySegment: true,
+                rif_order: log.from
+            });
+
+            let segmentToPosition = tmpJob[log.type].get(toIndex).toJS();
+            let segmentNextToPosition = tmpJob[log.type].get(toIndex + 1).toJS();
+            let segmentfromPosition = tmpJob[log.type].get(fromIndex).toJS();
+            let inverseSegmentToPosition = tmpJob[inverse[log.type]].get(toIndex + 1).toJS();
+
+            segmentfromPosition.order = segmentToPosition.order;
+            segmentfromPosition.next = segmentToPosition.next;
+
+            //2
+            changes.push({
+                type: log.type,
+                action: 'update',
+                rif_order: log.to,
+                data: segmentfromPosition
+            });
+
+
+            if (segmentToPosition.content_clean) {
+                //3
+                segmentToPosition.order = avgOrder(segmentToPosition.order, segmentToPosition.next);
+                segmentToPosition.next = segmentNextToPosition.order;
+                changes.push({
+                    type: log.type,
+                    action: 'create',
+                    rif_order: segmentNextToPosition.order,
+                    data: segmentToPosition
+                });
+
+                changes.push({
+                    type: inverse[log.type],
+                    action: 'create',
+                    rif_order: inverseSegmentToPosition.order,
+                    isEmptySegment: true
+                });
+            }
+
+            return changes;
+        },
+
+        /**
+         * @param {Number} jobID
+         * @param {String} jobPassword
+         * @param {Array} orders
+         * @param {Object} orders[]
+         * @param {number} orders[].order
+         * @param {string} type
+         */
+        mergeSegments: function (jobID, jobPassword, orders, type) {
+            const changes = this.getLogsForMergeSegments(orders, type);
+
+            AppDispatcher.dispatch({
+                    actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                    changes: changes,
+                    syncAPI: {
+                        action: 'merge',
+                        data: {
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
+                            order: orders,
+                            type: type
+                        }
+                    }
+                }
+            )
+            ;
+        },
+
+        /**
+         *
+         * @param {Object} segment1
+         * @param {String} segment1.type
+         * @param {String} segment1.content_clean
+         * @param {String} segment1.content_raw
+         * @param {Number} segment1.order
+         * @param {Number} segment1.next
+         * @param {Object} segment2
+         * @param {String} segment2.content_clean
+         * @param {String} segment2.content_raw
+         * @param {Number} segment2.order
+         * @param {Number} segment2.next
+         * @param {String} segment2.type
+         */
+        reverseTwoSegments: function (segment1, segment2) {
+
+            let tmpSegment1 = Object.assign({}, segment1);
+            let tmpSegment2 = Object.assign({}, segment2);
+
+            tmpSegment1.content_clean = segment2.content_clean;
+            tmpSegment1.content_raw = segment2.content_raw;
+
+            tmpSegment2.content_clean = segment1.content_clean;
+            tmpSegment2.content_raw = segment1.content_raw;
+
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                changes: [
+                    {
+                        type: tmpSegment1.type,
+                        action: 'update',
+                        rif_order: tmpSegment1.order,
+                        data: tmpSegment1
+                    },
+                    {
+                        type: tmpSegment2.type,
+                        action: 'update',
+                        rif_order: tmpSegment2.order,
+                        data: tmpSegment2
+                    }],
+                syncAPI: {
+                    action: 'reverse',
+                    data: {
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        order1: segment1.order,
+                        order2: segment2.order,
+                        type: segment2.type
+                    }
+                }
+            });
+        },
+
+        /**
+         *
+         * @param type
+         * @param order
+         * @param position
+         * @param rec
+         */
+        animateChangeRowPosition: function (type, order, position, rec) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.ANIMATE_ROW_POSITION,
+                data: {
+                    type: type,
+                    order: order,
+                    position: position,
+                    rec: rec
+                }
+            });
+        },
+        /**
+         *
+         * @param {Number} order Send -1 for remove all selection
+         * @param {String} type
+         */
+        addSegmentToSelection: function (order, type = null) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.ADD_SEGMENT_TO_SELECTION,
+                order: order,
+                type: type
+            });
+        },
+
+        /**
+         *
+         * @param {Object} segment Segment to open, use false for close modal split
+         */
+        openSegmentToSplit: function (segment) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.SEGMENT_TO_SPLIT,
+                segment: segment
+            });
+        },
+
+        /**
+         *
+         * @param {Object} log A log of move action from frontend
+         * @param {String} log.type The type of segment: source or target
+         * @param {Number} log.from The row's order of Drag action
+         * @param {Number} log.to The row's order of Drop action
+         */
+        requireChangeSegmentPosition: function (log) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION,
+                data: log,
+            });
+        },
+
+        /**
+         * @param {Number} jobID
+         * @param {String} jobPassword
+         * @param {Object} data
+         * @param {String} data.type
+         * @param {Number} data.order
+         * @param {Number} data.inverseOrder
+         * @param {Array} data.positions
+         */
+
+        splitSegment: function (jobID, jobPassword, data) {
+
+            httpSplitSegment(jobID, jobPassword, data).then(response => {
+                if (!response.errors) {
+                    AppDispatcher.dispatch({
+                        actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                        changes: response.data
+                    });
+                } else {
+                    response.errors.map(e => {
+                        console.error(e.message);
+                    })
+                }
+
+            }, error => {
+                console.error(error)
+            })
+        },
+
+        /**
+         * on action hover in toolbar dispatch type of action
+         * @param type
+         */
+        onActionHover: function (type) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.ON_ACTION_HOVER,
+                type: type,
+            });
+        },
+
+
+        /**
+         *
+         * @param {Array} changes A List of rows to apply actions
+         * @param {Object} changes[]
+         * @param {String} changes[].action The action to application on local row
+         * @param {String} changes[].rif_order Depending on the received action takes different meanings.
+         * if changes[].action = 'create' we refer to next order row.
+         * if changes[].action = 'delete' we refer to row to delete.
+         * if changes[].action = 'update' we refer to row to update.
+         * if changes[].action = 'push' ignore rif_order.
+         * @param {String} changes[].data The new row
+         * @param {String} changes[].type The type of segments (target or source)
+         * @param {boolean} changes[].isEmptySegment use this for set the mock from order of index
+         */
+        requireDirectChangesToStore: function (changes) {
+            //todo: call backend for propagate;
+            //console.log(changes);
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
+                changes: changes
+            });
+        },
+
+        /**
+         *
+         * @param deletes
+         * @param matches
+         */
+        deleteEmptyRows: function (deletes, matches) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.DELETE_ROWS,
+                deletes: deletes,
+                syncAPI: {
+                    action: 'delete',
+                    data: {
+                        jobID: ProjectStore.jobID,
+                        jobPassword: ProjectStore.jobPassword,
+                        matches: matches
+                    }
+                }
+            });
+        },
+
+        /**
+         *
+         * @param {boolean} status, true when user was on homepage, to initialise the store
+         */
+        emptyStore: function (status) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.EMPTY_STORE,
+                status: status
+            })
+        },
+
+        /**
+         *
+         * @param search
+         */
+        emitSearchResults: function (search) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.SEARCH_RESULTS,
+                data: search
+            })
+        },
+
+        /**
+         *
+         * @param info , set latest job info api call result into STORE_JOB_INFO.
+         */
+        setJobInfo: function (info) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.STORE_JOB_INFO,
+                info: info
+            })
+        },
+
+        getJobInfo: function () {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.GET_JOB_INFO
+            })
+        },
+
+        /**
+         * hide selected segments rows
+         */
+        hideSegments: function (matches) {
+            AppDispatcher.dispatch({
+                    actionType: ProjectConstants.HIDE_SEGMENTS,
+                    changes: matches,
+                    syncAPI: {
+                        action: 'hide',
+                        data: {
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
+                            matches: matches
+                        }
+                    }
+                }
+            )
+        },
+
+        /**
+         * show clicked row
+         */
+        showSegments: function (matches) {
+            AppDispatcher.dispatch({
+                    actionType: ProjectConstants.SHOW_SEGMENTS,
+                    changes: matches,
+                    syncAPI: {
+                        action: 'show',
+                        data: {
+                            jobID: ProjectStore.jobID,
+                            jobPassword: ProjectStore.jobPassword,
+                            matches: matches
+                        }
+                    }
+                }
+            )
+        },
+
     }
-};
+;
 
 
 export default ProjectActions;
