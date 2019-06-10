@@ -14,12 +14,20 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
     const TABLE = "segments_match";
 
 
-    public function missAlignments($id_job, $ttl = 0){
+    public function misalignments($id_job, $ttl = 0){
 
         $thisDao = new self();
         $conn = NewDatabase::obtain()->getConnection();
         $stmt = $conn->prepare( " SELECT `type`, `order` FROM segments_match WHERE segment_id IS NULL AND id_job =  :id_job" );
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id_job ] );
+    }
+
+    public function misalignmentCount($id_job, $type, $ttl = 0){
+
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( " SELECT COUNT(*) FROM segments_match WHERE segment_id IS NULL AND id_job =  :id_job AND `type` = :match_type" );
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id_job, 'match_type' => $type ] );
     }
 
     public function deleteByJobId($id_job) {
