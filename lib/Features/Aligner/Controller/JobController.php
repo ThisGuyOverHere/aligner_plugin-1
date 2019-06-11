@@ -16,6 +16,7 @@ use Features\Aligner\Model\Jobs_JobDao;
 use Features\Aligner\Model\Jobs_JobStruct;
 use Features\Aligner\Model\Projects_ProjectDao;
 use Features\Aligner\Model\Segments_SegmentDao;
+use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\ProjectProgress;
 
@@ -47,15 +48,19 @@ class JobController extends AlignerController {
 
         $language = \Langs_Languages::getInstance();
 
+        $source_misalignments = Segments_SegmentMatchDao::getMisalignmentCount($this->job->id, "source");
+        $target_misalignments = Segments_SegmentMatchDao::getMisalignmentCount($this->job->id, "target");
 
         $information = [
-                'job_name'        => $this->project->name,
-                'source_lang'     => $this->job->source,
-                'target_lang'     => $this->job->target,
-                'source_filename' => $source_file->filename,
-                'target_filename' => $target_file->filename,
-                'target_is_rtl'   => $language->isRTL( $this->job->target ),
-                'source_is_rtl'   => $language->isRTL( $this->job->source )
+                'job_name'             => $this->project->name,
+                'source_lang'          => $this->job->source,
+                'target_lang'          => $this->job->target,
+                'source_filename'      => $source_file->filename,
+                'target_filename'      => $target_file->filename,
+                'target_is_rtl'        => $language->isRTL( $this->job->target ),
+                'source_is_rtl'        => $language->isRTL( $this->job->source ),
+                'source_misalignments' => (int) $source_misalignments,
+                'target_misalignments' => (int) $target_misalignments
         ];
 
 
