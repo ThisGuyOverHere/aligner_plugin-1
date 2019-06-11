@@ -1,13 +1,10 @@
 import ProjectStore from "../Stores/Project.store";
-
-let AppDispatcher = require('../Stores/AppDispatcher');
 import ProjectConstants from '../Constants/Project.constants';
-import {
-    httpGetSegments,
-    httpSplitSegment
-} from "../HttpRequests/Alignment.http";
+import {httpGetSegments, httpSplitSegment} from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
 import {avgOrder, getSegmentByIndex, getSegmentByOrder, getSegmentIndexByOrder} from "../Helpers/SegmentUtils.helper";
+
+let AppDispatcher = require('../Stores/AppDispatcher');
 
 let ProjectActions = {
         /**
@@ -374,8 +371,7 @@ let ProjectActions = {
                         }
                     }
                 }
-            )
-            ;
+            );
         },
 
         /**

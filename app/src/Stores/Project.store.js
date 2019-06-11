@@ -304,11 +304,13 @@ AppDispatcher.register(function (action) {
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
-
             });
             break;
         case ProjectConstants.CHANGE_SEGMENT_POSITION:
             ProjectStore.storeMovements(action.changes, action.type);
+            if(action.syncAPI && action.syncAPI.action === "merge") {
+                ProjectStore.emitChange(ProjectConstants.CHANGE_SEGMENT_POSITION, action.changes);
+            }
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
@@ -326,6 +328,7 @@ AppDispatcher.register(function (action) {
                 source: ProjectStore.job.source.toJS(),
                 target: ProjectStore.job.target.toJS()
             }, syncAPI);
+            ProjectStore.emitChange(ProjectConstants.MERGE_ALIGN, action.syncAPI.data);
             break;
         case ProjectConstants.HIDE_SEGMENTS:
             ProjectStore.emitChange(ProjectConstants.RENDER_ROWS,  {
