@@ -320,14 +320,12 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
                             id_job, 
                             type,
                             content_clean, 
-                            content_raw,
-                            content_hash, 
                             raw_word_count,
                             create_date
                             ) VALUES ";
 
 
-        $tuple_marks = "( " . str_repeat( "?, ", 7 ) . " NOW() )";
+        $tuple_marks = "( " . str_repeat( "?, ", 5 ) . " NOW() )";
 
         foreach ( $obj_arr as $i => $chunk ) {
 
@@ -340,8 +338,6 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
                 $values[] = $segStruct[ 'id_job' ];
                 $values[] = $segStruct[ 'type' ];
                 $values[] = $segStruct[ 'content_clean' ];
-                $values[] = $segStruct[ 'content_raw' ];
-                $values[] = $segStruct[ 'content_hash' ];
                 $values[] = $segStruct[ 'raw_word_count' ];
             }
 
@@ -374,7 +370,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
         $clean_merge = implode( ' ', $clean_array );
 
-        self::updateSegmentContent( array_shift( $segments_id ), [ null, $clean_merge, null, $merge_count ] );
+        self::updateSegmentContent( array_shift( $segments_id ), [ $clean_merge, $merge_count ] );
 
         self::deleteSegmentsByIds( $segments_id );
 
@@ -402,9 +398,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
     public static function updateSegmentContent( $id, Array $contents ) {
         $query        = "UPDATE segments
-                    SET content_raw = ?,
-                    content_clean = ?,
-                    content_hash = ?,
+                    SET content_clean = ?,
                     raw_word_count = ?
                     WHERE id = ?;";
         $query_params = array_merge( $contents, [ $id ] );

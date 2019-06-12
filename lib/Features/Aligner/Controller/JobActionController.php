@@ -155,7 +155,6 @@ class JobActionController extends AlignerController {
         //$first_count = \CatUtils::segment_raw_word_count( $first_raw, $this->job->{$split_segment['type']} );
 
         $first_clean = array_shift( $clean_contents );
-        $first_hash  = md5( $first_raw );
         $first_count = \CatUtils::segment_raw_word_count( $first_clean, $this->job->{$split_segment['type']} );
 
         $new_segment = $split_segment;
@@ -237,7 +236,7 @@ class JobActionController extends AlignerController {
             $segmentsMatchDao = new Segments_SegmentMatchDao;
             $segmentsMatchDao->createList( array_merge( $new_matches, $new_null_matches ) );
 
-            Segments_SegmentDao::updateSegmentContent( $split_segment [ 'id' ], [ $first_raw, $first_clean, $first_hash, $first_count ] );
+            Segments_SegmentDao::updateSegmentContent( $split_segment [ 'id' ], [ $first_clean, $first_count ] );
             Segments_SegmentMatchDao::updateNextSegmentMatch( $update_order, $order, $id_job, $type );
             Segments_SegmentMatchDao::updateNextSegmentMatch( $inverse_update_order, $inverse_order, $id_job, $inverse_type );
 
