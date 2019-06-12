@@ -194,7 +194,7 @@ class JobActionController extends AlignerController {
             //$new_segment[ 'content_clean' ]  = AlignUtils::_cleanSegment( $new_segment[ 'content_raw' ], $this->job->{$new_segment[ 'type' ]} );
             
             $new_segment[ 'content_clean' ]  = array_shift( $clean_contents );
-            $new_segment[ 'content_hash' ]   = md5( $new_segment[ 'content_raw' ] );
+            $new_segment[ 'content_hash' ]   = null;
             $new_segment[ 'raw_word_count' ] = \CatUtils::segment_raw_word_count( $new_segment[ 'content_raw' ], $this->job->{$new_segment[ 'type' ]}  );
 
             //create new matches
@@ -501,7 +501,6 @@ class JobActionController extends AlignerController {
 
 
     public function addGap() {
-
 
         $order      = $this->params[ 'order' ];
         $id_job     = $this->params[ 'id_job' ];
@@ -853,7 +852,7 @@ class JobActionController extends AlignerController {
             so that it won't assign a segment id that no longer exists */
             if(!in_array($destination_order, $targetOrders)){
                 $new_match_destination[ 'segment_id' ]     = $referenceMatch[ 'id' ];
-                $new_match_destination[ 'content_raw' ]    = $referenceMatch['content_raw'];
+                $new_match_destination[ 'content_raw' ]    = null;
                 $new_match_destination[ 'content_clean' ]  = $referenceMatch['content_clean'];
                 $new_match_destination[ 'raw_word_count' ] = $referenceMatch['raw_word_count'];
             }
@@ -906,12 +905,11 @@ class JobActionController extends AlignerController {
         array_shift( $sources );
         array_shift( $targets );
         
-        //TODO replace stuff in match
-        $destination_match['content_raw']    = $first_target_segment['content_raw'];
+        $destination_match['content_raw']    = null;
         $destination_match['content_clean']  = $first_target_segment['content_clean'];
         $destination_match['raw_word_count'] = $first_target_segment['raw_word_count'];
 
-        $inverseReference['content_raw']    = $first_source_segment['content_raw'];
+        $inverseReference['content_raw']    = null;
         $inverseReference['content_clean']  = $first_source_segment['content_clean'];
         $inverseReference['raw_word_count'] = $first_source_segment['raw_word_count'];
         
@@ -977,7 +975,6 @@ class JobActionController extends AlignerController {
                     'data'      => $new_match_destination
                 ] );
 
-                //TODO fix rif_order for front-end
                 $this->pushOperation( [
                     'type'      => 'source',
                     'action'    => 'create',
