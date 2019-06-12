@@ -31,6 +31,15 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         return $result[0]["empty_match_count"];
     }
 
+    public static function getHiddenRows($id_job, $ttl = 0){
+
+        $thisDao = new self();
+        $conn = NewDatabase::obtain()->getConnection();
+        $stmt = $conn->prepare( " SELECT (COUNT(*) / 2) as hidden_rows_count FROM segments_match WHERE hidden = 1 AND id_job =  :id_job" );
+        $result = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id_job ] );
+        return $result[0]["hidden_rows_count"];
+    }
+
     public function deleteByJobId($id_job) {
         $sql = "DELETE FROM segments_match " .
                 " WHERE id_job = :id_job " ;

@@ -51,6 +51,8 @@ class JobController extends AlignerController {
         $source_misalignments = Segments_SegmentMatchDao::getMisalignmentCount($this->job->id, "source");
         $target_misalignments = Segments_SegmentMatchDao::getMisalignmentCount($this->job->id, "target");
 
+        $hidden_rows = Segments_SegmentMatchDao::getHiddenRows($this->job->id);
+
         $information = [
                 'job_name'             => $this->project->name,
                 'source_lang'          => $this->job->source,
@@ -60,7 +62,8 @@ class JobController extends AlignerController {
                 'target_is_rtl'        => $language->isRTL( $this->job->target ),
                 'source_is_rtl'        => $language->isRTL( $this->job->source ),
                 'source_misalignments' => (int) $source_misalignments,
-                'target_misalignments' => (int) $target_misalignments
+                'target_misalignments' => (int) $target_misalignments,
+                'hidden_rows'          => (int) $hidden_rows
         ];
 
 
