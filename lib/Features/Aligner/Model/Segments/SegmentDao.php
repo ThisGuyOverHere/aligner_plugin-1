@@ -361,32 +361,28 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
     public static function mergeSegments( Array $segments ) {
 
-        $raw_array   = [];
         $clean_array = [];
         $merge_count = 0;
 
         $segments_id = [];
         foreach ( $segments as $key => $segment ) {
-            $raw_array[]   = $segment[ 'content_raw' ];
             $clean_array[] = $segment[ 'content_clean' ];
             $merge_count   += $segment[ 'raw_word_count' ];
 
             $segments_id[] = $segment[ 'id' ];
         }
 
-        $raw_merge   = implode( ' ', $raw_array );
         $clean_merge = implode( ' ', $clean_array );
 
-        $hash_merge = md5( $raw_merge );
-
-        self::updateSegmentContent( array_shift( $segments_id ), [ $raw_merge, $clean_merge, $hash_merge, $merge_count ] );
+        self::updateSegmentContent( array_shift( $segments_id ), [ null, $clean_merge, null, $merge_count ] );
 
         self::deleteSegmentsByIds( $segments_id );
 
         $first_segment = array_shift( $segments );
 
-        $first_segment[ 'content_raw' ]    = $raw_merge;
+        $first_segment[ 'content_raw' ]    = null;
         $first_segment[ 'content_clean' ]  = $clean_merge;
+        $first_segment[ 'content_hash' ]   = null;
         $first_segment[ 'raw_word_count' ] = $merge_count;
         $first_segment[ 'order' ]          = (int)$first_segment[ 'order' ];
         $first_segment[ 'next' ]           = (int)$first_segment[ 'next' ];
