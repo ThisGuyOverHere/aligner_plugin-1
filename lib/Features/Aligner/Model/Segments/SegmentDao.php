@@ -103,7 +103,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
 
 
-        $source_query = "SELECT s.content_raw as source, s.id as source_segment_id FROM segments as s
+        $source_query = "SELECT s.content_clean as source, s.id as source_segment_id FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order";
 
@@ -113,7 +113,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $source_data = $stmt->fetchAll();
 
-        $target_query = "SELECT s.content_raw as target, s.id as target_segment_id FROM segments as s
+        $target_query = "SELECT s.content_clean as target, s.id as target_segment_id FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order";
 
@@ -161,7 +161,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
         $conn = NewDatabase::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "SELECT s.content_raw as source FROM segments as s
+        $stmt = $conn->prepare( "SELECT s.content_clean as source FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order" );
 
@@ -169,7 +169,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
         $source = $stmt->fetchAll();
 
-        $stmt = $conn->prepare( "SELECT s.content_raw as target FROM segments as s
+        $stmt = $conn->prepare( "SELECT s.content_clean as target FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order" );
 
@@ -196,7 +196,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
     public static function getDataForAlignment( $id_job, $type, $ttl = 0 ) {
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT id, content_raw, content_clean, raw_word_count FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
+        $stmt = $conn->prepare( "SELECT id, content_clean, raw_word_count FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
         $stmt->execute( [ $id_job, $type ] );
 
         return $stmt->fetchAll( \PDO::FETCH_ASSOC );
@@ -272,7 +272,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
         $conn    = NewDatabase::obtain()->getConnection();
 
 
-        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw FROM segments as s
+        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ?
         ORDER by sm.order";
@@ -289,7 +289,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
         $conn    = NewDatabase::obtain()->getConnection();
 
 
-        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw, sm.hidden FROM segments as s
+        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, sm.hidden FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ?
         ORDER by sm.order";
