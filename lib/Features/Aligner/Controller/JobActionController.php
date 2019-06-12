@@ -321,7 +321,7 @@ class JobActionController extends AlignerController {
         $new_match_order                       = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch[ 'next' ] );
         $destination_match                     = $referenceMatch;
         $destination_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
-        $destination_match[ 'content_raw' ]    = $movingSegment[ 'content_raw' ];
+        $destination_match[ 'content_raw' ]    = null;
         $destination_match[ 'content_clean' ]  = $movingSegment[ 'content_clean' ];
         $destination_match[ 'raw_word_count' ] = $movingSegment[ 'raw_word_count' ];
         $destination_match[ 'next' ]           = $new_match_order;
@@ -383,7 +383,7 @@ class JobActionController extends AlignerController {
         $new_match_order = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch['next'] );
         $destination_match = $referenceMatch;
         $destination_match['segment_id'] = $movingSegment['id'];
-        $destination_match['content_raw'] = $movingSegment['content_raw'];
+        $destination_match['content_raw'] = null;
         $destination_match['content_clean'] = $movingSegment['content_clean'];
         $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
         $destination_match['next'] = $new_match_order;
@@ -415,7 +415,7 @@ class JobActionController extends AlignerController {
         $new_match_destination[ 'segment_id' ]     = $referenceMatch[ 'id' ];
         $new_match_destination[ 'type' ]           = $type;
         $new_match_destination[ 'id_job' ]         = $id_job;
-        $new_match_destination[ 'content_raw' ]    = $referenceMatch['content_raw'];
+        $new_match_destination[ 'content_raw' ]    = null;
         $new_match_destination[ 'content_clean' ]  = $referenceMatch['content_clean'];
         $new_match_destination[ 'raw_word_count' ] = $referenceMatch['raw_word_count'];
 
