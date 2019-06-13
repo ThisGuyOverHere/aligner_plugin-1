@@ -15,7 +15,7 @@ import AlignComponent from "./Components/Align/Align.component";
 import Env from "./Constants/Env.constants";
 
 
-Env.GA_UA ? ReactGA.initialize(Env.GA_UA, {debug: true}) : null;
+Env.GA_UA !== 'null' ? ReactGA.initialize(Env.GA_UA, {debug: true}) : null;
 
 
 const e = React.createElement;

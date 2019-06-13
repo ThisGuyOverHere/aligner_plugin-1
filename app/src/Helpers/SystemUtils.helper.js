@@ -159,6 +159,21 @@ export const syncWithBackend = (method, callback) => {
 };
 
 
+export const countHideAndMiss = (source, target) => {
+    for(const index in source){
+        if(parseInt(source[index].hidden) || parseInt(target[index].hidden) ){
+            console.log(`Row ${+index+1} is hidden`)
+        }else {
+            if(!source[index].content_clean && target[index].content_clean){
+                console.log(`Row ${+index+1} is not alignment`)
+            }
+            if(!target[index].content_clean && source[index].content_clean){
+                console.log(`Row ${+index+1} is not alignment`)
+            }
+        }
+    }
+}
+
 export const checkResultStore = (source, target) => {
     console.log("Check Result");
     for (let x = 0; x < source.length - 1; x++) {
