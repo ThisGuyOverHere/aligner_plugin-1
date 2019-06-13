@@ -166,4 +166,20 @@ class AlignUtils
         return $messages ;
     }
 
+    public static function removeVersionFromFileName($filename){
+
+        $matches = [];
+
+        preg_match_all('/(_\([0-9]+\))/u', $filename, $matches,PREG_OFFSET_CAPTURE);
+
+        $last_array = end($matches);
+        $last_match = end($last_array);
+
+        $start_position = $last_match[1];
+        $filename       = substr_replace($filename, '', $start_position, strlen($last_match[0]));
+
+        return $filename;
+
+    }
+
 }
