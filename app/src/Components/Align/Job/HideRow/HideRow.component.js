@@ -17,7 +17,6 @@ class HideComponent extends Component {
 
     constructor(props) {
         super(props);
-
     }
 
 

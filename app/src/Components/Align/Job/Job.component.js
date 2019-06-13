@@ -22,7 +22,11 @@ class JobComponent extends Component {
                 id: PropTypes.any
             }),
             rows: PropTypes.array,
-            rowsDictionary: PropTypes.any
+            rowsDictionary: PropTypes.any,
+            counters:PropTypes.shape({
+                hideIndexesMap: PropTypes.array,
+                misalignmentsIndexesMap: PropTypes.array
+            }),
         }),
         inSync: PropTypes.bool
     };
@@ -213,6 +217,7 @@ class JobComponent extends Component {
     renderItems(array) {
         let values = [];
         const enableDrag = true;
+        const { job: {counters:{hideIndexesMap,misalignmentsIndexesMap}}} = this.props;
         if (array.length > 0) {
             array.map((row, index) => {
                 const selection = {
@@ -236,6 +241,7 @@ class JobComponent extends Component {
                         jobInfo={this.props.jobInfo}
                         enableDrag={enableDrag}
                         selection={selection}
+                        misaligned={misalignmentsIndexesMap.includes(index)}
                         row={row}/>);
                 }
                 return row;

@@ -36,6 +36,10 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 		},
 		count: 0
 	},
+	counters:{
+		hideIndexesMap: [],
+		misalignmentsIndexesMap:[]
+	},
 
 	updateAll: function (volumeAnalysis, project) {
 
@@ -58,6 +62,8 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 		this.selection.target.list = [];
 		this.selection.target.map = {};
 		this.selection.count = 0;
+		this.counters.hideIndexesMap = [];
+		this.counters.misalignmentsIndexesMap = [];
 	},
 
 	emitChange: function (event, args) {
@@ -94,7 +100,8 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 		this.job.source = this.job.source.push(...source);
 		this.job.target = this.job.target.push(...target);
 		checkResultStore(segments.source, segments.target);
-		countHideAndMiss(this.job.source.toJS(), this.job.target.toJS())
+		this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
+		console.log(this.counters)
 	},
 	/**
 	 *
@@ -196,11 +203,12 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 						change.data.next = el.next;
 						this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
 					} else {
-						console.log(change.data)
+						console.log(change.data);
 						this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
 					}
 					break;
 			}
+			this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 		});
 
 
@@ -308,7 +316,8 @@ AppDispatcher.register(function (action) {
 			ProjectStore.storeSegments(action.segments);
 			ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
 				source: ProjectStore.job.source.toJS(),
-				target: ProjectStore.job.target.toJS()
+				target: ProjectStore.job.target.toJS(),
+				counters: ProjectStore.counters
 			});
 			break;
 		case ProjectConstants.CHANGE_SEGMENT_POSITION:
@@ -318,33 +327,38 @@ AppDispatcher.register(function (action) {
 			}
 			ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
 				source: ProjectStore.job.source.toJS(),
-				target: ProjectStore.job.target.toJS()
+				target: ProjectStore.job.target.toJS(),
+				counters: ProjectStore.counters
 			}, syncAPI);
 			break;
 		case ProjectConstants.DELETE_ROWS:
 			ProjectStore.deleteEmptyRows(action.deletes);
 			ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
 				source: ProjectStore.job.source.toJS(),
-				target: ProjectStore.job.target.toJS()
+				target: ProjectStore.job.target.toJS(),
+				counters: ProjectStore.counters
 			}, syncAPI);
 			break;
 		case ProjectConstants.MERGE_ALIGN:
 			ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
 				source: ProjectStore.job.source.toJS(),
-				target: ProjectStore.job.target.toJS()
+				target: ProjectStore.job.target.toJS(),
+				counters: ProjectStore.counters
 			}, syncAPI);
 			ProjectStore.emitChange(ProjectConstants.MERGE_ALIGN, action.syncAPI.data);
 			break;
 		case ProjectConstants.HIDE_SEGMENTS:
 			ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
 				source: ProjectStore.job.source.toJS(),
-				target: ProjectStore.job.target.toJS()
+				target: ProjectStore.job.target.toJS(),
+				counters: ProjectStore.counters
 			}, syncAPI);
 			break;
 		case ProjectConstants.SHOW_SEGMENTS:
 			ProjectStore.emitChange(ProjectConstants.RENDER_ROWS, {
 				source: ProjectStore.job.source.toJS(),
-				target: ProjectStore.job.target.toJS()
+				target: ProjectStore.job.target.toJS(),
+				counters: ProjectStore.counters
 			}, syncAPI);
 			break;
 		case ProjectConstants.ADD_SEGMENT_TO_SELECTION:
