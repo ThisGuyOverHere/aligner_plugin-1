@@ -21,6 +21,7 @@ const ProjectConstants = keyMirror({
     GET_JOB_INFO: null,
     HIDE_SEGMENTS: null,
     SHOW_SEGMENTS: null,
+    HIDE_SEGMENTS_NAVIGATOR: null
 });
 
 export default ProjectConstants;

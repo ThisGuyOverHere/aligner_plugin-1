@@ -63,7 +63,8 @@ class JobComponent extends Component {
                 segmentContentWidth: "437px",
                 width: 0,
                 height: 0,
-            }
+            },
+            hideNavigatorData: null
         };
 
         this.elementsRef = {};
@@ -80,6 +81,7 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.addListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
+        ProjectStore.addListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.onHideNavigatorEvent);
     }
 
     componentWillUnmount() {
@@ -89,8 +91,8 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
+        ProjectStore.removeListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.onHideNavigatorEvent);
         window.removeEventListener('resize', this.updateWindowDimensions);
-
     }
 
     componentDidUpdate() {
@@ -184,7 +186,6 @@ class JobComponent extends Component {
             data.segmentContentWidth = "437px";
         }
 
-
         data.width = window.innerWidth;
         data.height = window.innerHeight;
 
@@ -210,7 +211,6 @@ class JobComponent extends Component {
                 splitModalStatus: false
             });
         }
-
     };
 
 
@@ -218,6 +218,7 @@ class JobComponent extends Component {
         let values = [];
         const enableDrag = true;
         const { job: {counters:{hideIndexesMap,misalignmentsIndexesMap}}} = this.props;
+        const {hideNavigatorData} = this.state;
         if (array.length > 0) {
             array.map((row, index) => {
                 const selection = {
@@ -231,6 +232,7 @@ class JobComponent extends Component {
                         index={index}
                         enableDrag={enableDrag}
                         selection={selection}
+                        selectedInNavigator={hideNavigatorData ? hideNavigatorData.realRowIndex === index  : null}
                         row={row}
                     />)
                 } else {
@@ -269,6 +271,15 @@ class JobComponent extends Component {
         this.setState({
             search: search,
             scrollToSegment: scrollToSegment
+        });
+    };
+
+    onHideNavigatorEvent = (hideNavigatorData) => {
+        console.log('in navigator interceptor: ',hideNavigatorData);
+        const scrollToSegment = null;
+        this.setState({
+            hideNavigatorData: hideNavigatorData,
+            scrollToSegment: hideNavigatorData.realRowIndex
         });
     }
 }

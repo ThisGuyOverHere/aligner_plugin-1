@@ -26,7 +26,7 @@ class ToolbarComponent extends Component {
         this.state = {
             hintOpened: false,
             searchStatus: false,
-            hideSegmentsNavigation: false,
+            hideSegmentsNavigator: false,
             selection: {
                 source: {
                     count: 0,
@@ -63,7 +63,7 @@ class ToolbarComponent extends Component {
                 </div>
                 <div>
                     <i className="low vision icon low vision" onClick={this.onHideSegmentsClick} />
-                    {this.state.hideSegmentsNavigation && <HideSegments job={this.props.job}/>}
+                    {this.state.hideSegmentsNavigator && <HideSegments close={this.closeHideSegmentsNavigator} job={this.props.job}/>}
                     <Hotkeys
                         keyName="command+f,ctrl+f,esc"
                         onKeyDown={this.handlerSearch}>
@@ -90,6 +90,12 @@ class ToolbarComponent extends Component {
         })
     };
 
+    closeHideSegmentsNavigator = () => {
+        this.setState({
+            hideSegmentsNavigator: false
+        })
+    };
+
     onSearchIconClick = () => {
         this.setState({
             searchStatus: !this.state.searchStatus
@@ -98,7 +104,7 @@ class ToolbarComponent extends Component {
 
     onHideSegmentsClick = () => {
         this.setState({
-            hideSegmentsNavigation: !this.state.hideSegmentsNavigation
+            hideSegmentsNavigator: !this.state.hideSegmentsNavigator
         })
     };
 

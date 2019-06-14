@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
+import ProjectActions from "../../../../Actions/Project.actions";
 
 class HideSegments extends Component {
     static propTypes = {
@@ -15,166 +16,85 @@ class HideSegments extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            active: false,
-            fulltext: ''
+            actualSegmentSelected: 0,
+            actualIndex: 0
         };
     }
 
-    componentDidUpdate(prevProps) {
-
-    }
+    componentDidUpdate(prevProps) {}
 
     componentDidMount() {
-      
+        ProjectActions.emitHideNavigatorData({
+            actualSegmentSelected: 0,
+            realRowIndex: 0
+        });
     }
 
     componentWillUnmount() {
-        /*  setTimeout(() => {
-              ProjectActions.emitSearchResults({
-                  q: '',
-                  searchResults: [],
-                  searchResultsDictionary: {},
-                  occurrencesList: [],
-                  featuredSearchResult: 0
-              });
-          }, 0)*/
+         setTimeout(() => {
+             this.resetHideSegmentsNavigator();
+          }, 0);
     }
 
     render() {
         const {job: {counters: {hideIndexesMap}}} = this.props;
+        const {actualSegmentSelected, actualIndex} = this.state;
         return (
             <div id="search">
-                <div> {hideIndexesMap.length} </div>
+                <div>  {actualSegmentSelected+1} / {hideIndexesMap.length}
+                    <span onClick={() => this.onHideNavigationChange("up")}> Up </span>
+                    <span onClick={() => this.onHideNavigationChange("down")}> Down </span>
+                    <span onClick={() =>  this.closeHideSegmentsNavigator()}> X </span>
+                </div>
             </div>
         );
     }
 
-    /*handlerSearch = (keyName, e, handle) => {
-        e.preventDefault();
-        this.searchInput.focus();
-    };
+    onHideNavigationChange = (direction) => {
+        const { actualSegmentSelected, actualIndex} = this.state;
+        const {job: {counters: {hideIndexesMap}}} = this.props;
+        let segmentSelected = actualSegmentSelected;
+        let navigatorIndex = actualIndex;
 
-    onPerformSearch = (e) => {
-        e.preventDefault();
-        this.setFeatured(this.state.featuredSearchResult + 1);
-    };
+        if(direction === "up"){
+            navigatorIndex = ++navigatorIndex;
+            segmentSelected = this.mod(navigatorIndex,hideIndexesMap.length);
+        }else{
+            navigatorIndex = --navigatorIndex;
+            segmentSelected = this.mod(navigatorIndex,hideIndexesMap.length);
+        }
 
-    getElements = () => {
-        let elements = [];
-        if (this.props.job.rows) {
-            this.props.job.rows.map((row, index) => {
-                const source = {
-                    content: row.source.content_clean ? row.source.content_clean.toLowerCase() : '',
-                    type: 'source',
-                    id: row.source.id,
-                    index: index
-                };
-                const target = {
-                    content: row.target.content_clean ? row.target.content_clean.toLowerCase() : '',
-                    type: 'target',
-                    id: row.target.id,
-                    index: index
-                };
-                elements.push(source, target);
-            });
-        }
-        return elements;
-    };
-    resetSearch = () => {
-        if (this.state.active) {
-            setTimeout(() => {
-                ProjectActions.emitSearchResults({
-                    q: '',
-                    searchResults: [],
-                    searchResultsDictionary: {},
-                    occurrencesList: [],
-                    featuredSearchResult: 0
-                });
-            }, 0)
-        }
-        this.setState({
-            elements: this.getElements(this.props.job.rows),
-            active: false,
-            searchResults: [],
-            searchResultsDictionary: {},
-            featuredSearchResult: 0,
-            occurrencesList: [],
-            fulltext: ''
+        ProjectActions.emitHideNavigatorData({
+            actualSegmentSelected: segmentSelected,
+            realRowIndex: hideIndexesMap[segmentSelected]
         });
-    };
-    onSearchChange = (event) => {
-        let fulltext = event.target.value.toLowerCase();
-        let searchResultsDictionary = {};
-        const elements = JSON.parse(JSON.stringify(this.state.elements));
-        let active = false;
-        let searchProgressiveIndex = 0;
-        let searchResults = [];
-        let occurrencesList = [];
 
-        if (fulltext.length > 0) {
-            active = true;
-            searchResults = elements.filter(function (item) {
-                return item.content.indexOf(fulltext) !== -1;
-            }).map(item => {
-                item.occurrences = [];
-                let searchStrLen = fulltext.length;
-                let startIndex = 0, index;
-                while ((index = item.content.indexOf(fulltext, startIndex)) > -1) {
-                    item.occurrences.push({matchPosition: index, searchProgressiveIndex: searchProgressiveIndex});
-                    occurrencesList.push({index: item.index, id: item.id});
-                    searchProgressiveIndex++;
-                    startIndex = index + searchStrLen;
-                }
-                item.occurrences.reverse();
-                searchResultsDictionary[item.id] = item;
-                return item
-            });
-            ProjectActions.emitSearchResults({
-                q: fulltext,
-                searchResults: searchResults,
-                searchResultsDictionary: searchResultsDictionary,
-                occurrencesList: occurrencesList,
-                featuredSearchResult: 0
-            });
-            this.setState({
-                fulltext: event.target.value,
-                active: active,
-                searchResults: searchResults,
-                searchResultsDictionary: searchResultsDictionary,
-                occurrencesList: occurrencesList,
-                featuredSearchResult: 0
-            })
-        } else {
-            this.resetSearch()
-        }
+        console.log("segment selected: ", segmentSelected);
+        console.log("actualIndex: ", navigatorIndex);
+        console.log("hideindex map real row index: ", hideIndexesMap[segmentSelected]);
 
-
-    };
-
-    setFeatured = (value) => {
-        if (this.state.occurrencesList.length > 1) {
-            let module = this.state.occurrencesList.length;
-            value = this.mod(value, module);
-        } else {
-            value = 0;
-        }
-
-        ProjectActions.emitSearchResults({
-            q: this.state.fulltext,
-            searchResults: this.state.searchResults,
-            searchResultsDictionary: this.state.searchResultsDictionary,
-            occurrencesList: this.state.occurrencesList,
-            featuredSearchResult: value
-        });
         this.setState({
-            featuredSearchResult: value
-        })
+            actualSegmentSelected: segmentSelected,
+            actualIndex: navigatorIndex,
+        });
     };
 
     // handling module
     mod = (n, m) => {
         return ((n % m) + m) % m;
-    }*/
+    };
+
+    resetHideSegmentsNavigator = () => {
+        ProjectActions.emitHideNavigatorData({
+            actualSegmentSelected: null,
+            realRowIndex: null
+        });
+    };
+
+    closeHideSegmentsNavigator = () => {
+        this.resetHideSegmentsNavigator();
+        this.props.close();
+    }
 }
 
 export default HideSegments;
