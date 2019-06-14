@@ -96,7 +96,6 @@ class RowComponent extends Component {
 
     render() {
         const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag, jobInfo,isInMisalignedNavigator,selectedInNavigator} = this.props;
-        console.log(isInMisalignedNavigator);
         let rowClass = [`project-row ${selectedInNavigator ? "selected" : null} ${isInMisalignedNavigator ? "isIn" : null} ` ];
         const dragElType = dragEl ? dragEl.type : undefined;
 
