@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../Actions/Project.actions";
+import {Icon} from "semantic-ui-react";
 
 class HideSegments extends Component {
     static propTypes = {
@@ -21,7 +22,8 @@ class HideSegments extends Component {
         };
     }
 
-    componentDidUpdate(prevProps) {}
+    componentDidUpdate(prevProps) {
+    }
 
     componentDidMount() {
         ProjectActions.emitHideNavigatorData({
@@ -31,37 +33,38 @@ class HideSegments extends Component {
     }
 
     componentWillUnmount() {
-         setTimeout(() => {
-             this.resetHideSegmentsNavigator();
-          }, 0);
+        setTimeout(() => {
+            this.resetHideSegmentsNavigator();
+        }, 0);
     }
 
     render() {
         const {job: {counters: {hideIndexesMap}}} = this.props;
         const {actualSegmentSelected, actualIndex} = this.state;
         return (
-            <div id="search">
-                <div>  {actualSegmentSelected+1} / {hideIndexesMap.length}
-                    <span onClick={() => this.onHideNavigationChange("up")}> Up </span>
-                    <span onClick={() => this.onHideNavigationChange("down")}> Down </span>
-                    <span onClick={() =>  this.closeHideSegmentsNavigator()}> X </span>
-                </div>
+            <div id="hide-segments">
+                <span className="amount">{actualSegmentSelected + 1} / {hideIndexesMap.length}</span>
+                <span className="controls">
+                    <Icon className={"increment"} name='chevron up' onClick={() => this.onHideNavigationChange("up")}/>
+                    <Icon className={"decrement"} name='chevron down' onClick={() => this.onHideNavigationChange("down")}/>
+                    <Icon className={"close"} name='x' onClick={() => this.closeHideSegmentsNavigator()}/>
+                </span>
             </div>
         );
     }
 
     onHideNavigationChange = (direction) => {
-        const { actualSegmentSelected, actualIndex} = this.state;
+        const {actualSegmentSelected, actualIndex} = this.state;
         const {job: {counters: {hideIndexesMap}}} = this.props;
         let segmentSelected = actualSegmentSelected;
         let navigatorIndex = actualIndex;
 
-        if(direction === "up"){
+        if (direction === "down") {
             navigatorIndex = ++navigatorIndex;
-            segmentSelected = this.mod(navigatorIndex,hideIndexesMap.length);
-        }else{
+            segmentSelected = this.mod(navigatorIndex, hideIndexesMap.length);
+        } else {
             navigatorIndex = --navigatorIndex;
-            segmentSelected = this.mod(navigatorIndex,hideIndexesMap.length);
+            segmentSelected = this.mod(navigatorIndex, hideIndexesMap.length);
         }
 
         ProjectActions.emitHideNavigatorData({

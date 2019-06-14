@@ -232,6 +232,7 @@ class JobComponent extends Component {
                         index={index}
                         enableDrag={enableDrag}
                         selection={selection}
+                        isInHideNavigator={hideIndexesMap.includes( hideNavigatorData ? hideNavigatorData.realRowIndex : null )}
                         selectedInNavigator={hideNavigatorData ? hideNavigatorData.realRowIndex === index  : null}
                         row={row}
                     />)

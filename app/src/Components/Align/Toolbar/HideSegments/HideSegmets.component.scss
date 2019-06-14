@@ -1,0 +1,31 @@
+@import "../../../../../assets/theme/variables";
+
+#hide-segments{
+  background: $white;
+  border: 1px solid  $lightGrey;
+  min-width: 120px;
+  position: absolute;
+  top: 56px;
+  right: 80px;
+  padding: 4px;
+
+  box-shadow: 0 2px 8px 0 #C5C5C5;
+  .amount{
+	padding-right: 8px;
+	border-right: 1px solid;
+	margin-right: 8px;
+  }
+  .controls{
+	color: #7C7A7A;
+	font-size: 0.9rem;
+	height: 32px;
+	.increment,.decrement{
+	  margin: 8px 4px;
+	  cursor: pointer;
+	}
+	.close{
+	  margin: 8px 0;
+	  cursor: pointer;
+	}
+  }
+}

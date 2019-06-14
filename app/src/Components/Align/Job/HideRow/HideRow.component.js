@@ -15,6 +15,7 @@ class HideComponent extends Component {
         rec: PropTypes.any,
         row: PropTypes.object.isRequired,
         selection: PropTypes.object,
+        isInHideNavigator: PropTypes.bool,
         selectedInNavigator: PropTypes.bool
     };
 
@@ -25,24 +26,11 @@ class HideComponent extends Component {
         }
     }
 
-
-   /* componentDidUpdate(prevProps, prevState, snapshot) {
-        if(prevProps.navigatorIndex !== this.props.navigatorIndex){
-            console.log("changed##############")
-            this.isSelected()
-        }
-    }*/
-
-    /*componentDidMount() {
-        ProjectStore.addListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.isSelected);
-    }
-
-    componentWillUnmount() {
-        ProjectStore.removeListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.isSelected);
-    }*/
-
     render() {
-        return <div className={`container ui ${ this.props.selectedInNavigator ? "selected" : null}`} id="hide-row-container">
+        const {isInHideNavigator,selectedInNavigator} = this.props;
+        return <div className={`container ui 
+                    ${ selectedInNavigator ? "selected" : null} ${isInHideNavigator ? "isIn" : null}`}
+                    id="hide-row-container">
             <div className="index">{this.props.index+1}</div>
             <div className="show-toggle" onClick={this.showRow}>
               <i aria-hidden='true' className='unhide icon'/>
@@ -58,14 +46,6 @@ class HideComponent extends Component {
         }];
         ProjectActions.showSegments(matches);
     };
-
-    isSelected = () => {
-        console.log("ROW index: ", this.props.index );
-        console.log("navigator######: ", this.props.navigatorIndex );
-        this.setState({
-            selected: this.props.navigatorIndex === this.props.index
-        })
-    }
 
 }
 
