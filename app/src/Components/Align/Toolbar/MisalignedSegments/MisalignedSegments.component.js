@@ -5,12 +5,12 @@ import {Icon} from "semantic-ui-react";
 import ProjectStore from "../../../../Stores/Project.store";
 import ProjectConstants from "../../../../Constants/Project.constants";
 
-class HideSegments extends Component {
+class MisalignedSegments extends Component {
     static propTypes = {
         job: PropTypes.shape({
             counters: PropTypes.shape({
                 hideIndexesMap: PropTypes.array,
-                missAlignmentsIndexesMap: PropTypes.array
+                misalignmentsIndexesMap: PropTypes.array
             }),
         }),
         close: PropTypes.func
@@ -28,56 +28,60 @@ class HideSegments extends Component {
     }
 
     componentDidMount() {
-        const {job: {counters: {hideIndexesMap}}} = this.props;
-        ProjectActions.emitHideNavigatorData({
-            actualSegmentSelected: hideIndexesMap[0],
-            realRowIndex: hideIndexesMap[0]
+        const {job: {counters: {misalignmentsIndexesMap}}} = this.props;
+        ProjectActions.emitMisalignmentsData({
+            actualSegmentSelected: misalignmentsIndexesMap[0],
+            realRowIndex: misalignmentsIndexesMap[0]
         });
+       /* ProjectStore.addListener(ProjectConstants.SEARCH_RESULTS, this.closeMisalignmentSegmentsNavigator);
+        ProjectStore.addListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.closeMisalignmentSegmentsNavigator);*/
     }
 
     componentWillUnmount() {
         setTimeout(() => {
             this.resetHideSegmentsNavigator();
         }, 0);
+       /* ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.closeMisalignmentSegmentsNavigator);
+        ProjectStore.removeListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.closeMisalignmentSegmentsNavigator);*/
     }
 
     render() {
-        const {job: {counters: {hideIndexesMap}}} = this.props;
+        const {job: {counters: {misalignmentsIndexesMap}}} = this.props;
         const {actualSegmentSelected, actualIndex} = this.state;
         return (
             <div id="hide-segments">
-                <span className="amount">{actualSegmentSelected + 1} / {hideIndexesMap.length}</span>
+                <span className="amount">{actualSegmentSelected + 1} / {misalignmentsIndexesMap.length}</span>
                 <span className="controls">
-                    <Icon className={"increment"} name='chevron up' onClick={() => this.onHideNavigationChange("up")}/>
-                    <Icon className={"decrement"} name='chevron down' onClick={() => this.onHideNavigationChange("down")}/>
-                    <Icon className={"close"} name='x' onClick={() => this.closeHideSegmentsNavigator()}/>
+                    <Icon className={"increment"} name='chevron up' onClick={() => this.onMisalignmentSegmentsChange("up")}/>
+                    <Icon className={"decrement"} name='chevron down' onClick={() => this.onMisalignmentSegmentsChange("down")}/>
+                    <Icon className={"close"} name='x' onClick={() => this.closeMisalignmentSegmentsNavigator()}/>
                 </span>
             </div>
         );
     }
 
-    onHideNavigationChange = (direction) => {
+    onMisalignmentSegmentsChange = (direction) => {
         const {actualSegmentSelected, actualIndex} = this.state;
-        const {job: {counters: {hideIndexesMap}}} = this.props;
+        const {job: {counters: {misalignmentsIndexesMap}}} = this.props;
         let segmentSelected = actualSegmentSelected;
         let navigatorIndex = actualIndex;
 
         if (direction === "down") {
             navigatorIndex = ++navigatorIndex;
-            segmentSelected = this.mod(navigatorIndex, hideIndexesMap.length);
+            segmentSelected = this.mod(navigatorIndex, misalignmentsIndexesMap.length);
         } else {
             navigatorIndex = --navigatorIndex;
-            segmentSelected = this.mod(navigatorIndex, hideIndexesMap.length);
+            segmentSelected = this.mod(navigatorIndex, misalignmentsIndexesMap.length);
         }
 
-        ProjectActions.emitHideNavigatorData({
+        ProjectActions.emitMisalignmentsData({
             actualSegmentSelected: segmentSelected,
-            realRowIndex: hideIndexesMap[segmentSelected]
+            realRowIndex: misalignmentsIndexesMap[segmentSelected]
         });
 
         console.log("segment selected: ", segmentSelected);
         console.log("actualIndex: ", navigatorIndex);
-        console.log("hideindex map real row index: ", hideIndexesMap[segmentSelected]);
+        console.log("misalignmentsIndexesMap map real row index: ", misalignmentsIndexesMap[segmentSelected]);
 
         this.setState({
             actualSegmentSelected: segmentSelected,
@@ -91,13 +95,13 @@ class HideSegments extends Component {
     };
 
     resetHideSegmentsNavigator = () => {
-        ProjectActions.emitHideNavigatorData({
+        ProjectActions.emitMisalignmentsData({
             actualSegmentSelected: null,
             realRowIndex: null
         });
     };
 
-    closeHideSegmentsNavigator = () => {
+    closeMisalignmentSegmentsNavigator = () => {
         setTimeout(() => {
             this.resetHideSegmentsNavigator();
         }, 0);
@@ -105,4 +109,4 @@ class HideSegments extends Component {
     }
 }
 
-export default HideSegments;
+export default MisalignedSegments;

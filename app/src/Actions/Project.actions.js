@@ -603,6 +603,17 @@ let ProjectActions = {
 
         /**
          *
+         * @param misalignmentsData: misalignments segments data
+         */
+        emitMisalignmentsData: function (misalignmentsData) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.MISALIGNMENT_NAVIGATOR,
+                data: misalignmentsData
+            })
+        },
+
+        /**
+         *
          * @param info , set latest job info api call result into STORE_JOB_INFO.
          */
         setJobInfo: function (info) {

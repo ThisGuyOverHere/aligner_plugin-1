@@ -47,6 +47,8 @@ class RowComponent extends Component {
         row: PropTypes.object.isRequired,
         selection: PropTypes.object,
         search: PropTypes.object,
+        isInMisalignedNavigator: PropTypes.bool,
+        selectedInNavigator: PropTypes.bool
     };
 
     constructor(props) {
@@ -93,10 +95,11 @@ class RowComponent extends Component {
     }
 
     render() {
-        let rowClass = ['project-row'];
-        const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag, jobInfo} = this.props;
-
+        const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag, jobInfo,isInMisalignedNavigator,selectedInNavigator} = this.props;
+        console.log(isInMisalignedNavigator);
+        let rowClass = [`project-row ${selectedInNavigator ? "selected" : null} ${isInMisalignedNavigator ? "isIn" : null} ` ];
         const dragElType = dragEl ? dragEl.type : undefined;
+
         if (isOver && dragElType && canDrop) {
             rowClass.push("dropHover");
         }

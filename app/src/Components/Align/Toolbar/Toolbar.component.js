@@ -8,6 +8,7 @@ import ToolbarRightHintComponent from "./ToolbarRightHint/ToolbarRightHint.compo
 import SearchComponent from "./Search/Search.component";
 import Hotkeys from "react-hot-keys";
 import HideSegments from "./HideSegments/HideSegments.component";
+import MisalignedSegments from "./MisalignedSegments/MisalignedSegments.component";
 
 class ToolbarComponent extends Component {
     static propTypes = {
@@ -27,6 +28,7 @@ class ToolbarComponent extends Component {
             hintOpened: false,
             searchStatus: false,
             hideSegmentsNavigator: false,
+            misalignedSegments: false,
             selection: {
                 source: {
                     count: 0,
@@ -64,6 +66,8 @@ class ToolbarComponent extends Component {
                 <div>
                     <i className="low vision icon low vision" onClick={this.onHideSegmentsClick} />
                     {this.state.hideSegmentsNavigator && <HideSegments close={this.closeHideSegmentsNavigator} job={this.props.job}/>}
+                    <i className="sliders horizontal icon sliders horizontal" onClick={this.onMisalignedSegmentsClick} />
+                    {this.state.misalignedSegments && <MisalignedSegments close={this.closeMisalignedSegmentsNavigator} job={this.props.job}/>}
                     <Hotkeys
                         keyName="command+f,ctrl+f,esc"
                         onKeyDown={this.handlerSearch}>
@@ -96,6 +100,12 @@ class ToolbarComponent extends Component {
         })
     };
 
+    closeMisalignedSegmentsNavigator = () => {
+        this.setState({
+            misalignedSegments: false
+        })
+    };
+
     onSearchIconClick = () => {
         this.setState({
             searchStatus: !this.state.searchStatus
@@ -105,6 +115,12 @@ class ToolbarComponent extends Component {
     onHideSegmentsClick = () => {
         this.setState({
             hideSegmentsNavigator: !this.state.hideSegmentsNavigator
+        })
+    };
+
+    onMisalignedSegmentsClick = () => {
+        this.setState({
+            misalignedSegments: !this.state.misalignedSegments
         })
     };
 

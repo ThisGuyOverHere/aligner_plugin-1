@@ -64,7 +64,8 @@ class JobComponent extends Component {
                 width: 0,
                 height: 0,
             },
-            hideNavigatorData: null
+            hideNavigatorData: null,
+            misalignmentsNavigatorData: null
         };
 
         this.elementsRef = {};
@@ -82,6 +83,7 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.addListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
         ProjectStore.addListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.onHideNavigatorEvent);
+        ProjectStore.addListener(ProjectConstants.MISALIGNMENT_NAVIGATOR, this.onMisalignmentsNavigatorEvent);
     }
 
     componentWillUnmount() {
@@ -92,6 +94,7 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
         ProjectStore.removeListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.onHideNavigatorEvent);
+        ProjectStore.removeListener(ProjectConstants.MISALIGNMENT_NAVIGATOR, this.onMisalignmentsNavigatorEvent);
         window.removeEventListener('resize', this.updateWindowDimensions);
     }
 
@@ -218,7 +221,10 @@ class JobComponent extends Component {
         let values = [];
         const enableDrag = true;
         const { job: {counters:{hideIndexesMap,misalignmentsIndexesMap}}} = this.props;
-        const {hideNavigatorData} = this.state;
+        const {hideNavigatorData,misalignmentsNavigatorData} = this.state;
+        const misalignedNav = misalignmentsNavigatorData ? misalignmentsNavigatorData.realRowIndex : null;
+
+        console.log("############ ",misalignmentsNavigatorData);
         if (array.length > 0) {
             array.map((row, index) => {
                 const selection = {
@@ -244,7 +250,8 @@ class JobComponent extends Component {
                         jobInfo={this.props.jobInfo}
                         enableDrag={enableDrag}
                         selection={selection}
-                        misaligned={misalignmentsIndexesMap.includes(index)}
+                        isInMisalignedNavigator={misalignedNav ? misalignmentsIndexesMap.includes( index ) : null}
+                        selectedInNavigator={misalignmentsNavigatorData ? misalignmentsNavigatorData.realRowIndex === index  : null}
                         row={row}/>);
                 }
                 return row;
@@ -277,10 +284,17 @@ class JobComponent extends Component {
 
     onHideNavigatorEvent = (hideNavigatorData) => {
         console.log('in navigator interceptor: ',hideNavigatorData);
-        const scrollToSegment = null;
         this.setState({
             hideNavigatorData: hideNavigatorData,
             scrollToSegment: hideNavigatorData.realRowIndex
+        });
+    };
+
+    onMisalignmentsNavigatorEvent = (misalignmentsNavigatorData) => {
+        console.log('in navigator interceptor: ', misalignmentsNavigatorData);
+        this.setState({
+            misalignmentsNavigatorData: misalignmentsNavigatorData,
+            scrollToSegment: misalignmentsNavigatorData.realRowIndex
         });
     }
 }
