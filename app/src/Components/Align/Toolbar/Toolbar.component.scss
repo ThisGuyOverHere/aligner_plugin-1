@@ -14,17 +14,52 @@
   grid-template-columns: 56px 1fr 2.6fr 1fr;
   align-items: center;
   box-shadow: 0 5px 10px 0 rgba(198, 198, 198, 0.50);
-  >:first-child{
-    grid-column-end: span 2;
+
+  > :first-child {
+	grid-column-end: span 2;
   }
-  .hint, .search-ico{
-    font-size: 24px;
-    cursor: pointer;
-    float: right;
-    margin: 0 0 0 24px;
-    color: #8c8d90;
+
+  .toolbar-icons-container {
+	display: grid;
+	grid-column-gap: 16px;
+	grid-template-columns: repeat(4, 1fr);
+	max-width: 240px;
+	margin: 0 auto;
+	align-items: center;
   }
-  .search-ico{
-    font-size: 20px;
+
+  .misalignment-ico, .hide-ico {
+	position: relative;
+	svg {
+	  cursor: pointer;
+	  height: 32px;
+	  fill: #8c8d90;
+	}
+  }
+
+  .hint, .search-ico, .misalignment-ico, .hide-ico {
+	font-size: 32px;
+	cursor: pointer;
+	color: #8c8d90;
+  }
+
+  .search-ico, .hint {
+	margin: 10px auto 0;
+  }
+
+  .search-ico {
+	font-size: 28px;
+  }
+
+  .counter {
+	position: absolute;
+	font-size: 10px;
+	right: 0;
+	top: 0;
+  }
+
+  .ico-active {
+	fill: $primary !important;
+	color: $primary;
   }
 }

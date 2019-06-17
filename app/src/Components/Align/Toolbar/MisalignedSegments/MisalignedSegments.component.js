@@ -49,7 +49,7 @@ class MisalignedSegments extends Component {
         const {job: {counters: {misalignmentsIndexesMap}}} = this.props;
         const {actualSegmentSelected, actualIndex} = this.state;
         return (
-            <div id="hide-segments">
+            <div id="misaligned-segments">
                 <span className="amount">{actualSegmentSelected + 1} / {misalignmentsIndexesMap.length}</span>
                 <span className="controls">
                     <Icon className={"increment"} name='chevron up' onClick={() => this.onMisalignmentSegmentsChange("up")}/>
