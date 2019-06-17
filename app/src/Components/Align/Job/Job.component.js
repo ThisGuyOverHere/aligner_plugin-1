@@ -107,6 +107,7 @@ class JobComponent extends Component {
     }
 
     render() {
+        const { job: {counters:{hideIndexesMap,misalignmentsIndexesMap}}} = this.props;
         const data = this.renderItems(this.props.job.rows);
         let classes = ['align-project'];
         if (this.props.inSync) {
@@ -117,6 +118,8 @@ class JobComponent extends Component {
                 {this.state.statusExportModal && <ExportModal
                     user={this.state.user}
                     image={this.state.googleUserImage}
+                    misAlignedSegments={misalignmentsIndexesMap.length}
+                    hideSegments={hideIndexesMap.length}
                 />}
                 {data.length > 0 &&
                 <VirtualList

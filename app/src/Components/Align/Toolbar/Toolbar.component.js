@@ -68,7 +68,7 @@ class ToolbarComponent extends Component {
                                              job={this.props.job}/>
                 </div>
                 <div className="toolbar-icons-container">
-                    <div onClick={this.onHideSegmentsClick} className="hide-ico">
+                    <div onClick={hideIndexesMap.length ? this.onHideSegmentsClick : Function.prototype} className="hide-ico" aria-disabled={hideIndexesMap.length}>
                         <span className={hideSegmentsNavigator ? "counter ico-active" : "counter"}>
                             {hideIndexesMap.length}
                         </span>
@@ -83,7 +83,7 @@ class ToolbarComponent extends Component {
                     {hideSegmentsNavigator &&
                     <HideSegments close={this.closeHideSegmentsNavigator} job={this.props.job}/>}
 
-                    <div onClick={this.onMisalignedSegmentsClick} className="misalignment-ico">
+                    <div onClick={misalignmentsIndexesMap.length ? this.onMisalignedSegmentsClick : Function.prototype} className="misalignment-ico">
                         <span className={misalignedSegments ? "counter ico-active" : "counter"}>
                             {misalignmentsIndexesMap.length}
                         </span>

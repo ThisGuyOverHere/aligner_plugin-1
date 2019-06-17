@@ -11,7 +11,9 @@ import {httpConfig} from "../../../HttpRequests/System.http";
 class ExportModal extends Component {
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-        image: PropTypes.string
+        image: PropTypes.string,
+        misAlignedSegments:PropTypes.number,
+        hideSegments:PropTypes.number
     };
 
     constructor(props) {
@@ -62,6 +64,8 @@ class ExportModal extends Component {
     }
 
     renderComponent = () => {
+        const {hideSegments,misAlignedSegments} = this.props;
+
         let component;
         if (this.state.completed) {
             component = <ExportModalCompleted/>
@@ -69,7 +73,9 @@ class ExportModal extends Component {
             component = <ExportModalSendMail setCompletedExport={this.setCompletedExport} user={this.props.user}
                                              sendEmailHandler={this.sendEmailHandler}/>;
         } else if (this.props.user) {
-            component = <ExportModalLogged setCompletedExport={this.setCompletedExport} user={this.props.user}/>;
+            component = <ExportModalLogged setCompletedExport={this.setCompletedExport} user={this.props.user}
+                                           misAlignedSegments={misAlignedSegments}
+                                           hideSegments={hideSegments}/>;
         } else {
             component = <ExportModalNotLogged
                 googleLink={this.state.googleLogInLink}
