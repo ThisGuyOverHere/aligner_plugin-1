@@ -35,14 +35,16 @@ class Aligner extends BaseFeature
 
         route( '/job/[:id_job]/[:password]/segments', 'GET', 'Features\Aligner\Controller\SegmentsController', 'get' );
         
-        route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\JobActionController', 'split' );
-        route( '/job/[:id_job]/[:password]/segment/merge', 'POST', 'Features\Aligner\Controller\JobActionController', 'merge' );
-        route( '/job/[:id_job]/[:password]/segment/move', 'POST', 'Features\Aligner\Controller\JobActionController', 'move' );
-        route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\JobActionController', 'delete' );
-        route( '/job/[:id_job]/[:password]/segment/switch', 'POST', 'Features\Aligner\Controller\JobActionController', 'switchAction' );
-        route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\JobActionController', 'mergeAndAlign' );
-        route( '/job/[:id_job]/[:password]/segment/hide', 'POST', 'Features\Aligner\Controller\JobActionController', 'hide' );
-        route( '/job/[:id_job]/[:password]/segment/show', 'POST', 'Features\Aligner\Controller\JobActionController', 'show' );
+        route( '/job/[:id_job]/[:password]/segment/split', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'split' );
+        route( '/job/[:id_job]/[:password]/segment/merge', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'merge' );
+        route( '/job/[:id_job]/[:password]/segment/move', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'move' );
+        route( '/job/[:id_job]/[:password]/segment/delete', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'delete' );
+        route( '/job/[:id_job]/[:password]/segment/switch', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'switchAction' );
+        route( '/job/[:id_job]/[:password]/segment/merge_align', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'mergeAndAlign' );
+        route( '/job/[:id_job]/[:password]/segment/hide', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'hide' );
+        route( '/job/[:id_job]/[:password]/segment/show', 'POST', 'Features\Aligner\Controller\JobDirectActionController', 'show' );
+
+        route( '/job/[:id_job]/[:password]/segment/undo/delete', 'POST', 'Features\Aligner\Controller\JobUndoActionController', 'undoDelete' );
 
         route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TmController', 'getUserTM' );
         route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TmController', 'createTmKey' );
