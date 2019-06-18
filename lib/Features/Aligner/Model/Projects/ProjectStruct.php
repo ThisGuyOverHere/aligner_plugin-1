@@ -14,18 +14,8 @@ class Projects_ProjectStruct extends \DataAccess_AbstractDaoSilentStruct impleme
     public $name ;
     public $id_customer ;
     public $create_date ;
-    public $status_analysis ;
+    public $status_analysis;
     public $remote_ip_address ;
-    public $due_date;
-
-    /**
-     * @return bool
-     */
-    public function analysisComplete() {
-        return
-                $this->status_analysis == \Constants_ProjectStatus::STATUS_DONE ||
-                $this->status_analysis == \Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ;
-    }
 
     /**
      * @param int $ttl

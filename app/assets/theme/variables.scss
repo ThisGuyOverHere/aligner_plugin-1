@@ -1,22 +1,32 @@
 /** Colors **/
-
+$primary:           #00AEE4;
+$primary-light:     #78CFEA;
 $black:             #000000;
-$navbarBlack:       #4d4d4d;
+$headerBlack:       #4d4d4d;
+$gray:              #9B9B9B;
+$midGregy:          #7C7A7A;
 $secondaryText:     #797979;
+$overlay:           rgba(0, 0, 0, 0.4);
+$headerText:        #D5D5D5;
 $mainBackground:    #E5E5E5;
 $sectionGrey:       #E5E9F1;
 $dropzoneBorder:    #D2D2D2;
 $lightGrey:         #F2F4F7;
+$googleLogin:       #f8f8f8;
+$googleLoginBorder: #cccccc;
 $white:             #ffffff;
 $darkBlue:          #39699a;
+$checkBlue:         #3aa9dd;
 $mainBlue:          #2185d0;
+$googleLoginBtn:    #3e82f7;
 $lightBlue:         #03b8e9;
 $primaryBtnborder:  #7A7A7A;
 $primaryBtnBg:      #2BBEE9;
-$red:               #FB570D;
+$red:               #cf3d2b;
 $rose:              #FFA5A5;
 $lightRose:         #FEF8F6;
 
 /** Shadow **/
 
 $cardShadow:     0px 2px 2px #CCCCCC;
+$loginInputShadow: inset 0 1px 3px #ddd;

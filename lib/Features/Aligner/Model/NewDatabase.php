@@ -29,6 +29,12 @@ class NewDatabase extends Database {
     private $password = ""; //database login password
     private $database = ""; //database name
 
+    const SEQ_ID_SEGMENT = 'id_segment';
+
+    protected static $SEQUENCES = [
+            NewDatabase::SEQ_ID_SEGMENT,
+    ];
+
     /**
      * Instantiate the database (singleton design pattern)
      * @param string $server
@@ -40,7 +46,7 @@ class NewDatabase extends Database {
 
         // Check that the variables are not empty
         if ($server == null || $user == null || $database == null) {
-            throw new InvalidArgumentException("Database information must be passed in when the object is first created.");
+            throw new \InvalidArgumentException("NewDatabase information must be passed in when the object is first created.");
         }
 
         // Set fields

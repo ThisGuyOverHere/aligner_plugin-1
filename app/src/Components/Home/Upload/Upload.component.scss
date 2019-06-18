@@ -1,46 +1,49 @@
 @import "../../../../assets/theme/variables";
 
 .uploadComponent {
-  .uploadCard{
+  .uploadCard {
     margin: 0 auto;
     width: 90%;
     z-index: 11;
     padding-bottom: 24px;
     position: relative;
-    top: -144px;
+    top: -118px;
     background: $white;
     box-shadow: $cardShadow;
-    #projectNameHeader{
+    #projectNameHeader {
       background: $lightGrey;
       padding: 24px 0px 8px 16px;
-      h3{
+      h3 {
         padding-left: 16px;
-        span{
+        span {
           color: $secondaryText;
           font-size: 12px;
           font-weight: 300;
         }
       }
     }
-    #projectNameInput{
+    #projectNameInput {
       padding: 0px 0px 12px;
       background: $lightGrey;
-      p{
+      #project-name {
+        height: 32px;
+      }
+      p {
         color: $darkBlue;
         padding: .67857143em 0 .67857143em 1em;
         text-align: right;
         cursor: pointer;
-        span{
+        span {
           text-decoration: underline;
         }
       }
     }
-    #buttonRow{
+    #buttonRow {
       padding-bottom: 0px;
-      h4{
+      h4 {
         padding: 8px 24px 8px 16px;
         font-weight: 300;
-        span{
+        span {
           color: $darkBlue;
           text-decoration: underline;
           font-weight: 600;
@@ -49,26 +52,29 @@
       }
     }
   }
-  .dropzone{
+  .dropzone {
     border: 2px dashed $dropzoneBorder;
     border-radius: 2px;
-    padding: 8px;
     background: $lightGrey;
     cursor: pointer;
-    p{
+    background: #F2F4F7;
+    p {
       margin: 0;
       font-size: 14px;
       text-align: center;
       color: $secondaryText;
       font-weight: 300;
-      span{
+      span {
         color: $lightBlue;
         font-weight: bold;
       }
     }
+    > div {
+      padding: 32px 16px;
+    }
   }
 
-  .error{
+  .error {
     border: 2px solid $white;
     border-radius: 2px;
     padding: 8px;
@@ -80,13 +86,17 @@
         color: $red;
       }
     }
-    #error-icon{
+    #error-icon {
       margin-right: 8px;
     }
-    #delete-icon{
+    #delete-icon {
+      display: none;
       float: right;
     }
-    #triangle{
+    &:hover #delete-icon {
+      display: inline-block;
+    }
+    #triangle {
       color: $rose;
       font-size: 2rem;
       transform: rotate(-45deg);
@@ -96,49 +106,60 @@
     }
   }
 
-  .finish{
+  .finish {
     background: $white;
     border: 2px dashed $dropzoneBorder;
-    p{
+    p {
       text-align: left;
       color: $black;
-      #file-icon{
+      #file-icon {
         color: $lightBlue;
       }
-      #delete-icon{
+      .fileInfo {
+        display: inline-block;
+        text-align: left;
+        color: $black;
+      }
+      #delete-icon {
         display: none;
         float: right;
         color: $secondaryText;
       }
-      #fileSize{
+      #fileSize {
         font-size: 10px;
         margin: 2px;
         float: right;
         color: $secondaryText;
       }
-      &:hover #delete-icon{
+      &:hover #delete-icon {
         display: inline-block;
       }
-      &:hover #fileSize{
+      &:hover #fileSize {
         display: none;
       }
     }
   }
 
-  .progress{
-    #fileSize{
+  .progress {
+    #fileSize {
       font-size: 10px;
       margin: 2px 2px 2px 8px;
       float: right;
     }
-    #actionInfo{
+    #actionInfo {
       float: right;
       font-size: 10px;
       margin: 2px 2px 2px 8px;
     }
   }
 
-  .fileInfo{
+  .fileInfo {
     display: inline-block;
+  }
+
+  .creation-error{
+    color: $red;
+    text-align: center;
+    padding: 4px 0;
   }
 }

@@ -1,0 +1,49 @@
+@import "../../../../../assets/theme/variables";
+
+#toolbar {
+  .segment-actions {
+	ul {
+	  list-style: none;
+	  text-align: center;
+	  padding: 0;
+	  margin: 0;
+	  li {
+		display: inline-block;
+		padding: 4px 8px;
+		button {
+		  text-align: center;
+		  font-size: 13px;
+		  font-weight: 500;
+		  border: 1px solid $primary;
+		  background-color: $primary;
+		  padding: 8px 24px;
+		  border-radius: 2px;
+		  color: $white;
+		  cursor: pointer;
+		  opacity: 0.8;
+		  &:active, &:focus {
+			border: 1px solid $primary;
+			background-color: $primary;
+			color: $white;
+			box-shadow: none;
+			outline: none;
+		  }
+		  &:hover {
+			border: 1px solid $primary;
+			background-color: $primary;
+			color: $white;
+			opacity: 1;
+		  }
+		  &:disabled {
+			cursor: not-allowed;
+			background-color: transparent;
+			color: $gray;
+			border: 1px solid $gray;
+			opacity: .45 !important;
+		  }
+		}
+
+	  }
+	}
+  }
+}

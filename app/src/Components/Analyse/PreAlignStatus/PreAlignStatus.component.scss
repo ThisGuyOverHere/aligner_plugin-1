@@ -1,0 +1,34 @@
+@import "../../../../assets/theme/variables";
+@import "../../../../assets/theme/form";
+
+h3{
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.bar-container{
+  width: 800px;
+  margin: 8px auto 48px;
+  position: relative;
+  /* display: block; */
+  /* new */
+  display: flex;
+  justify-content: space-between;
+  .progress{
+	float: none;
+	width: 85%;
+	/* height: 24px; */
+	height: 8px;
+	.bar{
+	  min-width: 3%;
+	  /* height: 24px; */
+	  height: 8px;
+	}
+  }
+  .percentage{
+	line-height: 0.1;
+	font-size: 24px;
+	color: $gray;
+	font-weight: 500;
+  }
+}

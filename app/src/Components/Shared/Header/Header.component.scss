@@ -1,9 +1,128 @@
+@import "../../../../assets/theme/variables";
+
 #header{
-  height: 56px;
+  height: auto;
   z-index: 999;
-  background: #333;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  .aligner-nav-log{
+    li{
+      color: $headerText;
+      font-size: 14px;
+      font-weight: 300;
+      &:last-child{
+        margin-right: 0px;
+        text-align: right;
+      }
+    }
+  }
+  .aligner-nav-log , .aligner-nav-nolog {
+    background: $headerBlack;
+    display: -ms-flexbox;
+    list-style: none;
+    margin: 0;
+    padding: 8px 12px;
+
+    #logo{
+      top: 4px;
+      border: 0;
+      /*background: url("/public/img/logo.png") 0px 2px no-repeat;*/
+      width: 145px;
+      height: 31px;
+      background-size: 130px 26px;
+      position: relative;
+      img{
+        max-width: 100%;
+      }
+    }
+  }
+  .aligner-nav-nolog{
+    display: grid;
+    grid-template-columns: 1fr 200px 100px;
+    align-items: center;
+    .return-to-matecat {
+      text-align: right;
+      a {
+        color: #fff;
+        text-decoration: none;
+        -webkit-font-smoothing: antialiased;
+        line-height: 22px;
+        padding: 10px 15px;
+        font-weight: 200;
+        font-size: 18px;
+
+        &:hover {
+          color: #3aa9dd;
+        }
+      }
+    }
+  }
+
+  .aligner-nav-log {
+    display: grid;
+    grid-template-columns: 0.5fr 1fr 56px 0.3fr 0.1fr 0.3fr 1.3fr 0.2fr;
+    li {
+      &:nth-child(2) {
+        text-align: center;
+      }
+      &:nth-child(3) {
+        text-align: right;
+      }
+      &:nth-child(8) {
+        text-align: right;
+      }
+    }
+    #logo,
+    #source,
+    #to,
+    #target,
+    #user,
+    #mini_align_nav{
+      display: inline-block;
+    }
+    #final_title,
+    #source,
+    #target,
+    #to{
+      line-height: 3;
+    }
+    #final_title,#target{
+      text-align: left;
+    }
+    #source,#export{
+      text-align: right;
+    }
+    #to{
+      text-align: center;
+    }
+    #source,#to,#target {
+      span {
+        color: $white;
+      }
+    }
+    #mini_align_nav {
+      margin-right: 24px;
+      #aligned {
+        color: $white;
+        display: inline-block;
+      }
+      span {
+        &:nth-child(2) {
+          margin-left: 8px;
+        }
+        border: 1px solid $secondaryText;
+        border-radius: 2px;
+        font-size: 1.5rem;
+        position: relative;
+        top: 4px;
+        margin: 0px 2px;
+        cursor: pointer;
+        i {
+          margin: 0px;
+        }
+      }
+    }
+  }
 }

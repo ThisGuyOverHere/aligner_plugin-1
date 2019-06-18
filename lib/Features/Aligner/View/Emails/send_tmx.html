@@ -1,0 +1,8 @@
+
+<?php if(!empty($user)): ?>
+Dear <?= $user['first_name'] ?>,
+<?php else: ?>
+Hi,
+<?php endif; ?>
+
+<p>You can download the TMX ("<?= $project['name'] ?>" ) you exported from Aligner from the following link: <?= $url ?></p>

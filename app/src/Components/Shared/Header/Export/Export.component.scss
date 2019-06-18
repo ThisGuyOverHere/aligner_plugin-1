@@ -1,0 +1,19 @@
+@import "../../../../../assets/theme/variables";
+
+#export {
+  text-align: center;
+  button {
+	width: auto;
+	padding: 12px;
+	text-align: center;
+	text-transform: none;
+	span {
+	  i {
+		margin: 0 auto;
+		padding-left: 8px;
+	  }
+
+	}
+  }
+}
+

@@ -1,0 +1,90 @@
+@import "../../../../assets/theme/variables";
+@import "../../../../assets/theme/variables";
+
+.logoutContainer {
+  z-index: 9999;
+  margin: auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  border-radius: 4px;
+  text-align: center;
+  max-width: 600px;
+  min-width: 400px;
+  box-shadow: 0 1px 20px #6f6e6e;
+  background: $white;
+  .content {
+	display: flex;
+	justify-content: center;
+	width: 60%;
+	margin: 0 auto;
+	font-size: 18px;
+	padding: 24px;
+	.user-info-form {
+	  display: flex;
+	  text-align: left;
+	  justify-content: center;
+	  width: 100%;
+	  font-size: 18px;
+	  .avatar-user {
+		width: 50px;
+		height: 50px;
+		line-height: 50px;
+		text-align: center;
+		font-size: 21px;
+		color: $white;
+		padding: 0;
+		background: #b7b7b7;
+		border: 1px solid #ccc;
+		border-radius: 50px;
+		position: relative;
+		overflow: hidden;
+		img{
+		  height: 50px!important;
+		}
+	  }
+	  .user-name {
+		display: inline-block;
+		margin-left: 16px;
+		strong {
+		  font-size: 24px;
+		}
+		.grey-txt {
+		  display: block;
+		  margin: 8px 0px;
+		}
+	  }
+	}
+  }
+  .link {
+	width: 80%;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	padding: 24px;
+	.reset-btn, .logout-btn {
+	  width: 180px;
+	  margin: 16px auto;
+	  display: block;
+	  text-transform: none;
+	  font-size: 16px;
+	  font-weight: 300;
+	  padding: 16px;
+	  box-shadow: 0 2px 8px 0 #C5C5C5 !important;
+	  border-radius: 2px;
+	  text-align: center;
+	  border: none;
+	  cursor: pointer;
+	}
+	.reset-btn {
+	  background: $white;
+	  color: $primary;
+	}
+	.logout-btn {
+	  background: $primary;
+	  color: $white;
+	}
+  }
+}

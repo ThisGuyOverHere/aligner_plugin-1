@@ -20,7 +20,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return Projects_ProjectStruct
      */
-    public function updateField( $project, $field, $value ) {
+    public static function updateField( $project, $field, $value ) {
 
         $sql = "UPDATE projects SET {$field} = :value WHERE id = :id ";
 
@@ -48,7 +48,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @internal param $pid
      */
     public function changePassword( Projects_ProjectStruct $project, $newPass ){
-        $res = $this->updateField( $project, 'password', $newPass );
+        $res = self::updateField( $project, 'password', $newPass );
         $this->destroyCacheById( $project->id );
         return $res;
     }

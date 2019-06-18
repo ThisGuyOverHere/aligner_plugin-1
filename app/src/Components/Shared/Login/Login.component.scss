@@ -1,0 +1,156 @@
+@import "../../../../assets/theme/variables";
+
+#login {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  overflow: hidden;
+  min-height: 486px;
+  .sx-content {
+    position: relative;
+    width: 61%;
+    padding-top: 56px;
+    text-align: left;
+    background: url(https://www.matecat.com/wp-content/themes/stanleywp/images/bgfeat5.png) no-repeat;
+    background-size: 84%;
+    background-position: 370% bottom;
+    h2 {
+      margin-bottom: 8px;
+    }
+    ul {
+      padding: 0px;
+      li {
+        margin: 24px 0px;
+        font-size: 16px;
+        i {
+          color: #30c5ec;
+          margin-right: 8px;
+        }
+      }
+    }
+    button {
+      position: absolute;
+      bottom: 56px;
+      left: 2px;
+      display: block;
+      text-transform: none;
+      padding: 16px;
+      box-shadow: 0 2px 8px 0 #C5C5C5 !important;
+      border-radius: 2px;
+      text-align: center;
+      border: none;
+      font-weight: 300;
+      width: 180px;
+      font-size: 16px;
+      color: $white;
+      background: $primary;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+  }
+
+  .dx-content {
+    width: 39%;
+    padding-left: 24px;
+    .google-login {
+      cursor: pointer;
+      background: #478cf8;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.24);
+      border-radius: 2px;
+      margin: 56px auto 0;
+      padding: 8px 16px;
+      text-align: right;
+      font-size: 14px;
+      width: 196px;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      span {
+        color: #ffffff;
+        font-size: 24px;
+      }
+    }
+
+    .login-form-container {
+      margin: 0 auto;
+      .divider-line {
+        height: 1px;
+        width: 40%;
+        background-color: #c5c5c5;
+        margin-top: 10px;
+        display: block;
+        float: left;
+      }
+      .form-divider {
+        width: 100%;
+        text-align: center;
+        position: relative;
+        height: 20px;
+        margin: 24px 0px;
+        .divider-line {
+          height: 2px;
+          width: 40%;
+          background-color: #c5c5c5;
+          margin-top: 10px;
+          display: block;
+          float: left;
+        }
+        span {
+          float: left;
+          width: 20%;
+          color: #656565;
+          display: inline-block;
+          position: relative;
+          bottom: 0;
+        }
+      }
+      input {
+        width: 100%;
+        height: 56px;
+        padding: 16px;
+        display: inline-block;
+        border: 1px solid #cccccc;
+        box-shadow: inset 0 1px 3px #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 24px;
+        font-weight: 300;
+      }
+      .reset{
+		color: #7C7A7A;
+		text-decoration: underline;
+		cursor: pointer;
+		margin: 8px 0 16px;
+      }
+    }
+    .login-btn {
+      width: 180px;
+      margin: 16px auto;
+      display: block;
+      text-transform: none;
+      font-size: 16px;
+      font-weight: 300;
+      padding: 16px;
+      box-shadow: 0 2px 8px 0 #C5C5C5 !important;
+      border-radius: 2px;
+      text-align: center;
+      border: none;
+      &:disabled{
+        background: $white;
+        color: $primary;
+      }
+    }
+  }
+}
+
+.error{
+  text-align: center;
+  margin: 0px;
+  font-size: 12px;
+  color: #cf3d2b;
+  margin-bottom: 8px !important;
+}

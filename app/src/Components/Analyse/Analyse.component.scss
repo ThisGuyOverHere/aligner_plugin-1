@@ -1,0 +1,158 @@
+@import "../../../assets/theme/variables";
+
+#title {
+  text-align: center;
+  margin: 16px 0px;
+}
+
+.analyse.container {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  margin: 10% auto;
+  .info-animation {
+	position: relative;
+	margin: 0 auto;
+	width: 800px;
+	height: 100vh;
+	overflow: hidden;
+  }
+  .files-info, .process-info {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 24px 24px;
+	.info {
+	  padding: 16px;
+	  border-radius: 4px;
+	}
+  }
+
+  .files-info {
+	margin-bottom: 24px;
+	.info {
+	  background-color: $lightGrey;
+	  color: $gray;
+	  height: 166px;
+	  label {
+		font-size: 16px;
+		margin-bottom: 16px;
+		display: block;
+	  }
+	  h4 {
+		margin: 0;
+		padding: 0 0 4px;
+	  }
+	  h2 {
+		margin: 24px 0 0;
+		font-size: 26px;
+		color: $secondaryText;
+	  }
+	}
+  }
+
+  .prev-job {
+	padding: 16px;
+	width: 100%;
+	border-radius: 4px;
+	margin-bottom: 24px;
+	background-color: #fdf8ce;
+	color: #908105;
+	h4 {
+	  font-weight: 300;
+	  margin: 0;
+	  span {
+		font-weight: 600;
+	  }
+	}
+  }
+
+  .score {
+	border: 1px solid $primary;
+	border-radius: 4px;
+	margin-bottom: 16px;
+	margin-top: 48px;
+	padding: 16px;
+  }
+
+  .process-info {
+	.info {
+	  background-color: $white;
+	  color: $gray;
+	  border: 1px solid $gray;
+	  h3 {
+		font-size: 25px;
+		margin-bottom: 8px;
+	  }
+	  label {
+		font-size: 18px;
+		margin-bottom: 4px;
+		display: block;
+	  }
+	  p {
+		font-size: 14px;
+	  }
+	}
+  }
+}
+
+.segments-in-loading {
+  @extend .segments;
+  margin: 24px 0;
+}
+
+.segments {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  margin-bottom: 8px;
+  line-height: 2;
+  .segments-info {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	.info-sx-text-loader, .info-dx-text-loader {
+	  width: 180px;
+	  margin: 0 24px;
+	  @extend .animated-background;
+	}
+	p {
+	  margin: 0;
+	  padding: 0;
+	  &:nth-child(1) {
+		font-weight: 600;
+		font-size: 26px;
+		line-height: 1;
+	  }
+	}
+  }
+}
+
+.radio-container {
+  .radio-loader {
+	height: 16px;
+	width: 16px;
+	border-radius: 50px;
+	@extend .animated-background;
+  }
+}
+
+// Animation
+@keyframes placeHolderShimmer {
+  0% {
+	background-position: -468px 0
+  }
+  100% {
+	background-position: 468px 0
+  }
+}
+
+.animated-background {
+  animation-duration: 1.25s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: placeHolderShimmer;
+  animation-timing-function: linear;
+  background: #F6F6F6;
+  background: linear-gradient(to right, #ebebeb 8%, #ebebeb 18%, #e4e4e6 33%);
+  background-size: 800px 104px;
+  position: relative;
+}

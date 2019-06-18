@@ -23,6 +23,7 @@ class UploadController extends AlignerController {
     public $result;
 
     public function __construct( $request, $response, $service, $app ) {
+        $this->setOrGetGuid();
         if ( !isset( $_COOKIE[ 'upload_session' ] ) && empty( $_COOKIE[ 'upload_session' ] ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Cookie session is not set" ];
         }
@@ -30,10 +31,11 @@ class UploadController extends AlignerController {
     }
 
     public function convert() {
-        if ( @count( $this->result[ 'errors' ] ) ) {
-            $this->response->json( $this->result );
 
-            return;
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            //$this->response->json( $this->result );
+            //return;
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
 
         $filterArgs = [
@@ -90,39 +92,104 @@ class UploadController extends AlignerController {
         $conversionHandler->doAction();
 
         $this->result = $conversionHandler->getResult();
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+        }
         $this->response->json( $this->result );
     }
 
-    public function upload_old() {
+    public function upload() {
         if ( @count( $this->result[ 'errors' ] ) ) {
-            $this->response->json( $this->result );
-
-            return;
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
-
         $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
+        setlocale(LC_ALL, "en_US.utf8");
+        foreach($_FILES as $key => $file){
+            $_FILES[$key]['name'] = iconv('UTF-8', 'ASCII//TRANSLIT', $_FILES[$key]['name']);
+        }
 
         try {
             $this->result = $uploadFile->uploadFiles( $_FILES );
-
             foreach ( $this->result as $key => $value ) {
                 unset( $this->result->$key->file_path );
             }
         } catch ( \Exception $e ) {
-            $this->result = [
-                    'errors' => [
-                            [ "code" => -1, "message" => $e->getMessage() ]
-                    ]
-            ];
+            throw new \Exception( $e->getMessage() );
         }
+
+        $this->result = array_values((array)$this->result);
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+        }
+
         $this->response->json( $this->result );
     }
 
+    public function delete(){
 
-    public function upload(){
+        $file = $this->params[ 'file' ];
+        $type = $this->params[ 'type' ];
+        $size = $this->params[ 'size' ];
 
-        $this->setOrGetGuid();
-        $this->initUploadDir();
+        if( empty($file) || empty($type) || empty($size) ){
+            throw new \Exception( "Invalid request object" );
+        }
+
+        $uploadSession = $_COOKIE['upload_session'];
+        $upload = new \Upload($uploadSession);
+
+        $path = $upload->getUploadPath();
+        $file = $this->_sanitizeFileName($file);
+
+        $filePath = $path . DIRECTORY_SEPARATOR . $file;
+
+        $filetype = mime_content_type($filePath);
+        $filesize = filesize($filePath);
+
+        if (($filetype === false || $filesize === false) ||
+            ($filetype !== $type || $filesize !== $size)){
+            throw new \Exception( "Invalid request object" );
+        }
+
+        @unlink($filePath);
+
+        return $this->response->json( [ "success" => true ] );
+    }
+
+    protected function _sanitizeFileName( $filename ){
+
+        $upload  = new \Upload();
+
+        $filename = str_replace('/','',$filename);
+
+        try{
+            $filename = $upload->fixFileName( $filename );
+        } catch ( \Exception $e ) {
+            throw new \Exception( $e->getMessage() );
+        }
+
+        $contains_separator = strpos('/', $filename) !== false ||
+        strpos('&#47;', $filename) !== false ||
+        strpos('%2F', $filename) !== false;
+
+        if($contains_separator){
+            throw new \Exception('Invalid file input');
+        }
+
+        return $filename;
+
+    }
+
+    /*public function upload(){
+
+        if ( @count( $this->result[ 'errors' ] ) ) {
+            //$this->response->json( $this->result );
+            //return;
+            throw new \Exception($this->result['errors'][0]['message']);
+
+        }
+
+
         header('Pragma: no-cache');
         header('Cache-Control: no-store, no-cache, must-revalidate');
         header('Content-Disposition: inline; filename="files.json"');
@@ -130,16 +197,25 @@ class UploadController extends AlignerController {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE');
         header('Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size');
+        $this->setOrGetGuid();
+        $this->initUploadDir();
 
-        $upload_handler = new \UploadHandler();
-        $upload_handler->post();
-    }
+
+        $upload_handler  = new \UploadHandler();
+        $upload_response = $upload_handler->post( true );
+        if ( $upload_response[ 0 ]->error ) {
+            throw new \Exception( $upload_response[ 0 ]->error );
+        } else {
+            return $this->response->json( $upload_response );
+        }
+    }*/
 
     private function setOrGetGuid() {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            $guid = \Utils::create_guid();
+            $guid = \Utils::createToken();
             setcookie( "upload_session", $guid, time() + 86400, '/' );
+            $_COOKIE['upload_session'] = $guid;
         } else {
             $guid = $_COOKIE[ 'upload_session' ];
         }

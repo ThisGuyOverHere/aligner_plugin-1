@@ -1,0 +1,38 @@
+@import "../../../../../assets/theme/variables";
+
+#toolbar {
+  .record-count {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      li {
+        display: inline-block;
+        p {
+          font-size: 14px;
+          text-transform: uppercase;
+          .label {
+            padding: 2px 16px;
+            border-radius: 16px;
+            background-color: $primary;
+            color: $white;
+            margin-right: 8px;
+            letter-spacing: -1px;
+          }
+        }
+        i {
+          cursor: pointer;
+          &:hover {
+            color: $primary;
+          }
+          &.disabled {
+            cursor: not-allowed;
+          }
+          &.active {
+            color: $primary;
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,5 +2,16 @@
 @import "form";
 @import "buttons";
 @import "visor";
-@import "variables";
+@import "components";
 
+.overlay {
+  display: block;
+  z-index: 9999;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: $overlay;
+}

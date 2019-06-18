@@ -1,0 +1,295 @@
+@import "../../../../../assets/theme/variables";
+
+#logged {
+  width: 75%;
+  margin: 0 auto;
+  h1, h3 {
+    margin: 0px;
+    padding: 0px;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 300;
+  }
+
+  .destinations{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin: 32px 0;
+    input[type=radio]{
+      display: none;
+    }
+    .hide-checkbox + label {
+      width: 240px;
+      padding: 16px 0;
+      text-align: center;
+      border: 1px solid #e4e4e6;
+      color: #6e6e6f;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .hide-checkbox:checked + label {
+      display: inline-block;
+      background-color: #02b7e7;
+      color: #fff;
+    }
+  }
+
+  .create{
+    border: 2px dashed #e4e4e6;
+    background: transparent;
+    width: 240px;
+  }
+
+  .memories {
+    margin: 24px 0;
+    .memory-in-loading{
+      @extend .memory;
+      margin: 16px 0;
+    }
+    .memory {
+      display: flex;
+      justify-content: center;
+      padding: 4px;
+      margin-bottom: 8px;
+      line-height: 2;
+      .memory-info {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0px;
+        margin-left: 8px;
+        border-bottom: 1px solid #e4e4e6;
+        .info-sx-text-loader, .info-dx-text-loader{
+          width: 180px;
+          margin: 0 24px;
+          @extend .animated-background;
+        }
+        p {
+          margin: 0;
+          padding: 0;
+          &:nth-child(1) {
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1;
+          }
+          &:nth-child(2) {
+            color: $midGregy;
+            font-size: 12px;
+            font-weight: 300;
+          }
+        }
+      }
+    }
+  }
+  .radio-container{
+    padding: 0 8px;
+    .radio-loader{
+        height: 16px;
+        width: 16px;
+        border-radius: 50px;
+        @extend .animated-background;
+    }
+  }
+  .line {
+    width: 410px;
+    border: 1px solid #e8e8e8;;
+    border-radius: 50px;
+    margin: 8px auto 24px;
+  }
+
+  .memory-input-container {
+    width: 406px;
+    margin: 0 auto;
+    display: flex;
+    .memory-input {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      input {
+        width: 336px;
+        height: 56px;
+        padding: 16px;
+        display: inline-block;
+        border: 1px solid #cccccc;
+        box-shadow: inset 0 1px 3px #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 24px;
+        font-weight: 300;
+      }
+    }
+  }
+
+  .new-memory {
+    margin: 24px 0;
+    display: grid;
+    grid-template-columns: 0.2fr 1.8fr;
+    .icon-container{
+      margin: 16px auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid $primary;
+      .fake-radio-clicked{
+        width: 16px;
+        height: 16px;
+        background: $primary;
+        border-radius: 50px;
+        margin: 2px;
+      }
+    }
+    form{
+      padding: 8px 8px 0;
+      border: 2px solid #02b7e7;
+      .form-container{
+        display: grid;
+        grid-template-columns: 1.5fr 1.5fr;
+        input {
+          padding: 8px;
+          border: 1px solid #cccccc;
+          box-shadow: inset 0 1px 3px #ddd;
+          border-radius: 4px;
+          box-sizing: border-box;
+          font-size: 16px;
+          color: #333;
+          font-weight: 300;
+        }
+        p{
+          text-align: right;
+          font-size: 12px;
+          margin: 8px 0;
+        }
+      }
+      .btn-container{
+        display: grid;
+        grid-template-columns: 1.5fr 0.5fr;
+        margin: 8px 0;
+        div{
+          text-align: right;
+          .save , .cancel{
+            width: 96px;
+            padding: 8px 24px;
+            border-radius: 2px;
+          }
+          .save{
+            color: white;
+            border: 1px solid #02c6ed;
+            background-color: #02bfea;
+          }
+          .cancel{
+            box-sizing: border-box;
+            border: 1px solid #6e6e6f;
+            background-color: #fff;
+          }
+        }
+      }
+    }
+  }
+
+  .selection {
+    margin: 16px 0;
+    .ui.toggle.checkbox input:checked ~ .box, .ui.toggle.checkbox input:checked ~ label:before {
+      background-color: $primary !important;
+    }
+    .ui.toggle.checkbox input:checked ~ .box, .ui.toggle.checkbox input:checked ~ label {
+      color: $primary !important;
+    }
+    .active {
+      color: $primary !important;
+    }
+    .inactive {
+      color: $midGregy;
+    }
+  }
+
+  .export-btn {
+    background: $primary;
+    color: $white;
+    width: 160px;
+    margin: 40px auto 16px;
+    display: block;
+    text-transform: none;
+    font-size: 16px;
+    font-weight: 300;
+    padding: 16px;
+    box-shadow: 0 2px 8px 0 #C5C5C5 !important;
+    border-radius: 2px;
+    text-align: center;
+    border: none;
+  }
+
+}
+
+// Animation
+@keyframes placeHolderShimmer{
+  0%{
+    background-position: -468px 0
+  }
+  100%{
+    background-position: 468px 0
+  }
+}
+
+.animated-background {
+  animation-duration: 1.25s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: placeHolderShimmer;
+  animation-timing-function: linear;
+  background: #F6F6F6;
+  background: linear-gradient(to right, #ebebeb 8%, #ebebeb 18%, #e4e4e6 33%);
+  background-size: 800px 104px;
+  position: relative;
+}
+
+.memory{
+  input[type="radio"] {
+    display:none;
+  }
+
+  input[type="radio"] + label{
+    width: 22px;
+    height: 22px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    display: block;
+    cursor: pointer;
+  }
+
+  input[type="radio"] + label span{
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  input[type="radio"] + label span {
+    background-color: #fff;
+  }
+
+  input[type="radio"]:checked + label {
+    border: 1px solid #00AEE4;
+  }
+
+  input[type="radio"]:checked + label span {
+    background-color: #00AEE4;
+    border: 1px solid #00AEE4;
+  }
+
+  input[type="radio"] + label span,
+  input[type="radio"]:checked + label span {
+    -webkit-transition:background-color 0.4s linear;
+    -o-transition:background-color 0.4s linear;
+    -moz-transition:background-color 0.4s linear;
+    transition:background-color 0.4s linear;
+  }
+}

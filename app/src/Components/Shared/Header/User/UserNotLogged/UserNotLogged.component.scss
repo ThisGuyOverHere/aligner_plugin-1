@@ -1,0 +1,30 @@
+@import "../../../../../../assets/theme/variables";
+
+#user{
+  i {
+    margin: 0 auto;
+  }
+  .user-nolog {
+    align-items: center;
+    background: center/cover transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: $white;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: relative;
+    font-size: 14px;
+    height: 42px;
+    width: 42px;
+    margin-left: 24px;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px dashed;
+    overflow: hidden;
+    &:hover {
+      color: $lightBlue
+    }
+  }
+}
