@@ -172,4 +172,66 @@ class JobUndoActionController extends JobActionController
         return $this->getOperations();
 
     }
+
+    public function undoSplit(){
+
+        $id_job   = $this->job->id;
+        $segments = [];
+        $orders   = $this->params[ 'order' ];
+        $type     = $this->params[ 'type' ];
+
+
+        sort( $orders, SORT_NUMERIC);
+
+        foreach ($orders as $order) {
+            $segment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $type);
+            if(!is_object($segment)){
+                throw new ValidationError("There's no segment with the parameters specified in the input");
+            }
+            $segments[] =  $segment->toArray();
+        }
+
+        $deleted_orders = [];
+
+        foreach ( $segments as $key => $segment ) {
+            if ( $key != 0 ) {
+                $deleted_orders[] = $segment[ 'order' ];
+            }
+        }
+
+        $conn = NewDatabase::obtain()->getConnection();
+        try {
+            $conn->beginTransaction();
+            $first_segment = Segments_SegmentDao::mergeSegments( $segments, '' );
+            Segments_SegmentMatchDao::nullifySegmentsInMatches( $deleted_orders, $id_job, $type );
+            $conn->commit();
+        } catch ( \PDOException $e ) {
+            $conn->rollBack();
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Merging $orders", -2 );
+        }
+
+        try{
+
+            $this->pushOperation( [
+                'type'      => $type,
+                'action'    => 'update',
+                'rif_order' => $first_segment[ 'order' ],
+                'data'      => $first_segment
+            ] );
+
+            foreach ( $deleted_orders as $order ) {
+                $this->pushOperation( [
+                    'type'      => $type,
+                    'action'    => 'update',
+                    'rif_order' => $order
+                ] );
+            }
+
+        } catch ( ValidationError $e ) {
+            throw new ValidationError( $e->getMessage(), -2 );
+        }
+
+        return $this->getOperations();
+
+    }
 }

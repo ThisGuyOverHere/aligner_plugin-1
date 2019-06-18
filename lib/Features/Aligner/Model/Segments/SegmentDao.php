@@ -355,7 +355,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
     }
 
-    public static function mergeSegments( Array $segments ) {
+    public static function mergeSegments( Array $segments, $glue = ' ' ) {
 
         $clean_array = [];
         $merge_count = 0;
@@ -368,7 +368,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
             $segments_id[] = $segment[ 'id' ];
         }
 
-        $clean_merge = implode( ' ', $clean_array );
+        $clean_merge = implode( $glue, $clean_array );
 
         self::updateSegmentContent( array_shift( $segments_id ), [ $clean_merge, $merge_count ] );
 
