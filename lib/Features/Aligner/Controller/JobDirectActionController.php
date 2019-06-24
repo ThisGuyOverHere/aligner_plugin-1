@@ -151,7 +151,7 @@ class JobDirectActionController extends JobActionController {
         //$split_segment[ 'content_raw' ]  = $first_raw;
         $split_segment[ 'content_raw' ]    = null;
         $split_segment[ 'content_clean' ]  = $first_clean;
-        $split_segment[ 'content_hash' ]   = $first_hash;
+        $split_segment[ 'content_hash' ]   = null;
         $split_segment[ 'raw_word_count' ] = $first_count;
 
         $update_order         = $avg_order;

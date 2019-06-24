@@ -98,6 +98,23 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getFromOrderArrayJobIdAndType( Array $orders, $id_job, $type, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn    = NewDatabase::obtain()->getConnection();
+        $qMarks = str_repeat('?,', count($orders) - 1) . '?';
+        $stmt    = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match ON segment_id = segments.id
+        WHERE segments_match.order IN ($qMarks)
+        AND segments_match.id_job = ?
+        AND segments_match.type = ? ORDER BY id ASC" );
+        $params = array_merge($orders, array($id_job, $type) );
+
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), $params )[ 0 ];
+
+    }
+
     public static function getTranslationsForTMXExport( $id_job ) {
         $conn = NewDatabase::obtain()->getConnection();
 
