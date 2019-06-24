@@ -22,7 +22,11 @@ class JobComponent extends Component {
                 id: PropTypes.any
             }),
             rows: PropTypes.array,
-            rowsDictionary: PropTypes.any
+            rowsDictionary: PropTypes.any,
+            counters:PropTypes.shape({
+                hideIndexesMap: PropTypes.array,
+                misalignmentsIndexesMap: PropTypes.array
+            }),
         }),
         inSync: PropTypes.bool
     };
@@ -59,7 +63,9 @@ class JobComponent extends Component {
                 segmentContentWidth: "437px",
                 width: 0,
                 height: 0,
-            }
+            },
+            hideNavigatorData: null,
+            misalignmentsNavigatorData: null
         };
 
         this.elementsRef = {};
@@ -76,6 +82,8 @@ class JobComponent extends Component {
         ProjectStore.addListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.addListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
+        ProjectStore.addListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.onHideNavigatorEvent);
+        ProjectStore.addListener(ProjectConstants.MISALIGNMENT_NAVIGATOR, this.onMisalignmentsNavigatorEvent);
     }
 
     componentWillUnmount() {
@@ -85,8 +93,9 @@ class JobComponent extends Component {
         ProjectStore.removeListener(ProjectConstants.SEGMENT_TO_SPLIT, this.setSegmentToSplit);
         ProjectStore.removeListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
         ProjectStore.removeListener(ProjectConstants.SEARCH_RESULTS, this.onSearchEvent);
+        ProjectStore.removeListener(ProjectConstants.HIDE_SEGMENTS_NAVIGATOR, this.onHideNavigatorEvent);
+        ProjectStore.removeListener(ProjectConstants.MISALIGNMENT_NAVIGATOR, this.onMisalignmentsNavigatorEvent);
         window.removeEventListener('resize', this.updateWindowDimensions);
-
     }
 
     componentDidUpdate() {
@@ -98,6 +107,7 @@ class JobComponent extends Component {
     }
 
     render() {
+        const { job: {counters:{hideIndexesMap,misalignmentsIndexesMap}}} = this.props;
         const data = this.renderItems(this.props.job.rows);
         let classes = ['align-project'];
         if (this.props.inSync) {
@@ -108,6 +118,8 @@ class JobComponent extends Component {
                 {this.state.statusExportModal && <ExportModal
                     user={this.state.user}
                     image={this.state.googleUserImage}
+                    misAlignedSegments={misalignmentsIndexesMap.length}
+                    hideSegments={hideIndexesMap.length}
                 />}
                 {data.length > 0 &&
                 <VirtualList
@@ -180,7 +192,6 @@ class JobComponent extends Component {
             data.segmentContentWidth = "437px";
         }
 
-
         data.width = window.innerWidth;
         data.height = window.innerHeight;
 
@@ -206,13 +217,17 @@ class JobComponent extends Component {
                 splitModalStatus: false
             });
         }
-
     };
 
 
     renderItems(array) {
         let values = [];
         const enableDrag = true;
+        const { job: {counters:{hideIndexesMap,misalignmentsIndexesMap}}} = this.props;
+        const {hideNavigatorData,misalignmentsNavigatorData} = this.state;
+        const misalignedNav = misalignmentsNavigatorData ? misalignmentsNavigatorData.realRowIndex : null;
+
+        console.log("############ ",misalignmentsNavigatorData);
         if (array.length > 0) {
             array.map((row, index) => {
                 const selection = {
@@ -226,6 +241,8 @@ class JobComponent extends Component {
                         index={index}
                         enableDrag={enableDrag}
                         selection={selection}
+                        isInHideNavigator={hideIndexesMap.includes( hideNavigatorData ? hideNavigatorData.realRowIndex : null )}
+                        selectedInNavigator={hideNavigatorData ? hideNavigatorData.realRowIndex === index  : null}
                         row={row}
                     />)
                 } else {
@@ -236,6 +253,8 @@ class JobComponent extends Component {
                         jobInfo={this.props.jobInfo}
                         enableDrag={enableDrag}
                         selection={selection}
+                        isInMisalignedNavigator={misalignedNav ? misalignmentsIndexesMap.includes( index ) : null}
+                        selectedInNavigator={misalignmentsNavigatorData ? misalignmentsNavigatorData.realRowIndex === index  : null}
                         row={row}/>);
                 }
                 return row;
@@ -263,6 +282,22 @@ class JobComponent extends Component {
         this.setState({
             search: search,
             scrollToSegment: scrollToSegment
+        });
+    };
+
+    onHideNavigatorEvent = (hideNavigatorData) => {
+        console.log('in navigator interceptor: ',hideNavigatorData);
+        this.setState({
+            hideNavigatorData: hideNavigatorData,
+            scrollToSegment: hideNavigatorData.realRowIndex
+        });
+    };
+
+    onMisalignmentsNavigatorEvent = (misalignmentsNavigatorData) => {
+        console.log('in navigator interceptor: ', misalignmentsNavigatorData);
+        this.setState({
+            misalignmentsNavigatorData: misalignmentsNavigatorData,
+            scrollToSegment: misalignmentsNavigatorData.realRowIndex
         });
     }
 }

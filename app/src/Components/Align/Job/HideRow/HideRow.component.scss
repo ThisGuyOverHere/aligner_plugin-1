@@ -6,23 +6,42 @@
   grid-template-columns: 16px 16px 1fr;
   column-gap: 16px;
   align-items: center;
+
   .index {
 
   }
+
   .show-toggle {
 	cursor: pointer;
+
 	i {
 	  color: #cccccc;
+
 	  &:hover {
 		transform: scale(1.1);
 		color: $primary;
 	  }
 	}
   }
+
   .row-collapsed-line {
 	background-color: $sectionGrey;
 	height: 4px;
 	margin: 8px;
 	border-radius: 50px;
+  }
+}
+
+.isIn {
+  .row-collapsed-line {
+	background-color: #2bbee9 !important;
+  }
+}
+
+.selected {
+  background-color: #E5F1F4;
+  .index {
+	color: #2bbee9;
+	font-size: 1.3rem
   }
 }

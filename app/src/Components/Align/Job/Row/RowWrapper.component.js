@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import RowComponent from "./Row.component";
 import ActionsBetweenLines from "./ActionsBetweenLines/ActionsBetweenLines.component";
+import HideComponent from "../HideRow/HideRow.component";
 
 class RowWrapperComponent extends Component {
 
@@ -15,7 +16,9 @@ class RowWrapperComponent extends Component {
         rec: PropTypes.any,
         search: PropTypes.object,
         row: PropTypes.object.isRequired,
-        selection: PropTypes.object
+        selection: PropTypes.object,
+        isInMisalignedNavigator: PropTypes.bool,
+        selectedInNavigator: PropTypes.bool
     };
 
     constructor(props) {
