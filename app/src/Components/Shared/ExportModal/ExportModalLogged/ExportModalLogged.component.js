@@ -81,10 +81,6 @@ class ExportModalLogged extends Component {
 
                 {this.state.cloudCheckBox ?
                     <div>
-                        {(this.props.misAlignedSegments > 0 || this.props.hideSegments > 0) && <p>
-                            {this.props.misAlignedSegments > 0 && <span>{this.props.misAlignedSegments} Unaligned segments and</span>}
-                            {this.props.hideSegments > 0 && <span> {this.props.hideSegments} hidden segments</span>} will not be exported
-                        </p>}
                         <p> A copy of your TMX will be sent to our collaborative memory shared with all MateCat users to
                             improve our alignment algorithm </p>
                     </div>
@@ -121,6 +117,12 @@ class ExportModalLogged extends Component {
                         </div>
                     </div>
                 }
+
+                {(this.props.misAlignedSegments > 0 || this.props.hideSegments > 0) && <p className={"alert"}>
+                    {this.props.misAlignedSegments > 0 && <span className={"evidence"}>{this.props.misAlignedSegments} Unaligned segments</span>}
+                    {this.props.hideSegments > 0 && <span> and </span>}
+                    {this.props.hideSegments > 0 && <span className={"evidence"}> {this.props.hideSegments} hidden segments</span>} will not be exported
+                </p>}
 
                 <button className={exportBtn.join(" ")} tabIndex="6"
                         disabled={!(this.state.tmxList.length > 0) && !this.state.cloudCheckBox} type=""

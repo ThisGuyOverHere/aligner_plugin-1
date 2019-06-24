@@ -71,6 +71,8 @@ class ExportModal extends Component {
             component = <ExportModalCompleted/>
         } else if (this.state.sendEmail) {
             component = <ExportModalSendMail setCompletedExport={this.setCompletedExport} user={this.props.user}
+                                             misAlignedSegments={misAlignedSegments}
+                                             hideSegments={hideSegments}
                                              sendEmailHandler={this.sendEmailHandler}/>;
         } else if (this.props.user) {
             component = <ExportModalLogged setCompletedExport={this.setCompletedExport} user={this.props.user}

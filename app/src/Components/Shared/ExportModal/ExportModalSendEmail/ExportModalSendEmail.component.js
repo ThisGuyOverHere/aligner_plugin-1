@@ -33,6 +33,11 @@ class ExportModalSendEmail extends Component {
                     <a href="javascript:void(0);" onClick={this.props.sendEmailHandler}> &lt; Go back </a>
                     <p className={"description"}>A copy of your TMX will be sent to our collaborative memory shared with
                         all MateCat users to improve our alignment algorithm</p>
+                    {(this.props.misAlignedSegments > 0 || this.props.hideSegments > 0) && <p className={"alert"}>
+                        {this.props.misAlignedSegments > 0 && <span className={"evidence"}>{this.props.misAlignedSegments} Unaligned segments</span>}
+                        {this.props.hideSegments > 0 && <span> and </span>}
+                        {this.props.hideSegments > 0 && <span className={"evidence"}> {this.props.hideSegments} hidden segments</span>} will not be exported
+                    </p>}
                     <div className={"btn-container"}>
                         <input type="email" tabIndex="0" placeholder="Enter your email address"
                                value={this.state.email}
