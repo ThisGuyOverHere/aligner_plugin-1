@@ -3,7 +3,8 @@
 #hide-segments{
   background: $white;
   border: 1px solid  $lightGrey;
-  min-width: 120px;
+  min-width: 140px;
+  text-align: center;
   position: absolute;
   top: 56px;
   right: 224px;
@@ -14,6 +15,9 @@
 	padding-right: 8px;
 	border-right: 1px solid;
 	margin-right: 8px;
+	span{
+	  color: #00AEE4;
+	}
   }
   .controls{
 	color: #7C7A7A;

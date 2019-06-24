@@ -50,7 +50,9 @@ class MisalignedSegments extends Component {
         const {actualSegmentSelected, actualIndex} = this.state;
         return (
             <div id="misaligned-segments">
-                <span className="amount">{actualSegmentSelected + 1} / {misalignmentsIndexesMap.length}</span>
+                <span className="amount">
+                    <span>{actualSegmentSelected + 1}</span>/ {misalignmentsIndexesMap.length}
+                </span>
                 <span className="controls">
                     <Icon className={"increment"} name='chevron up' onClick={() => this.onMisalignmentSegmentsChange("up")}/>
                     <Icon className={"decrement"} name='chevron down' onClick={() => this.onMisalignmentSegmentsChange("down")}/>

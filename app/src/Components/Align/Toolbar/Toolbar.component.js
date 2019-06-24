@@ -56,7 +56,7 @@ class ToolbarComponent extends Component {
 
     render() {
         const {searchStatus, hideSegmentsNavigator, misalignedSegments} = this.state;
-        const {job: {counters: {misalignmentsIndexesMap, hideIndexesMap }}} = this.props;
+        const {job: {counters: {misalignmentsIndexesMap, hideIndexesMap}}} = this.props;
 
         return (
             <div id="toolbar">
@@ -68,26 +68,23 @@ class ToolbarComponent extends Component {
                                              job={this.props.job}/>
                 </div>
                 <div className="toolbar-icons-container">
-                    <div onClick={hideIndexesMap.length ? this.onHideSegmentsClick : Function.prototype} className="hide-ico" aria-disabled={hideIndexesMap.length}>
+                    <div onClick={hideIndexesMap.length ? this.onHideSegmentsClick : Function.prototype}
+                         className="hide-ico" aria-disabled={hideIndexesMap.length}>
                         <span className={hideSegmentsNavigator ? "counter ico-active" : "counter"}>
                             {hideIndexesMap.length}
                         </span>
-                        <svg className={hideSegmentsNavigator ? "ico-active" : ""}  id="Livello_1" data-name="Livello 1" xmlns="http://www.w3.org/2000/svg"
-                             viewBox="0 0 24 24">
-                            <path className="cls-1"
-                                  d="M21.69,22.15H2.29a1.92,1.92,0,0,1-1.53-.72,1.83,1.83,0,0,1-.1-2.05L10.42,2.82a1.84,1.84,0,0,1,3.14,0l9.77,16.58a1.81,1.81,0,0,1-.11,2A1.91,1.91,0,0,1,21.69,22.15Zm-9.91-18L2.44,20a.24.24,0,0,0,.2.36H21.35a.24.24,0,0,0,.21-.36L12.19,4.1A.24.24,0,0,0,11.78,4.1Z"/>
-                            <path className="cls-1"
-                                  d="M12.38,17a2,2,0,0,1-2-1.84L9,14a4.47,4.47,0,0,0-.51.77.41.41,0,0,0,0,.4,4.42,4.42,0,0,0,3.93,2.46,4.2,4.2,0,0,0,1.08-.15L12.74,17A2,2,0,0,1,12.38,17Zm4.35.81L15.2,16.62a4.82,4.82,0,0,0,1.12-1.42.41.41,0,0,0,0-.4,4.44,4.44,0,0,0-3.94-2.45,4.23,4.23,0,0,0-2,.52L8.59,11.51a.22.22,0,0,0-.31,0h0L8,11.89a.25.25,0,0,0,0,.32l8.14,6.29a.23.23,0,0,0,.31,0h0l.28-.35A.23.23,0,0,0,16.73,17.8Zm-2.55-2-.54-.42a1.14,1.14,0,0,0,.07-.41A1.29,1.29,0,0,0,12,13.73a.61.61,0,0,1,.13.39.59.59,0,0,1,0,.13l-1-.78A2,2,0,0,1,12.38,13a2,2,0,0,1,2,2h0a1.92,1.92,0,0,1-.2.83Z"/>
-                        </svg>
+                        <i className={hideSegmentsNavigator ? "ico-active hide icon" : "hide icon"} style={{fontSize: "25px", marginTop: "7px"}}/>
                     </div>
                     {hideSegmentsNavigator &&
                     <HideSegments close={this.closeHideSegmentsNavigator} job={this.props.job}/>}
 
-                    <div onClick={misalignmentsIndexesMap.length ? this.onMisalignedSegmentsClick : Function.prototype} className="misalignment-ico">
+                    <div onClick={misalignmentsIndexesMap.length ? this.onMisalignedSegmentsClick : Function.prototype}
+                         className="misalignment-ico">
                         <span className={misalignedSegments ? "counter ico-active" : "counter"}>
                             {misalignmentsIndexesMap.length}
                         </span>
-                        <svg className={misalignedSegments ? "ico-active" : ""} id="Livello_1" data-name="Livello 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <svg className={misalignedSegments ? "ico-active" : ""} id="Livello_1" data-name="Livello 1"
+                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path className="cls-1"
                                   d="M21.69,22.15H2.29a1.92,1.92,0,0,1-1.53-.72,1.83,1.83,0,0,1-.1-2.05L10.42,2.82a1.84,1.84,0,0,1,3.14,0l9.77,16.58a1.81,1.81,0,0,1-.11,2A1.91,1.91,0,0,1,21.69,22.15Zm-9.91-18L2.44,20a.24.24,0,0,0,.2.36H21.35a.24.24,0,0,0,.21-.36L12.19,4.1A.24.24,0,0,0,11.78,4.1Z"/>
                             <path className="cls-1"
@@ -103,7 +100,8 @@ class ToolbarComponent extends Component {
                         {searchStatus && <SearchComponent close={this.closeSearch} job={this.props.job}/>}
                     </Hotkeys>
                     <i className=" hint icon question circle outline" onClick={this.hintModalOpened}/>
-                    <i className={searchStatus ? "search-ico icon search ico-active" : "search-ico icon search"} onClick={this.onSearchIconClick}/>
+                    <i className={searchStatus ? "search-ico icon search ico-active" : "search-ico icon search"}
+                       onClick={this.onSearchIconClick}/>
                 </div>
                 {this.state.hintOpened && <ToolbarRightHintComponent close={this.hintModalOpened}/>}
             </div>

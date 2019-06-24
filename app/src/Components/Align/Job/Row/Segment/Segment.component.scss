@@ -5,6 +5,7 @@
   z-index: 1;
   width: 100%;
   position: relative;
+  box-sizing: border-box;
   &:not(.empty){
     &:not(.onDropHover){
       cursor: pointer;
@@ -124,6 +125,13 @@
       color: $primary;
       display: inline-block;
     }
+  }
+  &.isIn-and-selected{
+    border: 2px solid #2bbee9;
+    background-color: #E5F1F4;
+  }
+  &.isIn{
+    border: 2px solid #2bbee9;
   }
 }
 

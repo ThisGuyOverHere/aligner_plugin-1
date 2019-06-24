@@ -6,19 +6,24 @@
   grid-template-columns: 16px 16px 1fr;
   column-gap: 16px;
   align-items: center;
+
   .index {
 
   }
+
   .show-toggle {
 	cursor: pointer;
+
 	i {
 	  color: #cccccc;
+
 	  &:hover {
 		transform: scale(1.1);
 		color: $primary;
 	  }
 	}
   }
+
   .row-collapsed-line {
 	background-color: $sectionGrey;
 	height: 4px;
@@ -27,12 +32,16 @@
   }
 }
 
-.isIn{
-  border: 1px solid #2bbee9;
+.isIn {
+  .row-collapsed-line {
+	background-color: #2bbee9 !important;
+  }
 }
-.selected{
-  border: 1px solid #2bbee9;
-  -webkit-box-shadow: -1px 0px 9px -2px #2bbee9;
-  -moz-box-shadow: -1px 0px 9px -2px #2bbee9;
-  box-shadow: -1px 0px 9px -2px #2bbee9;
+
+.selected {
+  background-color: #E5F1F4;
+  .index {
+	color: #2bbee9;
+	font-size: 1.3rem
+  }
 }

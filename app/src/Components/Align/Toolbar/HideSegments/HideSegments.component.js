@@ -46,7 +46,9 @@ class HideSegments extends Component {
         const {actualSegmentSelected, actualIndex} = this.state;
         return (
             <div id="hide-segments">
-                <span className="amount">{actualSegmentSelected + 1} / {hideIndexesMap.length}</span>
+                <span className="amount">
+                    <span>{actualSegmentSelected + 1}</span> / {hideIndexesMap.length}
+                </span>
                 <span className="controls">
                     <Icon className={"increment"} name='chevron up' onClick={() => this.onHideNavigationChange("up")}/>
                     <Icon className={"decrement"} name='chevron down' onClick={() => this.onHideNavigationChange("down")}/>

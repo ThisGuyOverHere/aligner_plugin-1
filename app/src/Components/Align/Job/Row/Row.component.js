@@ -96,7 +96,7 @@ class RowComponent extends Component {
 
     render() {
         const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag, jobInfo,isInMisalignedNavigator,selectedInNavigator} = this.props;
-        let rowClass = [`project-row ${selectedInNavigator ? "selected" : null} ${isInMisalignedNavigator ? "isIn" : null} ` ];
+        let rowClass = [`project-row` ];
         const dragElType = dragEl ? dragEl.type : undefined;
 
         if (isOver && dragElType && canDrop) {
@@ -110,21 +110,27 @@ class RowComponent extends Component {
             <div className={rowClass.join(' ')} ref={re => {
                 this.ref = re
             }}>
-                <div>{this.props.index + 1}</div>
+                <div className={`${selectedInNavigator ? "index-selected" : null}`}>{this.props.index + 1}</div>
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
                                   rtl={jobInfo.source_is_rtl}
                                   search={this.props.search}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.source}
-                                  segment={this.props.row.source}/>
+                                  segment={this.props.row.source}
+                                  selectedInNavigator={selectedInNavigator}
+                                  isInMisalignedNavigator={isInMisalignedNavigator}
+                />
                 <SegmentComponent type="target"
                                   search={this.props.search}
                                   dropHover={isOver && canDrop && dragElType === 'target'}
                                   rtl={jobInfo.target_is_rtl}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.target}
-                                  segment={this.props.row.target}/>
+                                  segment={this.props.row.target}
+                                  selectedInNavigator={selectedInNavigator}
+                                  isInMisalignedNavigator={isInMisalignedNavigator}
+                />
             </div>
         );
     }
