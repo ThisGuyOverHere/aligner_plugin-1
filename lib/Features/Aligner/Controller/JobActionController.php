@@ -24,6 +24,7 @@ class JobActionController extends AlignerController
 {
 
     protected $operations;
+    protected $undo_actions_params;
     protected $job;
 
     public function afterConstruct() {
@@ -37,6 +38,14 @@ class JobActionController extends AlignerController
         $this->appendValidator( $jobValidator );
     }
 
+    protected function setUndoActionsParams( $params ){
+        // TODO: define better sanitization of input
+        if(is_array($params)){
+            $this->undo_actions_params = $params;
+        } else {
+            throw new ValidationError("Undo action params format is not valid");
+        }
+    }
 
     protected function pushOperation( $operation ) {
         $operation_fields = [ 'type', 'action', 'rif_order', 'data' ];
@@ -64,7 +73,25 @@ class JobActionController extends AlignerController
     }
 
     protected function getOperations() {
-        return $this->response->json( $this->operations );
+        return $this->response->json( $this->operations_params );
+    }
+
+    protected function getUndoActionsParams(){
+        return $this->response->json( $this->undo_actions_params );
+    }
+
+    protected function getResponse() {
+
+        $operations          = $this->operations;
+        $undo_actions_params = $this->undo_actions_params;
+
+        $response = [
+            'operations'          => $operations,
+            'undo_actions_params' => $undo_actions_params
+        ];
+
+        return $this->response->json($response);
+
     }
 
 }

@@ -712,6 +712,17 @@ class JobDirectActionController extends JobActionController {
         $order1 = $this->params[ 'order1' ];
         $order2 = $this->params[ 'order2' ];
 
+        try{
+            $this->setUndoActionsParams([
+                'order1'    => $order2,
+                'order2'    => $order1,
+                'type'      => $type,
+                'operation' => "switch"
+            ]);
+        } catch (ValidationError $e){
+            throw new ValidationError( $e->getMessage(), -2 );
+        }
+
         $segment_1 = Segments_SegmentDao::getFromOrderJobIdAndType( $order1, $id_job, $type );
         if(!is_object($segment_1)){
             throw new ValidationError("There's no segment with the parameters specified in the input");
@@ -763,7 +774,7 @@ class JobDirectActionController extends JobActionController {
             throw new ValidationError( $e->getMessage(), -2 );
         }
 
-        return $this->getOperations();
+        return $this->getResponse();
 
     }
 
