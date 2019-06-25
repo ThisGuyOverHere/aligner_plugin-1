@@ -351,8 +351,18 @@ class JobUndoActionController extends JobActionController
 
                 if( isset( $previous_match ) ){
                     $previous_match           = $previous_match->toArray();
-                    $previous_match[ 'next' ] = $current_match[ 'order' ];
-                    $previous_matches[]       = $previous_match;
+                    $previous_assigned        = false;
+                    foreach ($previous_matches as $prev){
+                        if($previous_match['order'] == $prev['order']){
+                            $previous_assigned = true;
+                        }
+                    }
+                    if(!$previous_assigned){
+                        $previous_match[ 'next' ] = $current_match[ 'order' ];
+                        $previous_matches[]       = $previous_match;
+                    } else {
+                        $new_matches[count($new_matches)-1]['next'] = $current_match['order'];
+                    }
                 }
 
                 $new_match[ 'order' ]          = $current_match[ 'order' ];
@@ -378,8 +388,18 @@ class JobUndoActionController extends JobActionController
 
                 if( isset( $previous_inverse_match ) ){
                     $previous_inverse_match           = $previous_inverse_match->toArray();
-                    $previous_inverse_match[ 'next' ] = $current_inverse_match[ 'order' ];
-                    $previous_inverse_matches[]       = $previous_inverse_match;
+                    $previous_inverse_assigned        = false;
+                    foreach ($previous_inverse_matches as $prev){
+                        if($previous_inverse_match['order'] == $prev['order']){
+                            $previous_inverse_assigned = true;
+                        }
+                    }
+                    if(!$previous_inverse_assigned){
+                        $previous_inverse_match[ 'next' ] = $current_inverse_match[ 'order' ];
+                        $previous_inverse_matches[]       = $previous_inverse_match;
+                    } else {
+                        $null_matches[count($null_matches)-1]['next'] = $current_inverse_match['order'];
+                    }
                 }
 
                 $new_inverse_match[ 'order' ]  = $current_inverse_match[ 'order' ];
@@ -442,9 +462,19 @@ class JobUndoActionController extends JobActionController
                 ]);
             }
 
+
             foreach ($previous_matches as $match){
                 $this->pushOperation([
                     'type'      => $type,
+                    'action'    => 'update',
+                    'rif_order' => $match['order'],
+                    'data'      => $match,
+                ]);
+            }
+
+            foreach ($previous_inverse_matches as $match){
+                $this->pushOperation([
+                    'type'      => $inverse_type,
                     'action'    => 'update',
                     'rif_order' => $match['order'],
                     'data'      => $match,
@@ -467,14 +497,6 @@ class JobUndoActionController extends JobActionController
                 ]);
             }
 
-            foreach ($previous_inverse_matches as $match){
-                $this->pushOperation([
-                    'type'      => $inverse_type,
-                    'action'    => 'update',
-                    'rif_order' => $match['order'],
-                    'data'      => $match,
-                ]);
-            }
 
         } catch ( ValidationError $e ) {
             throw new ValidationError( $e->getMessage(), -2 );
