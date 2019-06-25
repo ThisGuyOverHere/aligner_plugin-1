@@ -98,6 +98,44 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getPreviousFromNonExistentOrderJobIdAndType( $order, $id_job, $type, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn    = NewDatabase::obtain()->getConnection();
+        $stmt    = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match sm1 ON sm1.segment_id = segments.id
+        INNER JOIN (SELECT sm2.`id_job`, MAX(`order`) as `maxorder`
+              FROM segments_match as sm2 
+              WHERE sm2.order < ?
+              AND sm2.type = ?
+              AND sm2.id_job = ?
+              GROUP BY sm2.id_job) sm2 ON sm1.order = sm2.maxorder
+        WHERE sm1.id_job = ? AND sm1.type = ? ORDER BY id ASC" );
+
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
+
+    }
+
+    public static function getNextFromNonExistentOrderJobIdAndType( $order, $id_job, $type, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn    = NewDatabase::obtain()->getConnection();
+        $stmt    = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match sm1 ON sm1.segment_id = segments.id
+        INNER JOIN (SELECT sm2.`id_job`, MIN(`order`) as `maxorder`
+              FROM segments_match as sm2 
+              WHERE sm2.order > ?
+              AND sm2.type = ?
+              AND sm2.id_job = ?
+              GROUP BY sm2.id_job) sm2 ON sm1.order = sm2.maxorder
+        WHERE sm1.id_job = ? AND sm1.type = ? ORDER BY id ASC" );
+
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
+
+    }
+
     public static function getFromOrderArrayJobIdAndType( Array $orders, $id_job, $type, $ttl = 0 ) {
 
         $thisDao = new self();

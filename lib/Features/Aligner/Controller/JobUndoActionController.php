@@ -346,8 +346,8 @@ class JobUndoActionController extends JobActionController
 
                 // Restore the original segment_match
 
-                $previous_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent( $current_match[ 'order' ], $id_job, $type );
-                $next_match     = Segments_SegmentMatchDao::getNextMatchOfNonExistent( $current_match[ 'order' ], $id_job, $type );
+                $previous_match = Segments_SegmentDao::getPreviousFromNonExistentOrderJobIdAndType( $current_match[ 'order' ], $id_job, $type );
+                $next_match     = Segments_SegmentDao::getNextFromNonExistentOrderJobIdAndType( $current_match[ 'order' ], $id_job, $type );
 
                 if( isset( $previous_match ) ){
                     $previous_match           = $previous_match->toArray();
@@ -355,9 +355,13 @@ class JobUndoActionController extends JobActionController
                     $previous_matches[]       = $previous_match;
                 }
 
-                $new_match[ 'order' ] = $current_match[ 'order' ];
+                $new_match[ 'order' ]          = $current_match[ 'order' ];
+                $new_match[ 'content_clean' ]  = $current_match[ 'content_clean' ];
+                $new_match[ 'content_hash' ]   = null;
+                $new_match[ 'raw_word_count' ] = 0;
 
                 if( isset( $next_match ) ){
+                    $next_match           = $next_match->toArray();
                     $new_match[ 'next' ]  = $next_match[ 'order' ];
                 } else {
                     $new_match[ 'next' ]  = null;
@@ -369,8 +373,8 @@ class JobUndoActionController extends JobActionController
 
                 // Restore the original null segment before it got deleted during the merge
 
-                $previous_inverse_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent( $current_inverse_match[ 'order' ], $id_job, $inverse_type );
-                $next_inverse_match     = Segments_SegmentMatchDao::getNextMatchOfNonExistent( $current_inverse_match[ 'order' ], $id_job, $inverse_type );
+                $previous_inverse_match = Segments_SegmentDao::getPreviousFromNonExistentOrderJobIdAndType( $current_inverse_match[ 'order' ], $id_job, $inverse_type );
+                $next_inverse_match     = Segments_SegmentDao::getNextFromNonExistentOrderJobIdAndType( $current_inverse_match[ 'order' ], $id_job, $inverse_type );
 
                 if( isset( $previous_inverse_match ) ){
                     $previous_inverse_match           = $previous_inverse_match->toArray();
@@ -382,7 +386,8 @@ class JobUndoActionController extends JobActionController
                 $new_inverse_match[ 'id_job' ] = $id_job;
                 $new_inverse_match[ 'type' ]   = $inverse_type;
 
-                if( isset( $next_match ) ){
+                if( isset( $next_inverse_match ) ){
+                    $next_inverse_match           = $next_inverse_match->toArray();
                     $new_inverse_match[ 'next' ]  = $next_inverse_match[ 'order' ];
                 } else {
                     $new_inverse_match[ 'next' ]  = null;
