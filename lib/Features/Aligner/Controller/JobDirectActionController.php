@@ -242,8 +242,20 @@ class JobDirectActionController extends JobActionController {
         $segments       = array_merge( [ $split_segment ], $new_segments );
         $sourceSegments = ( $type == 'source' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
         $targetSegments = ( $type == 'target' ) ? $segments : array_merge( [ $inverse_segment ], $null_segments );
-        
+
+        $orders = [];
+
+        foreach ($segments as $segment){
+            $orders[] = $segment['order'];
+        }
+
         try{
+
+            $this->setUndoActionsParams([
+                'order'     => $orders,
+                'type'      => $type,
+                'operation' => 'split',
+            ]);
 
             $this->pushOperation( [
                 'type'      => 'source',
@@ -285,7 +297,7 @@ class JobDirectActionController extends JobActionController {
             throw new ValidationError( $e->getMessage(), -2 );
         }
 
-        return $this->getOperations();
+        return $this->getResponse();
     }
 
     protected function moveInEmpty($referenceMatch){
