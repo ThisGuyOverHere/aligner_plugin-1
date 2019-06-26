@@ -132,25 +132,38 @@ class JobActionController extends AlignerController {
         $split_segment[ 'next' ]    = $avg_order;
         $inverse_segment[ 'next' ]  = $inverse_avg;
 
-        $raw_contents = [];
-        $full_raw     = AlignUtils::_mark_xliff_tags( $split_segment[ 'content_raw' ] );
-        $positions[]  = mb_strlen( $full_raw, 'UTF-8' );
+        //$raw_contents = [];
+        //$full_raw     = AlignUtils::_mark_xliff_tags( $split_segment[ 'content_raw' ] );
+        //$positions[]  = mb_strlen( $full_raw, 'UTF-8' );
+
+        $clean_contents  = [];
+        $clean_content = $split_segment[ 'content_clean' ];
+        $positions[]   = mb_strlen( $clean_content, 'UTF-8' );
         foreach ( $positions as $key => $position ) {
-            $start          = ( $key == 0 ) ? 0 : $positions[ $key - 1 ] + 1;
-            $raw_substring  = mb_substr( $full_raw, $start, ( $position + 1 ) - $start, 'UTF-8' );
-            $raw_contents[] = AlignUtils::_restore_xliff_tags( $raw_substring );
+
+            //$start          = ( $key == 0 ) ? 0 : $positions[ $key - 1 ] + 1;
+            //$raw_substring  = mb_substr( $full_raw, $start, ( $position + 1 ) - $start, 'UTF-8' );
+            //$raw_contents[] = AlignUtils::_restore_xliff_tags( $raw_substring );
+
+            $start              = ( $key == 0 ) ? 0 : $positions[ $key - 1 ];
+            $clean_substring    = mb_substr( $clean_content, $start, ( $position ) - $start, 'UTF-8' );
+            $clean_contents[]   = $clean_substring;
         }
 
-        $first_raw   = array_shift( $raw_contents );
+        //$first_raw   = array_shift( $raw_contents );
+        //$first_clean = AlignUtils::_cleanSegment( $first_raw, $this->job->{$split_segment['type']}  ); //
+        //$first_count = \CatUtils::segment_raw_word_count( $first_raw, $this->job->{$split_segment['type']} );
+
+        $first_clean = array_shift( $clean_contents );
         $first_hash  = md5( $first_raw );
-        $first_clean = AlignUtils::_cleanSegment( $first_raw, $this->job->{$split_segment['type']}  ); //
-        $first_count = \CatUtils::segment_raw_word_count( $first_raw, $this->job->{$split_segment['type']} );
+        $first_count = \CatUtils::segment_raw_word_count( $first_clean, $this->job->{$split_segment['type']} );
 
         $new_segment = $split_segment;
         $new_match   = $split_segment;
         $null_match  = $inverse_segment;
 
-        $split_segment[ 'content_raw' ]    = $first_raw;
+        //$split_segment[ 'content_raw' ]  = $first_raw;
+        $split_segment[ 'content_raw' ]    = null;
         $split_segment[ 'content_clean' ]  = $first_clean;
         $split_segment[ 'content_hash' ]   = $first_hash;
         $split_segment[ 'raw_word_count' ] = $first_count;
@@ -158,7 +171,8 @@ class JobActionController extends AlignerController {
         $update_order         = $avg_order;
         $inverse_update_order = $inverse_avg;
 
-        $new_ids          = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $raw_contents ) );
+        //$new_ids        = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $raw_contents ) );
+        $new_ids          = $this->dbHandler->nextSequence( NewDatabase::SEQ_ID_SEGMENT, count( $clean_contents ) );
         $new_segments     = [];
         $null_segments    = [];
         $new_matches      = [];
@@ -175,8 +189,11 @@ class JobActionController extends AlignerController {
 
             //create new segments
             $new_segment[ 'id' ]             = $id;
-            $new_segment[ 'content_raw' ]    = array_shift( $raw_contents );
-            $new_segment[ 'content_clean' ]  = AlignUtils::_cleanSegment( $new_segment[ 'content_raw' ], $this->job->{$new_segment[ 'type' ]} );
+
+            //$new_segment[ 'content_raw' ]    = array_shift( $raw_contents );
+            //$new_segment[ 'content_clean' ]  = AlignUtils::_cleanSegment( $new_segment[ 'content_raw' ], $this->job->{$new_segment[ 'type' ]} );
+            
+            $new_segment[ 'content_clean' ]  = array_shift( $clean_contents );
             $new_segment[ 'content_hash' ]   = md5( $new_segment[ 'content_raw' ] );
             $new_segment[ 'raw_word_count' ] = \CatUtils::segment_raw_word_count( $new_segment[ 'content_raw' ], $this->job->{$new_segment[ 'type' ]}  );
 

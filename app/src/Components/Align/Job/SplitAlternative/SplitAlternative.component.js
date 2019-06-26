@@ -21,7 +21,6 @@ class SplitAlternative extends Component {
 			segmentContent: this.props.segment.content_clean,
 			calculatedToSplit: [[this.props.segment.content_clean]],
 			clearIndexes: [],
-			segmentIndexesMap: this.getClearIndexesMatch()
 		};
 	}
 
@@ -82,7 +81,9 @@ class SplitAlternative extends Component {
 		let newCalculatedToSplit = calculatedToSplit;
 		let splitAtChar = window.getSelection().focusOffset;
 		const targetSentences = calculatedToSplit[clickedSegment][0];
-		console.log(splitAtChar)
+		console.log("newCalculatedToSplit : ", newCalculatedToSplit);
+		console.log("splitAtChar : ", splitAtChar);
+		console.log("targetSentences : ", targetSentences);
 
 		if ((splitAtChar !== 0 && (splitAtChar !== targetSentences.length)) && targetSentences.length > 1) {
 			// properly split clicked string in two items
@@ -108,7 +109,7 @@ class SplitAlternative extends Component {
 	};
 
 	/**
-	 * this. method take in separatori index and reverse split's effects.
+	 * this. method take in separator index and reverse split's effects.
 	 * @param clickedSeparator
 	 */
 	onReverseSplit = (clickedSeparator) => {
@@ -127,84 +128,18 @@ class SplitAlternative extends Component {
 		});
 	};
 
-	getClearIndexesMatch = () => {
-		const {content_clean} = this.props.segment;
-		const less = /##LESSTHAN##/g;
-		const greater = /##GREATERTHAN##/g;
-		let match;
-		let lessArray = [];
-		let greaterArray = [];
-		let tags = [];
-		let cleanIndexMatch = [];
-		let cleanCharCounter = 0;
-
-		// tags calculation
-		while (match = less.exec(this.props.segment.content_raw)) {
-			lessArray.push(match.index);
-		}
-		while (match = greater.exec(this.props.segment.content_raw)) {
-			greaterArray.push(match.index);
-		}
-		// tags index mapping
-		lessArray.map((e, index) => {
-			tags.push({
-				less: e,
-				greater: greaterArray[index] + 14,
-				totalRawLength: this.props.segment.content_raw.length
-			})
-		});
-		/*console.log(lessArray,greaterArray,tags);*/
-		// clean index mapping
-		if (tags.length > 0) {
-			tags.map((e, index) => {
-				if (index === 0 && e.less !== 0) {
-					for (cleanCharCounter; cleanCharCounter < e.less; cleanCharCounter++) {
-						cleanIndexMatch.push(cleanCharCounter);
-					}
-				}
-				if ((tags[index + 1] && ((e.greater + 1) !== tags[index + 1].less))) {
-					for (let idx = (e.greater + 1); idx < tags[index + 1].less; idx++) {
-						cleanIndexMatch.push(idx);
-					}
-				}
-				if ((!tags[index + 1] && ((e.greater + 1) < e.totalRawLength))) {
-					for (let idx = (e.greater + 1); idx <= e.totalRawLength; idx++) {
-						cleanIndexMatch.push(idx);
-					}
-				}
-			});
-			content_clean.split('').map((e,i)=>{
-				console.log(e,this.props.segment.content_raw[cleanIndexMatch[i]]);
-				if(e !== this.props.segment.content_raw[cleanIndexMatch[i]]) console.log('error', i);
-			});
-			return cleanIndexMatch
-		} else {
-			return null
-		}
-	};
-
 	onCloseSplitModal = () => {
 		ProjectActions.openSegmentToSplit(false);
 	};
 
 	onSave = async () => {
-		let positions = [];
-		if (this.state.segmentIndexesMap) {
-			this.state.clearIndexes.map(item => {
-				positions.push(this.state.segmentIndexesMap[item] -1);
-			});
-		} else {
-			positions = this.state.clearIndexes;
-		}
 
 		const data = {
 			type: this.props.segment.type,
 			order: this.props.segment.order,
 			inverseOrder: this.props.inverseSegmentOrder,
-			positions: positions
+			positions: this.state.clearIndexes
 		};
-		console.log(data)
-		console.log(this.props.segment.content_raw.substr(0,positions[0]))
 		ReactGA.event({
 			category: 'Interactions',
 			action: this.props.jobConf.id,
@@ -213,7 +148,7 @@ class SplitAlternative extends Component {
 		ProjectActions.splitSegment(this.props.jobConf.id, this.props.jobConf.password, data);
 		setTimeout(() => {
 			ProjectActions.openSegmentToSplit(false);
-		}, 0)
+		}, 0);
 	}
 }
 

@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import SegmentComponent from "./Segment/Segment.component";
 import ProjectStore from "../../../../Stores/Project.store";
 import ProjectConstants from "../../../../Constants/Project.constants";
-import ReactDOM, {findDOMNode} from "react-dom";
+import {findDOMNode} from "react-dom";
 
 const RowTarget = {
     canDrop(props, monitor) {
@@ -80,11 +80,15 @@ class RowComponent extends Component {
 
     componentDidMount() {
         ProjectStore.addListener(ProjectConstants.ANIMATE_ROW_POSITION, this.animateRow);
+        ProjectStore.addListener(ProjectConstants.MERGE_ALIGN, this.mergeAlign);
+        ProjectStore.addListener(ProjectConstants.CHANGE_SEGMENT_POSITION,this.merge);
         ProjectStore.addListener(ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION, this.alignSegments);
     }
 
     componentWillUnmount() {
         ProjectStore.removeListener(ProjectConstants.ANIMATE_ROW_POSITION, this.animateRow);
+        ProjectStore.removeListener(ProjectConstants.MERGE_ALIGN, this.mergeAlign);
+        ProjectStore.removeListener(ProjectConstants.CHANGE_SEGMENT_POSITION,this.merge);
         ProjectStore.removeListener(ProjectConstants.REQUIRE_SEGMENT_CHANGE_POSITION, this.alignSegments);
     }
 
@@ -104,7 +108,7 @@ class RowComponent extends Component {
             <div className={rowClass.join(' ')} ref={re => {
                 this.ref = re
             }}>
-                <div>{this.props.index+1}</div>
+                <div>{this.props.index + 1}</div>
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
                                   rtl={jobInfo.source_is_rtl}
@@ -160,7 +164,7 @@ class RowComponent extends Component {
             };
             const rec = findDOMNode(this.ref).getBoundingClientRect();
             const position = window.scrollY;
-            const inverseOrder = this.props.row[inverse[log.type]].order
+            const inverseOrder = this.props.row[inverse[log.type]].order;
 
 
             setTimeout(() => {
@@ -172,6 +176,45 @@ class RowComponent extends Component {
             }, 0)
         }
     };
+
+
+    /**
+     * handling merge align animation
+     */
+    mergeAlign = (mergeAlignInfo) => {
+        const data = {
+            type: mergeAlignInfo.matches[mergeAlignInfo.matches.length - 1].type,
+            from: mergeAlignInfo.matches[mergeAlignInfo.matches.length - 1].order,
+            to: mergeAlignInfo.destination,
+        };
+        const rec = findDOMNode(this.ref).getBoundingClientRect();
+        const position = window.scrollY;
+        const inverseOrder = data.to;
+
+        setTimeout(() => {
+            ProjectActions.animateChangeRowPosition(data.type, inverseOrder, position, rec);
+        }, 0)
+    };
+
+    /**
+     *
+     *handling merge animation
+     * */
+    merge = (mergeInfo) => {
+        const data = {
+            type: mergeInfo[mergeInfo.length - 1].type,
+            from: mergeInfo[0].rif_order,
+            to: mergeInfo[mergeInfo.length - 1].rif_order
+        };
+        const rec = findDOMNode(this.ref).getBoundingClientRect();
+        const position = window.scrollY;
+        const inverseOrder = data.to;
+
+        setTimeout(() => {
+            ProjectActions.animateChangeRowPosition(data.type, inverseOrder, position, rec);
+        }, 0)
+    };
+
 
     scrollAfterDrop = (position, rec) => {
         const top = findDOMNode(this.ref).getBoundingClientRect().top;
