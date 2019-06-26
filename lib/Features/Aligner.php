@@ -48,6 +48,7 @@ class Aligner extends BaseFeature
         route( '/job/[:id_job]/[:password]/segment/undo/switch', 'POST', 'Features\Aligner\Controller\JobUndoActionController', 'undoSwitchAction' );
         route( '/job/[:id_job]/[:password]/segment/undo/split', 'POST', 'Features\Aligner\Controller\JobUndoActionController', 'undoSplit' );
         route( '/job/[:id_job]/[:password]/segment/undo/merge', 'POST', 'Features\Aligner\Controller\JobUndoActionController', 'undoMerge' );
+        route( '/job/[:id_job]/[:password]/segment/undo/move', 'POST', 'Features\Aligner\Controller\JobUndoActionController', 'undoMove' );
 
         route( '/tm/mine', 'GET', 'Features\Aligner\Controller\TmController', 'getUserTM' );
         route( '/tm/create_key', 'POST', 'Features\Aligner\Controller\TmController', 'createTmKey' );

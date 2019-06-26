@@ -316,13 +316,11 @@ class JobDirectActionController extends JobActionController {
         }
         $movingSegment = $movingSegment->toArray();
 
-        $new_match_order                       = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch[ 'next' ] );
         $destination_match                     = $referenceMatch;
         $destination_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
         $destination_match[ 'content_raw' ]    = null;
         $destination_match[ 'content_clean' ]  = $movingSegment[ 'content_clean' ];
         $destination_match[ 'raw_word_count' ] = $movingSegment[ 'raw_word_count' ];
-        $destination_match[ 'next' ]           = $new_match_order;
 
         $this->pushOperation( [
                 'type'      => $type,
@@ -364,9 +362,9 @@ class JobDirectActionController extends JobActionController {
 
         $id_job   = $this->job->id;
 
-        $order               = $this->params[ 'order' ];
-        $type                = $this->params[ 'type' ];
-        $inverse_type        = ( $type == 'target' ) ? 'source' : 'target';
+        $order                     = $this->params[ 'order' ];
+        $type                      = $this->params[ 'type' ];
+        $inverse_type              = ( $type == 'target' ) ? 'source' : 'target';
         $destination_order         = $this->params[ 'destination' ];
         $inverse_destination_order = $this->params[ 'inverse_destination' ];
 
@@ -379,12 +377,14 @@ class JobDirectActionController extends JobActionController {
         $movingSegment = $movingSegment->toArray();
 
         $new_match_order = AlignUtils::_getNewOrderValue( $destination_order, $referenceMatch['next'] );
-        $destination_match = $referenceMatch;
-        $destination_match['segment_id'] = $movingSegment['id'];
-        $destination_match['content_raw'] = null;
-        $destination_match['content_clean'] = $movingSegment['content_clean'];
+
+        $destination_match                   = $referenceMatch;
+
+        $destination_match['segment_id']     = $movingSegment['id'];
+        $destination_match['content_raw']    = null;
+        $destination_match['content_clean']  = $movingSegment['content_clean'];
         $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
-        $destination_match['next'] = $new_match_order;
+        $destination_match['next']           = $new_match_order;
 
         $this->pushOperation( [
                 'type'      => $type,
@@ -393,10 +393,10 @@ class JobDirectActionController extends JobActionController {
                 'data'      => $destination_match
         ] );
 
-        $starting_match = $movingSegment;
-        $starting_match['segment_id'] = null;
-        $starting_match['content_raw'] = null;
-        $starting_match['content_clean'] = null;
+        $starting_match                   = $movingSegment;
+        $starting_match['segment_id']     = null;
+        $starting_match['content_raw']    = null;
+        $starting_match['content_clean']  = null;
         $starting_match['raw_word_count'] = null;
 
         $this->pushOperation( [
@@ -407,6 +407,7 @@ class JobDirectActionController extends JobActionController {
         ] );
 
         $new_match_destination = [];
+
         $new_match_destination[ 'order' ]          = $new_match_order;
         $new_match_destination[ 'next' ]           = $referenceMatch['next'];
         $new_match_destination[ 'score' ]          = 100;
@@ -476,6 +477,10 @@ class JobDirectActionController extends JobActionController {
     }
 
     public function move() {
+
+        //TODO Insert empty/full move_type value in undo_actions_params
+
+        //TODO Use inverse also for the starting position of the moving match
 
         $id_job   = $this->job->id;
 
