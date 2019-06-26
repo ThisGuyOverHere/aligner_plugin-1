@@ -73,7 +73,7 @@ class JobActionController extends AlignerController
     }
 
     protected function getOperations() {
-        return $this->response->json( $this->operations_params );
+        return $this->response->json( $this->operations );
     }
 
     protected function getUndoActionsParams(){
