@@ -1239,6 +1239,12 @@ class JobDirectActionController extends JobActionController {
 
         $conn = NewDatabase::obtain()->getConnection();
         try {
+
+            $this->setUndoActionsParams([
+                'operation' => 'hide',
+                'matches'   => $matches
+            ]);
+
             $conn->beginTransaction();
 
             foreach ($matches as $match) {
@@ -1277,7 +1283,7 @@ class JobDirectActionController extends JobActionController {
             throw new ValidationError( "Segment update - DB Error: " . $e->getMessage() . " - Show  ", -2 );
         }
 
-        return $this->getOperations();
+        return $this->getResponse();
 
     }
 

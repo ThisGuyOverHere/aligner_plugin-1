@@ -236,7 +236,6 @@ class JobUndoActionController extends JobActionController
 
     }
 
-
     public function undoMerge(){
 
         //It works like the normal split but it has to consider merges of distant matches (with segments in between)
@@ -927,6 +926,58 @@ class JobUndoActionController extends JobActionController
         } else {
             throw new ValidationError('This request is not valid');
         }
+    }
+
+    public function undoShow() {
+
+        $id_job = $this->job->id;
+
+        $matches = $this->params[ 'matches' ];
+
+        $conn = NewDatabase::obtain()->getConnection();
+
+        try {
+            $conn->beginTransaction();
+            foreach ( $matches as $match ) {
+
+                Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'source' ], $id_job, "source" );
+                Segments_SegmentMatchDao::hideByOrderAndType( $match[ 'target' ], $id_job, "target" );
+
+                $source = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match [ 'source' ],
+                    $id_job , 'source' );
+
+                $target = Segments_SegmentDao::getFromOrderJobIdAndType(
+                    $match [ 'target' ],
+                    $id_job , 'target' );
+
+                $this->pushOperation( [
+                    'type'      => 'source',
+                    'action'    => 'update',
+                    'rif_order' => $match[ 'source' ],
+                    'data'      => $source->toArray()
+                ] );
+
+                $this->pushOperation( [
+                    'type'      => 'target',
+                    'action'    => 'update',
+                    'rif_order' => $match[ 'target' ],
+                    'data'      => $target->toArray()
+                ] );
+
+            }
+
+            $conn->commit();
+
+        } catch ( \PDOException $e){
+            $conn->rollBack();
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+        } catch (ValidationError $e ){
+            throw new ValidationError( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+        }
+
+        return $this->getOperations();
+
     }
 
 }
