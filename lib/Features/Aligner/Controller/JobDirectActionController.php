@@ -26,8 +26,8 @@ class JobDirectActionController extends JobActionController {
         $id_job   = $this->job->id;
         $segments = [];
         $orders   = $this->params[ 'order' ];
+        $inverses = $this->params[ 'inverse' ];
         $type     = $this->params[ 'type' ];
-
 
         sort( $orders, SORT_NUMERIC);
 
@@ -41,9 +41,26 @@ class JobDirectActionController extends JobActionController {
 
         $deleted_orders = [];
 
+        $undo_matches   = [];
+        $position       = 0;
+        $total_segments = count($segments);
+
+        array_shift($inverses);
+
+        $undo_inverse = [];
+
+        foreach ( $inverses as $inverse ) {
+            $undo_inverse[] = [ 'order' => $inverse ];
+        }
+
         foreach ( $segments as $key => $segment ) {
+            $position += count( $segment[ 'content_clean' ] );
             if ( $key != 0 ) {
+                $position += 1; // We add 1 due to the space added between merged segments
                 $deleted_orders[] = $segment[ 'order' ];
+            }
+            if ( $key != $total_segments - 1 ){
+                $undo_matches[] = [ 'positon' => $position, 'order' => $segments[ $key + 1 ][ 'order' ] ] ;
             }
         }
 
@@ -59,6 +76,14 @@ class JobDirectActionController extends JobActionController {
         }
 
         try{
+
+            $this->setUndoActionsParams([
+                'order'           => $orders[0],
+                'type'            => $type,
+                'matches'         => $undo_matches,
+                'inverse_matches' => $undo_matches,
+                'operation'       => $merge
+            ]);
 
             $this->pushOperation( [
                 'type'      => $type,
@@ -79,7 +104,7 @@ class JobDirectActionController extends JobActionController {
             throw new ValidationError( $e->getMessage(), -2 );
         }
 
-        return $this->getOperations();
+        return $this->getResponse();
 
     }
 
@@ -477,11 +502,6 @@ class JobDirectActionController extends JobActionController {
     }
 
     public function move() {
-
-        //TODO Insert empty/full move_type value in undo_actions_params
-
-        //TODO Use inverse also for the starting position of the moving match
-
         $id_job   = $this->job->id;
 
         $type                = $this->params[ 'type' ];
