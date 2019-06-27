@@ -82,7 +82,7 @@ class JobDirectActionController extends JobActionController {
                 'type'            => $type,
                 'matches'         => $undo_matches,
                 'inverse_matches' => $undo_matches,
-                'operation'       => $merge
+                'operation'       => 'merge'
             ]);
 
             $this->pushOperation( [
@@ -325,13 +325,15 @@ class JobDirectActionController extends JobActionController {
         return $this->getResponse();
     }
 
+
     protected function moveInEmpty($referenceMatch){
 
         $id_job   = $this->job->id;
 
-        $order                     = $this->params[ 'order' ];
-        $type                      = $this->params[ 'type' ];
-        $destination_order         = $this->params[ 'destination' ];
+        $order             = $this->params[ 'order' ];
+        $inverse_order     = $this->params[ 'inverse_order' ];
+        $type              = $this->params[ 'type' ];
+        $destination_order = $this->params[ 'destination' ];
 
         if($order == $destination_order){ return $this->getOperations();}
 
@@ -367,6 +369,15 @@ class JobDirectActionController extends JobActionController {
                 'data'      => $starting_match
         ] );
 
+        $this->setUndoActionsParams([
+            'order'               => (int) $destination_order,
+            'type'                => $type,
+            'destination'         => (int) $order,
+            'inverse_destination' => (int) $inverse_order,
+            'move_type'           => 'empty',
+            'operation'           => 'move',
+        ]);
+
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
@@ -378,10 +389,11 @@ class JobDirectActionController extends JobActionController {
             throw new \PDOException( "Segment Move - DB Error: " . $e->getMessage(), -2 );
         }
 
-        return $this->getOperations();
+        return $this->getResponse();
 
 
     }
+
 
     protected function moveInFill($referenceMatch){
 
@@ -483,6 +495,16 @@ class JobDirectActionController extends JobActionController {
                 'data'      => $inverseReference
         ] );
 
+        $this->setUndoActionsParams([
+            'order1'              => (int) $destination_order,
+            'order2'              => (int) $new_match_order,
+            'type'                => $type,
+            'destination'         => (int) $order,
+            'inverse_destination' => (int) $inverse_order,
+            'move_type'           => 'full',
+            'operation'           => 'move'
+        ]);
+
         $conn = NewDatabase::obtain()->getConnection();
         try {
             $conn->beginTransaction();
@@ -497,7 +519,7 @@ class JobDirectActionController extends JobActionController {
             throw new \PDOException( "Segment Move - DB Error: " . $e->getMessage(), -2 );
         }
 
-        return $this->getOperations();
+        return $this->getResponse();
 
     }
 
