@@ -267,6 +267,8 @@ class JobUndoActionController extends JobActionController
         $clean_content  = $unmerged_segment[ 'content_clean' ];
         $matches[]      = [ 'position' => mb_strlen( $clean_content, 'UTF-8' ), 'order' => null ];
 
+        // TODO Remove merge space while splitting back
+
         foreach ( $matches as $key => $match ) {
 
             /*
@@ -276,8 +278,8 @@ class JobUndoActionController extends JobActionController
              * position they were before the merge operation
              */
 
-            $start       = ( $key == 0 ) ? 0 : $matches[ $key - 1 ]['position'];
-            $match_order = ( $key == 0 ) ? $order : $matches[ $key - 1 ]['order'];
+            $start         = ( $key == 0 ) ? 0 : $matches[ $key - 1 ]['position'];
+            $match_order   = ( $key == 0 ) ? $order : $matches[ $key - 1 ]['order'];
 
             $clean_substring = mb_substr( $clean_content, $start, ( $match['position'] ) - $start, 'UTF-8' );
             $clean_matches[] = [ 'order' => $match_order, 'content_clean' => $clean_substring];
@@ -944,353 +946,358 @@ class JobUndoActionController extends JobActionController
         $destination_order         = $this->params[ 'destination' ];
         $inverse_destination_order = $this->params[ 'inverse_destination' ];
 
-        // We start by moving the merged segment to the original position
+        if ($order != $destination_order) {
 
-        $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType( $destination_order, $id_job, $type );
-        if(is_object($referenceMatch)){
-            $referenceMatch = $referenceMatch->toArray();
-        }
+            // We start by moving the merged segment to the original position
 
-        $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $order, $id_job, $type );
-        if(!is_object($movingSegment)){
-            throw new ValidationError("There's no segment with the parameters specified in the input");
-        }
-        $movingSegment = $movingSegment->toArray();
+            $referenceMatch = Segments_SegmentDao::getFromOrderJobIdAndType($destination_order, $id_job, $type);
+            if (is_object($referenceMatch)) {
+                $referenceMatch = $referenceMatch->toArray();
+            }
 
-        $restoredSegment = Segments_SegmentDao::getFromOrderJobIdAndType( $moved_order, $id_job, $type );
-        if(is_object($restoredSegment)){
-            $restoredSegment = $restoredSegment->toArray();
-        }
+            $movingSegment = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $type);
+            if (!is_object($movingSegment)) {
+                throw new ValidationError("There's no segment with the parameters specified in the input");
+            }
+            $movingSegment = $movingSegment->toArray();
 
-        if($restoredSegment){
-            if($referenceMatch) {
+            $restoredSegment = Segments_SegmentDao::getFromOrderJobIdAndType($moved_order, $id_job, $type);
+            if (is_object($restoredSegment)) {
+                $restoredSegment = $restoredSegment->toArray();
+            }
 
-                $destination_match = $referenceMatch;
+            if ($restoredSegment) {
 
-                $destination_match['segment_id'] = $movingSegment['id'];
-                $destination_match['content_raw'] = null;
-                $destination_match['content_clean'] = $movingSegment['content_clean'];
-                $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
+                if ($referenceMatch) {
 
-                $this->pushOperation([
-                    'type' => $type,
-                    'action' => 'update',
-                    'rif_order' => $destination_order,
-                    'data' => $destination_match
-                ]);
+                    $destination_match = $referenceMatch;
 
-                $starting_match                   = $restoredSegment;
-                $starting_match['segment_id']     = null;
-                $starting_match['content_raw']    = null;
-                $starting_match['content_clean']  = null;
-                $starting_match['raw_word_count'] = null;
+                    $destination_match['segment_id'] = $movingSegment['id'];
+                    $destination_match['content_raw'] = null;
+                    $destination_match['content_clean'] = $movingSegment['content_clean'];
+                    $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
 
-                $this->pushOperation([
-                    'type' => $type,
-                    'action' => 'update',
-                    'rif_order' => $moved_order,
-                    'data' => $starting_match
-                ]);
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => 'update',
+                        'rif_order' => $destination_order,
+                        'data' => $destination_match
+                    ]);
 
-                $new_match_destination = $movingSegment;
+                    $starting_match = $restoredSegment;
+                    $starting_match['segment_id'] = null;
+                    $starting_match['content_raw'] = null;
+                    $starting_match['content_clean'] = null;
+                    $starting_match['raw_word_count'] = null;
 
-                $new_match_destination['score']       = 100;
-                $new_match_destination['segment_id']  = $restoredSegment['id'];
-                $new_match_destination['type']        = $type;
-                $new_match_destination['id_job']      = $id_job;
-                $new_match_destination['content_raw'] = null;
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => 'update',
+                        'rif_order' => $moved_order,
+                        'data' => $starting_match
+                    ]);
 
-                $this->pushOperation([
-                    'type' => $type,
-                    'action' => 'update',
-                    'rif_order' => $new_match_destination['order'],
-                    'data' => $new_match_destination
-                ]);
+                    $new_match_destination = $movingSegment;
 
-            } else {
+                    $new_match_destination['score'] = 100;
+                    $new_match_destination['segment_id'] = $restoredSegment['id'];
+                    $new_match_destination['type'] = $type;
+                    $new_match_destination['id_job'] = $id_job;
+                    $new_match_destination['content_raw'] = null;
 
-                $new_matches     = [];
-                $updated_matches = [];
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => 'update',
+                        'rif_order' => $new_match_destination['order'],
+                        'data' => $new_match_destination
+                    ]);
 
-                // The original operation row had an empty inverse match before the move. This means we have to recreate the row
-
-                $previous_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent( $destination_order, $id_job, $type );
-
-                $next_match     = Segments_SegmentMatchDao::getNextMatchOfNonExistent( $destination_order, $id_job, $type );
-                if(!empty($next_match)){
-                    $next_match = $next_match->toArray();
-                    $next_order = $next_match['order'];
                 } else {
-                    $next_order = null;
+
+                    $new_matches = [];
+                    $updated_matches = [];
+
+                    // The original operation row had an empty inverse match before the move. This means we have to recreate the row
+
+                    $previous_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent($destination_order, $id_job, $type);
+
+                    $next_match = Segments_SegmentMatchDao::getNextMatchOfNonExistent($destination_order, $id_job, $type);
+                    if (!empty($next_match)) {
+                        $next_match = $next_match->toArray();
+                        $next_order = $next_match['order'];
+                    } else {
+                        $next_order = null;
+                    }
+
+                    $destination_match['order'] = $destination_order;
+                    $destination_match['next'] = $next_order;
+                    $destination_match['id_job'] = $id_job;
+                    $destination_match['type'] = $type;
+                    $destination_match['segment_id'] = $movingSegment['id'];
+                    $destination_match['content_raw'] = null;
+                    $destination_match['content_clean'] = $movingSegment['content_clean'];
+                    $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
+                    $destination_match['next'] = $next_order;
+
+                    $new_matches[] = $destination_match;
+
+                    if (!empty($previous_match)) {
+                        $previous_match = $previous_match->toArray();
+                        $previous_match['next'] = $destination_order;
+                        $this->pushOperation([
+                            'type' => $type,
+                            'action' => 'update',
+                            'rif_order' => $previous_match['order'],
+                            'data' => $previous_match
+                        ]);
+
+                        $updated_matches[] = $previous_match;
+                    }
+
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => (isset($next_order)) ? 'create' : 'push',
+                        'rif_order' => (isset($next_order)) ? $next_order : null,
+                        'data' => $destination_match
+                    ]);
+
+
+                    $starting_match = $restoredSegment;
+                    $starting_match['segment_id'] = null;
+                    $starting_match['content_raw'] = null;
+                    $starting_match['content_clean'] = null;
+                    $starting_match['raw_word_count'] = null;
+
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => 'update',
+                        'rif_order' => $moved_order,
+                        'data' => $starting_match
+                    ]);
+
+                    $updated_matches[] = $starting_match;
+
+                    $new_match_destination = $movingSegment;
+
+                    $new_match_destination['score'] = 100;
+                    $new_match_destination['segment_id'] = $restoredSegment['id'];
+                    $new_match_destination['type'] = $type;
+                    $new_match_destination['id_job'] = $id_job;
+                    $new_match_destination['content_raw'] = null;
+                    $new_match_destination['content_clean'] = $referenceMatch['content_clean'];
+                    $new_match_destination['raw_word_count'] = $referenceMatch['raw_word_count'];
+
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => 'update',
+                        'rif_order' => $new_match_destination['order'],
+                        'data' => $new_match_destination
+                    ]);
+
+                    $updated_matches[] = $new_match_destination;
+
+                    $previous_inverse_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent($inverse_destination_order, $id_job, $inverse_type);
+
+                    $next_inverse_match = Segments_SegmentMatchDao::getNextMatchOfNonExistent($inverse_destination_order, $id_job, $inverse_type);
+                    if (!empty($next_inverse_match)) {
+                        $next_inverse_match = $next_inverse_match->toArray();
+                        $next_inverse_order = $next_inverse_match['order'];
+                    } else {
+                        $next_inverse_order = null;
+                    }
+
+                    $inverse_destination_match['order'] = $inverse_destination_order;
+                    $inverse_destination_match['next'] = $next_inverse_order;
+                    $inverse_destination_match['id_job'] = $id_job;
+                    $inverse_destination_match['type'] = $inverse_type;
+                    $inverse_destination_match['segment_id'] = null;
+                    $inverse_destination_match['content_raw'] = null;
+                    $inverse_destination_match['content_clean'] = null;
+                    $inverse_destination_match['raw_word_count'] = null;
+
+                    $this->pushOperation([
+                        'type' => $inverse_type,
+                        'action' => (isset($next_order)) ? 'create' : 'push',
+                        'rif_order' => (isset($next_order)) ? $next_order : null,
+                        'data' => $inverse_destination_match
+                    ]);
+
+                    $new_matches[] = $inverse_destination_match;
+
+                    if (!empty($previous_inverse_match)) {
+                        $previous_inverse_match = $previous_inverse_match->toArray();
+                        $previous_inverse_match['next'] = $inverse_destination_order;
+                        $this->pushOperation([
+                            'type' => $inverse_type,
+                            'action' => 'update',
+                            'rif_order' => $previous_inverse_match['order'],
+                            'data' => $previous_inverse_match
+                        ]);
+
+                        $updated_matches[] = $previous_inverse_match;
+                    }
+
                 }
 
-                $destination_match[ 'order' ]        = $destination_order;
-                $destination_match[ 'next' ]         = $next_order;
-                $destination_match[ 'id_job' ]       = $id_job;
-                $destination_match[ 'type' ]         = $type;
-                $destination_match['segment_id']     = $movingSegment['id'];
-                $destination_match['content_raw']    = null;
-                $destination_match['content_clean']  = $movingSegment['content_clean'];
-                $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
-                $destination_match['next']           = $next_order;
+                $conn = NewDatabase::obtain()->getConnection();
+                try {
+                    $conn->beginTransaction();
+                    $segmentsMatchDao = new Segments_SegmentMatchDao;
+                    Segments_SegmentMatchDao::nullifySegmentsInMatches([$order], $id_job, $type);
+                    $match_dao = new Segments_SegmentMatchDao();
+                    if (!empty($referenceMatch)) {
+                        $match_dao->updateList([$destination_match, $starting_match, $new_match_destination]);
+                    } else {
+                        $match_dao->createList($new_matches);
+                        $match_dao->updateList($updated_matches);
+                    }
+                    $conn->commit();
+                } catch (\PDOException $e) {
+                    $conn->rollBack();
+                    throw new \PDOException("Segment Move - DB Error: " . $e->getMessage(), -2);
+                }
+            } else {
+                if (!empty ($referenceMatch)) {
 
-                $new_matches[] = $destination_match;
+                    // The original operation row had a full inverse match, we just need to put the segment_id back.
 
-                if( !empty( $previous_match ) ){
-                    $previous_match         = $previous_match->toArray();
-                    $previous_match['next'] = $destination_order;
-                    $this->pushOperation( [
-                        'type'      => $type,
-                        'action'    => 'update',
-                        'rif_order' => $previous_match['order'],
-                        'data'      => $previous_match
-                    ] );
+                    $destination_match = $referenceMatch;
+                    $destination_match['segment_id'] = $movingSegment['id'];
+                    $destination_match['content_raw'] = null;
+                    $destination_match['content_clean'] = $movingSegment['content_clean'];
+                    $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
 
-                    $updated_matches[] = $previous_match;
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => 'update',
+                        'rif_order' => $destination_order,
+                        'data' => $destination_match
+                    ]);
+
+                } else {
+
+                    $new_matches = [];
+                    $updated_matches = [];
+
+                    // The original operation row had an empty inverse match before the move. This means we have to recreate the row
+
+                    $previous_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent($destination_order, $id_job, $type);
+
+                    $next_match = Segments_SegmentMatchDao::getNextMatchOfNonExistent($destination_order, $id_job, $type);
+                    if (!empty($next_match)) {
+                        $next_match = $next_match->toArray();
+                        $next_order = $next_match['order'];
+                    } else {
+                        $next_order = null;
+                    }
+
+                    $destination_match['order'] = $destination_order;
+                    $destination_match['next'] = $next_order;
+                    $destination_match['id_job'] = $id_job;
+                    $destination_match['type'] = $type;
+                    $destination_match['segment_id'] = $movingSegment['id'];
+                    $destination_match['content_raw'] = null;
+                    $destination_match['content_clean'] = $movingSegment['content_clean'];
+                    $destination_match['raw_word_count'] = $movingSegment['raw_word_count'];
+
+                    $this->pushOperation([
+                        'type' => $type,
+                        'action' => (isset($next_order)) ? 'create' : 'push',
+                        'rif_order' => (isset($next_order)) ? $next_order : null,
+                        'data' => $destination_match
+                    ]);
+
+                    $new_matches[] = $destination_match;
+
+                    if (!empty($previous_match)) {
+                        $previous_match = $previous_match->toArray();
+                        $previous_match['next'] = $destination_order;
+                        $this->pushOperation([
+                            'type' => $type,
+                            'action' => 'update',
+                            'rif_order' => $previous_match['order'],
+                            'data' => $previous_match
+                        ]);
+
+                        $updated_matches[] = $previous_match;
+                    }
+
+                    $previous_inverse_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent($inverse_destination_order, $id_job, $inverse_type);
+
+                    $next_inverse_match = Segments_SegmentMatchDao::getNextMatchOfNonExistent($inverse_destination_order, $id_job, $inverse_type);
+                    if (!empty($next_inverse_match)) {
+                        $next_inverse_match = $next_inverse_match->toArray();
+                        $next_inverse_order = $next_inverse_match['order'];
+                    } else {
+                        $next_inverse_order = null;
+                    }
+
+                    $inverse_destination_match['order'] = $inverse_destination_order;
+                    $inverse_destination_match['next'] = $next_inverse_order;
+                    $inverse_destination_match['id_job'] = $id_job;
+                    $inverse_destination_match['type'] = $inverse_type;
+                    $inverse_destination_match['segment_id'] = null;
+                    $inverse_destination_match['content_raw'] = null;
+                    $inverse_destination_match['content_clean'] = null;
+                    $inverse_destination_match['raw_word_count'] = null;
+
+                    $this->pushOperation([
+                        'type' => $inverse_type,
+                        'action' => (isset($next_order)) ? 'create' : 'push',
+                        'rif_order' => (isset($next_order)) ? $next_order : null,
+                        'data' => $inverse_destination_match
+                    ]);
+
+                    $new_matches[] = $inverse_destination_match;
+
+                    if (!empty($previous_inverse_match)) {
+                        $previous_inverse_match = $previous_inverse_match->toArray();
+                        $previous_inverse_match['next'] = $inverse_destination_order;
+                        $this->pushOperation([
+                            'type' => $inverse_type,
+                            'action' => 'update',
+                            'rif_order' => $previous_inverse_match['order'],
+                            'data' => $previous_inverse_match
+                        ]);
+
+                        $updated_matches[] = $previous_inverse_match;
+                    }
+
                 }
 
-                $this->pushOperation( [
-                    'type'      => $type,
-                    'action'    => (isset($next_order)) ? 'create' : 'push',
-                    'rif_order' => (isset($next_order)) ? $next_order : null,
-                    'data'      => $destination_match
-                ] );
-
-
-                $starting_match                   = $restoredSegment;
-                $starting_match['segment_id']     = null;
-                $starting_match['content_raw']    = null;
-                $starting_match['content_clean']  = null;
+                $starting_match = $movingSegment;
+                $starting_match['segment_id'] = null;
+                $starting_match['content_raw'] = null;
+                $starting_match['content_clean'] = null;
                 $starting_match['raw_word_count'] = null;
-
-                $this->pushOperation([
-                    'type' => $type,
-                    'action' => 'update',
-                    'rif_order' => $moved_order,
-                    'data' => $starting_match
-                ]);
 
                 $updated_matches[] = $starting_match;
 
-                $new_match_destination = $movingSegment;
-
-                $new_match_destination['score']          = 100;
-                $new_match_destination['segment_id']     = $restoredSegment['id'];
-                $new_match_destination['type']           = $type;
-                $new_match_destination['id_job']         = $id_job;
-                $new_match_destination['content_raw']    = null;
-                $new_match_destination['content_clean']  = $referenceMatch['content_clean'];
-                $new_match_destination['raw_word_count'] = $referenceMatch['raw_word_count'];
-
                 $this->pushOperation([
                     'type' => $type,
                     'action' => 'update',
-                    'rif_order' => $new_match_destination['order'],
-                    'data' => $new_match_destination
+                    'rif_order' => $order,
+                    'data' => $starting_match
                 ]);
 
-                $updated_matches[] = $new_match_destination;
-
-                $previous_inverse_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent( $inverse_destination_order, $id_job, $inverse_type );
-
-                $next_inverse_match     = Segments_SegmentMatchDao::getNextMatchOfNonExistent( $inverse_destination_order, $id_job, $inverse_type );
-                if(!empty($next_inverse_match)){
-                    $next_inverse_match = $next_inverse_match->toArray();
-                    $next_inverse_order = $next_inverse_match['order'];
-                } else {
-                    $next_inverse_order = null;
+                $conn = NewDatabase::obtain()->getConnection();
+                try {
+                    $conn->beginTransaction();
+                    Segments_SegmentMatchDao::nullifySegmentsInMatches([$order], $id_job, $type);
+                    if (!empty($referenceMatch)) {
+                        Segments_SegmentMatchDao::updateFields(['segment_id' => $movingSegment['id']], $destination_order, $id_job, $type);
+                    } else {
+                        $match_dao = new Segments_SegmentMatchDao();
+                        $match_dao->createList($new_matches);
+                        $match_dao->updateList($updated_matches);
+                    }
+                    $conn->commit();
+                } catch (\PDOException $e) {
+                    $conn->rollBack();
+                    throw new \PDOException("Segment Move - DB Error: " . $e->getMessage(), -2);
                 }
-
-                $inverse_destination_match[ 'order' ]          = $inverse_destination_order;
-                $inverse_destination_match[ 'next' ]           = $next_inverse_order;
-                $inverse_destination_match[ 'id_job' ]         = $id_job;
-                $inverse_destination_match[ 'type' ]           = $inverse_type;
-                $inverse_destination_match[ 'segment_id' ]     = null;
-                $inverse_destination_match[ 'content_raw' ]    = null;
-                $inverse_destination_match[ 'content_clean' ]  = null;
-                $inverse_destination_match[ 'raw_word_count' ] = null;
-
-                $this->pushOperation( [
-                    'type'      => $inverse_type,
-                    'action'    => (isset($next_order)) ? 'create' : 'push',
-                    'rif_order' => (isset($next_order)) ? $next_order : null,
-                    'data'      => $inverse_destination_match
-                ] );
-
-                $new_matches[] = $inverse_destination_match;
-
-                if( !empty($previous_inverse_match) ){
-                    $previous_inverse_match         = $previous_inverse_match->toArray();
-                    $previous_inverse_match['next'] = $inverse_destination_order;
-                    $this->pushOperation( [
-                        'type'      => $inverse_type,
-                        'action'    => 'update',
-                        'rif_order' => $previous_inverse_match['order'],
-                        'data'      => $previous_inverse_match
-                    ] );
-
-                    $updated_matches[] = $previous_inverse_match;
-                }
-
             }
 
-            $conn = NewDatabase::obtain()->getConnection();
-            try {
-                $conn->beginTransaction();
-                $segmentsMatchDao = new Segments_SegmentMatchDao;
-                Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order ], $id_job, $type );
-                $match_dao = new Segments_SegmentMatchDao();
-                if(!empty($referenceMatch)){
-                    $match_dao->updateList([$destination_match, $starting_match, $new_match_destination]);
-                } else {
-                    $match_dao->createList($new_matches);
-                    $match_dao->updateList($updated_matches);
-                }
-                $conn->commit();
-            } catch ( \PDOException $e ) {
-                $conn->rollBack();
-                throw new \PDOException( "Segment Move - DB Error: " . $e->getMessage(), -2 );
-            }
-        } else {
-            if( !empty ( $referenceMatch ) ){
-
-                // The original operation row had a full inverse match, we just need to put the segment_id back.
-
-                $destination_match                     = $referenceMatch;
-                $destination_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
-                $destination_match[ 'content_raw' ]    = null;
-                $destination_match[ 'content_clean' ]  = $movingSegment[ 'content_clean' ];
-                $destination_match[ 'raw_word_count' ] = $movingSegment[ 'raw_word_count' ];
-
-                $this->pushOperation( [
-                    'type'      => $type,
-                    'action'    => 'update',
-                    'rif_order' => $destination_order,
-                    'data'      => $destination_match
-                ] );
-
-            } else {
-
-                $new_matches     = [];
-                $updated_matches = [];
-
-                // The original operation row had an empty inverse match before the move. This means we have to recreate the row
-
-                $previous_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent( $destination_order, $id_job, $type );
-
-                $next_match     = Segments_SegmentMatchDao::getNextMatchOfNonExistent( $destination_order, $id_job, $type );
-                if(!empty($next_match)){
-                    $next_match = $next_match->toArray();
-                    $next_order = $next_match['order'];
-                } else {
-                    $next_order = null;
-                }
-
-                $destination_match[ 'order' ]          = $destination_order;
-                $destination_match[ 'next' ]           = $next_order;
-                $destination_match[ 'id_job' ]         = $id_job;
-                $destination_match[ 'type' ]           = $type;
-                $destination_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
-                $destination_match[ 'content_raw' ]    = null;
-                $destination_match[ 'content_clean' ]  = $movingSegment[ 'content_clean' ];
-                $destination_match[ 'raw_word_count' ] = $movingSegment[ 'raw_word_count' ];
-
-                $this->pushOperation( [
-                    'type'      => $type,
-                    'action'    => (isset($next_order)) ? 'create' : 'push',
-                    'rif_order' => (isset($next_order)) ? $next_order : null,
-                    'data'      => $destination_match
-                ] );
-
-                $new_matches[] = $destination_match;
-
-                if( !empty( $previous_match ) ){
-                    $previous_match         = $previous_match->toArray();
-                    $previous_match['next'] = $destination_order;
-                    $this->pushOperation( [
-                        'type'      => $type,
-                        'action'    => 'update',
-                        'rif_order' => $previous_match['order'],
-                        'data'      => $previous_match
-                    ] );
-
-                    $updated_matches[] = $previous_match;
-                }
-
-                $previous_inverse_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent( $inverse_destination_order, $id_job, $inverse_type );
-
-                $next_inverse_match     = Segments_SegmentMatchDao::getNextMatchOfNonExistent( $inverse_destination_order, $id_job, $inverse_type );
-                if(!empty($next_inverse_match)){
-                    $next_inverse_match = $next_inverse_match->toArray();
-                    $next_inverse_order = $next_inverse_match['order'];
-                } else {
-                    $next_inverse_order = null;
-                }
-
-                $inverse_destination_match[ 'order' ]          = $inverse_destination_order;
-                $inverse_destination_match[ 'next' ]           = $next_inverse_order;
-                $inverse_destination_match[ 'id_job' ]         = $id_job;
-                $inverse_destination_match[ 'type' ]           = $inverse_type;
-                $inverse_destination_match[ 'segment_id' ]     = null;
-                $inverse_destination_match[ 'content_raw' ]    = null;
-                $inverse_destination_match[ 'content_clean' ]  = null;
-                $inverse_destination_match[ 'raw_word_count' ] = null;
-
-                $this->pushOperation( [
-                    'type'      => $inverse_type,
-                    'action'    => (isset($next_order)) ? 'create' : 'push',
-                    'rif_order' => (isset($next_order)) ? $next_order : null,
-                    'data'      => $inverse_destination_match
-                ] );
-
-                $new_matches[] = $inverse_destination_match;
-
-                if( !empty($previous_inverse_match) ){
-                    $previous_inverse_match         = $previous_inverse_match->toArray();
-                    $previous_inverse_match['next'] = $inverse_destination_order;
-                    $this->pushOperation( [
-                        'type'      => $inverse_type,
-                        'action'    => 'update',
-                        'rif_order' => $previous_inverse_match['order'],
-                        'data'      => $previous_inverse_match
-                    ] );
-
-                    $updated_matches[] = $previous_inverse_match;
-                }
-
-            }
-
-            $starting_match                     = $movingSegment;
-            $starting_match[ 'segment_id' ]     = null;
-            $starting_match[ 'content_raw' ]    = null;
-            $starting_match[ 'content_clean' ]  = null;
-            $starting_match[ 'raw_word_count' ] = null;
-
-            $updated_matches[] = $starting_match;
-
-            $this->pushOperation( [
-                'type'      => $type,
-                'action'    => 'update',
-                'rif_order' => $order,
-                'data'      => $starting_match
-            ] );
-
-            $conn = NewDatabase::obtain()->getConnection();
-            try {
-                $conn->beginTransaction();
-                Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order ], $id_job, $type );
-                if(!empty($referenceMatch)){
-                    Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $movingSegment[ 'id' ] ], $destination_order, $id_job, $type );
-                } else {
-                    $match_dao = new Segments_SegmentMatchDao();
-                    $match_dao->createList($new_matches);
-                    $match_dao->updateList($updated_matches);
-                }
-                $conn->commit();
-            } catch ( \PDOException $e ) {
-                $conn->rollBack();
-                throw new \PDOException( "Segment Move - DB Error: " . $e->getMessage(), -2 );
-            }
         }
 
 
@@ -1342,6 +1349,7 @@ class JobUndoActionController extends JobActionController
         foreach ( $unmerge_structure as $structure ){
 
             $order           = $structure[ 'order' ];
+            $type            = $structure[ 'type' ];
             $type            = $structure[ 'type' ];
             $inverse_matches = $structure[ 'inverses' ];
             $inverse_type    = ( $type == 'target' ) ? 'source' : 'target';

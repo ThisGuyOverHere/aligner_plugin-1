@@ -26,7 +26,7 @@ class JobDirectActionController extends JobActionController {
         $id_job   = $this->job->id;
         $segments = [];
         $orders   = $this->params[ 'order' ];
-        $inverses = $this->params[ 'inverse' ];
+        $inverses = $this->params[ 'inverses' ];
         $type     = $this->params[ 'type' ];
 
         sort( $orders, SORT_NUMERIC);
@@ -54,7 +54,7 @@ class JobDirectActionController extends JobActionController {
         }
 
         foreach ( $segments as $key => $segment ) {
-            $position += count( $segment[ 'content_clean' ] );
+            $position += mb_strlen( $segment[ 'content_clean' ], 'UTF-8' );
             if ( $key != 0 ) {
                 $position += 1; // We add 1 due to the space added between merged segments
                 $deleted_orders[] = $segment[ 'order' ];
@@ -841,8 +841,9 @@ class JobDirectActionController extends JobActionController {
 
         $id_job   = $this->job->id;
 
-        $matches           = $this->params[ 'matches' ];
-        $destination_order = $this->params[ 'destination' ];
+        $matches             = $this->params[ 'matches' ];
+        $inverses            = $this->params[ 'inverses' ];
+        $destination_order   = $this->params[ 'destination' ];
 
         $sources        = [];
         $targets        = [];
@@ -857,8 +858,19 @@ class JobDirectActionController extends JobActionController {
             }
         }
 
+        $sourceInverseOrders = [];
+
+        foreach ( $inverses as $inverse ) {
+            if ( $inverse[ 'type' ] == 'source' ){
+                $sourceInverseOrders[] = $inverse['order'];
+            }
+        }
+
         sort($sourceOrders, SORT_NUMERIC);
         sort($targetOrders, SORT_NUMERIC);
+
+        sort($sourceInverseOrders, SORT_NUMERIC);
+        $inverse_order = array_shift($sourceInverseOrders);
 
         foreach ( $sourceOrders as $order ) {
             $source = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, 'source');
@@ -873,6 +885,34 @@ class JobDirectActionController extends JobActionController {
                 throw new ValidationError("There's no segment with the parameters specified in the input");
             }
             $targets[] = $target->toArray();
+        }
+
+        $position      = 0;
+        $total_sources = count($sourceOrders);
+
+        foreach ( $sources as $key => $segment ){
+            $position += mb_strlen( $segment[ 'content_clean' ], 'UTF-8' );
+            if ( $key != 0 ) {
+                $position += 1; // We add 1 due to the space added between merged segments
+                $deleted_orders[] = $segment[ 'order' ];
+            }
+            if ( $key != $total_sources - 1 ){
+                $undo_matches[] = [ 'type' => 'source', 'position' => $position, 'order' => $sources[ $key + 1 ][ 'order' ] ] ;
+            }
+        }
+
+        $position      = 0;
+        $total_targets = count($targetOrders);
+
+        foreach ( $targets as $key => $segment ){
+            $position += mb_strlen( $segment[ 'content_clean' ], 'UTF-8' );
+            if ( $key != 0 ) {
+                $position += 1; // We add 1 due to the space added between merged segments
+                $deleted_orders[] = $segment[ 'order' ];
+            }
+            if ( $key != $total_targets - 1 ){
+                $undo_matches[] = [ 'type' => 'target', 'position' => $position, 'order' => $targets[ $key + 1 ][ 'order' ] ] ;
+            }
         }
 
         $first_source = $sources[0];
@@ -970,6 +1010,16 @@ class JobDirectActionController extends JobActionController {
         $inverseReference['raw_word_count'] = $first_source_segment['raw_word_count'];
         
         try{
+            $this->setUndoActionsParams([
+                'order1'              => (int) $destination_order,
+                'order2'              => (int) $new_match_order,
+                'inverse_order'       => (int) $first_source[ 'order' ],
+                'destination'         => (int) $first_target[ 'order' ],
+                'inverse_destination' => (int) $inverse_order,
+                'matches'             => $undo_matches,
+                'inverses'            => $inverses,
+                'operation'           => 'merge_align'
+            ]);
 
             $this->pushOperation( [
                 'type'      => 'source',
@@ -1050,7 +1100,8 @@ class JobDirectActionController extends JobActionController {
         } catch ( ValidationError $e ) {
             throw new ValidationError( $e->getMessage(), -2 );
         }
-        return $this->getOperations();
+
+        return $this->getResponse();
     }
 
 
