@@ -60,7 +60,7 @@ class JobDirectActionController extends JobActionController {
                 $deleted_orders[] = $segment[ 'order' ];
             }
             if ( $key != $total_segments - 1 ){
-                $undo_matches[] = [ 'positon' => $position, 'order' => $segments[ $key + 1 ][ 'order' ] ] ;
+                $undo_matches[] = [ 'position' => $position, 'order' => $segments[ $key + 1 ][ 'order' ] ] ;
             }
         }
 
@@ -81,7 +81,7 @@ class JobDirectActionController extends JobActionController {
                 'order'           => $orders[0],
                 'type'            => $type,
                 'matches'         => $undo_matches,
-                'inverse_matches' => $undo_matches,
+                'inverse_matches' => $undo_inverse,
                 'operation'       => 'merge'
             ]);
 

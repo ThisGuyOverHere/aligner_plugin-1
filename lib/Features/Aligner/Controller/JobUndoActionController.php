@@ -267,8 +267,6 @@ class JobUndoActionController extends JobActionController
         $clean_content  = $unmerged_segment[ 'content_clean' ];
         $matches[]      = [ 'position' => mb_strlen( $clean_content, 'UTF-8' ), 'order' => null ];
 
-        // TODO Remove merge space while splitting back
-
         foreach ( $matches as $key => $match ) {
 
             /*
@@ -278,7 +276,8 @@ class JobUndoActionController extends JobActionController
              * position they were before the merge operation
              */
 
-            $start         = ( $key == 0 ) ? 0 : $matches[ $key - 1 ]['position'];
+            // $start has an hardcoded + 1 to remove all spaces created by merges after the first segment
+            $start         = ( $key == 0 ) ? 0 : ($matches[ $key - 1 ]['position'] + 1);
             $match_order   = ( $key == 0 ) ? $order : $matches[ $key - 1 ]['order'];
 
             $clean_substring = mb_substr( $clean_content, $start, ( $match['position'] ) - $start, 'UTF-8' );
@@ -1382,7 +1381,8 @@ class JobUndoActionController extends JobActionController
                  * position they were before the merge operation
                  */
 
-                $start       = ( $key == 0 ) ? 0 : $matches[ $key - 1 ]['position'];
+                // $start has an hardcoded + 1 to remove all spaces created by merges after the first segment
+                $start       = ( $key == 0 ) ? 0 : ($matches[ $key - 1 ]['position'] + 1);
                 $match_order = ( $key == 0 ) ? $order : $matches[ $key - 1 ]['order'];
 
                 $clean_substring = mb_substr( $clean_content, $start, ( $match['position'] ) - $start, 'UTF-8' );
