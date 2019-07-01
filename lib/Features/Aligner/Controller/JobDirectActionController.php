@@ -108,7 +108,6 @@ class JobDirectActionController extends JobActionController {
 
     }
 
-
     public function split() {
         $id_job   = $this->job->id;
 
@@ -325,7 +324,6 @@ class JobDirectActionController extends JobActionController {
         return $this->getResponse();
     }
 
-
     protected function moveInEmpty($referenceMatch){
 
         $id_job   = $this->job->id;
@@ -393,7 +391,6 @@ class JobDirectActionController extends JobActionController {
 
 
     }
-
 
     protected function moveInFill($referenceMatch){
 
@@ -543,7 +540,6 @@ class JobDirectActionController extends JobActionController {
         }
 
     }
-
 
     public function addGap() {
 
@@ -1104,13 +1100,14 @@ class JobDirectActionController extends JobActionController {
         return $this->getResponse();
     }
 
-
     public function hide() {
         $id_job = $this->job->id;
 
         $matches = $this->params[ 'matches' ];
 
         $conn = NewDatabase::obtain()->getConnection();
+
+        $undo_matches = [];
 
         try {
             $conn->beginTransaction();
@@ -1143,7 +1140,15 @@ class JobDirectActionController extends JobActionController {
                         'data'      => $target->toArray()
                     ] );
 
+                    $undo_match = $match;
+                    $undo_match['hide_type'] = 'both';
+
+                    $undo_matches[] = $undo_match;
+
                 } else {
+
+                    $undo_match = $match;
+                    $undo_match['hide_type'] = 'both';
 
                     $type_hide         = $match['to_hide'];
                     $type_inverse_hide = ( $type_hide == "source" ) ? "target" : "source";
@@ -1152,7 +1157,6 @@ class JobDirectActionController extends JobActionController {
                         $id_job , $type_inverse_hide );
                     $inverse_hide = $inverse_hide->toArray();
 
-                    //Gets the segment matches to change their 'next' pointer to the non-hidden match
                     $to_hide = Segments_SegmentDao::getFromOrderJobIdAndType( $match[ $type_hide ], $id_job, $type_hide );
                     $to_hide = $to_hide->toArray();
 
@@ -1177,6 +1181,22 @@ class JobDirectActionController extends JobActionController {
                         } else {
                             $new_match_order_inverse = AlignUtils::_getNewOrderValue( 0, $inverse_hide['order'] );
                         }
+
+                        /* In case the hide operation separates the semgent_matches the undo must restore them
+                        as they were before the hide. The following object will make it easier to do so.*/
+
+                        $undo_match = [
+                            'hide_type' => 'single',
+                            'type' => $type_hide,
+                            'old_match' => [
+                                $type_hide         => $match[$type_hide],
+                                $type_inverse_hide => $match[$type_inverse_hide],
+                            ],
+                            'new_match' => [
+                                $type_hide => $new_match_order,
+                                $type_inverse_hide => $new_match_order_inverse
+                            ]
+                        ];
 
                         //Creates a new non-hidden match
 
@@ -1247,6 +1267,7 @@ class JobDirectActionController extends JobActionController {
 
                     }
 
+                    $undo_matches[] = $undo_match;
 
                     $inverse_hide[ 'hidden' ] = 1;
                     $to_hide['hidden'] = 1;
@@ -1270,6 +1291,8 @@ class JobDirectActionController extends JobActionController {
                 }
             }
 
+            $this->setUndoActionsParams(["matches" => $undo_matches]);
+
             $conn->commit();
 
         } catch ( \PDOException $e){
@@ -1279,7 +1302,7 @@ class JobDirectActionController extends JobActionController {
             throw new ValidationError( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
         }
 
-        return $this->getOperations();
+        return $this->getResponse();
         
     }
 
@@ -1292,7 +1315,7 @@ class JobDirectActionController extends JobActionController {
         try {
 
             $this->setUndoActionsParams([
-                'operation' => 'hide',
+                'operation' => 'show',
                 'matches'   => $matches
             ]);
 

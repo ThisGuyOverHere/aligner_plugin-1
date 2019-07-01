@@ -527,7 +527,7 @@ class JobUndoActionController extends JobActionController
 
     }
 
-    public function undoMoveFull(){
+    protected function undoMoveFull(){
 
         $id_job   = $this->job->id;
 
@@ -751,7 +751,7 @@ class JobUndoActionController extends JobActionController
 
     }
 
-    public function undoMoveEmpty(){
+    protected function undoMoveEmpty(){
 
         $id_job   = $this->job->id;
 
@@ -1679,6 +1679,120 @@ class JobUndoActionController extends JobActionController
             throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
         } catch (ValidationError $e ){
             throw new ValidationError( "Segment update - DB Error: " . $e->getMessage() . " - Hide  ", -2 );
+        }
+
+        return $this->getOperations();
+
+    }
+
+    protected function undoHideBoth($id_job, $match){
+
+        Segments_SegmentMatchDao::showByOrderAndType($match['source'], $id_job, "source");
+        Segments_SegmentMatchDao::showByOrderAndType($match['target'], $id_job, "target");
+
+        $source = Segments_SegmentDao::getFromOrderJobIdAndType(
+            $match ['source'],
+            $id_job, 'source');
+
+        $target = Segments_SegmentDao::getFromOrderJobIdAndType(
+            $match ['target'],
+            $id_job, 'target');
+
+        $this->pushOperation([
+            'type' => 'source',
+            'action' => 'update',
+            'rif_order' => $match['source'],
+            'data' => $source->toArray()
+        ]);
+
+        $this->pushOperation([
+            'type' => 'target',
+            'action' => 'update',
+            'rif_order' => $match['target'],
+            'data' => $target->toArray()
+        ]);
+
+    }
+
+    protected function undoHideSingle($id_job, $match){
+        $old_match    = $match['old_match'];
+        $new_match    = $match['new_match'];
+        $type         = $match['type'];
+        $inverse_type = ( $type == 'target' ) ? 'source' : 'target';
+
+        Segments_SegmentMatchDao::showByOrderAndType($old_match["source"], $id_job, "source");
+        Segments_SegmentMatchDao::showByOrderAndType($new_match["source"], $id_job, "source");
+        Segments_SegmentMatchDao::showByOrderAndType($old_match["target"], $id_job, "target");
+        Segments_SegmentMatchDao::showByOrderAndType($new_match["target"], $id_job, "target");
+
+        $order             = $new_match[$type];
+        $destination_order = $old_match[$type];
+
+        $movingSegment      = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $inverse_type);
+        $destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination_order, $id_job, $inverse_type);
+
+        $movingSegment      = $movingSegment->toArray();
+        $destinationSegment = $destinationSegment->toArray();
+
+        $destination_match                     = $destinationSegment;
+        $destination_match[ 'segment_id' ]     = $movingSegment[ 'id' ];
+        $destination_match[ 'content_raw' ]    = null;
+        $destination_match[ 'content_clean' ]  = $movingSegment[ 'content_clean' ];
+        $destination_match[ 'raw_word_count' ] = $movingSegment[ 'raw_word_count' ];
+
+        $this->pushOperation( [
+            'type'      => $type,
+            'action'    => 'update',
+            'rif_order' => $destination_order,
+            'data'      => $destination_match
+        ] );
+
+        $starting_match                     = $movingSegment;
+        $starting_match[ 'segment_id' ]     = null;
+        $starting_match[ 'content_raw' ]    = null;
+        $starting_match[ 'content_clean' ]  = null;
+        $starting_match[ 'raw_word_count' ] = null;
+
+        $this->pushOperation( [
+            'type'      => $type,
+            'action'    => 'update',
+            'rif_order' => $order,
+            'data'      => $starting_match
+        ] );
+
+        Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order ], $id_job, $inverse_type );
+        Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $movingSegment[ 'id' ] ], $destination_order, $id_job, $inverse_type );
+    }
+
+    public function undoHide() {
+
+        $id_job = $this->job->id;
+        $matches = $this->params['matches'];
+
+        $conn = NewDatabase::obtain()->getConnection();
+
+        try {
+            $conn->beginTransaction();
+
+            foreach ($matches as $match) {
+
+                $hideType = $match['hide_type'];
+                if ($hideType == 'both') {
+                    $this->undoHideBoth($id_job, $match);
+                } elseif ($hideType == 'single') {
+                    $this->undoHideSingle($id_job, $match);
+                } else {
+                    throw new ValidationError('This request is not valid');
+                }
+
+            }
+            $conn->commit();
+
+        } catch ( \PDOException $e){
+            $conn->rollBack();
+            throw new \PDOException( "Segment update - DB Error: " . $e->getMessage() . " - Show  ", -2 );
+        } catch (ValidationError $e ){
+            throw new ValidationError( "Segment update - DB Error: " . $e->getMessage() . " - Show  ", -2 );
         }
 
         return $this->getOperations();
