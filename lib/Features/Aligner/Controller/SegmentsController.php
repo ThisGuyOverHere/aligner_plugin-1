@@ -34,7 +34,6 @@ class SegmentsController extends AlignerController {
         $source         = [];
 
         foreach ( $order_segments as &$order_segment ) {
-            $order_segment->content_raw   = AlignUtils::_mark_xliff_tags( $order_segment->content_raw );
             $order_segment->content_clean = htmlspecialchars_decode( $order_segment->content_clean );
             if ( $order_segment->type == "source" ) {
                 $source[] = $order_segment;

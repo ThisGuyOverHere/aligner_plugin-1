@@ -98,12 +98,67 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function getPreviousFromNonExistentOrderJobIdAndType( $order, $id_job, $type, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn    = NewDatabase::obtain()->getConnection();
+        $stmt    = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match sm1 ON sm1.segment_id = segments.id
+        INNER JOIN (SELECT sm2.`id_job`, MAX(`order`) as `maxorder`
+              FROM segments_match as sm2 
+              WHERE sm2.order < ?
+              AND sm2.type = ?
+              AND sm2.id_job = ?
+              GROUP BY sm2.id_job) sm2 ON sm1.order = sm2.maxorder
+        WHERE sm1.id_job = ? AND sm1.type = ? ORDER BY id ASC" );
+
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
+
+    }
+
+    public static function getNextFromNonExistentOrderJobIdAndType( $order, $id_job, $type, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn    = NewDatabase::obtain()->getConnection();
+        $stmt    = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match sm1 ON sm1.segment_id = segments.id
+        INNER JOIN (SELECT sm2.`id_job`, MIN(`order`) as `maxorder`
+              FROM segments_match as sm2 
+              WHERE sm2.order > ?
+              AND sm2.type = ?
+              AND sm2.id_job = ?
+              GROUP BY sm2.id_job) sm2 ON sm1.order = sm2.maxorder
+        WHERE sm1.id_job = ? AND sm1.type = ? ORDER BY id ASC" );
+
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
+
+    }
+
+    public static function getFromOrderArrayJobIdAndType( Array $orders, $id_job, $type, $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn    = NewDatabase::obtain()->getConnection();
+        $qMarks = str_repeat('?,', count($orders) - 1) . '?';
+        $stmt    = $conn->prepare( "SELECT * 
+        FROM segments RIGHT JOIN segments_match ON segment_id = segments.id
+        WHERE segments_match.order IN ($qMarks)
+        AND segments_match.id_job = ?
+        AND segments_match.type = ? ORDER BY id ASC" );
+        $params = array_merge($orders, array($id_job, $type) );
+
+        //There's a [0] at the end because it's supposed to return a single element instead of an array
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), $params )[ 0 ];
+
+    }
+
     public static function getTranslationsForTMXExport( $id_job ) {
         $conn = NewDatabase::obtain()->getConnection();
 
 
 
-        $source_query = "SELECT s.content_raw as source, s.id as source_segment_id FROM segments as s
+        $source_query = "SELECT s.content_clean as source, s.id as source_segment_id FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order";
 
@@ -113,7 +168,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $source_data = $stmt->fetchAll();
 
-        $target_query = "SELECT s.content_raw as target, s.id as target_segment_id FROM segments as s
+        $target_query = "SELECT s.content_clean as target, s.id as target_segment_id FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order";
 
@@ -161,7 +216,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
         $conn = NewDatabase::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "SELECT s.content_raw as source FROM segments as s
+        $stmt = $conn->prepare( "SELECT s.content_clean as source FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order" );
 
@@ -169,7 +224,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
         $source = $stmt->fetchAll();
 
-        $stmt = $conn->prepare( "SELECT s.content_raw as target FROM segments as s
+        $stmt = $conn->prepare( "SELECT s.content_clean as target FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ? ORDER by sm.order" );
 
@@ -196,7 +251,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
     public static function getDataForAlignment( $id_job, $type, $ttl = 0 ) {
         $conn = NewDatabase::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT id, content_raw, content_clean, raw_word_count FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
+        $stmt = $conn->prepare( "SELECT id, content_clean, raw_word_count FROM segments WHERE id_job = ? AND type = ? ORDER BY id ASC" );
         $stmt->execute( [ $id_job, $type ] );
 
         return $stmt->fetchAll( \PDO::FETCH_ASSOC );
@@ -272,7 +327,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
         $conn    = NewDatabase::obtain()->getConnection();
 
 
-        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw FROM segments as s
+        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ? AND sm.type = ?
         ORDER by sm.order";
@@ -289,7 +344,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
         $conn    = NewDatabase::obtain()->getConnection();
 
 
-        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, s.content_raw, sm.hidden FROM segments as s
+        $query = "SELECT s.id, sm.`type`, sm.order, sm.next, s.content_clean, sm.hidden FROM segments as s
         RIGHT JOIN segments_match as sm ON s.id = sm.segment_id
         WHERE sm.id_job = ?
         ORDER by sm.order";
@@ -320,14 +375,12 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
                             id_job, 
                             type,
                             content_clean, 
-                            content_raw,
-                            content_hash, 
                             raw_word_count,
                             create_date
                             ) VALUES ";
 
 
-        $tuple_marks = "( " . str_repeat( "?, ", 7 ) . " NOW() )";
+        $tuple_marks = "( " . str_repeat( "?, ", 5 ) . " NOW() )";
 
         foreach ( $obj_arr as $i => $chunk ) {
 
@@ -340,8 +393,6 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
                 $values[] = $segStruct[ 'id_job' ];
                 $values[] = $segStruct[ 'type' ];
                 $values[] = $segStruct[ 'content_clean' ];
-                $values[] = $segStruct[ 'content_raw' ];
-                $values[] = $segStruct[ 'content_hash' ];
                 $values[] = $segStruct[ 'raw_word_count' ];
             }
 
@@ -359,34 +410,30 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
     }
 
-    public static function mergeSegments( Array $segments ) {
+    public static function mergeSegments( Array $segments, $glue = ' ' ) {
 
-        $raw_array   = [];
         $clean_array = [];
         $merge_count = 0;
 
         $segments_id = [];
         foreach ( $segments as $key => $segment ) {
-            $raw_array[]   = $segment[ 'content_raw' ];
             $clean_array[] = $segment[ 'content_clean' ];
             $merge_count   += $segment[ 'raw_word_count' ];
 
             $segments_id[] = $segment[ 'id' ];
         }
 
-        $raw_merge   = implode( ' ', $raw_array );
-        $clean_merge = implode( ' ', $clean_array );
+        $clean_merge = implode( $glue, $clean_array );
 
-        $hash_merge = md5( $raw_merge );
-
-        self::updateSegmentContent( array_shift( $segments_id ), [ $raw_merge, $clean_merge, $hash_merge, $merge_count ] );
+        self::updateSegmentContent( array_shift( $segments_id ), [ $clean_merge, $merge_count ] );
 
         self::deleteSegmentsByIds( $segments_id );
 
         $first_segment = array_shift( $segments );
 
-        $first_segment[ 'content_raw' ]    = $raw_merge;
+        $first_segment[ 'content_raw' ]    = null;
         $first_segment[ 'content_clean' ]  = $clean_merge;
+        $first_segment[ 'content_hash' ]   = null;
         $first_segment[ 'raw_word_count' ] = $merge_count;
         $first_segment[ 'order' ]          = (int)$first_segment[ 'order' ];
         $first_segment[ 'next' ]           = (int)$first_segment[ 'next' ];
@@ -406,9 +453,7 @@ SELECT s.content_raw as source, @RN1 := @RN1 + 1 as RN1, s.id as source_segment_
 
     public static function updateSegmentContent( $id, Array $contents ) {
         $query        = "UPDATE segments
-                    SET content_raw = ?,
-                    content_clean = ?,
-                    content_hash = ?,
+                    SET content_clean = ?,
                     raw_word_count = ?
                     WHERE id = ?;";
         $query_params = array_merge( $contents, [ $id ] );

@@ -150,7 +150,6 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
 
         }
 
-
     }
 
     public static function updateFields($attributes, $order, $id_job, $type){
@@ -240,5 +239,105 @@ class Segments_SegmentMatchDao extends DataAccess_AbstractDao {
         $stm->execute( $params );
 
     }
-    
+
+    //Undo queue operations
+
+    public function updateList( Array $obj_arr ) {
+
+        $obj_arr = array_chunk( $obj_arr, 100 );
+
+        $baseQuery = "INSERT INTO segments_match ( 
+                            id_job, 
+                            `type`,
+                            `order`,
+                            score,
+                            segment_id,
+                            `next`,
+                            create_date
+                            ) VALUES ";
+
+
+        $tuple_marks = "( " . str_repeat( "?, ", 6 ) . "NOW() )";
+
+        $update_query = " ON DUPLICATE KEY UPDATE id_job = VALUES(id_job),
+                                                  `type` = VALUES(`type`),
+                                                  `order` = VALUES(`order`),
+                                                  score = VALUES(score),
+                                                  segment_id = VALUES(segment_id),
+                                                  `next` = VALUES(`next`)";
+
+        foreach ( $obj_arr as $i => $chunk ) {
+
+            $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " ) . $update_query;
+
+            $values = [];
+
+            foreach( $chunk as $segStruct ){
+
+                $values[] = $segStruct['id_job'];
+                $values[] = $segStruct['type'];
+                $values[] = $segStruct['order'];
+                $values[] = $segStruct['score'];
+                $values[] = $segStruct['segment_id'];
+                $values[] = $segStruct['next'];
+            }
+
+            try {
+                $conn = NewDatabase::obtain()->getConnection();
+                $stm = $conn->prepare( $query );
+                $stm->execute( $values );
+
+            } catch ( \PDOException $e ) {
+                throw new \PDOException( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+            }
+
+        }
+
+    }
+
+    public static function getPreviousMatchOfNonExistent($order, $id_job, $type, $ttl = 0){
+
+        $thisDao = new self();
+
+        $query  = "SELECT sm1.`id_job`, `order`, `type`, `segment_id`, `next`, `score`
+            FROM segments_match as sm1 
+            INNER JOIN (SELECT sm2.`id_job`, MAX(`order`) as `maxorder`
+              FROM segments_match as sm2 
+              WHERE sm2.order < ?
+              AND sm2.type = ?
+              AND sm2.id_job = ?
+              GROUP BY sm2.id_job) sm2 ON sm1.order = sm2.maxorder 
+            AND sm1.type = ?
+            AND sm1.id_job = ?";
+        $params = [$order, $type, $id_job, $type, $id_job ];
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stm, new ShapelessConcreteStruct(), $params )[0];
+    }
+
+    public static function getNextMatchOfNonExistent($order, $id_job, $type, $ttl = 0){
+
+        $thisDao = new self();
+
+        $query  = "SELECT sm1.`id_job`, `order`, `type`, `segment_id`, `next`, `score`
+            FROM segments_match as sm1 
+            INNER JOIN (SELECT sm2.`id_job`, MIN(`order`) as `minorder`
+              FROM segments_match as sm2 
+              WHERE sm2.order > ?
+              AND sm2.type = ?
+              AND sm2.id_job = ?
+              GROUP BY sm2.id_job) sm2 ON sm1.order = sm2.minorder 
+            AND sm1.type = ?
+            AND sm1.id_job = ?";
+        $params = [$order, $type, $id_job, $type, $id_job ];
+
+        $conn = NewDatabase::obtain()->getConnection();
+        $stm = $conn->prepare( $query );
+
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stm, new ShapelessConcreteStruct(), $params )[0];
+
+    }
+
 }

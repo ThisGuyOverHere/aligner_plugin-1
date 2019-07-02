@@ -8,6 +8,8 @@
 
 namespace Features\Aligner\Controller;
 
+use Features\Aligner\Utils\AlignUtils;
+
 include_once \INIT::$UTILS_ROOT . "/fileupload/upload.class.php";
 
 
@@ -116,6 +118,8 @@ class UploadController extends AlignerController {
         } catch ( \Exception $e ) {
             throw new \Exception( $e->getMessage() );
         }
+
+        $this->result->files->name = AlignUtils::removeVersionFromFileName($this->result->files->name);
 
         $this->result = array_values((array)$this->result);
         if ( @count( $this->result[ 'errors' ] ) ) {

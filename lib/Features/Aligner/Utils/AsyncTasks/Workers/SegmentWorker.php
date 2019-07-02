@@ -210,7 +210,6 @@ class SegmentWorker extends AbstractWorker {
 
 
                     $unit_segment = [
-                        'content_raw' => $item,
                         'content_clean' => AlignUtils::_cleanSegment($item, $lang),
                         'raw_word_count' => $raw_word_count
                     ];
@@ -241,7 +240,6 @@ class SegmentWorker extends AbstractWorker {
             $segments[$key]['id'] = $sequenceId;
             $segments[$key]['type'] = $type;
             $segments[$key]['id_job'] = $this->job->id;
-            $segments[$key]['content_hash'] = md5($segments[$key]['content_raw']);
         }
 
         $segmentsDao = new Segments_SegmentDao;
