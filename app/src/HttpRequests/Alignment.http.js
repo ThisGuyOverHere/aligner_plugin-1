@@ -126,3 +126,16 @@ export const httpReverseSegments = (jobID, jobPassword, data) => {
     const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/switch';
     return post(url, qs.stringify(data));
 };
+
+/**
+ *
+ * @param {Number} jobID
+ * @param {String} jobPassword
+ * @param {Object} data
+ * @param {String} data.operation
+ * @return {*}
+ */
+export const httpUndoChanges = (jobID, jobPassword, data) => {
+    const url = `/plugins/aligner/job/${jobID}/${jobPassword}/segment/undo/${data.operation}`;
+    return post(url, qs.stringify(data));
+};

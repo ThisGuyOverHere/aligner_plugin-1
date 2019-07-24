@@ -227,7 +227,6 @@ class JobComponent extends Component {
         const {hideNavigatorData,misalignmentsNavigatorData} = this.state;
         const misalignedNav = misalignmentsNavigatorData ? misalignmentsNavigatorData.realRowIndex : null;
 
-        console.log("############ ",misalignmentsNavigatorData);
         if (array.length > 0) {
             array.map((row, index) => {
                 const selection = {

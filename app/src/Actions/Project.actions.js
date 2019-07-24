@@ -3,6 +3,7 @@ import ProjectConstants from '../Constants/Project.constants';
 import {httpGetSegments, httpSplitSegment} from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
 import {avgOrder, getSegmentByIndex, getSegmentByOrder, getSegmentIndexByOrder} from "../Helpers/SegmentUtils.helper";
+import {storeUndoOperations} from "../Helpers/SystemUtils.helper";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
 
@@ -498,9 +499,10 @@ let ProjectActions = {
 
             httpSplitSegment(jobID, jobPassword, data).then(response => {
                 if (!response.errors) {
+                    storeUndoOperations(response.data.undo_actions_params)
                     AppDispatcher.dispatch({
                         actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
-                        changes: response.data
+                        changes: response.data.operations
                     });
                 } else {
                     response.errors.map(e => {

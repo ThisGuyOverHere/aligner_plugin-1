@@ -99,9 +99,8 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 		this.job.target = List();
 		this.job.source = this.job.source.push(...source);
 		this.job.target = this.job.target.push(...target);
-		checkResultStore(segments.source, segments.target);
+		//checkResultStore(segments.source, segments.target);
 		this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
-		console.log(this.counters)
 	},
 	/**
 	 *
@@ -212,7 +211,7 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 		});
 
 
-		checkResultStore(this.job.source.toJS(), this.job.target.toJS());
+		//checkResultStore(this.job.source.toJS(), this.job.target.toJS());
 
 		countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 
@@ -282,11 +281,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 			};
 		}
 	},
-
-	hideSelectedSegments: function (matches) {
-		console.log(matches);
-	}
-
 });
 
 
