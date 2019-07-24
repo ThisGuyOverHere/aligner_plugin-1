@@ -475,8 +475,8 @@ class Alignment {
         $ts = implode('', $ts);
 
         // Distance
-        $sl = mb_strlen($ss, 'UTF-8');
-        $tl = mb_strlen($ts, 'UTF-8');
+        $sl = strlen($ss);  // Do not use MULTI BYTE here because levenshtein considers 255 single byte length
+        $tl = strlen($ts);
 
         if ($sl == 0 || $tl == 0) {  // Check if we can return immediately the upper bound
             $distance = max($sl, $tl);
