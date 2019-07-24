@@ -592,6 +592,28 @@ let ProjectActions = {
 
         /**
          *
+         * @param hideSegmentsNavigatorData: hide segments data
+         */
+        emitHideNavigatorData: function (hideSegmentsNavigatorData) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.HIDE_SEGMENTS_NAVIGATOR,
+                data: hideSegmentsNavigatorData
+            })
+        },
+
+        /**
+         *
+         * @param misalignmentsData: misalignments segments data
+         */
+        emitMisalignmentsData: function (misalignmentsData) {
+            AppDispatcher.dispatch({
+                actionType: ProjectConstants.MISALIGNMENT_NAVIGATOR,
+                data: misalignmentsData
+            })
+        },
+
+        /**
+         *
          * @param info , set latest job info api call result into STORE_JOB_INFO.
          */
         setJobInfo: function (info) {

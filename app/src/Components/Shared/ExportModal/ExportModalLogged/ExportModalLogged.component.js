@@ -1,12 +1,15 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {httpCreateTmx, httpExportTmxCloud, httpExportTmxPrivate, httpSaveTmx} from "../../../../HttpRequests/Tmx.http";
+import ExportModal from "../ExportModal.component";
 
 class ExportModalLogged extends Component {
 
     static propTypes = {
         user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-        setCompletedExport: PropTypes.func.isRequired
+        setCompletedExport: PropTypes.func.isRequired,
+        misAlignedSegments: PropTypes.number,
+        hideSegments: PropTypes.number
     };
 
     constructor(props) {
@@ -77,8 +80,10 @@ class ExportModalLogged extends Component {
                 </div>
 
                 {this.state.cloudCheckBox ?
-                    <p> A copy of your TMX will be sent to our collaborative memory shared with all MateCat users to
-                        improve our alignment algorithm </p>
+                    <div>
+                        <p> A copy of your TMX will be sent to our collaborative memory shared with all MateCat users to
+                            improve our alignment algorithm </p>
+                    </div>
                     :
                     <div>
                         <button className={newTmxBtn.join(" ")} onClick={this.createMemory}>Create new Resource</button>
@@ -106,13 +111,18 @@ class ExportModalLogged extends Component {
                                 </form>
                             </div>
                             : null}
-
                         <div className="memories">
                             {(this.state.tmxList.length > 0 && !this.state.txmInLoad) && this.renderMemories()}
                             {this.state.txmInLoad && this.renderMemoriesLoader()}
                         </div>
                     </div>
                 }
+
+                {(this.props.misAlignedSegments > 0 || this.props.hideSegments > 0) && <p className={"alert"}>
+                    {this.props.misAlignedSegments > 0 && <span className={"evidence"}>{this.props.misAlignedSegments} Unaligned segments</span>}
+                    {this.props.hideSegments > 0 && <span> and </span>}
+                    {this.props.hideSegments > 0 && <span className={"evidence"}> {this.props.hideSegments} hidden segments</span>} will not be exported
+                </p>}
 
                 <button className={exportBtn.join(" ")} tabIndex="6"
                         disabled={!(this.state.tmxList.length > 0) && !this.state.cloudCheckBox} type=""

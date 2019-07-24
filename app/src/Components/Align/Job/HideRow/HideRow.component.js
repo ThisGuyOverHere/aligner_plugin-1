@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../Actions/Project.actions";
+import ProjectStore from "../../../../Stores/Project.store";
+import ProjectConstants from "../../../../Constants/Project.constants";
 
 class HideComponent extends Component {
 
@@ -13,28 +15,22 @@ class HideComponent extends Component {
         rec: PropTypes.any,
         row: PropTypes.object.isRequired,
         selection: PropTypes.object,
+        isInHideNavigator: PropTypes.bool,
+        selectedInNavigator: PropTypes.bool
     };
 
     constructor(props) {
         super(props);
-
-    }
-
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-
-    }
-
-    componentDidMount() {
-
-    }
-
-    componentWillUnmount() {
-
+        this.state = {
+            selected: false
+        }
     }
 
     render() {
-        return <div className="container ui" id="hide-row-container">
+        const {isInHideNavigator,selectedInNavigator} = this.props;
+        return <div className={`container ui 
+                    ${ selectedInNavigator ? "selected" : null} ${isInHideNavigator ? "isIn" : null}`}
+                    id="hide-row-container">
             <div className="index">{this.props.index+1}</div>
             <div className="show-toggle" onClick={this.showRow}>
               <i aria-hidden='true' className='unhide icon'/>

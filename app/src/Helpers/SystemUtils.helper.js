@@ -158,21 +158,27 @@ export const syncWithBackend = (method, callback) => {
     }
 };
 
-
+/**
+ *
+ * @param {Object} source segments
+ * @param {Object} target segments
+ */
 export const countHideAndMiss = (source, target) => {
+    let counters = {
+        hideIndexesMap: [],
+        misalignmentsIndexesMap:[]
+    };
     for(const index in source){
         if(parseInt(source[index].hidden) || parseInt(target[index].hidden) ){
-            console.log(`Row ${+index+1} is hidden`)
+            counters.hideIndexesMap.push(+index);
         }else {
-            if(!source[index].content_clean && target[index].content_clean){
-                console.log(`Row ${+index+1} is not alignment`)
-            }
-            if(!target[index].content_clean && source[index].content_clean){
-                console.log(`Row ${+index+1} is not alignment`)
+            if((!source[index].content_clean && target[index].content_clean) || (!target[index].content_clean && source[index].content_clean)){
+                counters.misalignmentsIndexesMap.push(+index);
             }
         }
     }
-}
+   return counters;
+};
 
 export const checkResultStore = (source, target) => {
     console.log("Check Result");

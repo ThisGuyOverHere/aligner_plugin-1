@@ -47,6 +47,8 @@ class RowComponent extends Component {
         row: PropTypes.object.isRequired,
         selection: PropTypes.object,
         search: PropTypes.object,
+        isInMisalignedNavigator: PropTypes.bool,
+        selectedInNavigator: PropTypes.bool
     };
 
     constructor(props) {
@@ -93,10 +95,10 @@ class RowComponent extends Component {
     }
 
     render() {
-        let rowClass = ['project-row'];
-        const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag, jobInfo} = this.props;
-
+        const {connectDropTarget, isOver, isOverCurrent, canDrop, dragEl, selection, enableDrag, jobInfo,isInMisalignedNavigator,selectedInNavigator} = this.props;
+        let rowClass = [`project-row` ];
         const dragElType = dragEl ? dragEl.type : undefined;
+
         if (isOver && dragElType && canDrop) {
             rowClass.push("dropHover");
         }
@@ -108,21 +110,27 @@ class RowComponent extends Component {
             <div className={rowClass.join(' ')} ref={re => {
                 this.ref = re
             }}>
-                <div>{this.props.index + 1}</div>
+                <div className={`${selectedInNavigator ? "index-selected" : null}`}>{this.props.index + 1}</div>
                 <SegmentComponent type="source"
                                   dropHover={isOver && canDrop && dragElType === 'source'}
                                   rtl={jobInfo.source_is_rtl}
                                   search={this.props.search}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.source}
-                                  segment={this.props.row.source}/>
+                                  segment={this.props.row.source}
+                                  selectedInNavigator={selectedInNavigator}
+                                  isInMisalignedNavigator={isInMisalignedNavigator}
+                />
                 <SegmentComponent type="target"
                                   search={this.props.search}
                                   dropHover={isOver && canDrop && dragElType === 'target'}
                                   rtl={jobInfo.target_is_rtl}
                                   enableDrag={enableDrag}
                                   selected={selection && selection.target}
-                                  segment={this.props.row.target}/>
+                                  segment={this.props.row.target}
+                                  selectedInNavigator={selectedInNavigator}
+                                  isInMisalignedNavigator={isInMisalignedNavigator}
+                />
             </div>
         );
     }

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ItemTypes} from '../../../../../Constants/Draggable.constants';
-import {DragSource, DropTarget} from 'react-dnd';
+import {DragSource} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 import PropTypes from "prop-types";
 import ProjectActions from "../../../../../Actions/Project.actions";
@@ -44,7 +44,9 @@ class SegmentComponent extends Component {
             next: PropTypes.oneOfType([() => {
                 return null
             }, PropTypes.number]).isDefined
-        }).isRequired
+        }).isRequired,
+        isInMisalignedNavigator: PropTypes.bool,
+        selectedInNavigator: PropTypes.bool
 
     };
 
@@ -90,7 +92,7 @@ class SegmentComponent extends Component {
 
 
     render = () => {
-        const {connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl, rtl} = this.props;
+        const {connectDragPreview, connectDragSource, isDragging, segment, dropHover, isOver, dragEl, rtl, isInMisalignedNavigator, selectedInNavigator} = this.props;
 
         let segmentClasses = ['segmentBox'];
         if (!segment.content_clean) {
@@ -105,8 +107,13 @@ class SegmentComponent extends Component {
         if (this.props.selected) {
             segmentClasses.push('selected')
         }
-
-        if(isOver && dragEl.type === this.props.segment.type){
+        if(!segment.content_clean && isInMisalignedNavigator){
+            segmentClasses.push('isIn')
+        }
+        if(!segment.content_clean && selectedInNavigator){
+            segmentClasses.push('isIn-and-selected')
+        }
+        if (isOver && dragEl.type === this.props.segment.type) {
             segmentClasses.push('onDropHoverMerge')
         }
         return connectDragPreview(connectDragSource(
@@ -116,28 +123,30 @@ class SegmentComponent extends Component {
             >
                 {dropHover && <span className="dropAlignArea"> </span>}
                 <i className="icon check circle outline"></i>
-                <div className="segmentBox-content" style={{textAlign: rtl ? 'right': 'left', direction: rtl ? 'rtl': 'ltr'}}>
-                    <SegmentContentComponent search={this.props.search} content={segment.content_clean} id={segment.id}/>
+                <div className="segmentBox-content"
+                     style={{textAlign: rtl ? 'right' : 'left', direction: rtl ? 'rtl' : 'ltr'}}>
+                    <SegmentContentComponent search={this.props.search} content={segment.content_clean}
+                                             id={segment.id}/>
                 </div>
 
             </div>
         ));
     };
 
-    handleClick = () =>{
+    handleClick = () => {
         if (this.props.segment.content_clean) {
             ProjectActions.addSegmentToSelection(this.props.segment.order, this.props.type)
-        }else{
-           /* ProjectActions.removeSpaceSegment({
-                order: this.props.segment.order,
-                type: this.props.segment.type
-            });*/
+        } else {
+            /* ProjectActions.removeSpaceSegment({
+                 order: this.props.segment.order,
+                 type: this.props.segment.type
+             });*/
         }
     };
 
 
     openSplitModal = () => {
-        if(this.props.segment.content_clean){
+        if (this.props.segment.content_clean) {
             let segment = this.props.segment;
             segment.rtl = this.props.rtl;
             ProjectActions.openSegmentToSplit(segment);

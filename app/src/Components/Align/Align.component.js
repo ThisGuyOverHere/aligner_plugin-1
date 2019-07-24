@@ -32,7 +32,11 @@ class AlignComponent extends Component {
                 rowsDictionary: {
                     source: {},
                     target: {}
-                }
+                },
+                counters:{
+                    hideIndexesMap: [],
+                    misalignmentsIndexesMap:[]
+                },
             },
             inSync: false,
             jobError: false
@@ -57,6 +61,7 @@ class AlignComponent extends Component {
 
     render() {
         const {jobInfo} = this.state;
+        console.log("in align component: ", this.state.job.counters);
         return (
             <div id="Align">
                 <ToolbarComponent job={this.state.job}/>
@@ -74,6 +79,7 @@ class AlignComponent extends Component {
     };
 
     setRows = (job, syncAPI) => {
+        console.log("changing")
         let rows = [];
         let deletes = [];
         let matches = [];
@@ -103,10 +109,9 @@ class AlignComponent extends Component {
                 });
             }
         });
-
         previousJob.rows = rows;
         previousJob.rowsDictionary = rowsDictionary;
-
+        previousJob.counters = job.counters;
 
         let inSync = false;
         if (syncAPI) {
@@ -127,7 +132,6 @@ class AlignComponent extends Component {
                 setTimeout(() => {
                     ProjectActions.deleteEmptyRows(deletes, matches);
                 }, 0);
-
             }
         }
 
