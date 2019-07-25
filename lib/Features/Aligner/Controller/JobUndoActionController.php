@@ -585,13 +585,16 @@ class JobUndoActionController extends JobActionController
                 'data' => $starting_match
             ]);
 
-            $new_match_destination = $starting_match;
 
-            $new_match_destination['score']       = 100;
-            $new_match_destination['segment_id']  = $restoredSegment['id'];
-            $new_match_destination['type']        = $type;
-            $new_match_destination['id_job']      = $id_job;
-            $new_match_destination['content_raw'] = null;
+            $new_match_destination = $movingSegment;
+
+            $new_match_destination['score']          = 100;
+            $new_match_destination['segment_id']     = $restoredSegment['id'];
+            $new_match_destination['type']           = $type;
+            $new_match_destination['id_job']         = $id_job;
+            $new_match_destination['content_raw']    = $restoredSegment['content_raw'];
+            $new_match_destination['content_clean']  = $restoredSegment['content_clean'];
+            $new_match_destination['raw_word_count'] = $restoredSegment['raw_word_count'];
 
             $this->pushOperation([
                 'type' => $type,
@@ -671,9 +674,9 @@ class JobUndoActionController extends JobActionController
             $new_match_destination['segment_id']     = $restoredSegment['id'];
             $new_match_destination['type']           = $type;
             $new_match_destination['id_job']         = $id_job;
-            $new_match_destination['content_raw']    = null;
-            $new_match_destination['content_clean']  = $referenceMatch['content_clean'];
-            $new_match_destination['raw_word_count'] = $referenceMatch['raw_word_count'];
+            $new_match_destination['content_raw']    = $restoredSegment['content_raw'];
+            $new_match_destination['content_clean']  = $restoredSegment['content_clean'];
+            $new_match_destination['raw_word_count'] = $restoredSegment['raw_word_count'];
 
             $this->pushOperation([
                 'type' => $type,
