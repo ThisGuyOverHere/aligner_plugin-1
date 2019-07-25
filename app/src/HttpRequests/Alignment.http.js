@@ -11,8 +11,8 @@ import env from "../Constants/Env.constants";
  * @return {Promise}
  */
 export const httpConversion = (data) => {
-    const url = '/plugins/aligner/xliff_conversion';
-    return post(url, qs.stringify(data));
+	const url = '/plugins/aligner/xliff_conversion';
+	return post(url, qs.stringify(data));
 };
 /**
  *
@@ -25,8 +25,8 @@ export const httpConversion = (data) => {
  * @return {Promise}
  */
 export const httpCreateProject = (data) => {
-    const url = '/plugins/aligner/create_project';
-    return post(url, qs.stringify(data));
+	const url = '/plugins/aligner/create_project';
+	return post(url, qs.stringify(data));
 };
 /**
  *
@@ -34,14 +34,14 @@ export const httpCreateProject = (data) => {
  * @return {Promise}
  */
 export const httpAlignJob = (jobID) => {
-    const url = '/plugins/aligner/parse/' + jobID;
-    return get(url);
+	const url = '/plugins/aligner/parse/' + jobID;
+	return get(url);
 };
 
 
 export const httpGetSegments = (jobID, jobPassword) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segments';
-    return get(url);
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segments';
+	return get(url);
 };
 
 /**
@@ -56,14 +56,14 @@ export const httpGetSegments = (jobID, jobPassword) => {
  * @return {*}
  */
 export const httpSplitSegment = (jobID, jobPassword, data) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/split';
-    const values = {
-        type: data.type,
-        order: data.order,
-        inverse_order: data.inverseOrder,
-        positions: data.positions
-    };
-    return post(url, qs.stringify(values));
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/split';
+	const values = {
+		type: data.type,
+		order: data.order,
+		inverse_order: data.inverseOrder,
+		positions: data.positions
+	};
+	return post(url, qs.stringify(values));
 };
 
 /**
@@ -73,13 +73,13 @@ export const httpSplitSegment = (jobID, jobPassword, data) => {
  * @returns {*}
  */
 export const httpGetAlignmentInfo = (jobID, jobPassword) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/information';
-    return get(url);
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/information';
+	return get(url);
 };
 
 export const httpGetPullingInfo = (jobID, jobPassword) => {
-    const url = '/plugins/aligner/job/' + jobID +'/' + jobPassword + '/check_progress';
-    return get(url);
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/check_progress';
+	return get(url);
 };
 
 /**
@@ -93,38 +93,38 @@ export const httpGetPullingInfo = (jobID, jobPassword) => {
  * @return {*}
  */
 export const httpMergeSegments = (jobID, jobPassword, data) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/merge';
-    return post(url, qs.stringify(data));
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/merge';
+	return post(url, qs.stringify(data));
 };
 
-export const httpMergeAlignSegments = (jobID, jobPassword, matches, destination) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/merge_align';
-    return post(url, qs.stringify({matches: matches, destination: destination}));
+export const httpMergeAlignSegments = (jobID, jobPassword, matches, inverses, destination) => {
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/merge_align';
+	return post(url, qs.stringify({matches: matches, inverses: inverses, destination: destination}));
 };
 
 export const httpMoveSegments = (jobID, jobPassword, data) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/move';
-    return post(url, qs.stringify(data));
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/move';
+	return post(url, qs.stringify(data));
 };
 
-export const httpHideSegments = (jobID, jobPassword, data ) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/hide';
-    return post(url, qs.stringify({matches:data}));
+export const httpHideSegments = (jobID, jobPassword, data) => {
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/hide';
+	return post(url, qs.stringify({matches: data}));
 };
 
-export const httpShowSegments = (jobID, jobPassword, data ) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/show';
-    return post(url, qs.stringify({matches:data}));
+export const httpShowSegments = (jobID, jobPassword, data) => {
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/show';
+	return post(url, qs.stringify({matches: data}));
 };
 
 export const httpDeleteSegments = (jobID, jobPassword, data) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/delete';
-    return post(url, qs.stringify({matches: data}));
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/delete';
+	return post(url, qs.stringify({matches: data}));
 };
 
 export const httpReverseSegments = (jobID, jobPassword, data) => {
-    const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/switch';
-    return post(url, qs.stringify(data));
+	const url = '/plugins/aligner/job/' + jobID + '/' + jobPassword + '/segment/switch';
+	return post(url, qs.stringify(data));
 };
 
 /**
@@ -136,6 +136,6 @@ export const httpReverseSegments = (jobID, jobPassword, data) => {
  * @return {*}
  */
 export const httpUndoChanges = (jobID, jobPassword, data) => {
-    const url = `/plugins/aligner/job/${jobID}/${jobPassword}/segment/undo/${data.operation}`;
-    return post(url, qs.stringify(data));
+	const url = `/plugins/aligner/job/${jobID}/${jobPassword}/segment/undo/${data.operation}`;
+	return post(url, qs.stringify(data));
 };

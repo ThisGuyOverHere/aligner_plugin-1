@@ -74,10 +74,10 @@ export const storeUndoOperations = (operations) => {
 export const executeUndoOperations = async (id, password) => {
 	let storageOperations = localStorage.getItem(`undo_${id}`)
 		? JSON.parse(localStorage.getItem(`undo_${id}`)) : null;
-	if(storageOperations){
+	if (storageOperations) {
 		const data = storageOperations[0];
-		const {data:changes} = await httpUndoChanges(id, password, data);
-		storageOperations.splice(0,1);
+		const {data: changes} = await httpUndoChanges(id, password, data);
+		storageOperations.splice(0, 1);
 		localStorage.setItem(`undo_${id}`, JSON.stringify(storageOperations));
 		ProjectActions.requireDirectChangesToStore(changes);
 	}
@@ -113,7 +113,13 @@ export const syncWithBackend = (method, callback) => {
 				action: method.data.jobID,
 				label: 'merge and align',
 			});
-			httpMergeAlignSegments(method.data.jobID, method.data.jobPassword, method.data.matches, method.data.destination).then((response) => {
+			httpMergeAlignSegments(
+				method.data.jobID,
+				method.data.jobPassword,
+				method.data.matches,
+				method.data.inverses,
+				method.data.destination
+			).then((response) => {
 				ProjectActions.requireDirectChangesToStore(response.data.operations);
 				storeUndoOperations(response.data.undo_actions_params)
 				callback()

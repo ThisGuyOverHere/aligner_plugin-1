@@ -219,6 +219,13 @@ let ProjectActions = {
             });
             const firstSourceIndex = getSegmentIndexByOrder(sourceOrderList[0], 'source');
             const destination = getSegmentByIndex(firstSourceIndex, 'target').order;
+            const inverses = matches.map(item=>{
+                const inverse = getInverseSegmentByOrder(item.order, item.type)
+                return {
+                    order: inverse.order,
+                    type: inverse.type
+                }
+            });
             AppDispatcher.dispatch({
                 actionType: ProjectConstants.MERGE_ALIGN,
                 syncAPI: {
@@ -227,6 +234,7 @@ let ProjectActions = {
                         jobID: ProjectStore.jobID,
                         jobPassword: ProjectStore.jobPassword,
                         matches: matches,
+                        inverses: inverses,
                         destination: destination
                     }
                 }
