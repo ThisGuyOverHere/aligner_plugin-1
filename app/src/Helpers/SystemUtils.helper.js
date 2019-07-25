@@ -8,6 +8,7 @@ import ProjectActions from "../Actions/Project.actions";
 import SystemActions from "../Actions/System.actions";
 import ReactGA from "react-ga";
 import ProjectStore from "../Stores/Project.store";
+import {getSegmentIndexByOrder} from "./SegmentUtils.helper";
 
 /**
  *
@@ -77,9 +78,28 @@ export const executeUndoOperations = async (id, password) => {
 	if (storageOperations) {
 		const data = storageOperations[0];
 		const {data: changes} = await httpUndoChanges(id, password, data);
+		const focusOrders = changes.filter(e => e.rif_order).sort((a, b) => a.rif_order - b.rif_order).map((e) => {
+			let rifs = {
+				type: e.type
+			};
+
+			if(e.data){
+				rifs.order = e.data.order
+			}else{
+				rifs.order = e.rif_order
+			}
+
+				return rifs
+			}
+		);
 		storageOperations.splice(0, 1);
 		localStorage.setItem(`undo_${id}`, JSON.stringify(storageOperations));
 		ProjectActions.requireDirectChangesToStore(changes);
+		ProjectActions.scrollToSegment(getSegmentIndexByOrder(focusOrders[0].order,focusOrders[0].type));
+		setTimeout(()=>{
+			ProjectActions.highligthSegments(focusOrders);
+		},200)
+
 	}
 };
 

@@ -22,7 +22,8 @@ const ProjectConstants = keyMirror({
     HIDE_SEGMENTS: null,
     SHOW_SEGMENTS: null,
     HIDE_SEGMENTS_NAVIGATOR: null,
-    MISALIGNMENT_NAVIGATOR: null
+    MISALIGNMENT_NAVIGATOR: null,
+    SEGMENT_HIGHLIGHT: null,
 });
 
 export default ProjectConstants;

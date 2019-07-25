@@ -124,7 +124,6 @@ class ToolbarComponent extends Component {
 		e.preventDefault();
 		const {job: {config: {id, password}}} = this.props;
 		executeUndoOperations(id,password);
-		console.log('UNDO***')
 	};
 
 	closeSearch = () => {
