@@ -57,12 +57,10 @@ let ProjectActions = {
 
 
             let tmpJob = ProjectStore.job,
-                changeData,
                 changes = [],
+                inverseFromOrder = getInverseSegmentByOrder(log.from,log.type).order,
                 fromIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.from),
-                toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to),
-                mockFrom = Object.assign({}, env.segmentModel),
-                mockToInverse = Object.assign({}, env.segmentModel);
+                toIndex = tmpJob[log.type].findIndex(i => i.get('order') === log.to);
 
             const inverse = {
                 source: 'target',
@@ -133,6 +131,7 @@ let ProjectActions = {
                         jobID: ProjectStore.jobID,
                         jobPassword: ProjectStore.jobPassword,
                         order: log.from,
+                        inverse_order: inverseFromOrder,
                         destination: log.to,
                         inverse_destination: inverseSegmentToPositionBE,
                         type: log.type

@@ -129,6 +129,7 @@ export const syncWithBackend = (method, callback) => {
 			});
 			httpMoveSegments(method.data.jobID, method.data.jobPassword, {
 				order: method.data.order,
+				inverse_order: method.data.inverse_order,
 				type: method.data.type,
 				destination: method.data.destination,
 				inverse_destination: method.data.inverse_destination
