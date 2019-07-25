@@ -397,6 +397,7 @@ class JobDirectActionController extends JobActionController {
         $id_job   = $this->job->id;
 
         $order                     = $this->params[ 'order' ];
+        $inverse_order             = $this->params[ 'inverse_order' ];
         $type                      = $this->params[ 'type' ];
         $inverse_type              = ( $type == 'target' ) ? 'source' : 'target';
         $destination_order         = $this->params[ 'destination' ];
