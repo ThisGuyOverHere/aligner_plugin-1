@@ -40,3 +40,18 @@ export const getSegmentIndexByOrder = (order,type) => {
 export const getSegmentByIndex = (index,type) => {
     return ProjectStore.job[type].get(index).toJS();
 };
+
+/**
+ *
+ * @param {Number} order the order of segment you want to get inverse
+ * @param {String} type of segment you want to get
+ * @return {Object} segment
+ */
+export const getInverseSegmentByOrder = (order,type) => {
+    const inverseTypes = {
+        source: 'target',
+        target: 'source'
+    };
+    const index = getSegmentIndexByOrder(order,type);
+    return getSegmentByIndex(index, inverseTypes[type])
+};

@@ -2,7 +2,13 @@ import ProjectStore from "../Stores/Project.store";
 import ProjectConstants from '../Constants/Project.constants';
 import {httpGetSegments, httpSplitSegment} from "../HttpRequests/Alignment.http";
 import env from "../Constants/Env.constants";
-import {avgOrder, getSegmentByIndex, getSegmentByOrder, getSegmentIndexByOrder} from "../Helpers/SegmentUtils.helper";
+import {
+    avgOrder,
+    getInverseSegmentByOrder,
+    getSegmentByIndex,
+    getSegmentByOrder,
+    getSegmentIndexByOrder
+} from "../Helpers/SegmentUtils.helper";
 import {storeUndoOperations} from "../Helpers/SystemUtils.helper";
 
 let AppDispatcher = require('../Stores/AppDispatcher');
@@ -358,7 +364,10 @@ let ProjectActions = {
          */
         mergeSegments: function (jobID, jobPassword, orders, type) {
             const changes = this.getLogsForMergeSegments(orders, type);
-
+            const inverseOrders = orders.map(order =>{
+                return getInverseSegmentByOrder(order, type).order
+            });
+            console.log(orders,inverseOrders)
             AppDispatcher.dispatch({
                     actionType: ProjectConstants.CHANGE_SEGMENT_POSITION,
                     changes: changes,
@@ -368,6 +377,7 @@ let ProjectActions = {
                             jobID: ProjectStore.jobID,
                             jobPassword: ProjectStore.jobPassword,
                             order: orders,
+                            inverses: inverseOrders,
                             type: type
                         }
                     }

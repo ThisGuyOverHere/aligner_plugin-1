@@ -98,6 +98,7 @@ export const syncWithBackend = (method, callback) => {
 			});
 			httpMergeSegments(method.data.jobID, method.data.jobPassword, {
 				order: method.data.order,
+				inverses: method.data.inverses,
 				type: method.data.type
 			}).then((response) => {
 				storeUndoOperations(response.data.undo_actions_params)
