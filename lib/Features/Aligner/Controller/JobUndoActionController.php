@@ -1329,6 +1329,10 @@ class JobUndoActionController extends JobActionController
 
         // TODO Add check on match orders (needs to have ascending orders)
 
+        function sortByOrder($a, $b) {
+            return (int)$a['order'] - (int)$b['order'];
+        }
+
         foreach ($matches as $match) {
             if ( $match[ 'type' ] == 'target' ){
                 $target_matches[] = $match;
@@ -1337,13 +1341,23 @@ class JobUndoActionController extends JobActionController
             }
         }
 
+        array_multisort(array_column($target_matches, 'order'), SORT_ASC, $target_matches);
+        array_multisort(array_column($source_matches, 'order'), SORT_ASC, $source_matches);
+        //usort($source_matches, "sortByOrder");
+
         foreach ($inverses as $inverse) {
-            if ( $inverse[ 'type' ] == 'target' ){
+            if ( $inverse[ 'type' ] == 'source' ){
                 $target_inverses[] = $inverse;
             } else {
                 $source_inverses[] = $inverse;
             }
         }
+
+        array_multisort(array_column($target_inverses, 'order'), SORT_ASC, $target_inverses);
+        array_multisort(array_column($source_inverses, 'order'), SORT_ASC, $source_inverses);
+
+        //usort($target_inverses, "sortByOrder");
+        //usort($source_inverses, "sortByOrder");
 
         $unmerge_structure = [
             [
@@ -1372,7 +1386,7 @@ class JobUndoActionController extends JobActionController
             $matches         = $structure[ 'matches' ];
 
             if ( empty( $matches ) ) {
-                return true;
+                continue;
             }
 
             //In this section we find all the inverse segments of the previously merged segments
@@ -1410,6 +1424,7 @@ class JobUndoActionController extends JobActionController
             // Create the ids for the sequence match list
 
             $first_segment = array_shift($clean_matches);
+            $first_inverse = array_shift($inverse_matches);
             $first_clean   = $first_segment['content_clean'];
             $first_count   = \CatUtils::segment_raw_word_count( $first_segment, $this->job->{$unmerged_segment['type']} );
 
