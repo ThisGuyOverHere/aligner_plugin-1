@@ -102,7 +102,18 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn    = NewDatabase::obtain()->getConnection();
-        $stmt    = $conn->prepare( "SELECT * 
+        $stmt    = $conn->prepare( "SELECT segments.`id`,
+        segments.`id_job`,
+        segments.`type`,
+        segments.`content_clean`,
+        segments.`raw_word_count`,
+        sm1.`id_job`,
+        sm1.`order`,
+        sm1.`type`,
+        sm1.`segment_id`,
+        sm1.`next`,
+        sm1.`score`,
+        sm1.`hidden`
         FROM segments RIGHT JOIN segments_match sm1 ON sm1.segment_id = segments.id
         INNER JOIN (SELECT sm2.`id_job`, MAX(`order`) as `maxorder`
               FROM segments_match as sm2 
@@ -113,7 +124,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         WHERE sm1.id_job = ? AND sm1.type = ? ORDER BY id ASC" );
 
         //There's a [0] at the end because it's supposed to return a single element instead of an array
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
 
     }
 
@@ -121,7 +132,18 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn    = NewDatabase::obtain()->getConnection();
-        $stmt    = $conn->prepare( "SELECT * 
+        $stmt    = $conn->prepare( "SELECT segments.`id`,
+        segments.`id_job`,
+        segments.`type`,
+        segments.`content_clean`,
+        segments.`raw_word_count`,
+        sm1.`id_job`,
+        sm1.`order`,
+        sm1.`type`,
+        sm1.`segment_id`,
+        sm1.`next`,
+        sm1.`score`,
+        sm1.`hidden`
         FROM segments RIGHT JOIN segments_match sm1 ON sm1.segment_id = segments.id
         INNER JOIN (SELECT sm2.`id_job`, MIN(`order`) as `maxorder`
               FROM segments_match as sm2 
@@ -132,7 +154,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         WHERE sm1.id_job = ? AND sm1.type = ? ORDER BY id ASC" );
 
         //There's a [0] at the end because it's supposed to return a single element instead of an array
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ $order, $type, $id_job, $id_job, $type, ] )[ 0 ];
 
     }
 
