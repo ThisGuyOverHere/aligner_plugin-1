@@ -858,7 +858,7 @@ class JobDirectActionController extends JobActionController {
         $sourceInverseOrders = [];
 
         foreach ( $inverses as $inverse ) {
-            if ( $inverse[ 'type' ] == 'target' ){
+            if ( $inverse[ 'type' ] == 'source' ){
                 $sourceInverseOrders[] = $inverse['order'];
             }
         }
