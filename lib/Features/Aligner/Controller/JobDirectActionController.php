@@ -1292,7 +1292,10 @@ class JobDirectActionController extends JobActionController {
                 }
             }
 
-            $this->setUndoActionsParams(["matches" => $undo_matches]);
+            $this->setUndoActionsParams([
+                "operation" => "hide",
+                "matches" => $undo_matches
+            ]);
 
             $conn->commit();
 

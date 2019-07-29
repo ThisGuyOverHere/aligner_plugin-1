@@ -68,6 +68,7 @@ class JobActionController extends AlignerController
             $operation['data']['content_raw']   = AlignUtils::_mark_xliff_tags($operation['data']['content_raw']);
             $operation['data']['content_clean'] = htmlspecialchars_decode($operation['data']['content_clean']);
             AlignUtils::_parseArrayIntegers( $operation['data'] );
+            $operation['data']['content_clean'] = (string) $operation['data']['content_clean'];
         }
         $this->operations[] = $operation;
     }
