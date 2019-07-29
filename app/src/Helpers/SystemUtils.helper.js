@@ -75,7 +75,7 @@ export const storeUndoOperations = (operations) => {
 export const executeUndoOperations = async (id, password) => {
 	let storageOperations = localStorage.getItem(`undo_${id}`)
 		? JSON.parse(localStorage.getItem(`undo_${id}`)) : null;
-	if (storageOperations) {
+	if (storageOperations && storageOperations.length) {
 		const data = storageOperations[0];
 		const {data: changes} = await httpUndoChanges(id, password, data);
 		const focusOrders = changes.filter(e => e.rif_order).sort((a, b) => a.rif_order - b.rif_order).map((e) => {
