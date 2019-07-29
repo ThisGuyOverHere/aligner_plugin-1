@@ -1073,15 +1073,15 @@ class JobDirectActionController extends JobActionController {
 
                 $this->pushOperation( [
                     'type'      => 'target',
-                    'action'    => 'create',
-                    'rif_order' => $referenceMatch['next'],
+                    'action'    => ($referenceMatch['next'] !== null) ? 'create' : 'push',
+                    'rif_order' => ($referenceMatch['next'] !== null) ? $referenceMatch['next']: null,
                     'data'      => $new_match_destination
                 ] );
 
                 $this->pushOperation( [
                     'type'      => 'source',
-                    'action'    => 'create',
-                    'rif_order' => $first_source[ 'next' ],
+                    'action'    => ($first_source[ 'next' ] !== null) ? 'create' : 'push',
+                    'rif_order' => ($first_source[ 'next' ] !== null) ? $first_source[ 'next' ] : null,
                     'data'      => $new_match_null
                 ] );
 

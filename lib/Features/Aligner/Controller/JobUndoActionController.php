@@ -193,11 +193,17 @@ class JobUndoActionController extends JobActionController
         }
 
         $deleted_orders = [];
+        $deleted_segments = [];
 
         foreach ( $segments as $key => $segment ) {
             if ( $key != 0 ) {
                 $deleted_orders[] = $segment[ 'order' ];
+                $segment['content_raw'] = '';
+                $segment['content_clean'] = '';
+                $segment['raw_word_count'] = 0;
+                $deleted_segments[] = $segment;
             }
+
         }
 
         $conn = NewDatabase::obtain()->getConnection();
@@ -220,11 +226,12 @@ class JobUndoActionController extends JobActionController
                 'data'      => $first_segment
             ] );
 
-            foreach ( $deleted_orders as $order ) {
+            foreach ( $deleted_segments as $segment ) {
                 $this->pushOperation( [
                     'type'      => $type,
                     'action'    => 'update',
-                    'rif_order' => $order
+                    'rif_order' => $segment['order'],
+                    'data'      => $segment
                 ] );
             }
 
