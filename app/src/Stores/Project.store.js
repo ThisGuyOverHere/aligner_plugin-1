@@ -207,38 +207,11 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 					}
 					break;
 			}
-			this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 		});
 
 
 		//checkResultStore(this.job.source.toJS(), this.job.target.toJS());
-
-		countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
-
-
-		/*//Todo: remove this test
-		const arrayS = this.job.source.toJS();
-		console.log('#### SOURCE #####');
-		for(let x= arrayS.length -5; x< arrayS.length; x++){
-			console.log(arrayS[x].order+'       '+arrayS[x].next);
-		}
-		const arrayT = this.job.target.toJS();
-		console.log('#### TARGET #####');
-		for(let x= arrayT.length -5; x < arrayT.length; x++){
-			console.log(arrayT[x].order+'       '+arrayT[x].next);
-		}*/
-
-		/*//Todo: remove this test
-		const arrayS = this.job.source.toJS();
-		console.log('#### SOURCE #####');
-		for(let x= 0; x< arrayS.length; x++){
-			console.log('['+x+']   '+arrayS[x].order+'       '+arrayS[x].next);
-		}
-		const arrayT = this.job.target.toJS();
-		console.log('#### TARGET #####');
-		for(let x= 0; x < arrayT.length; x++){
-			console.log('['+x+']   '+arrayT[x].order+'       '+arrayT[x].next);
-		}*/
+		this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 	},
 	deleteEmptyRows: function (deletes) {
 		deletes.map((index, i) => {
