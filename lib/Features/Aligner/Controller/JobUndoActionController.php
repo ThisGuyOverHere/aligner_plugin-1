@@ -1768,13 +1768,13 @@ class JobUndoActionController extends JobActionController
         Segments_SegmentMatchDao::showByOrderAndType($old_match["target"], $id_job, "target");
         Segments_SegmentMatchDao::showByOrderAndType($new_match["target"], $id_job, "target");
 
-        $order             = $new_match[$inverse_type];
-        $destination_order = $old_match[$inverse_type];
-        $inverse_order     = $old_match[$type];
+        $order             = $new_match[$type];
+        $destination_order = $old_match[$type];
+        $inverse_order     = $old_match[$inverse_type];
 
-        $movingSegment      = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $inverse_type);
-        $destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination_order, $id_job, $inverse_type);
-        $inverseSegment     = Segments_SegmentDao::getFromOrderJobIdAndType($inverse_order, $id_job, $type);
+        $movingSegment      = Segments_SegmentDao::getFromOrderJobIdAndType($order, $id_job, $type);
+        $destinationSegment = Segments_SegmentDao::getFromOrderJobIdAndType($destination_order, $id_job, $type);
+        $inverseSegment     = Segments_SegmentDao::getFromOrderJobIdAndType($inverse_order, $id_job, $inverse_type);
 
         $movingSegment      = $movingSegment->toArray();
         $destinationSegment = $destinationSegment->toArray();
@@ -1788,7 +1788,7 @@ class JobUndoActionController extends JobActionController
         $destination_match[ 'hidden' ]         = 0;
 
         $this->pushOperation( [
-            'type'      => $inverse_type,
+            'type'      => $type,
             'action'    => 'update',
             'rif_order' => $destination_order,
             'data'      => $destination_match
@@ -1802,7 +1802,7 @@ class JobUndoActionController extends JobActionController
         $starting_match[ 'hidden' ]         = 0;
 
         $this->pushOperation( [
-            'type'      => $inverse_type,
+            'type'      => $type,
             'action'    => 'update',
             'rif_order' => $order,
             'data'      => $starting_match
@@ -1812,14 +1812,14 @@ class JobUndoActionController extends JobActionController
         $inverse_match['hidden'] = 0;
 
         $this->pushOperation( [
-            'type'      => $type,
+            'type'      => $inverse_type,
             'action'    => 'update',
             'rif_order' => $inverse_order,
             'data'      => $inverse_match
         ] );
 
-        Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order ], $id_job, $inverse_type );
-        Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $movingSegment[ 'id' ] ], $destination_order, $id_job, $inverse_type );
+        Segments_SegmentMatchDao::nullifySegmentsInMatches( [ $order ], $id_job, $type );
+        Segments_SegmentMatchDao::updateFields( [ 'segment_id' => $movingSegment[ 'id' ] ], $destination_order, $id_job, $type );
     }
 
     public function undoHide() {
