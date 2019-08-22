@@ -162,12 +162,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 					change.data.next = this.job[change.type].getIn([index, 'order']);
 					this.job[change.type] = this.job[change.type].insert(index, fromJS(change.data));
 
-					//add empty space to the end for consistency of two list
-					this.storeMovements([{
-						type: inverse[change.type],
-						action: 'push'
-					}]);
-
 					break;
 				case 'push':
 					//check if we have the last segment of job
