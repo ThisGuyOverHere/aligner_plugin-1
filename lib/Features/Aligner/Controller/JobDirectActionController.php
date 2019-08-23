@@ -702,15 +702,19 @@ class JobDirectActionController extends JobActionController {
             ] );
 
             //query to take previous match
-            $previousSourceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($sourceMatch['order'], $id_job, "source")->toArray();
-            $previousSourceMatch['next'] = $sourceMatch['next'];
+            $previousSourceMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($sourceMatch['order'], $id_job, "source");
+            if(!empty($previousSourceMatch)){
+                $previousSourceMatch = $previousSourceMatch->toArray();
+                $previousSourceMatch['next'] = $sourceMatch['next'];
 
-            $this->pushOperation( [
+                $this->pushOperation( [
                     'type'      => "source",
                     'action'    => "update",
                     'rif_order' => $previousSourceMatch['order'],
                     'data'      => $previousSourceMatch
-            ] );
+                ] );
+            }
+
         }
 
         foreach ( $targetMatches as $targetMatch ) {
@@ -721,15 +725,19 @@ class JobDirectActionController extends JobActionController {
             ] );
 
             //query to take previous match
-            $previousTargetMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($targetMatch['order'], $id_job, "source")->toArray();
-            $previousTargetMatch['next'] = $targetMatch['next'];
+            $previousTargetMatch = Segments_SegmentMatchDao::getPreviousSegmentMatch($targetMatch['order'], $id_job, "source");
+            if(!empty($previousTargetMatch)){
+                $previousTargetMatch = $previousTargetMatch->toArray();
+                $previousTargetMatch['next'] = $targetMatch['next'];
 
-            $this->pushOperation( [
+                $this->pushOperation( [
                     'type'      => "source",
                     'action'    => "update",
                     'rif_order' => $previousTargetMatch['order'],
                     'data'      => $previousTargetMatch
-            ] );
+                ] );
+            }
+
         }
 
         $conn = NewDatabase::obtain()->getConnection();
