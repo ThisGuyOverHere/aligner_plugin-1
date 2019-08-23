@@ -8,18 +8,18 @@ const SourceComponent = (props) => {
                 <div>
                     <div className="segments segments-in-loading">
                         <div className="radio-container">
-                            <div className="radio-loader"></div>
+                            <div className="radio-loader"/>
                         </div>
                         <div className="segments-info">
-                            <p className="info-sx-text-loader"></p>
+                            <p className="info-sx-text-loader"/>
                         </div>
                     </div>
                     <div className="segments segments-in-loading">
                         <div className="radio-container">
-                            <div className="radio-loader"></div>
+                            <div className="radio-loader"/>
                         </div>
                         <div className="segments-info">
-                            <p className="info-sx-text-loader"></p>
+                            <p className="info-sx-text-loader"/>
                         </div>
                     </div>
                 </div>
