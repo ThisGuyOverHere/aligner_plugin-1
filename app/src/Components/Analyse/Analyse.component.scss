@@ -2,7 +2,7 @@
 
 #title {
   text-align: center;
-  margin: 16px 0px;
+  margin: 16px 0;
 }
 
 .analyse.container {
@@ -38,8 +38,12 @@
 		display: block;
 	  }
 	  h4 {
+		max-width: 316px;
 		margin: 0;
 		padding: 0 0 4px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
 	  }
 	  h2 {
 		margin: 24px 0 0;
