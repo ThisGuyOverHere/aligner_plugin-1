@@ -1208,9 +1208,9 @@ class JobUndoActionController extends JobActionController
 
                     // The original operation row had an empty inverse match before the move. This means we have to recreate the row
 
-                    $previous_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent($destination_order, $id_job, $type);
+                    $previous_match = Segments_SegmentDao::getPreviousFromNonExistentOrderJobIdAndType($destination_order, $id_job, $type);
 
-                    $next_match = Segments_SegmentMatchDao::getNextMatchOfNonExistent($destination_order, $id_job, $type);
+                    $next_match = Segments_SegmentDao::getNextFromNonExistentOrderJobIdAndType($destination_order, $id_job, $type);
                     if (!empty($next_match)) {
                         $next_match = $next_match->toArray();
                         $next_order = $next_match['order'];
@@ -1249,9 +1249,9 @@ class JobUndoActionController extends JobActionController
                         $updated_matches[] = $previous_match;
                     }
 
-                    $previous_inverse_match = Segments_SegmentMatchDao::getPreviousMatchOfNonExistent($inverse_destination_order, $id_job, $inverse_type);
+                    $previous_inverse_match = Segments_SegmentDao::getPreviousFromNonExistentOrderJobIdAndType($inverse_destination_order, $id_job, $inverse_type);
 
-                    $next_inverse_match = Segments_SegmentMatchDao::getNextMatchOfNonExistent($inverse_destination_order, $id_job, $inverse_type);
+                    $next_inverse_match = Segments_SegmentDao::getNextFromNonExistentOrderJobIdAndType($inverse_destination_order, $id_job, $inverse_type);
                     if (!empty($next_inverse_match)) {
                         $next_inverse_match = $next_inverse_match->toArray();
                         $next_inverse_order = $next_inverse_match['order'];
