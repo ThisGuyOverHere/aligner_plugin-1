@@ -1293,8 +1293,8 @@ class JobDirectActionController extends JobActionController {
                             'data'      => $to_hide
                         ] );
 
-                        Segments_SegmentMatchDao::hideByOrderAndType( $to_hide, $id_job, $type_hide );
-                        Segments_SegmentMatchDao::hideByOrderAndType( $inverse_hide, $id_job, $type_inverse_hide );
+                        Segments_SegmentMatchDao::hideByOrderAndType( $to_hide['order'], $id_job, $type_hide );
+                        Segments_SegmentMatchDao::hideByOrderAndType( $inverse_hide['order'], $id_job, $type_inverse_hide );
                     }
 
                 }
