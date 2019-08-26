@@ -905,7 +905,11 @@ class JobUndoActionController extends JobActionController
 
         }
 
-        $starting_match                     = $movingSegment;
+        if(!empty($previous_match) && $movingSegment['order'] == $previous_match['order']){
+            $starting_match = $previous_match;
+        } else {
+            $starting_match = $movingSegment;
+        }
         $starting_match[ 'segment_id' ]     = null;
         $starting_match[ 'content_raw' ]    = null;
         $starting_match[ 'content_clean' ]  = null;
