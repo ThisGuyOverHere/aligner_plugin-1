@@ -170,7 +170,7 @@ class AlignUtils
 
         $matches = [];
 
-        preg_match_all('/(_\([0-9]+\))/u', $filename, $matches,PREG_OFFSET_CAPTURE);
+        preg_match_all('/((?:_| )\([0-9]+\))/u', $filename, $matches,PREG_OFFSET_CAPTURE);
 
         $last_array = end($matches);
         $last_match = end($last_array);
@@ -181,5 +181,6 @@ class AlignUtils
         return $filename;
 
     }
+
 
 }
