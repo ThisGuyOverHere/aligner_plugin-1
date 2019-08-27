@@ -87,7 +87,7 @@ class AlignComponent extends Component {
             target: {}
         };
         job.source.map((e, index) => {
-            rowsDictionary.source[e.order] = job.target[index].order; // era target
+            rowsDictionary.source[e.order] = job.target[index].order;
             rowsDictionary.target[job.target[index].order] = e.order;
             //todo: send API for remove empty/empty from DB
             if (e.content_clean || job.target[index].content_clean) {
