@@ -171,19 +171,19 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 						//check if is a empty segment
 						//prepare mock for push
 						mock.next = null;
-						/*if (change.data) {
+						if (change.data) {
 							mock.content_clean = change.data.content_clean ? change.data.content_clean : null;
 							mock.content_raw = change.data.content_raw ? change.data.content_raw : null;
-						}*/
+						}
+
 						if(change.data && change.data.order){
 							mock.order = change.data.order;
-							mock.content_clean = change.data.content_clean ? change.data.content_clean : null;
-							mock.content_raw = change.data.content_raw ? change.data.content_raw : null;
 						}else{
 							mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
 						}
 
 						mock.type = change.type;
+
 						//edit previous last element segment next param.
 						this.job[change.type] = this.job[change.type].setIn([this.job[change.type].size - 1, 'next'], mock.order);
 						//add empty space at the end of list
