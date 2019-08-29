@@ -130,6 +130,7 @@ class UploadComponent extends Component {
                         status: 'finish',
                         progress: 0,
                         name: response.data[0].name,
+                        display_name: response.data[0].display_name,
                         size: Math.floor((files[0].size) / 1000),
                         disabled: true
                     },
@@ -182,6 +183,7 @@ class UploadComponent extends Component {
                         status: 'finish',
                         progress: 0,
                         name: response.data[0].name,
+                        display_name: response.data[0].display_name,
                         size: Math.floor((files[0].size) / 1000),
                         disabled: true
                     },
@@ -205,7 +207,9 @@ class UploadComponent extends Component {
         httpCreateProject({
             project_name: this.state.pName,
             file_name_source: this.state.uploadSource.name,
+            display_file_name_source: this.state.uploadSource.display_name,
             file_name_target: this.state.uploadTarget.name,
+            display_file_name_target: this.state.uploadTarget.display_name,
             source_lang: this.state.sourceLang,
             target_lang: this.state.targetLang
         }).then(response => {
