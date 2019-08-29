@@ -106,7 +106,9 @@ class UploadController extends AlignerController {
         }
         $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
         setlocale(LC_ALL, "en_US.utf8");
+        $matches = [];
         foreach($_FILES as $key => $file){
+            $original_filename = $_FILES[$key]['name'];
             $_FILES[$key]['name'] = iconv('UTF-8', 'ASCII//TRANSLIT', $_FILES[$key]['name']);
         }
 
@@ -119,6 +121,7 @@ class UploadController extends AlignerController {
             throw new \Exception( $e->getMessage() );
         }
 
+        $this->result->files->display_name = $original_filename;
         $this->result->files->name = AlignUtils::removeVersionFromFileName($this->result->files->name);
 
         $this->result = array_values((array)$this->result);

@@ -13,6 +13,7 @@ class Files_FileStruct extends \DataAccess_AbstractDaoSilentStruct implements \D
     public $id_project  ;
     public $id_job ;
     public $filename ;
+    public $display_filename ;
     public $type ;
     public $extension ;
     public $sha1_original_file ;
