@@ -95,13 +95,15 @@ class SearchComponent extends Component {
                     content: row.source.content_clean ? row.source.content_clean.toLowerCase() : '',
                     type: 'source',
                     id: row.source.id,
-                    index: index
+                    index: index,
+                    hidden: +row.source.hidden
                 };
                 const target = {
                     content: row.target.content_clean ? row.target.content_clean.toLowerCase() : '',
                     type: 'target',
                     id: row.target.id,
-                    index: index
+                    index: index,
+                    hidden: +row.source.hidden
                 };
                 elements.push(source, target);
             });
@@ -142,7 +144,7 @@ class SearchComponent extends Component {
         if (fulltext.length > 0) {
             active = true;
             searchResults = elements.filter(function (item) {
-                return item.content.indexOf(fulltext) !== -1;
+                return item.content.indexOf(fulltext) !== -1 && item.hidden !== 1;
             }).map(item => {
                 item.occurrences = [];
                 let searchStrLen = fulltext.length;

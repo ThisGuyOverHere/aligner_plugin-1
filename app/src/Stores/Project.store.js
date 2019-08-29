@@ -208,8 +208,6 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 					break;
 			}
 		});
-
-
 		//checkResultStore(this.job.source.toJS(), this.job.target.toJS());
 		this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 	},
@@ -224,6 +222,8 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 
 			this.job.target = this.job.target.setIn([+index - i - 1, 'next'], nextTarget);
 			this.job.source = this.job.source.setIn([+index - i - 1, 'next'], nextSource);
+			// update counters after the delete action of an empty row
+			this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 		});
 	},
 	addSegmentToSelection: function (order, type) {
