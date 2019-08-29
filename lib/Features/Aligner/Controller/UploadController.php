@@ -61,7 +61,7 @@ class UploadController extends AlignerController {
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->file_name         = $postInput[ 'file_name' ];
+        $this->file_name         = AlignUtils::encode_filename( $postInput[ 'file_name' ] );
         $this->source_lang       = $postInput[ "source_lang" ];
         $this->target_lang       = $postInput[ "target_lang" ];
         $this->segmentation_rule = $postInput[ "segmentation_rule" ];
@@ -108,8 +108,7 @@ class UploadController extends AlignerController {
         setlocale(LC_ALL, "en_US.utf8");
         $matches = [];
         foreach($_FILES as $key => $file){
-            $original_filename = $_FILES[$key]['name'];
-            $_FILES[$key]['name'] = iconv('UTF-8', 'ASCII//TRANSLIT', $_FILES[$key]['name']);
+            $_FILES[$key]['name'] = AlignUtils::encode_filename($_FILES[$key]['name']);
         }
 
         try {
@@ -122,6 +121,7 @@ class UploadController extends AlignerController {
         }
 
         $this->result->files->name = AlignUtils::removeVersionFromFileName($this->result->files->name);
+        $this->result->files->name = AlignUtils::decode_filename($this->result->files->name );
 
         $this->result = array_values((array)$this->result);
         if ( @count( $this->result[ 'errors' ] ) ) {

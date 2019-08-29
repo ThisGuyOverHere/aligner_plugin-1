@@ -183,4 +183,23 @@ class AlignUtils
     }
 
 
+    public static function encode_filename($filename){
+        $title_parts = explode(".", $filename);
+        $extension = array_pop($title_parts);
+        $title = base64_encode(implode(".", $title_parts));
+        $filename = $title . "." . $extension;
+        $filename = filter_var($filename, FILTER_SANITIZE_STRING);
+        return $filename;
+    }
+
+    public static function decode_filename($filename){
+        $title_parts = explode(".", $filename);
+        $extension = array_pop($title_parts);
+        $title = base64_decode(implode(".", $title_parts));
+        $filename = $title . "." . $extension;
+        $filename = filter_var($filename, FILTER_SANITIZE_STRING);
+        return $filename;
+    }
+
+
 }
