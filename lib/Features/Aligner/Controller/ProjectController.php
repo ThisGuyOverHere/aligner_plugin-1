@@ -53,11 +53,11 @@ class ProjectController extends AlignerController {
                 ],
                 'file_name_target' => [
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'flags'  => FILTER_FLAG_STRIP_LOW
                 ],
                 'file_name_source' => [
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'flags'  => FILTER_FLAG_STRIP_LOW
                 ]
         ];
 
@@ -85,12 +85,12 @@ class ProjectController extends AlignerController {
 
         $this->uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
 
-        $this->fileSourcePath = $this->uploadDir . "/" . $this->postInput[ 'file_name_source' ];
+        $this->fileSourcePath = $this->uploadDir . "/" . AlignUtils::encode_filename( $this->postInput[ 'file_name_source' ] );
         if ( !file_exists( $this->fileSourcePath ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file source." ];
         }
 
-        $this->fileTargetPath = $this->uploadDir . "/" . $this->postInput[ 'file_name_target' ];
+        $this->fileTargetPath = $this->uploadDir . "/" . AlignUtils::encode_filename( $this->postInput[ 'file_name_target' ] );
         if ( !file_exists( $this->fileTargetPath ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file target." ];
         }
