@@ -145,6 +145,12 @@
   }
 
   .progress {
+    p{
+      text-align: left;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
     #fileSize {
       font-size: 10px;
       margin: 2px 2px 2px 8px;
