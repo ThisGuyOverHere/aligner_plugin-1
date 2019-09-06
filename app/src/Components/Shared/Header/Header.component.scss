@@ -1,12 +1,16 @@
 @import "../../../../assets/theme/variables";
 
 #header{
-  height: auto;
+  height: 80px;
   z-index: 999;
   position: fixed;
   top: 0;
   left: 0;
+  background-color: #002b5c;
   width: 100%;
+  display: grid;
+  align-items: center;
+  padding: 0 60px;
   .aligner-nav-log{
     li{
       color: $headerText;
@@ -19,12 +23,9 @@
     }
   }
   .aligner-nav-log , .aligner-nav-nolog {
-    background: $headerBlack;
     display: -ms-flexbox;
     list-style: none;
     margin: 0;
-    padding: 8px 12px;
-
     #logo{
       top: 4px;
       border: 0;
@@ -39,20 +40,26 @@
     }
   }
   .aligner-nav-nolog{
+    height: 100%;
     display: grid;
     grid-template-columns: 1fr 200px 100px;
     align-items: center;
     .return-to-matecat {
       text-align: right;
       a {
-        color: #fff;
-        text-decoration: none;
-        -webkit-font-smoothing: antialiased;
-        line-height: 22px;
+        display: block;
+        margin: 0 auto;
+        background: #fff;
+        color: #002b5c;
+        font-size: 16px;
+        width: 152px;
+        text-align: center;
+        max-height: 40px;
+        border-radius: 5px;
+        line-height: 1.25;
+        border: none;
         padding: 10px 15px;
         font-weight: 200;
-        font-size: 18px;
-
         &:hover {
           color: #3aa9dd;
         }
@@ -63,6 +70,7 @@
   .aligner-nav-log {
     display: grid;
     grid-template-columns: 0.5fr 1fr 56px 0.3fr 0.1fr 0.3fr 1.3fr 0.2fr;
+    align-items: center;
     li {
       &:nth-child(2) {
         text-align: center;
@@ -88,16 +96,16 @@
     #to{
       line-height: 3;
     }
-    #final_title,#target{
+    #target{
       text-align: left;
     }
     #source,#export{
       text-align: right;
     }
-    #to{
+    #to,#final_title{
       text-align: center;
     }
-    #source,#to,#target {
+    #source,#to,#target,#final_title {
       span {
         color: $white;
       }

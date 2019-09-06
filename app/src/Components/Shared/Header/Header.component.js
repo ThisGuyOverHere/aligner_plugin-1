@@ -151,6 +151,7 @@ class HeaderComponent extends Component {
             .then(
                 response => {
                     const info = response.data;
+                    console.log(info);
                     if(info){
                         this.setState({
                             projectTitle: textEllipsisCenter(info.job_name),

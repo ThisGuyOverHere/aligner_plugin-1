@@ -7,9 +7,9 @@ const UserLogged = (props) => (
                 <div className="ui logged label" title="Login"
                      onClick={ () => SystemActions.setLogoutStatus(true)}
                 >
-                    { props.image ?
+                   {/* { props.image ?
                         <img src={props.image}/> : null
-                    }
+                    }*/}
                     {!props.image && getUserInitials(props.user.first_name, props.user.last_name )}
                 </div>
             </div>

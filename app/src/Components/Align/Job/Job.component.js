@@ -127,7 +127,7 @@ class JobComponent extends Component {
                         this.virtualList = instance;
                     }}
                     width={this.state.window.width}
-                    height={this.state.window.height - 112}
+                    height={this.state.window.height - 160}
                     overscanCount={2}
                     itemCount={data.length}
                     scrollToIndex={this.state.scrollToSegment}

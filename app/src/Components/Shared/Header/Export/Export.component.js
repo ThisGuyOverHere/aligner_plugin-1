@@ -3,7 +3,7 @@ import SystemActions from "../../../../Actions/System.actions";
 
 const Export = () => (
     <div>
-        <button className="ui primary button"
+        <button className=""
                 onClick={() => SystemActions.setExportModalStatus(true)}>
             <span>
                 Download TMX
