@@ -6,8 +6,8 @@ const Export = () => (
         <button className=""
                 onClick={() => SystemActions.setExportModalStatus(true)}>
             <span>
+                 <i aria-hidden='true' className="download icon"/>
                 Download TMX
-                <i aria-hidden='true' className="download icon"></i>
             </span>
         </button>
     </div>

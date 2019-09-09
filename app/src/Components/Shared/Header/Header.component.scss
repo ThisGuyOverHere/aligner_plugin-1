@@ -13,11 +13,11 @@
   padding: 0 60px;
   .aligner-nav-log{
     li{
-      color: $headerText;
+      color: $white;
       font-size: 14px;
       font-weight: 300;
       &:last-child{
-        margin-right: 0px;
+        margin-right: 0;
         text-align: right;
       }
     }
@@ -27,15 +27,14 @@
     list-style: none;
     margin: 0;
     #logo{
-      top: 4px;
-      border: 0;
-      /*background: url("/public/img/logo.png") 0px 2px no-repeat;*/
-      width: 145px;
-      height: 31px;
-      background-size: 130px 26px;
       position: relative;
-      img{
-        max-width: 100%;
+      a{
+        display: block;
+        width: max-content;
+        img{
+          height: 40px;
+          max-width: 100%;
+        }
       }
     }
   }
@@ -69,7 +68,7 @@
 
   .aligner-nav-log {
     display: grid;
-    grid-template-columns: 0.5fr 1fr 56px 0.3fr 0.1fr 0.3fr 1.3fr 0.2fr;
+    grid-template-columns: 0.6fr 0.8fr 56px 0.3fr 0.1fr 0.3fr 1.3fr 0.2fr;
     align-items: center;
     li {
       &:nth-child(2) {
@@ -95,6 +94,9 @@
     #target,
     #to{
       line-height: 3;
+    }
+    #to{
+      font-style: 16px;
     }
     #target{
       text-align: left;

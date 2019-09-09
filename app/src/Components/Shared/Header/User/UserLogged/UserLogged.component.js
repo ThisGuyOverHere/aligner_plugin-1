@@ -10,7 +10,7 @@ const UserLogged = (props) => (
                    {/* { props.image ?
                         <img src={props.image}/> : null
                     }*/}
-                    {!props.image && getUserInitials(props.user.first_name, props.user.last_name )}
+                    {getUserInitials(props.user.first_name, props.user.last_name )}
                 </div>
             </div>
         );
