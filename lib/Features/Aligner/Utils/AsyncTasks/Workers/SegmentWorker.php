@@ -24,6 +24,7 @@ use Features\Aligner\Utils\Constants;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 use Features\Aligner\Model\Exceptions\FileWordLimit;
+use FilesStorage\FilesStorageFactory;
 
 class SegmentWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
@@ -80,7 +81,7 @@ class SegmentWorker extends AbstractWorker {
         $source_lang = $this->job->source;
         $target_lang = $this->job->target;
 
-        $fileStorage = new \FilesStorage();
+        $fileStorage = FilesStorageFactory::create();
 
         try {
             \Log::doLog('/-------/ Convert xliff file to array for source /--------/');
@@ -160,7 +161,7 @@ class SegmentWorker extends AbstractWorker {
 
         // Get file content
         try {
-            $fileStorage = new \FilesStorage;
+            $fileStorage = FilesStorageFactory::create();
             $xliff_file = $fileStorage->getXliffFromCache($sha1, $lang);
             \Log::doLog('Found xliff file ['.$xliff_file.']');
             $xliff_content = file_get_contents($xliff_file);
@@ -253,7 +254,7 @@ class SegmentWorker extends AbstractWorker {
 
         $json_segments = json_encode($segments);
 
-        $fileStorage = new \FilesStorage();
+        $fileStorage = FilesStorageFactory::create();
 
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, $fileStorage->composeCachePath( $hash ) );

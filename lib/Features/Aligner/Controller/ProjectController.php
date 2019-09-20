@@ -21,6 +21,7 @@ use Features\Aligner\Model\Segments_SegmentDao;
 use CatUtils;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\ProjectProgress;
+use FilesStorage\AbstractFilesStorage;
 
 class ProjectController extends AlignerController {
 
@@ -180,7 +181,7 @@ class ProjectController extends AlignerController {
         $yearMonthPath    = date_create( $this->project->create_date )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1;
 
-        $extension = \FilesStorage::pathinfo_fix( $filename, PATHINFO_EXTENSION );
+        $extension = AbstractFilesStorage::pathinfo_fix( $filename, PATHINFO_EXTENSION );
 
         $fileStruct = new Files_FileStruct();
 

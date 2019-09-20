@@ -11,6 +11,7 @@ namespace Features\Aligner\Controller;
 
 use Exceptions\ValidationError;
 use Features\Aligner\Utils\TMSService;
+use FilesStorage\AbstractFilesStorage;
 
 class TmController extends AlignerController {
 
@@ -114,7 +115,7 @@ class TmController extends AlignerController {
         }
 
         foreach ( $file as $fileInfo ) {
-            if ( \FilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
+            if ( AbstractFilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
                 throw new \Exception( "Please upload a TMX.", -8 );
             }
 

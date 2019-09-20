@@ -23,6 +23,7 @@ use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
+use FilesStorage\FilesStorageFactory;
 
 class AlignJobWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
@@ -177,7 +178,7 @@ class AlignJobWorker extends AbstractWorker {
 
 
     protected function _getSegmentsFromJson($dateHashPath, $type, $idFile, $newFileName){
-        $fileStorage = new \FilesStorage();
+        $fileStorage = FilesStorageFactory::create();
 
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, $fileStorage->composeCachePath( $hash ) );
