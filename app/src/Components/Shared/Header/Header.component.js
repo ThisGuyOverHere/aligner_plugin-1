@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Link } from "react-router-dom";
+import {Link} from "react-router-dom";
 import PropTypes from "prop-types";
 import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
 import User from "./User/User.component";
@@ -19,7 +19,7 @@ class HeaderComponent extends Component {
                 jobPassword: PropTypes.string
             })
         }).isRequired,
-        user: PropTypes.oneOfType([PropTypes.bool,PropTypes.object]),
+        user: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
         image: PropTypes.string
     };
 
@@ -45,18 +45,18 @@ class HeaderComponent extends Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-         if(nextProps.match.params && nextProps.match.params.jobID){
-             prevState.job.config.id = nextProps.match.params.jobID;
-             prevState.job.config.password = nextProps.match.params.jobPassword;
-         }else{
-             prevState.job.config.id = null;
-             prevState.job.config.password = null;
-         }
+        if (nextProps.match.params && nextProps.match.params.jobID) {
+            prevState.job.config.id = nextProps.match.params.jobID;
+            prevState.job.config.password = nextProps.match.params.jobPassword;
+        } else {
+            prevState.job.config.id = null;
+            prevState.job.config.password = null;
+        }
         return prevState;
     };
 
     componentDidMount() {
-        if(this.props.match.params.jobID){
+        if (this.props.match.params.jobID) {
             this.getInfo();
         }
         ProjectStore.addListener(ProjectConstants.JOB_ERROR, this.getJobError);
@@ -80,13 +80,15 @@ class HeaderComponent extends Component {
 
     renderHtmlNavigation = () => {
 
-        if(this.state.job.config.id && !this.state.jobError){
+        if (this.state.job.config.id && !this.state.jobError) {
             return <div>
                 <ul className="aligner-nav-log" role="navigation">
                     <li>
-                        <Link to="/">
-                            <div id="logo"><img src="./static/build/images/logo.png"/></div>
-                        </Link>
+                        <div id="logo">
+                            <Link to="/">
+                                <img src="./static/build/images/logo.png"/>
+                            </Link>
+                        </div>
                     </li>
                     <li>
                         <div id="final_title">
@@ -99,7 +101,7 @@ class HeaderComponent extends Component {
                     </li>
 
                     <li id={"to"}>
-                        <span> > </span>
+                        <span> &#8594; </span>
                     </li>
 
                     <li id={"target"}>
@@ -123,12 +125,14 @@ class HeaderComponent extends Component {
         } else {
             return <ul className="aligner-nav-nolog" role="navigation">
                 <li>
-                    <Link to="/">
-                        <div id="logo"><img src="./static/build/images/logo.png"/></div>
-                    </Link>
+                    <div id="logo">
+                        <Link to="/">
+                            <img src="./static/build/images/logo.png"/>
+                        </Link>
+                    </div>
                 </li>
                 <li className="return-to-matecat">
-                    <a href="/">Go to matecat</a>
+                    <a href="/">Go to Matecat</a>
                 </li>
                 <li>
                     <User image={this.props.image} user={this.props.user}/>
@@ -140,7 +144,7 @@ class HeaderComponent extends Component {
     render() {
         return (
             <div id="header">
-                { this.renderHtmlNavigation() }
+                {this.renderHtmlNavigation()}
             </div>
         );
     }
@@ -151,7 +155,8 @@ class HeaderComponent extends Component {
             .then(
                 response => {
                     const info = response.data;
-                    if(info){
+                    /*console.log(info);*/
+                    if (info) {
                         this.setState({
                             projectTitle: textEllipsisCenter(info.job_name),
                             sourceLang: info.source_lang,
@@ -168,4 +173,5 @@ class HeaderComponent extends Component {
     }
 
 }
+
 export default HeaderComponent;
