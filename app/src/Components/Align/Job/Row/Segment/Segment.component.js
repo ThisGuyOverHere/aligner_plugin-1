@@ -131,7 +131,7 @@ class SegmentComponent extends Component {
 				 onClick={this.handleClick}
 			>
 				{dropHover && <span className="dropAlignArea"> </span>}
-				<i className="icon check circle outline"></i>
+				<i className="icon check circle outline"/>
 				<div className="segmentBox-content"
 					 style={{textAlign: rtl ? 'right' : 'left', direction: rtl ? 'rtl' : 'ltr'}}>
 					<SegmentContentComponent search={this.props.search} content={segment.content_clean}
@@ -166,10 +166,9 @@ class SegmentComponent extends Component {
 	setHighlight = (segments) => {
 		const {segment: {order, type}} = this.props;
 		if(segments.filter(e=> e.type === type && e.order === order).length){
-			console.log(order,type)
 			this.setState({
 				highlight: true
-			})
+			});
 
 			setTimeout(()=>{
 				this.setState({

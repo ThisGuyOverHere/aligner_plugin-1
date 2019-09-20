@@ -175,8 +175,15 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 							mock.content_clean = change.data.content_clean ? change.data.content_clean : null;
 							mock.content_raw = change.data.content_raw ? change.data.content_raw : null;
 						}
-						mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
+
+						if(change.data && change.data.order){
+							mock.order = change.data.order;
+						}else{
+							mock.order = +this.job[change.type].last().get('order') + env.orderElevation;
+						}
+
 						mock.type = change.type;
+
 						//edit previous last element segment next param.
 						this.job[change.type] = this.job[change.type].setIn([this.job[change.type].size - 1, 'next'], mock.order);
 						//add empty space at the end of list
@@ -196,14 +203,11 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 						change.data.next = el.next;
 						this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
 					} else {
-						console.log(change.data);
 						this.job[change.type] = this.job[change.type].set(index, fromJS(change.data));
 					}
 					break;
 			}
 		});
-
-
 		//checkResultStore(this.job.source.toJS(), this.job.target.toJS());
 		this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 	},
@@ -211,12 +215,15 @@ let ProjectStore = assign({}, EventEmitter.prototype, {
 		deletes.map((index, i) => {
 			this.job.source = this.job.source.delete(index - i);
 			this.job.target = this.job.target.delete(index - i);
+			//change next of previous inverse segment,
+			//check if we need to delete the first row	and properly return the next order
+			const nextTarget =  index !== 0 ? this.job.target.getIn([index - i, 'order']) : null;
+			const nextSource = index !== 0 ? this.job.source.getIn([index - i, 'order']) : null;
 
-			// change next of previous inverse segment
-			const nextTarget = this.job.target.getIn([index - i, 'order']) || null;
-			const nextSource = this.job.source.getIn([index - i, 'order']) || null;
 			this.job.target = this.job.target.setIn([+index - i - 1, 'next'], nextTarget);
 			this.job.source = this.job.source.setIn([+index - i - 1, 'next'], nextSource);
+			// update counters after the delete action of an empty row
+			this.counters = countHideAndMiss(this.job.source.toJS(), this.job.target.toJS());
 		});
 	},
 	addSegmentToSelection: function (order, type) {
