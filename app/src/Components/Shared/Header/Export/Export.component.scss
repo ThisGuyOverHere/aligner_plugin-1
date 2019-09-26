@@ -3,16 +3,28 @@
 #export {
   text-align: center;
   button {
-	width: auto;
-	padding: 12px;
+	max-width: 240px;
 	text-align: center;
-	text-transform: none;
+	background: #fff;
+	color: #002b5c;
+	font-size: 16px;
+	max-height: 40px;
+	border-radius: 5px;
+	line-height: 1.25;
+	border: none;
+	padding: 10px 15px;
+	font-weight: 500;
+	text-transform: uppercase;
+	cursor: pointer;
+	width: auto;
+	margin-right: 16px;
 	span {
 	  i {
-		margin: 0 auto;
-		padding-left: 8px;
+		margin-right: 12px;
 	  }
-
+	}
+	&:hover{
+	  color: $lightBlue;
 	}
   }
 }

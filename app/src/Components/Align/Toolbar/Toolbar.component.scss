@@ -1,14 +1,14 @@
 @import "../../../../assets/theme/variables";
 
 #toolbar {
-  position: relative;
+  position: fixed;
   padding: 0 32px;
   z-index: 20;
-  height: 56px;
+  height: 64px;
   background-color: $white;
   color: $midGregy;
   width: 100%;
-  top: 56px;
+  top: 80px;
   left: 0;
   display: grid;
   grid-template-columns: 56px 1fr 2.6fr 1fr;
