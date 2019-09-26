@@ -132,7 +132,7 @@ class HeaderComponent extends Component {
                     </div>
                 </li>
                 <li className="return-to-matecat">
-                    <a href="/">Go to Matecat</a>
+                    <a href="/" target="blank">Go to Matecat</a>
                 </li>
                 <li>
                     <User image={this.props.image} user={this.props.user}/>
