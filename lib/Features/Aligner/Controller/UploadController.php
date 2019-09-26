@@ -61,7 +61,6 @@ class UploadController extends AlignerController {
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->file_name         = $postInput[ 'file_name' ];
         $this->source_lang       = $postInput[ "source_lang" ];
         $this->target_lang       = $postInput[ "target_lang" ];
         $this->segmentation_rule = $postInput[ "segmentation_rule" ];
@@ -74,7 +73,10 @@ class UploadController extends AlignerController {
         $intDir    = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
         $errDir    = \INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
 
+        $this->file_name = AlignUtils::getLatestVersionFileName($postInput[ 'file_name' ], $intDir);
+
         $conversionHandler = new \ConversionHandler();
+
         $conversionHandler->setFileName( $this->file_name );
         $conversionHandler->setSourceLang( $this->source_lang );
         $conversionHandler->setTargetLang( $this->target_lang );

@@ -182,4 +182,60 @@ class AlignUtils
 
     }
 
+    public static function getFileVersion($filename){
+        $matches = [];
+
+        preg_match_all('/((?:_| )\([0-9]+\))/u', $filename, $matches,PREG_OFFSET_CAPTURE);
+
+        $last_array = end($matches);
+        $last_match = end($last_array);
+
+        $matches = [];
+        preg_match_all('/([0-9]+)/u', $last_match[0], $matches, PREG_OFFSET_CAPTURE);
+
+        $last_array = end($matches);
+        $last_match = end($last_array);
+
+        return (int) $last_match[0];
+    }
+
+    public static function startsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        return (substr($haystack, 0, $length) === $needle);
+    }
+
+    public static function endsWith($haystack, $needle) {
+        $length = strlen($needle);
+        if ($length == 0) {
+            return true;
+        }
+
+        return (substr($haystack, -$length) === $needle);
+    }
+
+    public static function getLatestVersionFileName($filename, $dir){
+        $filename_parts         = explode('.', $filename);
+        $filename_extensionless = $filename_parts[0];
+
+        $dirs = array_diff(scandir($dir), array('.', '..'));
+
+        $file_version = null;
+        foreach ($dirs as $dir){
+            if(AlignUtils::startsWith($dir, $filename_extensionless)){
+                $version = AlignUtils::getFileVersion($dir);
+                if($version != 0 && $version > $file_version){
+                    $file_version = $version;
+                }
+            }
+        }
+
+        if ($file_version !== null) {
+            $latest_filename = implode("_(".$file_version.").", $filename_parts);
+        } else {
+            $latest_filename = $filename;
+        }
+
+        return $latest_filename;
+    }
 }
