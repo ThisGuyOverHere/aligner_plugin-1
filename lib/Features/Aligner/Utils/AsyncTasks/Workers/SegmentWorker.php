@@ -24,7 +24,9 @@ use Features\Aligner\Utils\Constants;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 use Features\Aligner\Model\Exceptions\FileWordLimit;
+use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use FilesStorage\S3FilesStorage;
 
 class SegmentWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
@@ -164,7 +166,7 @@ class SegmentWorker extends AbstractWorker {
             $fileStorage = FilesStorageFactory::create();
             $xliff_file = $fileStorage->getXliffFromCache($sha1, $lang);
             \Log::doLog('Found xliff file ['.$xliff_file.']');
-            $xliff_content = file_get_contents($xliff_file);
+            $xliff_content = $this->getXliffFileContent($xliff_file);
         } catch ( \Exception $e ) {
             throw new \Exception( "File xliff not found", $e->getCode(), $e );
         }
@@ -231,6 +233,26 @@ class SegmentWorker extends AbstractWorker {
         }
 
         return $segments;
+    }
+
+    /**
+     * @param $xliff_file_content
+     *
+     * @return false|string
+     * @throws Exception
+     */
+    private function getXliffFileContent( $xliff_file_content ) {
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+
+            if ( $s3Client->hasEncoder() ) {
+                $xliff_file_content = $s3Client->getEncoder()->decode( $xliff_file_content );
+            }
+
+            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliff_file_content ] );
+        }
+
+        return file_get_contents( $xliff_file_content );
     }
 
 
