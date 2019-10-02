@@ -3679,6 +3679,11 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
 
+isnumeric@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/isnumeric/-/isnumeric-0.2.0.tgz#a2347ba360de19e33d0ffd590fddf7755cbf2e64"
+  integrity sha1-ojR7o2DeGeM9D/1ZD933dVy/LmQ=
+
 isobject@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-2.1.0.tgz#f065561096a3f1da2ef46272f815c840d87e0c89"
@@ -3984,7 +3989,7 @@ lodash@4.17.10:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
   integrity sha512-UejweD1pDoXu+AD825lWwp4ZGtSwgnpZxb3JDViD7StjQz+Nb/6l093lx4OQ0foGWNRoc19mWy7BzL+UAK2iVg==
 
-lodash@^4.0.0, lodash@^4.17.11, lodash@~4.17.10:
+lodash@^4.0.0, lodash@^4.17.11, lodash@^4.17.15, lodash@~4.17.10:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -4456,6 +4461,11 @@ normalize-url@2.0.1:
     prepend-http "^2.0.0"
     query-string "^5.0.1"
     sort-keys "^2.0.0"
+
+normalize.css@^8.0.0:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/normalize.css/-/normalize.css-8.0.1.tgz#9b98a208738b9cc2634caacbc42d131c97487bf3"
+  integrity sha512-qizSNPO93t1YUuUhP22btGOo3chcvDFqFaj2TRybP0DMxkHOCTYwp3n34fel4a31ORXy4m1Xq0Gyqpb5m33qIg==
 
 npm-bundled@^1.0.1:
   version "1.0.6"
@@ -5271,6 +5281,16 @@ react-is@^16.7.0, react-is@^16.8.1:
   version "16.10.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.10.1.tgz#0612786bf19df406502d935494f0450b40b8294f"
   integrity sha512-BXUMf9sIOPXXZWqr7+c5SeOKJykyVr2u0UDzEf4LNGc6taGkQe1A9DFD07umCIXz45RLr9oAAwZbAJ0Pkknfaw==
+
+react-middle-truncate@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-middle-truncate/-/react-middle-truncate-1.0.2.tgz#d4c4b0a471f5900cf7238336d61a41d413627f49"
+  integrity sha512-mVMmnzX8v3W4Lpm/FArifuNtCKdwcaJw4Jgia5BrE/+bFlUbIjZTvBhD7cpN3kn5scbggZs3TvsJi6IHyHyjIQ==
+  dependencies:
+    classnames "^2.2.6"
+    lodash "^4.17.15"
+    normalize.css "^8.0.0"
+    units-css "^0.4.0"
 
 react-router-dom@^4.3.1:
   version "4.3.1"
@@ -6547,6 +6567,14 @@ unique-string@^1.0.0:
   dependencies:
     crypto-random-string "^1.0.0"
 
+units-css@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/units-css/-/units-css-0.4.0.tgz#d6228653a51983d7c16ff28f8b9dc3b1ffed3a07"
+  integrity sha1-1iKGU6UZg9fBb/KPi53Dsf/tOgc=
+  dependencies:
+    isnumeric "^0.2.0"
+    viewport-dimensions "^0.2.0"
+
 unpipe@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
@@ -6699,6 +6727,11 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
+
+viewport-dimensions@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/viewport-dimensions/-/viewport-dimensions-0.2.0.tgz#de740747db5387fd1725f5175e91bac76afdf36c"
+  integrity sha1-3nQHR9tTh/0XJfUXXpG6x2r982w=
 
 vm-browserify@^1.0.0:
   version "1.1.0"
