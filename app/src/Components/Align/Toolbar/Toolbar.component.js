@@ -50,6 +50,21 @@ class ToolbarComponent extends Component {
 
 	componentDidMount() {
 		ProjectStore.addListener(ProjectConstants.ADD_SEGMENT_TO_SELECTION, this.storeSelection);
+		window.addEventListener("keydown", (e) => {
+			// Open and Close search with shortcut
+			if (e.keyCode == 70 && (e.ctrlKey || e.metaKey)) {
+				e.preventDefault();
+				this.setState({
+					searchStatus: true
+				})
+			}else if(this.state.searchStatus && e.keyCode === 27){
+				e.preventDefault();
+				this.setState({
+					searchStatus: false
+				})
+			}
+
+		})
 	}
 
 	componentWillUnmount() {
@@ -100,11 +115,8 @@ class ToolbarComponent extends Component {
 					{misalignedSegments &&
 					<MisalignedSegments close={this.closeMisalignedSegmentsNavigator} job={this.props.job}/>}
 
-					<Hotkeys
-						keyName="command+f,ctrl+f,esc"
-						onKeyDown={this.handlerSearch}>
-						{searchStatus && <SearchComponent close={this.closeSearch} job={this.props.job}/>}
-					</Hotkeys>
+					{searchStatus && <SearchComponent close={this.closeSearch} job={this.props.job}/>}
+
 					<i className=" hint icon question circle outline" onClick={this.hintModalOpened}/>
 					<i className={searchStatus ? "search-ico icon search ico-active" : "search-ico icon search"}
 					   onClick={this.onSearchIconClick}/>
@@ -113,13 +125,6 @@ class ToolbarComponent extends Component {
 			</div>
 		);
 	}
-
-	handlerSearch = (keyName, e, handle) => {
-		e.preventDefault();
-		this.setState({
-			searchStatus: keyName !== 'esc'
-		})
-	};
 	undoHandler = (keyName, e, handle) => {
 		e.preventDefault();
 		const {job: {config: {id, password}}} = this.props;
