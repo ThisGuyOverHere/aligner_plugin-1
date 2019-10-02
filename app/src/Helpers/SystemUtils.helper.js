@@ -11,18 +11,6 @@ import ProjectStore from "../Stores/Project.store";
 import {getSegmentIndexByOrder} from "./SegmentUtils.helper";
 
 /**
- *
- * @param text
- * @returns {string} with a centerd ellipsis
- */
-export const textEllipsisCenter = (text) => {
-	if (text.length > 26) {
-		return text.substr(0, 13) + '[...]' + text.substr(text.length - 6, text.length);
-	}
-	return text;
-};
-
-/**
  * google login function
  * @param url
  */

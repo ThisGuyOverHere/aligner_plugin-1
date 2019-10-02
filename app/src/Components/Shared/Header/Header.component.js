@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from "react-router-dom";
 import PropTypes from "prop-types";
-import {textEllipsisCenter} from "../../../Helpers/SystemUtils.helper";
+import MiddleTruncate from 'react-middle-truncate';
 import User from "./User/User.component";
 import Export from "./Export/Export.component";
 import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
@@ -92,7 +92,11 @@ class HeaderComponent extends Component {
                     </li>
                     <li>
                         <div id="final_title">
-                            {this.state.projectTitle}
+                            <MiddleTruncate
+                                text={this.state.projectTitle}
+                                start={6}
+                                ellipsis={"[...]"}
+                                end={6} />
                         </div>
                     </li>
                     <li/>
@@ -158,7 +162,7 @@ class HeaderComponent extends Component {
                     /*console.log(info);*/
                     if (info) {
                         this.setState({
-                            projectTitle: textEllipsisCenter(info.job_name),
+                            projectTitle: info.job_name,
                             sourceLang: info.source_lang,
                             targetLang: info.target_lang,
                         });
