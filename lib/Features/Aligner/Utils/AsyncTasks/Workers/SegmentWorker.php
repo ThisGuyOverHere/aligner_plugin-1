@@ -27,6 +27,7 @@ use Features\Aligner\Model\Exceptions\FileWordLimit;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use Features\Aligner\Utils\FilesStorage\S3AlignerFilesStorage;
 
 class SegmentWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
@@ -166,7 +167,7 @@ class SegmentWorker extends AbstractWorker {
             $fileStorage = FilesStorageFactory::create();
             $xliff_file = $fileStorage->getXliffFromCache($sha1, $lang);
             \Log::doLog('Found xliff file ['.$xliff_file.']');
-            $xliff_content = $this->getXliffFileContent($xliff_file);
+            $xliff_content = $this->getFileContent($xliff_file);
         } catch ( \Exception $e ) {
             throw new \Exception( "File xliff not found", $e->getCode(), $e );
         }
@@ -236,23 +237,41 @@ class SegmentWorker extends AbstractWorker {
     }
 
     /**
-     * @param $xliff_file_content
+     * @param $file_content
      *
      * @return false|string
      * @throws Exception
      */
-    private function getXliffFileContent( $xliff_file_content ) {
+    private function getFileContent($file_content ) {
         if ( AbstractFilesStorage::isOnS3() ) {
             $s3Client = S3FilesStorage::getStaticS3Client();
 
             if ( $s3Client->hasEncoder() ) {
-                $xliff_file_content = $s3Client->getEncoder()->decode( $xliff_file_content );
+                $file_content = $s3Client->getEncoder()->decode( $file_content );
             }
 
-            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliff_file_content ] );
+            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $file_content ] );
         }
 
-        return file_get_contents( $xliff_file_content );
+        return file_get_contents( $file_content );
+    }
+
+    /**
+     * @param $file_content
+     *
+     * @return false|string
+     * @throws Exception
+     */
+    private function putFileContent($file_name, $file_content, $key) {
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+
+            file_put_contents( $file_name, $file_content );
+
+            return $s3Client->uploadItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $file_content, 'source' => $file_name ] );
+        }
+
+        return file_put_contents( $file_name, $file_content );
     }
 
 
@@ -301,8 +320,13 @@ class SegmentWorker extends AbstractWorker {
             throw new \Exception($message);
         }
 
-        file_put_contents($json_path, $json_segments);
+        $lang = ($type == "source") ? $this->job->source : $this->job->target;
 
+        file_put_contents($json_path, $json_segments);
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $json_storage = new S3AlignerFilesStorage();
+            $json_storage->makeJsonCachePackage($cacheTree, $lang, $json_path, $newFileName);
+        }
         return;
 
     }
