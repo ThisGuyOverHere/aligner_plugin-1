@@ -222,11 +222,30 @@ class AlignUtils
 
         $file_version = null;
         foreach ($dirs as $dir){
+
+            //We use this startsWith method to avoid doing a regEx search for every possible name.
             if(AlignUtils::startsWith($dir, $filename_extensionless)){
-                $version = AlignUtils::getFileVersion($dir);
-                if($version != 0 && $version > $file_version){
-                    $file_version = $version;
+
+                //We remove the file version and extension to check the entire filename
+                $matches = [];
+                preg_match_all('/((?:\([0-9]*\))*\.[A-Za-z]+$)/u', $filename, $matches,PREG_OFFSET_CAPTURE);
+
+                $last_array = end($matches);
+                $last_match = end($last_array);
+                $file_end = $last_match[0];
+
+                $dir_check = str_replace($file_end,"", $dir);
+
+                if($dir_check == $filename_extensionless){
+
+                    $version = AlignUtils::getFileVersion($dir);
+
+                    if($version != 0 && $version > $file_version){
+                        $file_version = $version;
+                    }
+
                 }
+
             }
         }
 
