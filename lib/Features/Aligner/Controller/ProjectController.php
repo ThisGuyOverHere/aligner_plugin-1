@@ -108,7 +108,7 @@ class ProjectController extends AlignerController {
             throw new ValidationError( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
 
-        $default_project_name = "ALIGNER-" . date( 'Y-m-d H:i:s' );
+        $default_project_name = $this->postInput[ 'file_name_source' ];//"ALIGNER-" . date( 'Y-m-d H:i:s' );
         $projectStruct        = new Projects_ProjectStruct();
 
         $user = $this->getUser();
