@@ -98,10 +98,34 @@ class S3AlignerFilesStorage extends \FilesStorage\S3FilesStorage
         static::$FILES_STORAGE_BUCKET = \INIT::$AWS_STORAGE_BASE_BUCKET;
     }
 
+    private function getJsonCachePath( $prefix, $lang, $jsonPath ){
+        return self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $prefix . self::OBJECTS_SAFE_DELIMITER . $lang . '/json/' . $this->getTheLastPartOfKey( $jsonPath ). ".json";
+    }
+
+    private function getJsonCacheFolder( $prefix, $lang ){
+        return self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $prefix . self::OBJECTS_SAFE_DELIMITER . $lang . '/json/';
+    }
+
+
+    public function getJsonCachePackage( $prefix, $lang ) {
+
+        $s3Client = static::getStaticS3Client();
+
+        $prefix = $this->getJsonCacheFolder($prefix, $lang);
+
+        $items = $s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
+        $item = ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
+        if( isset( $item ) ){
+            $content = $s3Client->openItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $item ] );
+        }
+
+        return $content;
+    }
+
     public function makeJsonCachePackage( $prefix, $lang, $originalPath = false, $jsonPath ) {
 
         // get the prefix
-        $file   = self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $prefix . self::OBJECTS_SAFE_DELIMITER . $lang . '/json/' . $this->getTheLastPartOfKey( $jsonPath );
+        $file   = $this->getJsonCachePath($prefix, $lang, $jsonPath);
         $valid  = $this->s3Client->hasItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file ] );
 
         if ( !$valid ) {
@@ -111,35 +135,6 @@ class S3AlignerFilesStorage extends \FilesStorage\S3FilesStorage
         }
 
         return true;
-    }
-
-    /**
-     * @param $hash
-     * @param $lang
-     *
-     * @return string
-     */
-    private function getCachePackageHashFolder( $hash, $lang ) {
-        $hashTree = self::composeCachePath( $hash );
-
-        return self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] .
-            self::OBJECTS_SAFE_DELIMITER . $lang;
-    }
-
-    /**
-     * @param      $prefix
-     * @param      $xliffPath
-     * @param      $bucketName
-     * @param bool $originalPath
-     *
-     * @return string
-     */
-    private function uploadJson( $prefix, $jsonPath, $bucketName, $originalPath ) {
-        $raw_file_path   = explode( DIRECTORY_SEPARATOR, $originalPath );
-        $file_name       = array_pop( $raw_file_path );
-        $origDestination = self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $prefix . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . $file_name;
-
-        $this->tryToUploadAFile( $bucketName, $origDestination, $originalPath );
     }
 
     /**

@@ -256,24 +256,6 @@ class SegmentWorker extends AbstractWorker {
         return file_get_contents( $file_content );
     }
 
-    /**
-     * @param $file_content
-     *
-     * @return false|string
-     * @throws Exception
-     */
-    private function putFileContent($file_name, $file_content, $key) {
-        if ( AbstractFilesStorage::isOnS3() ) {
-            $s3Client = S3FilesStorage::getStaticS3Client();
-
-            file_put_contents( $file_name, $file_content );
-
-            return $s3Client->uploadItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $file_content, 'source' => $file_name ] );
-        }
-
-        return file_put_contents( $file_name, $file_content );
-    }
-
 
     private function _storeSegments($segments, $type){
 
