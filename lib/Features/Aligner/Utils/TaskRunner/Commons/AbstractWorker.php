@@ -24,7 +24,6 @@ abstract class AbstractWorker extends \TaskRunner\Commons\AbstractWorker {
         parent::_checkDatabaseConnection();
 
         $config = Aligner::getConfig();
-        \INIT::$FILE_STORAGE_METHOD = "fs";
 
         $this->dbHandler = NewDatabase::obtain($config['DB_SERVER'], $config['DB_USER'], $config['DB_PASS'], $config['DB_DATABASE']);
         try {

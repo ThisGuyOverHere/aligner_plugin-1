@@ -237,5 +237,6 @@ class AlignUtils
         }
 
         return $latest_filename;
+
     }
 }
