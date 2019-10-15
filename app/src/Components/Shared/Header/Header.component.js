@@ -7,6 +7,8 @@ import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
 import ProjectStore from "../../../Stores/Project.store";
 import ProjectConstants from "../../../Constants/Project.constants";
 import ProjectActions from "../../../Actions/Project.actions";
+/*import TruncateString from 'react-truncate-string'
+import Truncate from "../Truncate/Truncate.component";*/
 
 class HeaderComponent extends Component {
 
@@ -86,13 +88,15 @@ class HeaderComponent extends Component {
                     <li>
                         <div id="logo">
                             <Link to="/">
-                                <img src="./static/build/images/logo.png"/>
+                                <img src="./static/build/images/logo.png" alt=""/>
                             </Link>
                         </div>
                     </li>
                     <li>
                         <div id="final_title">
-                           <p>{projectTitle}</p>
+                            {projectTitle}
+                           {/* <TruncateString text="your long string your long string your long string your long string" truncateAt={51}  />
+                            <Truncate word={projectTitle}/>*/}
                         </div>
                     </li>
                     <li/>
