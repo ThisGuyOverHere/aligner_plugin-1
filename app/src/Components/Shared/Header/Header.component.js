@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {Link} from "react-router-dom";
 import PropTypes from "prop-types";
-import MiddleTruncate from 'react-middle-truncate';
 import User from "./User/User.component";
 import Export from "./Export/Export.component";
 import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
@@ -79,6 +78,7 @@ class HeaderComponent extends Component {
     };
 
     renderHtmlNavigation = () => {
+        const {projectTitle} = this.state;
 
         if (this.state.job.config.id && !this.state.jobError) {
             return <div>
@@ -92,11 +92,7 @@ class HeaderComponent extends Component {
                     </li>
                     <li>
                         <div id="final_title">
-                            <MiddleTruncate
-                                text={this.state.projectTitle}
-                                start={6}
-                                ellipsis={"[...]"}
-                                end={6} />
+                           <p>{projectTitle}</p>
                         </div>
                     </li>
                     <li/>
