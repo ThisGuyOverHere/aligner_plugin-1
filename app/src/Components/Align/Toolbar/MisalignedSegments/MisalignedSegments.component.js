@@ -25,6 +25,12 @@ class MisalignedSegments extends Component {
     }
 
     componentDidUpdate(prevProps) {
+        const {job: {counters: {misalignmentsIndexesMap}}} = this.props;
+        const {closeMisalignmentSegmentsNavigator} = this;
+
+        if( !misalignmentsIndexesMap.length ){
+            closeMisalignmentSegmentsNavigator()
+        }
     }
 
     componentDidMount() {
@@ -48,6 +54,7 @@ class MisalignedSegments extends Component {
     render() {
         const {job: {counters: {misalignmentsIndexesMap}}} = this.props;
         const {actualSegmentSelected, actualIndex} = this.state;
+
         return (
             <div id="misaligned-segments">
                 <span className="amount">

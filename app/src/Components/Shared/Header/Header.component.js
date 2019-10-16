@@ -1,13 +1,15 @@
 import React, {Component} from 'react';
 import {Link} from "react-router-dom";
 import PropTypes from "prop-types";
-import MiddleTruncate from 'react-middle-truncate';
 import User from "./User/User.component";
 import Export from "./Export/Export.component";
 import {httpGetAlignmentInfo} from "../../../HttpRequests/Alignment.http";
 import ProjectStore from "../../../Stores/Project.store";
 import ProjectConstants from "../../../Constants/Project.constants";
 import ProjectActions from "../../../Actions/Project.actions";
+import Truncate from "../Truncate/Truncate.component";
+/*import TruncateString from 'react-truncate-string'
+import Truncate from "../Truncate/Truncate.component";*/
 
 class HeaderComponent extends Component {
 
@@ -79,6 +81,7 @@ class HeaderComponent extends Component {
     };
 
     renderHtmlNavigation = () => {
+        const {projectTitle} = this.state;
 
         if (this.state.job.config.id && !this.state.jobError) {
             return <div>
@@ -86,18 +89,12 @@ class HeaderComponent extends Component {
                     <li>
                         <div id="logo">
                             <Link to="/">
-                                <img src="./static/build/images/logo.png"/>
+                                <img src="./static/build/images/logo.png" alt=""/>
                             </Link>
                         </div>
                     </li>
                     <li>
-                        <div id="final_title">
-                            <MiddleTruncate
-                                text={this.state.projectTitle}
-                                start={6}
-                                ellipsis={"[...]"}
-                                end={6} />
-                        </div>
+                        {projectTitle && <Truncate title={projectTitle}/>}
                     </li>
                     <li/>
                     <li id={"source"}>

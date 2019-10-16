@@ -123,7 +123,7 @@ module.exports = function (grunt) {
 	});
 
 	// Define your tasks here
-	grunt.registerTask('default', ['clean:build', 'env', 'string-replace', 'copy', 'browserify:dist', 'sass', 'autoprefixer']);
+	grunt.registerTask('default', ['clean:build', 'env', 'string-replace', 'copy', 'browserify:dist','uglify:dist', 'sass', 'autoprefixer']);
 	grunt.registerTask('dev', ['clean:build', 'copy', 'string-replace', 'browserify:dev', 'sass', 'autoprefixer', 'watch']);
 
 	grunt.loadNpmTasks('grunt-browserify');

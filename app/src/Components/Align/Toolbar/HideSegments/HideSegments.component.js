@@ -25,6 +25,12 @@ class HideSegments extends Component {
     }
 
     componentDidUpdate(prevProps) {
+        const {job: {counters: {hideIndexesMap}}} = this.props;
+        const {closeHideSegmentsNavigator} = this;
+
+        if( !hideIndexesMap.length ){
+            closeHideSegmentsNavigator()
+        }
     }
 
     componentDidMount() {

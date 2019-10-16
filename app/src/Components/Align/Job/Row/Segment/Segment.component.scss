@@ -127,12 +127,26 @@
       display: inline-block;
     }
   }
-  &.isIn-and-selected{
-    border: 2px solid #2bbee9;
-    background-color: #E5F1F4;
-  }
   &.isIn{
-    border: 2px solid #2bbee9;
+    border: none;
+    background-color: #E5E9F1;
+  }
+  &.isIn-and-selected{
+    border: 2px solid #cccccc;
+    .danger-indicator{
+      width: 24px;
+      height: 24px;
+      position: absolute;
+      right: -12px;
+      top: -12px;
+      border-radius: 50px;
+      background: #2bbee9;
+      svg{
+        width: 15px;
+        margin: 3px 0 0 5px;
+        fill: #fff;
+      }
+    }
   }
 }
 
