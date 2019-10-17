@@ -27,9 +27,13 @@ class Truncate extends Component {
     }
 
     componentDidMount() {
-        const {resetCalculatedTitle,handleTitleDisplay} = this;
-        handleTitleDisplay();
+        const {resetCalculatedTitle} = this;
+        const {title} = this.props;
         window.addEventListener("resize", resetCalculatedTitle);
+
+        this.setState({
+            hiddenText: title
+        })
     }
 
     componentWillUnmount() {
@@ -47,7 +51,7 @@ class Truncate extends Component {
                     {calculatedTitle ? calculatedTitle : title}
                 </span>
                 <span className="hidden-text" style={{visibility:'hidden',position:'absolute'}} ref={this.hiddenText}>
-                    {hiddenText ? hiddenText : title}
+                    {hiddenText}
                 </span>
             </div>
         );
