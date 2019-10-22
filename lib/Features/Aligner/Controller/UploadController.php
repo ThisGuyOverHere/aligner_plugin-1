@@ -9,6 +9,7 @@
 namespace Features\Aligner\Controller;
 
 use Features\Aligner\Utils\AlignUtils;
+use FilesStorage\FilesStorageFactory;
 
 include_once \INIT::$UTILS_ROOT . "/fileupload/upload.class.php";
 
@@ -93,11 +94,27 @@ class UploadController extends AlignerController {
         }
         $conversionHandler->setUserIsLogged( $userIsLogged );
 
-        $conversionHandler->doAction();
-
+        $converionResult = $conversionHandler->doAction();
         $this->result = $conversionHandler->getResult();
-        if ( @count( $this->result[ 'errors' ] ) ) {
-            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+
+        if ( $converionResult!== 0 ) {
+            if ( @count( $this->result[ 'errors' ] ) ) {
+                throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+            }
+        } else {
+            if ( @count( $this->result[ 'errors' ] ) ) {
+                $fs        = FilesStorageFactory::create();
+                $file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
+                $file_path = $intDir . DIRECTORY_SEPARATOR . $this->file_name;
+                $sha1      = sha1_file( $file_path );
+
+                $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
+
+                copy( $file_path, $cachedXliffPath );
+
+                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
+                //TODO upload file
+            }
         }
         $this->response->json( $this->result );
     }
