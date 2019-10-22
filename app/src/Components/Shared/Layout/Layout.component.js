@@ -41,7 +41,7 @@ class Layout extends Component {
                 <Authentication user = {this.state.user} image={this.state.googleUserImage} />
                 <HeaderComponent image={this.state.googleUserImage} user = {this.state.user} {...rest} {...matchProps}/>
                 <Component {...matchProps} />
-                <div id="hiddenHtml"></div>
+                <div id="hiddenHtml"/>
             </div>
         )}/>
     };
