@@ -112,8 +112,7 @@ class UploadController extends AlignerController {
 
                 copy( $file_path, $cachedXliffPath );
 
-                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
-                //TODO upload file
+                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, false, $cachedXliffPath );
             }
         }
         $this->response->json( $this->result );
