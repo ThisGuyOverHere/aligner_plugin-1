@@ -124,11 +124,15 @@ class UploadController extends AlignerController {
         }
         $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
         setlocale(LC_ALL, "en_US.utf8");
+
+        $cookieDir = $_COOKIE[ 'upload_session' ];
+        $intDir    = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
+
         $matches = [];
         foreach($_FILES as $key => $file){
-            $_FILES[$key]['name'] = AlignUtils::removeVersionFromFileName($_FILES[$key]['name']);
+            $_FILES[$key]['name'] = AlignUtils::getNewVersionFileName($_FILES[$key]['name'], $intDir);
         }
-
+        
         try {
             $this->result = $uploadFile->uploadFiles( $_FILES );
             foreach ( $this->result as $key => $value ) {
