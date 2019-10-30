@@ -142,7 +142,8 @@ class UploadController extends AlignerController {
             throw new \Exception( $e->getMessage() );
         }
 
-        $this->result->files->name = AlignUtils::removeVersionFromFileName($this->result->files->name);
+        $this->result->files->storage_name = $this->result->files->name;
+        $this->result->files->name         = AlignUtils::removeVersionFromFileName($this->result->files->name);
 
         $this->result = array_values((array)$this->result);
         if ( @count( $this->result[ 'errors' ] ) ) {

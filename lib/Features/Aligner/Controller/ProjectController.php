@@ -86,14 +86,16 @@ class ProjectController extends AlignerController {
 
         $this->uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
 
-        $source_filename = AlignUtils::getLatestVersionFileName( $this->postInput[ 'file_name_source' ], $this->uploadDir );
+        //$source_filename = AlignUtils::getLatestVersionFileName( $this->postInput[ 'file_name_source' ], $this->uploadDir );
+        $source_filename = $this->postInput[ 'file_name_source' ];
 
         $this->fileSourcePath = $this->uploadDir . "/" . $source_filename;
         if ( !file_exists( $this->fileSourcePath ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file source." ];
         }
 
-        $target_filename = AlignUtils::getLatestVersionFileName( $this->postInput[ 'file_name_target' ], $this->uploadDir );
+        //$target_filename = AlignUtils::getLatestVersionFileName( $this->postInput[ 'file_name_target' ], $this->uploadDir );
+        $target_filename = $this->postInput[ 'file_name_target' ];
 
         $this->fileTargetPath = $this->uploadDir . "/" . $target_filename;
         if ( !file_exists( $this->fileTargetPath ) ) {
