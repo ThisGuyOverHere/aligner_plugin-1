@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 
+const MINIMUM_PROJECT_TITLE_LENGTH = 12;
 class Truncate extends Component {
     static propTypes = {
         title: PropTypes.string
@@ -62,9 +63,10 @@ class Truncate extends Component {
     };
 
     resetCalculatedTitle = () => {
+        const {title} = this.props
         this.setState({
             calculatedTitle: null,
-            hiddenText: null,
+            hiddenText: title,
             trimCounter: 5
         })
     };
@@ -77,10 +79,12 @@ class Truncate extends Component {
         const containerLength = this.container.current ? this.container.current.offsetWidth : 0;
         const textHiddenLength = this.hiddenText.current ? this.hiddenText.current.offsetWidth : 0;
         if (textHiddenLength >= containerLength) {
-            this.setState({
-                hiddenText: textEllipsisCenter(title,trimCounter),
-                trimCounter: trimCounter+2
-            })
+            if(hiddenText.length > MINIMUM_PROJECT_TITLE_LENGTH){
+                this.setState({
+                    hiddenText: textEllipsisCenter(title,trimCounter),
+                    trimCounter: trimCounter+2
+                })
+            }
         }else{
             this.setState({
                 calculatedTitle: hiddenText,
