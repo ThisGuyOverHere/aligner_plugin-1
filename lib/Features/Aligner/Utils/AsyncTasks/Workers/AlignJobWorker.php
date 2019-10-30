@@ -23,6 +23,9 @@ use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\Constants;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+use Features\Aligner\Utils\FilesStorage\S3AlignerFilesStorage;
 
 class AlignJobWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
@@ -177,18 +180,24 @@ class AlignJobWorker extends AbstractWorker {
 
 
     protected function _getSegmentsFromJson($dateHashPath, $type, $idFile, $newFileName){
-        $fileStorage = new \FilesStorage();
+        $fileStorage = FilesStorageFactory::create();
 
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, $fileStorage->composeCachePath( $hash ) );
 
-        //destination dir
-        $fileDir  = \INIT::$FILES_REPOSITORY. DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR .
-            $idFile . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . $cacheTree . "|" . $type ;
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $lang = ($type == "source") ? $this->job->source : $this->job->target;
+            $json_storage = new S3AlignerFilesStorage();
+            $segments = $json_storage->getJsonCachePackage($cacheTree, $lang);
+        } else {
 
-        $json_path = $fileDir . DIRECTORY_SEPARATOR . $newFileName . '.json';
+            //destination dir
+            $fileDir  = \INIT::$FILES_REPOSITORY. DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR .
+                $idFile . DIRECTORY_SEPARATOR . 'json' . DIRECTORY_SEPARATOR . $cacheTree . "|" . $type ;
 
-        $segments = file_get_contents($json_path);
+            $json_path = $fileDir . DIRECTORY_SEPARATOR . $newFileName . '.json';
+            $segments = file_get_contents($json_path);
+        }
 
         if($segments === false){
             throw new \Exception("Error: no json file found");

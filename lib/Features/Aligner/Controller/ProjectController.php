@@ -21,6 +21,7 @@ use Features\Aligner\Model\Segments_SegmentDao;
 use CatUtils;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\ProjectProgress;
+use FilesStorage\AbstractFilesStorage;
 
 class ProjectController extends AlignerController {
 
@@ -53,19 +54,11 @@ class ProjectController extends AlignerController {
                 ],
                 'file_name_target' => [
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'flags'  => FILTER_FLAG_STRIP_LOW
                 ],
                 'file_name_source' => [
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ],
-                'display_file_name_target' => [
-                    'filter' => FILTER_SANITIZE_STRING,
-                    'flags'  => FILTER_FLAG_STRIP_LOW
-                ],
-                'display_file_name_source' => [
-                    'filter' => FILTER_SANITIZE_STRING,
-                    'flags'  => FILTER_FLAG_STRIP_LOW
+                        'flags'  => FILTER_FLAG_STRIP_LOW
                 ]
         ];
 
@@ -101,12 +94,18 @@ class ProjectController extends AlignerController {
 
         $this->uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
 
-        $this->fileSourcePath = $this->uploadDir . "/" . $this->postInput[ 'file_name_source' ];
+        //$source_filename = AlignUtils::getLatestVersionFileName( $this->postInput[ 'file_name_source' ], $this->uploadDir );
+        $source_filename = $this->postInput[ 'file_name_source' ];
+
+        $this->fileSourcePath = $this->uploadDir . "/" . $source_filename;
         if ( !file_exists( $this->fileSourcePath ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file source." ];
         }
 
-        $this->fileTargetPath = $this->uploadDir . "/" . $this->postInput[ 'file_name_target' ];
+        //$target_filename = AlignUtils::getLatestVersionFileName( $this->postInput[ 'file_name_target' ], $this->uploadDir );
+        $target_filename = $this->postInput[ 'file_name_target' ];
+
+        $this->fileTargetPath = $this->uploadDir . "/" . $target_filename;
         if ( !file_exists( $this->fileTargetPath ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file target." ];
         }
@@ -119,7 +118,7 @@ class ProjectController extends AlignerController {
             throw new ValidationError( $this->result[ 'errors' ][ 0 ][ 'message' ] );
         }
 
-        $default_project_name = "ALIGNER-" . date( 'Y-m-d H:i:s' );
+        $default_project_name = $this->postInput[ 'file_name_source' ];//"ALIGNER-" . date( 'Y-m-d H:i:s' );
         $projectStruct        = new Projects_ProjectStruct();
 
         $user = $this->getUser();
@@ -196,7 +195,7 @@ class ProjectController extends AlignerController {
         $yearMonthPath    = date_create( $this->project->create_date )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1;
 
-        $extension = \FilesStorage::pathinfo_fix( $filename, PATHINFO_EXTENSION );
+        $extension = AbstractFilesStorage::pathinfo_fix( $filename, PATHINFO_EXTENSION );
 
         $fileStruct = new Files_FileStruct();
 

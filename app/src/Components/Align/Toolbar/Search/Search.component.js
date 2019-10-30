@@ -58,15 +58,13 @@ class SearchComponent extends Component {
         return (
             <div id="search">
                 <form onSubmit={this.onPerformSearch}>
-                    <Hotkeys
-                        keyName="command+f,ctrl+f"
-                        onKeyDown={this.handlerSearch}>
+
                         <input ref={(input) => {
                             this.searchInput = input;
                         }} type="text" value={this.state.fulltext} onChange={this.onSearchChange}/>
                         {(active && occurrencesList.length > 0)  && <span>{featuredSearchResult + 1} / {occurrencesList.length}</span>}
                         {(active && occurrencesList.length === 0 )  && <span> 0 / 0</span>}
-                    </Hotkeys>
+
                 </form>
                 <SearchControlsComponent occurrencesList={occurrencesList}
                                          featuredSearchResult={featuredSearchResult}
@@ -76,11 +74,6 @@ class SearchComponent extends Component {
             </div>
         );
     }
-
-    handlerSearch = (keyName, e, handle) => {
-        e.preventDefault();
-        this.searchInput.focus();
-    };
 
     onPerformSearch = (e) => {
         e.preventDefault();

@@ -3,11 +3,11 @@ import SystemActions from "../../../../Actions/System.actions";
 
 const Export = () => (
     <div>
-        <button className="ui primary button"
+        <button className=""
                 onClick={() => SystemActions.setExportModalStatus(true)}>
             <span>
+                 <i aria-hidden='true' className="download icon"/>
                 Download TMX
-                <i aria-hidden='true' className="download icon"></i>
             </span>
         </button>
     </div>

@@ -24,6 +24,10 @@ use Features\Aligner\Utils\Constants;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\TaskRunner\Commons\AbstractWorker;
 use Features\Aligner\Model\Exceptions\FileWordLimit;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+use FilesStorage\S3FilesStorage;
+use Features\Aligner\Utils\FilesStorage\S3AlignerFilesStorage;
 
 class SegmentWorker extends AbstractWorker {
     use Aligner\Utils\ProjectProgress;
@@ -80,7 +84,7 @@ class SegmentWorker extends AbstractWorker {
         $source_lang = $this->job->source;
         $target_lang = $this->job->target;
 
-        $fileStorage = new \FilesStorage();
+        $fileStorage = FilesStorageFactory::create();
 
         try {
             \Log::doLog('/-------/ Convert xliff file to array for source /--------/');
@@ -160,10 +164,10 @@ class SegmentWorker extends AbstractWorker {
 
         // Get file content
         try {
-            $fileStorage = new \FilesStorage;
+            $fileStorage = FilesStorageFactory::create();
             $xliff_file = $fileStorage->getXliffFromCache($sha1, $lang);
             \Log::doLog('Found xliff file ['.$xliff_file.']');
-            $xliff_content = file_get_contents($xliff_file);
+            $xliff_content = $this->getFileContent($xliff_file);
         } catch ( \Exception $e ) {
             throw new \Exception( "File xliff not found", $e->getCode(), $e );
         }
@@ -232,6 +236,26 @@ class SegmentWorker extends AbstractWorker {
         return $segments;
     }
 
+    /**
+     * @param $file_content
+     *
+     * @return false|string
+     * @throws Exception
+     */
+    private function getFileContent($file_content ) {
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+
+            if ( $s3Client->hasEncoder() ) {
+                $file_content = $s3Client->getEncoder()->decode( $file_content );
+            }
+
+            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $file_content ] );
+        }
+
+        return file_get_contents( $file_content );
+    }
+
 
     private function _storeSegments($segments, $type){
 
@@ -253,7 +277,7 @@ class SegmentWorker extends AbstractWorker {
 
         $json_segments = json_encode($segments);
 
-        $fileStorage = new \FilesStorage();
+        $fileStorage = FilesStorageFactory::create();
 
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, $fileStorage->composeCachePath( $hash ) );
@@ -278,8 +302,13 @@ class SegmentWorker extends AbstractWorker {
             throw new \Exception($message);
         }
 
-        file_put_contents($json_path, $json_segments);
+        $lang = ($type == "source") ? $this->job->source : $this->job->target;
 
+        file_put_contents($json_path, $json_segments);
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $json_storage = new S3AlignerFilesStorage();
+            $json_storage->makeJsonCachePackage($cacheTree, $lang, $json_path, $newFileName);
+        }
         return;
 
     }

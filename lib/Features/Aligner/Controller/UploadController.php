@@ -9,6 +9,7 @@
 namespace Features\Aligner\Controller;
 
 use Features\Aligner\Utils\AlignUtils;
+use FilesStorage\FilesStorageFactory;
 
 include_once \INIT::$UTILS_ROOT . "/fileupload/upload.class.php";
 
@@ -61,7 +62,6 @@ class UploadController extends AlignerController {
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->file_name         = $postInput[ 'file_name' ];
         $this->source_lang       = $postInput[ "source_lang" ];
         $this->target_lang       = $postInput[ "target_lang" ];
         $this->segmentation_rule = $postInput[ "segmentation_rule" ];
@@ -74,7 +74,10 @@ class UploadController extends AlignerController {
         $intDir    = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
         $errDir    = \INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
 
+        $this->file_name = AlignUtils::getLatestVersionFileName($postInput[ 'file_name' ], $intDir);
+
         $conversionHandler = new \ConversionHandler();
+
         $conversionHandler->setFileName( $this->file_name );
         $conversionHandler->setSourceLang( $this->source_lang );
         $conversionHandler->setTargetLang( $this->target_lang );
@@ -91,11 +94,26 @@ class UploadController extends AlignerController {
         }
         $conversionHandler->setUserIsLogged( $userIsLogged );
 
-        $conversionHandler->doAction();
-
+        $converionResult = $conversionHandler->doAction();
         $this->result = $conversionHandler->getResult();
-        if ( @count( $this->result[ 'errors' ] ) ) {
-            throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+
+        if ( $converionResult!== 0 ) {
+            if ( @count( $this->result[ 'errors' ] ) ) {
+                throw new \Exception( $this->result[ 'errors' ][ 0 ][ 'message' ] );
+            }
+        } else {
+            if ( @count( $this->result[ 'errors' ] ) ) {
+                $fs        = FilesStorageFactory::create();
+                $file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
+                $file_path = $intDir . DIRECTORY_SEPARATOR . $this->file_name;
+                $sha1      = sha1_file( $file_path );
+
+                $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
+
+                copy( $file_path, $cachedXliffPath );
+
+                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, false, $cachedXliffPath );
+            }
         }
         $this->response->json( $this->result );
     }
@@ -106,12 +124,15 @@ class UploadController extends AlignerController {
         }
         $uploadFile = new \Upload( $_COOKIE[ 'upload_session' ] );
         setlocale(LC_ALL, "en_US.utf8");
+
+        $cookieDir = $_COOKIE[ 'upload_session' ];
+        $intDir    = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
+
         $matches = [];
         foreach($_FILES as $key => $file){
-            $original_filename = $_FILES[$key]['name'];
-            $_FILES[$key]['name'] = iconv('UTF-8', 'ASCII//TRANSLIT', $_FILES[$key]['name']);
+            $_FILES[$key]['name'] = AlignUtils::getNewVersionFileName($_FILES[$key]['name'], $intDir);
         }
-
+        
         try {
             $this->result = $uploadFile->uploadFiles( $_FILES );
             foreach ( $this->result as $key => $value ) {
@@ -121,8 +142,8 @@ class UploadController extends AlignerController {
             throw new \Exception( $e->getMessage() );
         }
 
-        $this->result->files->display_name = $original_filename;
-        $this->result->files->name = AlignUtils::removeVersionFromFileName($this->result->files->name);
+        $this->result->files->storage_name = $this->result->files->name;
+        $this->result->files->name         = AlignUtils::removeVersionFromFileName($this->result->files->name);
 
         $this->result = array_values((array)$this->result);
         if ( @count( $this->result[ 'errors' ] ) ) {

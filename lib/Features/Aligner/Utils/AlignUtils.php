@@ -182,5 +182,80 @@ class AlignUtils
 
     }
 
+    public static function getFileVersion($filename){
+        $matches = [];
 
+        preg_match_all('/((?:_| )\([0-9]+\))/u', $filename, $matches,PREG_OFFSET_CAPTURE);
+
+        $last_array = end($matches);
+        $last_match = end($last_array);
+
+        $matches = [];
+        preg_match_all('/([0-9]+)/u', $last_match[0], $matches, PREG_OFFSET_CAPTURE);
+
+        $last_array = end($matches);
+        $last_match = end($last_array);
+
+        return (int) $last_match[0];
+    }
+
+    public static function startsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        return (substr($haystack, 0, $length) === $needle);
+    }
+
+    public static function endsWith($haystack, $needle) {
+        $length = strlen($needle);
+        if ($length == 0) {
+            return true;
+        }
+
+        return (substr($haystack, -$length) === $needle);
+    }
+
+    public static function getLatestVersionFileName($filename, $dir){
+        $split = preg_split('/\.(\w+)$/',$filename,-1,PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $files = array_diff(scandir($dir), array('.', '..'));
+
+        $i = 0;
+        $file_exists = true;
+        $latest = 0;
+        $files = array_flip($files);
+        do {
+            $new_filename = implode("_(".$i.").", $split);
+            if ( $files[$new_filename] !== null ){
+                $latest = $i;
+                $i++;
+            } else {
+                $file_exists = false;
+            }
+        } while ( $file_exists && $i < count( $files ) );
+
+        $new_filename = implode("_(".$latest.").", $split);
+
+        return $new_filename;
+
+    }
+
+    public static function getNewVersionFileName($filename, $dir){
+        $filename = str_replace(" ", "_", $filename);
+        $split    = preg_split('/\.(\w+)$/',$filename,-1,PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $files    = array_diff(scandir($dir), array('.', '..'));
+
+        // To avoid the parentheses problem we add the version at the end of the filename regardless if it is set or not
+        $i = 0;
+        $file_exists = true;
+        $files = array_flip($files);
+        do {
+            $new_filename = implode("_(".$i.").", $split);
+            if ( $files[$new_filename] !== null ){
+                $i++;
+            } else {
+                $file_exists = false;
+            }
+        } while ( $file_exists && $i < count( $files ) );
+
+        return $new_filename;
+    }
 }
