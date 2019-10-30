@@ -215,47 +215,47 @@ class AlignUtils
     }
 
     public static function getLatestVersionFileName($filename, $dir){
-        $filename_parts         = explode('.', $filename);
-        $filename_extensionless = $filename_parts[0];
+        $split = preg_split('/\.(\w+)$/',$filename,-1,PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $files = array_diff(scandir($dir), array('.', '..'));
 
-        $dirs = array_diff(scandir($dir), array('.', '..'));
-
-        $file_version = null;
-        foreach ($dirs as $dir){
-
-            //We use this startsWith method to avoid doing a regEx search for every possible name.
-            if(AlignUtils::startsWith($dir, $filename_extensionless)){
-
-                //We remove the file version and extension to check the entire filename
-                $matches = [];
-                preg_match_all('/((?:\([0-9]*\))*\.[A-Za-z]+$)/u', $filename, $matches,PREG_OFFSET_CAPTURE);
-
-                $last_array = end($matches);
-                $last_match = end($last_array);
-                $file_end = $last_match[0];
-
-                $dir_check = str_replace($file_end,"", $dir);
-
-                if($dir_check == $filename_extensionless){
-
-                    $version = AlignUtils::getFileVersion($dir);
-
-                    if($version != 0 && $version > $file_version){
-                        $file_version = $version;
-                    }
-
-                }
-
+        $i = 0;
+        $file_exists = true;
+        $latest = 0;
+        $files = array_flip($files);
+        do {
+            $new_filename = implode("_(".$i.").", $split);
+            if ( $files[$new_filename] !== null ){
+                $latest = $i;
+                $i++;
+            } else {
+                $file_exists = false;
             }
-        }
+        } while ( $file_exists && $i < count( $files ) );
 
-        if ($file_version !== null) {
-            $latest_filename = implode("_(".$file_version.").", $filename_parts);
-        } else {
-            $latest_filename = $filename;
-        }
+        $new_filename = implode("_(".$latest.").", $split);
 
-        return $latest_filename;
+        return $new_filename;
 
+    }
+
+    public static function getNewVersionFileName($filename, $dir){
+        $filename = str_replace(" ", "_", $filename);
+        $split    = preg_split('/\.(\w+)$/',$filename,-1,PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $files    = array_diff(scandir($dir), array('.', '..'));
+
+        // To avoid the parentheses problem we add the version at the end of the filename regardless if it is set or not
+        $i = 0;
+        $file_exists = true;
+        $files = array_flip($files);
+        do {
+            $new_filename = implode("_(".$i.").", $split);
+            if ( $files[$new_filename] !== null ){
+                $i++;
+            } else {
+                $file_exists = false;
+            }
+        } while ( $file_exists && $i < count( $files ) );
+
+        return $new_filename;
     }
 }
