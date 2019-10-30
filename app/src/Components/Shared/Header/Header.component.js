@@ -152,6 +152,12 @@ class HeaderComponent extends Component {
 
     getInfo = () => {
         // get job info
+        this.setState({
+            projectTitle: '',
+            sourceLang: '',
+            targetLang: ''
+        });
+
         httpGetAlignmentInfo(this.props.match.params.jobID, this.props.match.params.password)
             .then(
                 response => {
