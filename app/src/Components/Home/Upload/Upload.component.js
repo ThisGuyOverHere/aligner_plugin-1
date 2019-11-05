@@ -29,6 +29,7 @@ class UploadComponent extends Component {
                 start: false,
                 status: 'start',
                 name: null,
+                upload_name: null,
                 size: 0,
                 disabled: false
             },
@@ -37,6 +38,7 @@ class UploadComponent extends Component {
                 start: false,
                 status: 'start',
                 name: null,
+                upload_name: null,
                 size: 0,
                 disabled: false
             },
@@ -130,6 +132,7 @@ class UploadComponent extends Component {
                         status: 'finish',
                         progress: 0,
                         name: response.data[0].name,
+                        upload_name: response.data[0].storage_name,
                         size: Math.floor((files[0].size) / 1000),
                         disabled: true
                     },
@@ -182,6 +185,7 @@ class UploadComponent extends Component {
                         status: 'finish',
                         progress: 0,
                         name: response.data[0].name,
+                        upload_name: response.data[0].storage_name,
                         size: Math.floor((files[0].size) / 1000),
                         disabled: true
                     },
@@ -204,8 +208,8 @@ class UploadComponent extends Component {
         });
         httpCreateProject({
             project_name: this.state.pName,
-            file_name_source: this.state.uploadSource.name,
-            file_name_target: this.state.uploadTarget.name,
+            file_name_source: this.state.uploadSource.upload_name,
+            file_name_target: this.state.uploadTarget.upload_name,
             source_lang: this.state.sourceLang,
             target_lang: this.state.targetLang
         }).then(response => {
