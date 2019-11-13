@@ -19,6 +19,7 @@ use Features\Aligner\Model\Segments_SegmentDao;
 use Features\Aligner\Model\Segments_SegmentMatchDao;
 use Features\Aligner\Utils\ConstantsJobAnalysis;
 use Features\Aligner\Utils\ProjectProgress;
+use Features\Aligner\Utils\AlignUtils;
 
 
 class JobController extends AlignerController {
@@ -55,8 +56,8 @@ class JobController extends AlignerController {
                 'job_name'             => $this->project->name,
                 'source_lang'          => $this->job->source,
                 'target_lang'          => $this->job->target,
-                'source_filename'      => $source_file->filename,
-                'target_filename'      => $target_file->filename,
+                'source_filename'      => AlignUtils::removeVersionFromFileName($source_file->filename),
+                'target_filename'      => AlignUtils::removeVersionFromFileName($target_file->filename),
                 'target_is_rtl'        => $language->isRTL( $this->job->target ),
                 'source_is_rtl'        => $language->isRTL( $this->job->source ),
                 'source_misalignments' => (int) $source_misalignments,
