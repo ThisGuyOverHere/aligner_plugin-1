@@ -117,6 +117,8 @@ class SegmentWorker extends AbstractWorker {
             $source_segments = $this->_storeSegments($source_segments, "source");
             $target_segments = $this->_storeSegments($target_segments, "target");
 
+
+
             $fileStorage->moveFromCacheToFileDir(
                     $source_file->sha1_original_file,
                     $this->job->source,
@@ -200,9 +202,14 @@ class SegmentWorker extends AbstractWorker {
             foreach ($xliff_file[ 'trans-units' ] as $trans_unit) {
 
                 // Extract only raw-content
-                $unit_items = array_map(function ($item) {
-                    return $item['raw-content'];
-                }, $trans_unit[ 'seg-source' ]);
+
+                if(isset($trans_unit['seg-source'])){
+                    $unit_items = array_map(function ($item) {
+                        return $item['raw-content'];
+                    }, $trans_unit[ 'seg-source' ]);
+                } else {
+                    $unit_items = [$trans_unit['source']['raw-content']];
+                }
 
                 // Build an object with raw-content and clean-content
                 $unit_segments = [];
