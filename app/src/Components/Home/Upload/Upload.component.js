@@ -78,9 +78,9 @@ class UploadComponent extends Component {
     onTargetLanguageChange = (e, value) => {
         if (this.state.uploadTarget.name) {
             httpConversion({
-                file_name: this.state.uploadSource.name,
-                source_lang: this.state.sourceLang,
-                target_lang: value.value
+                file_name: this.state.uploadTarget.name,
+                source_lang: value.value,
+                target_lang: this.state.sourceLang
             }).catch(error => {
                 this.setState({
                     uploadSource: {
