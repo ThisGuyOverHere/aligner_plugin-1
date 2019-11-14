@@ -114,6 +114,10 @@ class SegmentWorker extends AbstractWorker {
 
             $this->pushProjectInQueue($this->project->id, $attributes->queue);
 
+            if(empty($source_segments) || empty($target_segments)){
+                throw new \Exception( "Empty source or target segments" );
+            }
+
             $source_segments = $this->_storeSegments($source_segments, "source");
             $target_segments = $this->_storeSegments($target_segments, "target");
 
