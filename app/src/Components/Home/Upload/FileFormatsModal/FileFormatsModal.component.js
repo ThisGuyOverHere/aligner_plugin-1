@@ -120,9 +120,6 @@ class FileFormatsModal extends Component {
                                 <li>
                                     <span className="extxml">xml</span>
                                 </li>
-                                <li>
-                                    <span className="extzip">zip</span>
-                                </li>
                             </ul>
                         </div>
                         <div className="format-box">
@@ -188,9 +185,6 @@ class FileFormatsModal extends Component {
                                 </li>
                                 <li>
                                     <span className="extxif">sdlxliff</span>
-                                </li>
-                                <li>
-                                    <span className="exttmx">tmx</span>
                                 </li>
                                 <li>
                                     <span className="extttx">ttx</span>
