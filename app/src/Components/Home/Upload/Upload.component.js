@@ -100,7 +100,15 @@ class UploadComponent extends Component {
         this.setState({pName: event.target.value});
     };
 
-    onDropSource = (files) => {
+    onDropSource = async (files) => {
+        if(!files.length){
+            return this.setState({
+                uploadSource: {
+                    progress: 0,
+                    status: 'multiple'
+                }
+            });
+        }
         const onProgress = progressEvent => {
             this.setState({
                 uploadSource: {
@@ -112,47 +120,57 @@ class UploadComponent extends Component {
                 },
             });
         };
-        httpUpload(files[0], onProgress).then(response => {
-            if (!response.errors) {
-                httpConversion({
-                    file_name: response.data[0].name,
-                    source_lang: this.state.sourceLang,
-                    target_lang: this.state.targetLang
-                }).catch(error => {
-                    this.setState({
-                        uploadSource: {
-                            progress: 0,
-                            status: 'error'
-                        }
-                    });
-                    __insp.push(['tagSession', {error: "file_conversion"}]);
-                });
+        try {
+            const uploadResult = await httpUpload(files[0], onProgress);
+            if(!uploadResult.errors || !uploadResult.data.errors){
                 this.setState({
                     uploadSource: {
                         status: 'finish',
                         progress: 0,
-                        name: response.data[0].name,
-                        upload_name: response.data[0].storage_name,
+                        name: uploadResult.data[0].name,
+                        upload_name: uploadResult.data[0].storage_name,
                         size: Math.floor((files[0].size) / 1000),
                         disabled: true
                     },
                 });
+
+                const conversionResult = await httpConversion({
+                    file_name: uploadResult.data[0].name,
+                    source_lang: this.state.sourceLang,
+                    target_lang: this.state.targetLang
+                });
+                if(conversionResult.data.code !== 1){
+                    throw "conversion"
+                }
             }
-        }, (error) => {
+        }catch (e) {
+            console.log(e)
+            if(e === "conversion"){
+                __insp.push(['tagSession', {error: "file_conversion"}]);
+            }else{
+                __insp.push(['tagSession', {error: "file_upload"}]);
+            }
             this.setState({
                 uploadSource: {
                     progress: 0,
                     status: 'error'
                 }
             });
-            __insp.push(['tagSession', {error: "file_upload"}]);
-        });
 
+        }
 
     };
 
 
-    onDropTarget = (files) => {
+    onDropTarget = async (files) => {
+        if(!files.length){
+            return this.setState({
+                uploadTarget: {
+                    progress: 0,
+                    status: 'multiple'
+                }
+            });
+        }
         const onProgress = progressEvent => {
             this.setState({
                 uploadTarget: {
@@ -164,42 +182,44 @@ class UploadComponent extends Component {
                 },
             })
         };
-        httpUpload(files[0], onProgress).then(response => {
-            if (!response.errors) {
-                httpConversion({
-                    file_name: response.data[0].name,
-                    source_lang: this.state.targetLang,
-                    target_lang: this.state.sourceLang
-                }).catch(error => {
-                    this.setState({
-                        uploadTarget: {
-                            progress: 0,
-                            status: 'error'
-                        }
-                    });
-                    __insp.push(['tagSession', {error: "file_conversion"}]);
-                });
+        try {
+            const uploadResult = await httpUpload(files[0], onProgress);
+            if(!uploadResult.errors || !uploadResult.data.errors){
                 this.setState({
                     uploadTarget: {
                         start: false,
                         status: 'finish',
                         progress: 0,
-                        name: response.data[0].name,
-                        upload_name: response.data[0].storage_name,
+                        name: uploadResult.data[0].name,
+                        upload_name: uploadResult.data[0].storage_name,
                         size: Math.floor((files[0].size) / 1000),
                         disabled: true
                     },
                 });
+
+                const conversionResult = await httpConversion({
+                    file_name: uploadResult.data[0].name,
+                    source_lang: this.state.targetLang,
+                    target_lang: this.state.sourceLang
+                });
+                if(conversionResult.data.code !== 1){
+                    throw "conversion"
+                }
             }
-        }, (error) => {
+        }catch (e) {
+            console.log(e)
+            if(e === "conversion"){
+                __insp.push(['tagSession', {error: "file_conversion"}]);
+            }else{
+                __insp.push(['tagSession', {error: "file_upload"}]);
+            }
             this.setState({
                 uploadTarget: {
                     progress: 0,
                     status: 'error'
                 }
             });
-            __insp.push(['tagSession', {error: "file_upload"}]);
-        });
+        }
     };
 
     startAlignment = () => {
@@ -309,6 +329,16 @@ class UploadComponent extends Component {
                        className='trash alternate outline icon'/>
                     <i id="triangle" aria-hidden='true' className='triangle right icon'/>
                 </p>;
+
+            case 'multiple':
+                return <p>
+                    <i id="error-icon" aria-hidden='true'
+                       className='window close outline icon'/>Error during file upload
+                    : <span> Multiple file not allowed. </span>
+                    <i id="delete-icon" aria-hidden='true'
+                       className='trash alternate outline icon'/>
+                    <i id="triangle" aria-hidden='true' className='triangle right icon'/>
+                </p>;
         }
     };
 
@@ -324,9 +354,8 @@ class UploadComponent extends Component {
             startButton.push('loading');
         }
 
-
-        classes.source.push(this.state.uploadSource.status);
-        classes.target.push(this.state.uploadTarget.status);
+        classes.source.push(this.state.uploadSource.status === "multiple" ? "error" : this.state.uploadSource.status);
+        classes.target.push(this.state.uploadTarget.status === "multiple" ? "error" : this.state.uploadTarget.status);
 
         if (this.state.job) {
             return <Redirect push to={'/job/' + this.state.job.id + '/' + this.state.job.password + '/pre-align'}/>;
@@ -407,7 +436,7 @@ class UploadComponent extends Component {
                     <div className="row" id="buttonRow">
 
                         <div className="twelve wide column">
-                            <h4>MateCat supports <span onClick={this.onFormatsModalClick}> 71 file formats </span></h4>
+                            <h4>MateCat supports <span onClick={this.onFormatsModalClick}> 69 file formats </span></h4>
                             {this.state.formatsModalOpen &&
                             <FileFormatsModal formatModalState={this.onFormatsModalClick}/>}
                         </div>
