@@ -70,10 +70,21 @@ module.exports = function (grunt) {
 					],
 				},
 				src: [
-					'app/src/*.js',
+					'app/src/Main.js',
 					'app/src/**/*.js'
 				],
 				dest: `./static/build/js/main.${config.RELEASE_VERSION}.min.js`
+			},
+			matecatDist: {
+				options: {
+					transform: [
+						['babelify', {presets: [es2015Preset, reactPreset]}]
+					],
+				},
+				src: [
+					'app/src/aligner-upload.extension.js',
+				],
+				dest: `./static/build/js/aligner.js`
 			},
 		},
 		uglify: {
@@ -123,7 +134,8 @@ module.exports = function (grunt) {
 	});
 
 	// Define your tasks here
-	grunt.registerTask('default', ['clean:build', 'env', 'string-replace', 'copy', 'browserify:dist','uglify:dist', 'sass', 'autoprefixer']);
+	grunt.registerTask('default', ['clean:build', 'env', 'string-replace', 'copy', 'browserify:dist', 'browserify:matecatDist', 'uglify:dist', 'sass', 'autoprefixer']);
+	grunt.registerTask('matecat', ['browserify:matecatDist']);
 	grunt.registerTask('dev', ['clean:build', 'copy', 'string-replace', 'browserify:dev', 'sass', 'autoprefixer', 'watch']);
 
 	grunt.loadNpmTasks('grunt-browserify');
