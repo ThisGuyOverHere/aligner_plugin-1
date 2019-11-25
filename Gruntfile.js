@@ -82,7 +82,7 @@ module.exports = function (grunt) {
 					],
 				},
 				src: [
-					'app/src/aligner-upload.extension.js',
+					'app/matecat-overrides/aligner-upload.extension.js',
 				],
 				dest: `./static/build/js/aligner.js`
 			},
@@ -136,7 +136,7 @@ module.exports = function (grunt) {
 	// Define your tasks here
 	grunt.registerTask('default', ['clean:build', 'env', 'string-replace', 'copy', 'browserify:dist', 'browserify:matecatDist', 'uglify:dist', 'sass', 'autoprefixer']);
 	grunt.registerTask('matecat', ['browserify:matecatDist']);
-	grunt.registerTask('dev', ['clean:build', 'copy', 'string-replace', 'browserify:dev', 'sass', 'autoprefixer', 'watch']);
+	grunt.registerTask('dev', ['clean:build', 'copy', 'string-replace', 'browserify:dev','browserify:matecatDist', 'sass', 'autoprefixer', 'watch']);
 
 	grunt.loadNpmTasks('grunt-browserify');
 	grunt.loadNpmTasks('grunt-contrib-copy');
