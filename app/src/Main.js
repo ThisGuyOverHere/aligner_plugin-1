@@ -8,15 +8,15 @@ import ReactGA from 'react-ga';
 
 import NotFoundComponent from "./Components/Shared/NotFound/NotFound.component";
 import AnalyseComponent from "./Components/Analyse/Analyse.component";
-
+import * as Sentry from '@sentry/browser';
 import {Switch} from "react-router";
 import Layout from "./Components/Shared/Layout/Layout.component";
 import AlignComponent from "./Components/Align/Align.component";
 import Env from "./Constants/Env.constants";
 
 
-Env.GA_UA !== 'null' ? ReactGA.initialize(Env.GA_UA, {debug: true}) : null;
-
+Env.GA_UA !== 'null' ? ReactGA.initialize(Env.GA_UA) : null;
+Sentry.init({dsn: "https://45279413716046008e08d27af6d47921@sentry.io/1824876"});
 
 const e = React.createElement;
 
