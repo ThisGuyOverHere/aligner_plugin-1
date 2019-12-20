@@ -51,25 +51,22 @@ class UploadComponent extends Component {
         }
     }
 
-
     onSourceLanguageChange = async (e, value) => {
         if (this.state.uploadSource.name) {
             const {sourceConversion} = this;
-            const converstion = await sourceConversion()
+            this.setState({
+                sourceLang: value.value
+            },  () => sourceConversion());
         }
-        this.setState({
-            sourceLang: value.value
-        });
     };
 
     onTargetLanguageChange = async (e, value) => {
         if (this.state.uploadTarget.name) {
             const {targetConversion} = this;
-            const converstion = await targetConversion()
+            this.setState({
+                targetLang: value.value
+            },  () => targetConversion());
         }
-        this.setState({
-            targetLang: value.value
-        });
     };
 
     ProjectNameChange = (event) => {
@@ -363,7 +360,7 @@ class UploadComponent extends Component {
     renderHtmlUpload = (type, status, data) => {
         switch (status) {
             case 'start':
-                return <p><span>+ Add {type === 'target' ? "Target" : "Source"} file</span> (or drop it here).</p>;
+                return <p><span>+ Add {type === 'target' ? "Target" : "Source"} file</span> (or drop it heree).</p>;
 
             case 'progress':
                 return <div>
