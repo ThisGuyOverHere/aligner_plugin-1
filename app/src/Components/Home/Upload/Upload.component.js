@@ -7,6 +7,9 @@ import {httpConversion, httpCreateProject} from "../../../HttpRequests/Alignment
 import {Redirect} from "react-router"
 import FileFormatsModal from "./FileFormatsModal/FileFormatsModal.component";
 
+const ZIP_FORMAT = ["application/zip", "application/octet-stream", "application/x-zip-compressed", "multipart/x-zip"];
+const RAR_FORMAT = ["application/x-rar-compressed", "application/octet-stream"];
+
 class UploadComponent extends Component {
     static propTypes = {};
 
@@ -130,6 +133,7 @@ class UploadComponent extends Component {
         }
 
     };
+
     targetConversion = async () => {
         const {uploadTarget, sourceLang, targetLang} = this.state;
         if (uploadTarget.name) {
@@ -190,6 +194,7 @@ class UploadComponent extends Component {
 
     onDropSource = async (files) => {
         const {uploadSource} = this.state;
+        // multiple file exeption
         if (!files.length) {
             return this.setState({
                 uploadSource: {
@@ -198,6 +203,17 @@ class UploadComponent extends Component {
                 }
             });
         }
+        // zip file exeption
+        if (ZIP_FORMAT.includes(files[0].type) || RAR_FORMAT.includes(files[0].type)) {
+            console.log(files);
+            return this.setState({
+                uploadSource: {
+                    progress: 0,
+                    status: 'archive-file-exception'
+                }
+            });
+        }
+
         const onProgress = progressEvent => {
             this.setState({
                 uploadSource: {
@@ -239,7 +255,6 @@ class UploadComponent extends Component {
 
     };
 
-
     onDropTarget = async (files) => {
         const {uploadTarget} = this.state;
         if (!files.length) {
@@ -247,6 +262,16 @@ class UploadComponent extends Component {
                 uploadTarget: {
                     progress: 0,
                     status: 'multiple'
+                }
+            });
+        }
+        // zip file exeption
+        if (ZIP_FORMAT.includes(files[0].type) || RAR_FORMAT.includes(files[0].type)) {
+            console.log(files);
+            return this.setState({
+                uploadTarget: {
+                    progress: 0,
+                    status: 'archive-file-exception'
                 }
             });
         }
@@ -395,6 +420,16 @@ class UploadComponent extends Component {
                     <i id="triangle" aria-hidden='true' className='triangle right icon'/>
                 </p>;
 
+            case 'archive-file-exception':
+                return <p>
+                    <i id="error-icon" aria-hidden='true'
+                       className='window close outline icon'/>Error during file upload
+                    : <span> Archive Formats file not allowed. </span>
+                    <i id="delete-icon" aria-hidden='true'
+                       className='trash alternate outline icon'/>
+                    <i id="triangle" aria-hidden='true' className='triangle right icon'/>
+                </p>;
+
             case 'multiple':
                 return <p>
                     <i id="error-icon" aria-hidden='true'
@@ -419,8 +454,8 @@ class UploadComponent extends Component {
             startButton.push('loading');
         }
 
-        classes.source.push(this.state.uploadSource.status === "multiple" ? "error" : this.state.uploadSource.status);
-        classes.target.push(this.state.uploadTarget.status === "multiple" ? "error" : this.state.uploadTarget.status);
+        classes.source.push(this.state.uploadSource.status === "multiple" || this.state.uploadSource.status === "archive-file-exception" ? "error" : this.state.uploadSource.status);
+        classes.target.push(this.state.uploadTarget.status === "multiple" || this.state.uploadTarget.status === "archive-file-exception" ? "error" : this.state.uploadTarget.status);
 
         if (this.state.job) {
             return <Redirect push to={'/job/' + this.state.job.id + '/' + this.state.job.password + '/pre-align'}/>;
