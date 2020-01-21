@@ -52,21 +52,21 @@ class UploadComponent extends Component {
     }
 
     onSourceLanguageChange = async (e, value) => {
-        if (this.state.uploadSource.name) {
-            const {sourceConversion} = this;
-            this.setState({
-                sourceLang: value.value
-            },  () => sourceConversion());
-        }
+        const {sourceConversion} = this;
+        this.setState({
+            sourceLang: value.value
+        }, () => {
+            if (this.state.uploadSource.name) sourceConversion()
+        })
     };
 
     onTargetLanguageChange = async (e, value) => {
-        if (this.state.uploadTarget.name) {
-            const {targetConversion} = this;
-            this.setState({
-                targetLang: value.value
-            },  () => targetConversion());
-        }
+        const {targetConversion} = this;
+        this.setState({
+            targetLang: value.value
+        }, () => {
+            if (this.state.uploadTarget.name) targetConversion()
+        });
     };
 
     ProjectNameChange = (event) => {
