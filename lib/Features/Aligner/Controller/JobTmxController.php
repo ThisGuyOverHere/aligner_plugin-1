@@ -12,6 +12,7 @@ namespace Features\Aligner\Controller;
 use Exceptions\ValidationError;
 use Features\Aligner;
 use Features\Aligner\Controller\Validators\JobPasswordValidator;
+use Features\Aligner\Model\Jobs_JobDao;
 
 
 class JobTmxController extends AlignerController {
@@ -77,6 +78,9 @@ class JobTmxController extends AlignerController {
         $params['email'] = $email;
         $params['first_name'] = $userName;
         $params['last_name'] = $userSurname;
+
+        Jobs_JobDao::updateFields(['exported' => 1], $this->job->id, $this->job->password);
+
 
         try {
             \WorkerClient::init( new \AMQHandler() );
