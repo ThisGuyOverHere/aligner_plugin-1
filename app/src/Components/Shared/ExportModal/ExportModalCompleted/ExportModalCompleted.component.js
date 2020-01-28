@@ -16,6 +16,10 @@ const ExportModalCompleted = () => (
                 <Link to="/">New alignment</Link>
             </button>
         </div>
+        <div className="back-to-m">
+            <div className="divider"> Or </div>
+            <Link to="/">Back to Matecat</Link>
+        </div>
     </div>
 );
 

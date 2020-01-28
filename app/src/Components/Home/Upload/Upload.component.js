@@ -45,7 +45,7 @@ class UploadComponent extends Component {
             },
             inAlign: false,
             sourceLang: 'en-US',
-            targetLang: 'it-IT',
+            targetLang: 'fr-FR',
             formatsModalOpen: false,
             creationError: {
                 error: false,

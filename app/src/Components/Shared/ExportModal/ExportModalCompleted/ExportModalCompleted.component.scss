@@ -12,7 +12,7 @@
 	font-weight: 300;
   }
   .btn-container {
-	margin: 64px auto;
+	margin: 64px auto 32px auto;
 	width: 360px;
 	display: flex;
 	justify-content: space-between;
@@ -38,6 +38,13 @@
 	.close-btn {
 	  background: none;
 	  color: $primary;
+	}
+  }
+  .back-to-m{
+	.divider{
+	  text-align: center;
+	  color: #ccc;
+	  margin: 0px 0 24px 0;
 	}
   }
 }
