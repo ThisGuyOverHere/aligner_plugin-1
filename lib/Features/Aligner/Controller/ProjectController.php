@@ -22,6 +22,7 @@ use CatUtils;
 use Features\Aligner\Utils\AlignUtils;
 use Features\Aligner\Utils\ProjectProgress;
 use FilesStorage\AbstractFilesStorage;
+use Utils;
 
 class ProjectController extends AlignerController {
 
@@ -125,7 +126,7 @@ class ProjectController extends AlignerController {
         } else {
             $projectStruct->name = $this->postInput[ 'project_name' ];
         }
-        $projectStruct->password = CatUtils::generate_password( 12 );
+        $projectStruct->password = Utils::randomString();
 
         $projectStruct->create_date       = date( 'Y-m-d H:i:s' );
         $projectStruct->remote_ip_address = \Utils::getRealIpAddr();
@@ -133,7 +134,7 @@ class ProjectController extends AlignerController {
 
         $jobStruct = new Jobs_JobStruct();
 
-        $jobStruct->password   = CatUtils::generate_password( 12 );
+        $jobStruct->password   = Utils::randomString();
         $jobStruct->source     = $this->postInput[ 'source_lang' ];
         $jobStruct->target     = $this->postInput[ 'target_lang' ];
         $jobStruct->id_project = $this->project->id;
