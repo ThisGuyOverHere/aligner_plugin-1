@@ -42,6 +42,5 @@ class SegmentsController extends AlignerController {
             }
         }
         $this->response->json( [ 'target' => $target, 'source' => $source ] );
-
     }
 }

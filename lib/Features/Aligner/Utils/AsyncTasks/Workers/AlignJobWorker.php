@@ -188,7 +188,7 @@ class AlignJobWorker extends AbstractWorker {
         if ( AbstractFilesStorage::isOnS3() ) {
             $lang = ($type == "source") ? $this->job->source : $this->job->target;
             $json_storage = new S3AlignerFilesStorage();
-            $segments = $json_storage->getJsonCachePackage($cacheTree, $lang);
+            $segments = $json_storage->getJsonCachePackage($cacheTree, $lang, $idFile);
         } else {
 
             //destination dir

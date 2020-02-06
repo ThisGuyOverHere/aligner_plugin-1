@@ -318,7 +318,7 @@ class SegmentWorker extends AbstractWorker {
         file_put_contents($json_path, $json_segments);
         if ( AbstractFilesStorage::isOnS3() ) {
             $json_storage = new S3AlignerFilesStorage();
-            $json_storage->makeJsonCachePackage($cacheTree, $lang, $json_path, $newFileName);
+            $json_storage->makeJsonCachePackage($cacheTree, $lang, $json_path, $newFileName, $idFile);
         }
         return;
 

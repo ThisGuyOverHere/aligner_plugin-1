@@ -167,4 +167,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stm->execute( $params );
     }
 
+
+
 }
