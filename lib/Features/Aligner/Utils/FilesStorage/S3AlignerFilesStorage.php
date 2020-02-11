@@ -8,6 +8,7 @@
 
 namespace Features\Aligner\Utils\FilesStorage;
 
+use Exception;
 use SimpleS3\Client;
 use SimpleS3\Components\Cache\RedisCache;
 
@@ -45,9 +46,26 @@ class S3AlignerFilesStorage extends \FilesStorage\S3FilesStorage
         $valid  = $this->s3Client->hasItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file ] );
 
         if ( !$valid ) {
-            $this->tryToUploadAFile( static::$FILES_STORAGE_BUCKET, $file, $originalPath );
+
+            try {
+
+                $this->s3Client->uploadItem( [
+                        'bucket' => static::$FILES_STORAGE_BUCKET,
+                        'key'    => $file,
+                        'source' => $originalPath
+                ] );
+
+                \Log::doJsonLog( 'Successfully uploaded file ' . $file . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
+
+            } catch ( \Exception $e ) {
+
+                \Log::doJsonLog( 'Error in uploading a file ' . $file . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket. ERROR: ' . $e->getMessage() );
+                return false;
+            }
+
             //$this->uploadJson( $prefix, $jsonPath, static::$FILES_STORAGE_BUCKET, $originalPath );
             unlink( $originalPath );
+
         }
 
         return true;
