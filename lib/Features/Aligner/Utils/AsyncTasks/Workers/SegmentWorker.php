@@ -223,11 +223,24 @@ class SegmentWorker extends AbstractWorker {
                         continue;
                     }
 
-
                     $unit_segment = [
                         'content_clean' => AlignUtils::_cleanSegment($item, $lang),
                         'raw_word_count' => $raw_word_count
                     ];
+
+                    if($lang == "hi-IN"){
+                        // !!! Temporary workaround for the Mr. Mrs. and Dr. abbreviation !!!
+                        if(mb_strlen($unit_segment['content_clean']) <= 4 && mb_substr($unit_segment['content_clean'], -1) == "."){
+                            $abbr = (isset($abbr)) ? $abbr." ".$unit_segment['content_clean'] : $unit_segment['content_clean'];
+                            $total_words += $unit_segment['raw_word_count'];
+                            continue;
+                        }
+
+                        if(!empty($abbr)){
+                            $unit_segment['content_clean'] = $abbr." ".$unit_segment['content_clean'];
+                            $abbr = null;
+                        }
+                    }
 
                     $total_words += $unit_segment['raw_word_count'];
                     $unit_segments[] = $unit_segment;
